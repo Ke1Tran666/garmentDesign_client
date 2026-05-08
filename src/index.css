@@ -1,1 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
+
 @import "tailwindcss";
+
+
+
+@theme {
+    /* COLORS */
+    /* BRAND */
+    --color-brand: rgb(1, 146, 245);
+    --color-muted: rgb(107, 114, 128);
+    --color-dark: rgb(17, 24, 39);
+
+    /* TEXT */
+    --color-text-primary: #000;
+    --color-text-secondary: #fff;
+
+
+    /* FONTS */
+    --font-brand: "Bricolage Grotesque", sans-serif;
+
+    /* SHADOW */
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+    /* RADIUS */
+    --radius-main: 20px;
+}

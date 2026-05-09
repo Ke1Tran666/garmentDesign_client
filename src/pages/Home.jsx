@@ -1,73 +1,232 @@
-import { ArrowRight, ChevronDown, Play } from "lucide-react";
+import { ArrowRight, ChevronDown, FileCheck, Headphones, Play, ShieldCheck, Target, Zap } from "lucide-react";
 import Navigation from "../layouts/MainLayout/Navigation";
+import '../css/components.css'
+import useReveal from "../hooks/useReveal";
 
 const Home = () => {
-  return (
-    <>
-        {/* NAVIGATION */}
-        <Navigation />
-        {/* HERO */}
-        <section className="relative min-h-screen flex flex-col justify-end pb-10 overflow-hidden">
-            {/* Blobs */}
-            <div className="absolute top-20 right-0 w-[320px] h-[320px] bg-brand rounded-full hero-blob pointer-events-none" style={{ zIndex: 0, opacity: 0.15 }}></div>
-            <div className="absolute bottom-20 left-0 w-[220px] h-[220px] bg-brand rounded-full hero-blob pointer-events-none" style={{ zIndex: 0, opacity: 0.15, animationDelay: "-4s" }}></div>
-            <div className="absolute inset-0 grid-bg pointer-events-none opacity-60" style={{ zIndex: 0 }}></div>
 
-            {/* Content */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pt-32">
-                <h1 className="font-heading font-500 tracking-tighter leading-[0.9] animate-fiu delay-1" style={{ fontSize: "clamp(2.8rem, 8vw, 6.5vw)", color: "#111827" }}>
-                    Giải pháp thiết kế
-                    <br />
-                    <span className="text-brand">may mặc</span> chuyên nghiệp
-                    <br />
-                    cho mọi thương hiệu
-                </h1>
-                <p className="mt-8 text-muted font-body font-300 text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
-                    Từ in sơ đồ, in rập, thiết kế đến tính định mức — HoaTran maymac cung cấp trọn gói giải pháp kỹ thuật
-                    giúp tối ưu quy trình sản xuất thời trang của bạn.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center gap-4 mt-10 animate-fiu delay-3">
-                    <a href="#" className="btn-shine bg-brand text-white font-heading font-500 text-base px-8 py-3.5 rounded-full tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-105 hover:shadow-[0_8px_30px_rgba(1,146,245,0.3)] flex items-center gap-2">
-                        Khám phá dịch vụ
-                        <ArrowRight className="w-4 h-4" />
-                    </a>
-                    <a href="#" className="flex items-center gap-2.5 text-muted hover:text-dark font-body text-sm transition-colors duration-300 group">
-                        <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:bg-brand-50 transition-all duration-300">
-                            <Play className="w-4 h-4 ml-0.5" />
+    useReveal();
+
+    return (
+        <>
+            {/* NAVIGATION */}
+            <Navigation />
+            {/* HERO */}
+            <section className="relative min-h-screen flex flex-col justify-end pb-10 overflow-hidden">
+                {/* Blobs */}
+                {/* <div className="absolute top-20 right-0 w-80 h-80 bg-brand rounded-full hero-blob pointer-events-none opacity-60" style={{ zIndex: 0 }}></div>
+                <div className="absolute bottom-20 left-0 w-55 h-55 bg-brand rounded-full hero-blob pointer-events-none opacity-60" style={{ zIndex: 0, animationDelay: "-4s" }}></div> */}
+                <div className="absolute inset-0 grid-bg pointer-events-none opacity-60" style={{ zIndex: 0 }}></div>
+
+                {/* Content */}
+                <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pt-32">
+                    <h1 className="font-heading font-500 tracking-tighter leading-[0.9] animate-fiu delay-1" style={{ fontSize: "clamp(2.8rem, 8vw, 6.5vw)", color: "#111827" }}>
+                        Giải pháp thiết kế
+                        <br />
+                        <span className="text-brand">may mặc</span> chuyên nghiệp
+                        <br />
+                        cho mọi thương hiệu
+                    </h1>
+                    <p className="mt-8 text-muted font-body font-300 text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
+                        Từ in sơ đồ, in rập, thiết kế đến tính định mức — HoaTran maymac cung cấp trọn gói giải pháp kỹ thuật
+                        giúp tối ưu quy trình sản xuất thời trang của bạn.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center gap-4 mt-10 animate-fiu delay-3">
+                        <a href="#" className="btn-shine bg-brand text-white font-heading font-500 text-base px-8 py-3.5 rounded-full tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-105 hover:shadow-[0_8px_30px_rgba(1,146,245,0.3)] flex items-center gap-2">
+                            Khám phá dịch vụ
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
+                        <a href="#" className="flex items-center gap-2.5 text-muted hover:text-dark font-body text-sm transition-colors duration-300 group">
+                            <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:bg-brand-50 transition-all duration-300">
+                                <Play className="w-4 h-4 ml-0.5 group-hover:animate-play-ud" />
+                            </span>
+                            Xem quy trình làm việc
+                        </a>
+                    </div>
+                </div>
+
+                {/* Stats */}
+                <div className="relative z-10 max-w-4xl mx-auto w-full animate-fiu delay-4" style={{ marginTop: 10 }}>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.03)]">
+                        <div className="bg-white p-5 text-center">
+                            <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="3000">0</div>
+                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Thiết kế</div>
+                        </div>
+                        <div className="bg-white p-5 text-center">
+                            <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="500">0</div>
+                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Khách hàng</div>
+                        </div>
+                        <div className="bg-white p-5 text-center">
+                            <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="8">0</div>
+                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Năm kinh nghiệm</div>
+                        </div>
+                        <div className="bg-white p-5 text-center">
+                            <div className="font-heading text-2xl md:text-3xl font-500 text-brand counter" data-target="99">0</div>
+                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">% Hài lòng</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 scroll-hint" style={{ zIndex: 10 }}>
+                    <ChevronDown className="w-5 h-5 text-subtle" />
+                </div>
+            </section>
+
+            {/* ABOUT */}
+            <section id="about" className="relative px-4 py-24 md:py-32">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid items-center grid-cols-1 gap-12 md:grid-cols-12 md:gap-16">
+
+                    {/* IMAGE */}
+                    <div className="md:col-span-5 reveal">
+                        <div
+                        className="relative overflow-hidden rounded-3xl border-gradient img-hover shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)]"
+                        style={{ aspectRatio: "3 / 4" }}
+                        >
+                        <img
+                            src="https://picsum.photos/seed/garment-studio-pro/600/800"
+                            alt="Studio"
+                            className="object-cover w-full h-full"
+                        />
+
+                        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
+
+                        <div className="absolute left-6 right-6 bottom-6 group-hover:animate-float rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur-xl">
+                            <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10">
+                                <ShieldCheck className="w-5 h-5 text-brand" />
+                            </div>
+
+                            <div>
+                                <div className="text-sm font-500 font-heading text-dark">
+                                Đội ngũ kỹ thuật
+                                </div>
+
+                                <div className="text-xs text-muted">
+                                15+ chuyên viên lành nghề
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    {/* CONTENT */}
+                    <div className="md:col-span-7">
+
+                        <div className="reveal">
+                        <span className="text-xs font-mono font-500 tracking-widest uppercase text-brand">
+                            Về chúng tôi
                         </span>
-                        Xem quy trình làm việc
-                    </a>
-                </div>
-            </div>
+                        </div>
 
-            {/* Stats */}
-            <div className="relative z-10 max-w-4xl mx-auto w-full animate-fiu delay-4" style={{ marginTop: 10 }}>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.03)]">
-                    <div className="bg-white p-5 text-center">
-                        <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="3000">0</div>
-                        <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Thiết kế</div>
+                        <h2
+                        className="mt-4 text-3xl leading-tight tracking-tight md:text-5xl font-heading font-500 text-dark reveal"
+                        style={{ transitionDelay: "100ms" }}
+                        >
+                        Đơn vị tiên phong về
+                        <br />
+                        <span className="text-muted">
+                            kỹ thuật may mặc
+                        </span>{" "}
+                        tại Việt Nam
+                        </h2>
+
+                        <p
+                        className="mt-6 text-base leading-relaxed md:text-lg text-muted font-body font-300 reveal"
+                        style={{ transitionDelay: "200ms" }}
+                        >
+                        HoaTran maymac chuyên cung cấp các dịch vụ kỹ thuật thời trang bao gồm
+                        in sơ đồ, in rập, thiết kế và tính định mức. Với hơn 8 năm kinh nghiệm,
+                        chúng tôi đã đồng hành cùng hàng trăm thương hiệu thời trang trong và ngoài nước.
+                        </p>
+
+                        {/* FEATURES */}
+                        <div className="grid grid-cols-1 gap-6 mt-10 sm:grid-cols-2">
+
+                        <div
+                            className="reveal"
+                            style={{ transitionDelay: "300ms" }}
+                        >
+                            <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand/10">
+                                <Zap className="w-4 h-4 text-brand" />
+                            </div>
+
+                            <span className="text-sm font-500 font-heading text-dark">
+                                Nhanh chóng
+                            </span>
+                            </div>
+
+                            <p className="text-xs leading-relaxed text-subtle">
+                            Xử lý đơn trong 24–48h, đáp ứng tiến độ sản xuất khắt khe.
+                            </p>
+                        </div>
+
+                        <div
+                            className="reveal"
+                            style={{ transitionDelay: "400ms" }}
+                        >
+                            <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand/10">
+                                <Target className="w-4 h-4 text-brand" />
+                            </div>
+
+                            <span className="text-sm font-500 font-heading text-dark">
+                                Chính xác
+                            </span>
+                            </div>
+
+                            <p className="text-xs leading-relaxed text-subtle">
+                            Sai số rập cắt &lt; 2mm, định mức chênh lệch &lt; 3%.
+                            </p>
+                        </div>
+
+                        <div
+                            className="reveal"
+                            style={{ transitionDelay: "500ms" }}
+                        >
+                            <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand/10">
+                                <FileCheck className="w-4 h-4 text-brand" />
+                            </div>
+
+                            <span className="text-sm font-500 font-heading text-dark">
+                                Chuẩn format
+                            </span>
+                            </div>
+
+                            <p className="text-xs leading-relaxed text-subtle">
+                            Sơ đồ, rập đúng chuẩn xuất khẩu, tương thích mọi phần mềm CAD.
+                            </p>
+                        </div>
+
+                        <div
+                            className="reveal"
+                            style={{ transitionDelay: "600ms" }}
+                        >
+                            <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand/10">
+                                <Headphones className="w-4 h-4 text-brand" />
+                            </div>
+
+                            <span className="text-sm font-500 font-heading text-dark">
+                                Hỗ trợ 1:1
+                            </span>
+                            </div>
+
+                            <p className="text-xs leading-relaxed text-subtle">
+                            Kỹ sư trực tiếp tư vấn, chỉnh sửa đến khi khách hàng hài lòng.
+                            </p>
+                        </div>
+
+                        </div>
                     </div>
-                    <div className="bg-white p-5 text-center">
-                        <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="500">0</div>
-                        <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Khách hàng</div>
-                    </div>
-                    <div className="bg-white p-5 text-center">
-                        <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="8">0</div>
-                        <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Năm kinh nghiệm</div>
-                    </div>
-                    <div className="bg-white p-5 text-center">
-                        <div className="font-heading text-2xl md:text-3xl font-500 text-brand counter" data-target="99">0</div>
-                        <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">% Hài lòng</div>
                     </div>
                 </div>
-            </div>
-
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 scroll-hint" style={{ zIndex: 10 }}>
-                <ChevronDown className="w-5 h-5 text-subtle" />
-            </div>
-        </section>
-    </>
-  )
+            </section>
+        </>
+    )
 }
 
 export default Home

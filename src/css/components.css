@@ -25,6 +25,15 @@
     transform: translateY(0);
 }
 
+.card-hover {
+    transition: transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 500ms;
+}
+
+.card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px -15px rgba(1, 146, 245, 0.2);
+}
+
 .img-hover img {
     transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }

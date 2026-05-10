@@ -2,6 +2,7 @@ import { ArrowRight, ChevronDown, FileCheck, Headphones, Play, ShieldCheck, Targ
 import Navigation from "../layouts/MainLayout/Navigation";
 import '../css/components.css'
 import useReveal from "../hooks/useReveal";
+import ProductsSection from "../sections/ProductsSection";
 
 const Home = () => {
 
@@ -13,30 +14,33 @@ const Home = () => {
             <Navigation />
             {/* HERO */}
             <section className="relative min-h-screen flex flex-col justify-end pb-10 overflow-hidden">
+
                 {/* Blobs */}
-                {/* <div className="absolute top-20 right-0 w-80 h-80 bg-brand rounded-full hero-blob pointer-events-none opacity-60" style={{ zIndex: 0 }}></div>
-                <div className="absolute bottom-20 left-0 w-55 h-55 bg-brand rounded-full hero-blob pointer-events-none opacity-60" style={{ zIndex: 0, animationDelay: "-4s" }}></div> */}
+                <div className="absolute top-20 right-1/4 w-125 h-125 bg-brand rounded-full hero-blob pointer-events-none blur-[128px]"></div>
+                <div class="absolute bottom-20 left-1/4 w-87.5 h-87.5 bg-brand rounded-full hero-blob pointer-events-none blur-[128px]"></div>
+
+                {/* background hero*/}
                 <div className="absolute inset-0 grid-bg pointer-events-none opacity-60" style={{ zIndex: 0 }}></div>
 
                 {/* Content */}
                 <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pt-32">
-                    <h1 className="font-heading font-500 tracking-tighter leading-[0.9] animate-fiu delay-1" style={{ fontSize: "clamp(2.8rem, 8vw, 6.5vw)", color: "#111827" }}>
+                    <h1 className="font-heading font-medium tracking-tighter leading-[0.9] animate-fiu delay-1" style={{ fontSize: "clamp(2.8rem, 8vw, 6.5vw)", color: "#111827" }}>
                         Giải pháp thiết kế
                         <br />
                         <span className="text-brand">may mặc</span> chuyên nghiệp
                         <br />
                         cho mọi thương hiệu
                     </h1>
-                    <p className="mt-8 text-muted font-body font-300 text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
+                    <p className="mt-8 text-muted font-light text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
                         Từ in sơ đồ, in rập, thiết kế đến tính định mức — HoaTran maymac cung cấp trọn gói giải pháp kỹ thuật
                         giúp tối ưu quy trình sản xuất thời trang của bạn.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center gap-4 mt-10 animate-fiu delay-3">
-                        <a href="#" className="btn-shine bg-brand text-white font-heading font-500 text-base px-8 py-3.5 rounded-full tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-105 hover:shadow-[0_8px_30px_rgba(1,146,245,0.3)] flex items-center gap-2">
+                        <a href="#" className="btn-shine bg-brand text-white font-heading font-medium text-base px-8 py-3.5 rounded-full tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-105 hover:shadow-[0_8px_30px_rgba(1,146,245,0.3)] flex items-center gap-2">
                             Khám phá dịch vụ
                             <ArrowRight className="w-4 h-4" />
                         </a>
-                        <a href="#" className="flex items-center gap-2.5 text-muted hover:text-dark font-body text-sm transition-colors duration-300 group">
+                        <a href="#" className="flex items-center gap-2.5 text-muted hover:text-dark text-sm transition-colors duration-300">
                             <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:bg-brand-50 transition-all duration-300">
                                 <Play className="w-4 h-4 ml-0.5 group-hover:animate-play-ud" />
                             </span>
@@ -49,19 +53,19 @@ const Home = () => {
                 <div className="relative z-10 max-w-4xl mx-auto w-full animate-fiu delay-4" style={{ marginTop: 10 }}>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.03)]">
                         <div className="bg-white p-5 text-center">
-                            <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="3000">0</div>
+                            <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="3000">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Thiết kế</div>
                         </div>
                         <div className="bg-white p-5 text-center">
-                            <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="500">0</div>
+                            <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="500">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Khách hàng</div>
                         </div>
                         <div className="bg-white p-5 text-center">
-                            <div className="font-heading text-2xl md:text-3xl font-500 text-dark counter" data-target="8">0</div>
+                            <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="8">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Năm kinh nghiệm</div>
                         </div>
                         <div className="bg-white p-5 text-center">
-                            <div className="font-heading text-2xl md:text-3xl font-500 text-brand counter" data-target="99">0</div>
+                            <div className="font-heading text-2xl md:text-3xl font-medium text-brand counter" data-target="99">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">% Hài lòng</div>
                         </div>
                     </div>
@@ -98,7 +102,7 @@ const Home = () => {
                             </div>
 
                             <div>
-                                <div className="text-sm font-500 font-heading text-dark">
+                                <div className="text-sm font-medium font-heading text-dark">
                                 Đội ngũ kỹ thuật
                                 </div>
 
@@ -115,13 +119,13 @@ const Home = () => {
                     <div className="md:col-span-7">
 
                         <div className="reveal">
-                        <span className="text-xs font-mono font-500 tracking-widest uppercase text-brand">
+                        <span className="text-xs font-mono font-medium tracking-widest uppercase text-brand">
                             Về chúng tôi
                         </span>
                         </div>
 
                         <h2
-                        className="mt-4 text-3xl leading-tight tracking-tight md:text-5xl font-heading font-500 text-dark reveal"
+                        className="mt-4 text-3xl leading-tight tracking-tight md:text-5xl font-heading font-medium text-dark reveal"
                         style={{ transitionDelay: "100ms" }}
                         >
                         Đơn vị tiên phong về
@@ -133,7 +137,7 @@ const Home = () => {
                         </h2>
 
                         <p
-                        className="mt-6 text-base leading-relaxed md:text-lg text-muted font-body font-300 reveal"
+                        className="mt-6 text-base leading-relaxed md:text-lg text-muted font-light reveal"
                         style={{ transitionDelay: "200ms" }}
                         >
                         HoaTran maymac chuyên cung cấp các dịch vụ kỹ thuật thời trang bao gồm
@@ -153,7 +157,7 @@ const Home = () => {
                                 <Zap className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-500 font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-dark">
                                 Nhanh chóng
                             </span>
                             </div>
@@ -172,7 +176,7 @@ const Home = () => {
                                 <Target className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-500 font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-dark">
                                 Chính xác
                             </span>
                             </div>
@@ -191,7 +195,7 @@ const Home = () => {
                                 <FileCheck className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-500 font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-dark">
                                 Chuẩn format
                             </span>
                             </div>
@@ -210,7 +214,7 @@ const Home = () => {
                                 <Headphones className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-500 font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-dark">
                                 Hỗ trợ 1:1
                             </span>
                             </div>
@@ -225,6 +229,10 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
+            {/* PRODUCTS */}
+            <ProductsSection />
+            
         </>
     )
 }

@@ -40,8 +40,8 @@ const Home = () => {
                             Khám phá dịch vụ
                             <ArrowRight className="w-4 h-4" />
                         </a>
-                        <a href="#" className="flex items-center gap-2.5 text-muted hover:text-dark text-sm transition-colors duration-300">
-                            <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:bg-brand-50 transition-all duration-300">
+                        <a href="#" className="flex items-center gap-2.5 text-muted hover:text-dark text-base transition-colors duration-300 group">
+                            <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 transition-all duration-300">
                                 <Play className="w-4 h-4 ml-0.5 group-hover:animate-play-ud" />
                             </span>
                             Xem quy trình làm việc

@@ -9,7 +9,7 @@
     /* COLORS */
     /* BRAND */
     --color-brand: rgb(1, 146, 245);
-    --color-border rgb(229, 231, 235);
+    --color-border: rgb(229, 231, 235);
     --color-muted: rgb(107, 114, 128);
     --color-subtle: rgb(156, 163, 175);
     --color-dark: rgb(17, 24, 39);

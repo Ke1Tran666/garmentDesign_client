@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 const tabs = [
@@ -31,7 +31,7 @@ const products = {
 };
 
 const ProductCard = ({ img, name, service }) => (
-  <div className="card-hover rounded-2xl overflow-hidden bg-white border border-border/60">
+  <div className="card-hover rounded-2xl overflow-hidden bg-white border border-border/60 group">
     <div className="img-hover aspect-4/5 overflow-hidden">
       <img
         src={`https://picsum.photos/seed/${img}/600/750.jpg`}
@@ -45,7 +45,7 @@ const ProductCard = ({ img, name, service }) => (
           <h3 className="font-heading font-medium text-base text-dark">{name}</h3>
           <p className="text-xs text-subtle mt-1">{service}</p>
         </div>
-        <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center shrink-0 mt-0.5 transition-all duration-300 group-hover:border-brand/40 group-hover:text-brand group-hover:bg-brand-50">
+        <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:text-brand group-hover:bg-brand-50 transition-all duration-300 shrink-0 mt-0.5">
           <ArrowUpRight className="w-3.5 h-3.5" />
         </span>
       </div>
@@ -55,6 +55,22 @@ const ProductCard = ({ img, name, service }) => (
 
 const ProductsSection = () => {
   const [activeTab, setActiveTab] = useState("all");
+  const [isVisible, setIsVisible] = useState(true);
+  const prevTabRef = useRef("all");
+
+  const handleTabClick = (tabId) => {
+    if (tabId === activeTab) return;
+ 
+    setIsVisible(false);
+ 
+    setTimeout(() => {
+  
+      prevTabRef.current = tabId;
+      setActiveTab(tabId);
+      
+      setIsVisible(true);
+    }, 220); 
+  };
 
   return (
     <section id="products" className="relative py-24 md:py-32 px-4 bg-card-bg/50">
@@ -72,9 +88,9 @@ const ProductsSection = () => {
               Những sản phẩm thực tế chúng tôi đã hoàn thành cho khách hàng trên khắp Việt Nam.
             </p>
           </div>
-          <a href="#" className="inline-flex items-center gap-2 text-brand font-heading font-medium text-sm hover:gap-3 transition-all duration-300 self-start md:self-auto shrink-0">
+          <a href="#" className="inline-flex items-center gap-2 text-brand font-heading font-medium text-base hover:gap-3 transition-all duration-300 self-start md:self-auto shrink-0 group">
             Xem thêm
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
           </a>
         </div>
 
@@ -83,8 +99,8 @@ const ProductsSection = () => {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`text-sm font-heading px-5 py-2 rounded-full border transition-all duration-300 hover:border-brand/30 
+              onClick={() => handleTabClick(tab.id)}
+              className={`tab-btn text-sm font-heading px-5 py-2 rounded-full border transition-all duration-300 hover:border-brand/30 
                 ${activeTab === tab.id ? "active border-brand text-brand" : "border-border text-muted"}`}
             >
               {tab.label}
@@ -93,7 +109,9 @@ const ProductsSection = () => {
         </div>
 
         {/* Tab Content */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div
+          id={`tab-${activeTab}`}
+          className={`tab-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ${isVisible ? "active" : ""}`}>
           {products[activeTab].map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}

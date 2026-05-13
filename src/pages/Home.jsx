@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronDown, FileCheck, Headphones, Play, ShieldCheck, Target, Zap } from "lucide-react";
+import { ArrowRight, Calculator, ChevronDown, FileCheck, FileText, Headphones, PenTool, Play, Scissors, ShieldCheck, Target, Zap } from "lucide-react";
 import Navigation from "../layouts/MainLayout/Navigation";
 import '../css/components.css'
 import useReveal from "../hooks/useReveal";
@@ -232,6 +232,99 @@ const Home = () => {
 
             {/* PRODUCTS */}
             <ProductsSection />
+
+            {/* SERVICES */}
+            <section id="services" className="relative py-24 md:py-32 px-4">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-16">
+                        <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium reveal">Dịch vụ</span>
+                        <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-dark reveal" style={{transitionDelay:"100ms"}}>
+                            4 dịch vụ
+                            <span className="text-muted"> cốt lõi</span>
+                        </h2>
+                        <p className="text-muted font-body font-300 mt-4 max-w-lg mx-auto reveal" style={{transitionDelay:"200ms"}}>
+                            Đầy đủ công đoạn kỹ thuật cho ngành may mặc — từ bản vẽ đến con số sản xuất.
+                        </p>
+                    </div>
+        
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="card-hover rounded-2xl bg-white border border-border/60 p-8 group reveal"
+                            style={{transitionDelay:"100ms"}}>
+                            <div className="flex items-start gap-5">
+                                <div
+                                    className="service-icon w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
+                                    <FileText className="w-6 h-6 text-brand"/>
+                                </div>
+                                <div>
+                                    <h3 className="font-heading font-medium text-xl text-dark mb-2">In Sơ Đồ</h3>
+                                    <p className="text-sm text-muted leading-relaxed mb-4">In sơ đồ kỹ thuật (Tech Sketch) chi tiết
+                                        đầy đủ chi tiết may, đường chỉ, vị trí accessories — chuẩn format xuất khẩu.</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span
+                                            className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Tech
+                                            Sketch</span>
+                                        <span
+                                            className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Spec
+                                            Sheet</span>
+                                        <span
+                                            className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Construction</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card-hover rounded-2xl bg-white border border-border/60 p-8 group reveal" style={{transitionDelay:"200ms"}}>
+                            <div className="flex items-start gap-5">
+                                <div
+                                    className="service-icon w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
+                                    <Scissors className="w-6 h-6 text-brand"/>
+                                </div>
+                                <div>
+                                    <h3 className="font-heading font-medium text-xl text-dark mb-2">In Rập</h3>
+                                    <p className="text-sm text-muted leading-relaxed mb-4">Xây dựng rập cắt chính xác từ sơ đồ hoặc
+                                        mẫu thực tế, hỗ trợ grading đa size, xuất file DXF/PLT tương thích mọi máy cắt.</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Pattern</span>
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Grading</span>
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">DXF / PLT</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card-hover rounded-2xl bg-white border border-border/60 p-8 group reveal" style={{transitionDelay:"300ms"}}>
+                            <div className="flex items-start gap-5">
+                                <div className="service-icon w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
+                                    <PenTool className="w-6 h-6 text-brand"/>
+                                </div>
+                                <div>
+                                    <h3 className="font-heading font-500 text-xl text-dark mb-2">Thiết Kế</h3>
+                                    <p className="text-sm text-muted leading-relaxed mb-4">Sáng tạo thiết kế thời trang theo yêu cầu  — từ moodboard, phác thảo đến bản vẽ kỹ thuật hoàn chỉnh, thể hiện DNA thương hiệu.</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Moodboard</span>
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Illustration</span>
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Flat Sketch</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="card-hover rounded-2xl bg-white border border-border/60 p-8 group reveal" style={{transitionDelay:"400ms"}}>
+                            <div className="flex items-start gap-5">
+                                <div className="service-icon w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
+                                    <Calculator className="w-6 h-6 text-brand"/>
+                                </div>
+                                <div>
+                                    <h3 className="font-heading font-500 text-xl text-dark mb-2">Tính Định Mức</h3>
+                                    <p className="text-sm text-muted leading-relaxed mb-4">Tính toán định mức nguyên phụ liệu chính xác — vải, chỉ, phụ kiện, giúp tối ưu chi phí và kiểm soát hàng tồn kho hiệu quả.</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">BOM</span>
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Costing</span>
+                                        <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">Consumption</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
             
         </>
     )

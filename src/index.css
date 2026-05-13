@@ -13,6 +13,7 @@
     --color-muted: rgb(107, 114, 128);
     --color-subtle: rgb(156, 163, 175);
     --color-dark: rgb(17, 24, 39);
+    --color-card-bg: #F9FAFB;
 
     /* TEXT */
     --color-text-primary: #000;

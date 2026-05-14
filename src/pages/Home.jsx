@@ -5,6 +5,7 @@ import useReveal from "../hooks/useReveal";
 import ProductsSection from "../sections/ProductsSection";
 import ServicesSection from "../sections/ServicesSection";
 import ProcessSection from "../sections/ProcessSection";
+import TestimonialsSection from "../sections/TestimonialsSection";
 
 const Home = () => {
 
@@ -240,6 +241,9 @@ const Home = () => {
 
             {/* PROCESS */}
             <ProcessSection />
+
+            {/* TESTIMONIALS */}
+            <TestimonialsSection />
             
         </>
     )

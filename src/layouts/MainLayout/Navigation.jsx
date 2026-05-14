@@ -42,9 +42,9 @@ const Navigation = () => {
             </span>
           </a>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Về Chúng tôi</a>
-            <a href="#" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Sản phẩm</a>
-            <a href="#" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Dịch vụ</a>
+            <a href="#about" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Về Chúng tôi</a>
+            <a href="#products" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Sản phẩm</a>
+            <a href="#services" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Dịch vụ</a>
             <a href="#" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Quy trình</a>
             <a href="#" className="btn-shine bg-brand text-white font-heading font-medium text-m px-6 py-4 rounded-full tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-105 hover:shadow-[0_8px_25px_rgba(1,146,245,0.3)]">Liên hệ ngay</a>
           </div>

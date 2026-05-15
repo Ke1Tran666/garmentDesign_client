@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronDown, FileCheck, Headphones, Play, ShieldCheck, Target, Zap } from "lucide-react";
+import { ArrowRight, Calendar, ChevronDown, FileCheck, Headphones, Phone, Play, ShieldCheck, Sparkles, Target, Zap } from "lucide-react";
 import Navigation from "../layouts/MainLayout/Navigation";
 import '../css/components.css'
 import useReveal from "../hooks/useReveal";
@@ -6,6 +6,7 @@ import ProductsSection from "../sections/ProductsSection";
 import ServicesSection from "../sections/ServicesSection";
 import ProcessSection from "../sections/ProcessSection";
 import TestimonialsSection from "../sections/TestimonialsSection";
+import ContactSection from "../sections/ContactSection";
 
 const Home = () => {
 
@@ -244,7 +245,46 @@ const Home = () => {
 
             {/* TESTIMONIALS */}
             <TestimonialsSection />
-            
+
+            {/* CTA */}
+            <section className="relative py-24 md:py-32 px-4">
+                <div className="max-w-4xl mx-auto">
+                    <div className="relative rounded-3xl overflow-hidden reveal">
+                        <div className="absolute inset-0 bg-linear-to-br from-brand via-brand-dark to-blue-800"></div>
+                        <div className="absolute inset-0 opacity-10" style={{backgroundImage: `radial-gradient(circle at 20% 50%, white 1px, transparent 1px),radial-gradient(circle at 80% 50%, white 1px, transparent 1px)`,backgroundSize: "30px 30px"}}>
+                        </div>
+                        <div className="relative z-10 p-10 md:p-16 text-center text-white">
+                            <div
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm mb-8">
+                                <Sparkles className="w-4 h-4"/>
+                                <span className="text-xs font-mono tracking-widest uppercase">Miễn phí tư vấn</span>
+                            </div>
+                            <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight leading-tight text-white">
+                                Sẵn sàng tối ưu
+                                <br/>
+                                quy trình may mặc?
+                            </h2>
+                            <p className="text-white/70 font-body font-light mt-6 max-w-lg mx-auto">
+                                Gửi yêu cầu ngay hôm nay — nhận báo giá chi tiết trong vòng 2 giờ làm việc.
+                            </p>
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+                                <a href="#contact" className="btn-shine bg-white text-brand-dark font-heading font-medium text-base px-10 py-4 rounded-full tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center gap-2">
+                                    Đặt lịch tư vấn
+                                    <Calendar className="w-4 h-4"/>
+                                </a>
+                                <a href="tel:+84901234567"
+                                    className="flex items-center gap-2 text-white/70 hover:text-white font-body text-sm transition-colors duration-300">
+                                    <Phone className="w-4 h-4"/>
+                                    0918 414 470
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CONTACT */}
+            <ContactSection />
         </>
     )
 }

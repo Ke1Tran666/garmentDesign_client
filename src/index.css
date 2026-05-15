@@ -9,6 +9,11 @@
     /* COLORS */
     /* BRAND */
     --color-brand: rgb(1, 146, 245);
+    --color-brand-dark: #0170C2;
+    --color-brand-light: #E8F4FE;
+    --color-brand-50: rgba(1, 146, 245, 0.05);
+    --color-brand-10: rgba(1, 146, 245, 0.1);
+    --color-brand-20: rgba(1, 146, 245, 0.2);
     --color-border: rgb(229, 231, 235);
     --color-muted: rgb(107, 114, 128);
     --color-subtle: rgb(156, 163, 175);

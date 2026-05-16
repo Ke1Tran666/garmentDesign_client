@@ -8,6 +8,7 @@ import ProcessSection from "../sections/ProcessSection";
 import TestimonialsSection from "../sections/TestimonialsSection";
 import ContactSection from "../sections/ContactSection";
 import Footer from "../layouts/MainLayout/Footer";
+import FloatingButtons from "../components/ui/FloatingButtons";
 
 const Home = () => {
 
@@ -289,6 +290,10 @@ const Home = () => {
 
             {/* FOOTER */}
             <Footer/>
+
+            {/* SCROLL To TOP BUTTON */}
+            {/* <ScrollToTopButton /> */}
+            <FloatingButtons/>
         </>
     )
 }

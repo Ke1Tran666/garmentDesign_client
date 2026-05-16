@@ -2,6 +2,7 @@ import { ArrowRight, Scissors } from "lucide-react";
 import { FaFacebookF, FaYoutube } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
+import { useNotification } from "../../components/ui/Notification/NotificationContext";
 
 const socials = [
     {
@@ -23,6 +24,23 @@ const socials = [
 ]
 
 const Footer = () => {
+const { showNotification } = useNotification();
+
+    const handleNewsletterSubmit = (e) => {
+        e.preventDefault();
+        const email = e.target.email.value;
+
+        if (!email) {
+            showNotification("error", "Có lỗi xảy ra!", "Vui lòng nhập email của bạn.");
+            return;
+        }
+
+        // TODO: gọi API gửi mail ở đây
+
+        showNotification("success", "Đăng ký thành công!", "Chúng tôi sẽ gửi tin cập nhật đến bạn sớm nhất.");
+        e.target.reset();
+    };
+
   return (
     <footer className="relative py-16 px-4 bg-white">
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border to-transparent">
@@ -86,8 +104,8 @@ const Footer = () => {
                     <h4 className="text-xs font-mono tracking-widest uppercase text-subtle mb-4 font-500">Nhận tin cập nhật
                     </h4>
                     <p className="text-sm text-subtle mb-4">Xu hướng kỹ thuật may mặc & ưu đãi dành cho khách hàng mới.</p>
-                    <form id="newsletterForm" className="flex gap-2">
-                        <input type="email" placeholder="Email của bạn" required
+                    <form id="newsletterForm" className="flex gap-2" onSubmit={handleNewsletterSubmit}>
+                        <input type="email" name="email" placeholder="Email của bạn" required
                             className="flex-1 bg-card-bg border border-border rounded-xl px-4 py-2.5 text-sm font-body text-dark placeholder-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all" />
                         <button type="submit"
                             className="bg-brand! text-white px-5 py-2.5 rounded-xl font-heading font-500 text-sm hover:bg-brand-dark hover:scale-105 transition-all duration-300 shadow-[0_4px_15px_rgba(1,146,245,0.25)]">

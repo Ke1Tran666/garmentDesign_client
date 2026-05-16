@@ -7,6 +7,7 @@ import ServicesSection from "../sections/ServicesSection";
 import ProcessSection from "../sections/ProcessSection";
 import TestimonialsSection from "../sections/TestimonialsSection";
 import ContactSection from "../sections/ContactSection";
+import Footer from "../layouts/MainLayout/Footer";
 
 const Home = () => {
 
@@ -285,6 +286,9 @@ const Home = () => {
 
             {/* CONTACT */}
             <ContactSection />
+
+            {/* FOOTER */}
+            <Footer/>
         </>
     )
 }

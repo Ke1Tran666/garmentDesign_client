@@ -32,7 +32,7 @@ const SERVICES = ["In Sơ Đồ", "In Rập", "Thiết Kế", "Tính Định M�
 const inputCls =
   "w-full bg-card-bg border border-border rounded-xl px-4 py-3 text-sm font-body text-dark placeholder-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all";
 
-function ContactInfo({ icon: Icon, label, value, delay }) {
+const ContactInfo = ({ icon: Icon, label, value, delay }) => {
   return (
     <div className="flex items-center gap-4 reveal" style={{ transitionDelay: `${delay}ms` }}>
       <div className="w-11 h-11 rounded-xl bg-brand/10 flex items-center justify-center">
@@ -44,7 +44,7 @@ function ContactInfo({ icon: Icon, label, value, delay }) {
       </div>
     </div>
   );
-}
+};
 
 function ContactForm({ onSubmit }) {
   return (

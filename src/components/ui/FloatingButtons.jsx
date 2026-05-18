@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, LogIn } from "lucide-react";
+import { ArrowUp, LogIn, User } from "lucide-react";
 
 const FloatingButtons = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [scrollPercent, setScrollPercent] = useState(0);
+
+    // ví dụ user đã đăng nhập
+    const user = JSON.parse(localStorage.getItem("user"));
 
     useEffect(() => {
         const handleScroll = () => {
@@ -22,9 +25,7 @@ const FloatingButtons = () => {
         window.addEventListener("scroll", handleScroll);
         handleScroll();
 
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     const handleScrollToTop = () => {
@@ -34,23 +35,25 @@ const FloatingButtons = () => {
         });
     };
 
-    const handleLogin = () => {
-        console.log("Login clicked");
-        // ví dụ:
-        // navigate("/login");
+    const handleLoginOrAccount = () => {
+        if (user) {
+            // đã đăng nhập
+            window.location.href = "/profile";
+        } else {
+            // chưa đăng nhập
+            window.location.href = "/login";
+        }
     };
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex items-end gap-3">
-            {/* Login button - luôn hiện */}
             <button
-                onClick={handleLogin}
+                onClick={handleLoginOrAccount}
                 className="w-12 h-12 rounded-full bg-dark! text-white flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
             >
-                <LogIn size={20} />
+                {user ? <User size={20} /> : <LogIn size={20} />}
             </button>
 
-            {/* ScrollToTop button - chỉ hiện khi cuộn xuống */}
             <div
                 className={`relative transition-all duration-300 ${
                     showScrollTop

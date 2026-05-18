@@ -292,7 +292,6 @@ const Home = () => {
             <Footer/>
 
             {/* SCROLL To TOP BUTTON */}
-            {/* <ScrollToTopButton /> */}
             <FloatingButtons/>
         </>
     )

@@ -5,11 +5,62 @@ import '../../index.css'
 
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
+import { useNotification } from "../../components/ui/Notification/NotificationContext";
 
 
 const LoginPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { showNotification } = useNotification();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      localStorage.setItem("token", response.data.token);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(response.data.user)
+      );
+
+      showNotification(
+        "success",
+        "Đăng nhập thành công",
+        "Chào mừng bạn quay trở lại"
+      );
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+
+    } catch (err) {
+
+      showNotification(
+        "error",
+        "Đăng nhập thất bại",
+        err.response?.data?.message || "Email hoặc mật khẩu không đúng"
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div 
@@ -131,12 +182,14 @@ const LoginPage = () => {
           </p>
 
           {/* FORM */}
-          <form>
+          <form onSubmit={handleLogin}>
             {/* Email */}
             <div className="relative mb-5">
               <input 
                 type="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="
                   peer w-full rounded-xl border-2 border-white/25 
                   bg-transparent px-4 pt-5 pb-2 text-sm text-white outline-none 
@@ -174,6 +227,8 @@ const LoginPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="
                     peer w-full rounded-xl border-2 border-white/25 bg-transparent px-4 pt-5 pb-2 pr-12 text-sm text-white outline-none transition-all duration-300 placeholder:text-transparent focus:border-[#80d0ff]
                     focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
@@ -211,6 +266,7 @@ const LoginPage = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="
                 mt-2 w-full flex items-center justify-center gap-2
                 rounded-xl border border-white/20 bg-brand! px-5 py-3.25
@@ -219,7 +275,7 @@ const LoginPage = () => {
                 hover:shadow-[0_8px_25px_rgba(1,146,245,0.35)]
                 "
             >
-              Đăng nhập
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
               <ArrowRight className="w-4 h-4" />
           </button>
           </form>

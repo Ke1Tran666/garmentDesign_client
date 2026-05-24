@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Scissors } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Phone, Scissors } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
 import '../../index.css'
@@ -12,6 +12,8 @@ import { useNotification } from "../../components/ui/Notification/NotificationCo
 const LoginPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loginType, setLoginType] = useState("account");
+  const [phone, setPhone] = useState("");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,13 +26,22 @@ const LoginPage = () => {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const url =
+        loginType === "account"
+          ? "http://localhost:8080/api/auth/login"
+          : "http://localhost:8080/api/auth/login-phone";
+
+      const body =
+        loginType === "account"
+          ? {
+              email,
+              password,
+            }
+          : {
+              phone,
+            };
+
+      const response = await axios.post(url, body);
 
       localStorage.setItem("token", response.data.token);
 
@@ -52,16 +63,16 @@ const LoginPage = () => {
     } catch (err) {
 
       showNotification(
-        "error",
-        "Đăng nhập thất bại",
-        err.response?.data?.message || "Email hoặc mật khẩu không đúng"
-      );
+          "error",
+          "Đăng nhập thất bại",
+          err.response?.data?.message || "Thông tin đăng nhập không đúng"
+        );
 
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <div 
       className="
@@ -183,7 +194,9 @@ const LoginPage = () => {
 
           {/* FORM */}
           <form onSubmit={handleLogin}>
-            {/* Email */}
+            {loginType === "account" ? (
+              <>
+                {/* Email */}
             <div className="relative mb-5">
               <input 
                 type="email"
@@ -263,7 +276,41 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
+              </>
+            ) : (
+              <div className="relative mb-5">
+                <input
+                  type="tel"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="
+                    peer w-full rounded-xl border-2 border-white/25 
+                    bg-transparent px-4 pt-5 pb-2 text-sm text-white outline-none 
+                    transition-all duration-300 placeholder:text-transparent 
+                    focus:border-[#80d0ff] 
+                    focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
+                  "
+                  placeholder="Số điện thoại"
+                />
 
+                <label
+                  className="
+                    pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
+                    bg-transparent text-sm text-white/55 transition-all duration-300 
+                    peer-valid:top-2 peer-valid:translate-y-0 
+                    peer-valid:text-xs peer-valid:text-[#80d0ff] 
+                    peer-focus:top-2 peer-focus:translate-y-0 
+                    peer-focus:text-xs peer-focus:text-[#80d0ff]
+                  "
+                >
+                  Số điện thoại
+                </label>
+              </div>
+            )}
+            
+            
+            {/* button submit */}
             <button
               type="submit"
               disabled={loading}
@@ -275,7 +322,8 @@ const LoginPage = () => {
                 hover:shadow-[0_8px_25px_rgba(1,146,245,0.35)]
                 "
             >
-              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+              {loading ? "Đang xử lý..." : loginType === "account" 
+                  ? "Đăng nhập" : "Tiếp tục"}
               <ArrowRight className="w-4 h-4" />
           </button>
           </form>
@@ -288,6 +336,24 @@ const LoginPage = () => {
             </span>
             <div className="h-px flex-1 bg-white/15" />
           </div>
+
+          {/* PHONE */}
+          <button
+            type="button"
+            onClick={() => setLoginType(loginType === "account" ? "phone" : "account")}
+            className="
+              mb-3 flex w-full items-center justify-center gap-2.5 
+              rounded-xl border border-white/20 bg-white/10! px-5 py-3 
+              text-sm font-medium text-white/85 backdrop-blur-xl 
+              transition-all duration-300 hover:-translate-y-1 
+              hover:bg-white/20 hover:border-white/30
+            "
+          >
+            <Phone className="h-5 w-5 shrink-0 text-[#80d0ff]" />
+            {loginType === "account"
+              ? "Đăng nhập với số điện thoại"
+              : "Đăng nhập bằng tài khoản đã đăng ký"}
+          </button>
 
           {/* GOOGLE */}
           <button 

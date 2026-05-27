@@ -1,9 +1,4 @@
 .notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-
     width: 380px;
     max-width: calc(100vw - 32px);
 
@@ -21,10 +16,6 @@
 /* MOBILE */
 @media (max-width: 640px) {
     .notification {
-        left: 16px;
-        right: 16px;
-        bottom: 16px;
-
         width: auto;
         max-width: none;
     }

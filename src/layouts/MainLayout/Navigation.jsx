@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Scissors, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 import '../../css/components.css'
+import Logo from "../../components/ui/Logo/Logo";
 
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -38,14 +39,7 @@ const Navigation = () => {
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           {/* logo */}
-          <a href="#" className="flex justify-center items-center gap-2.5 font-brand">
-            <div className="w-9 h-9 bg-brand rounded-xl flex justify-center items-center shadow-[0_4px_15px_rgba(1,146,245,0.3)]">
-              <Scissors className="text-white" />
-            </div>
-            <span className="text-text-primary font-brand font-semibold text-xl">
-              HoaTran <span className="text-brand">maymac</span>
-            </span>
-          </a>
+          <Logo />
           <div className="hidden md:flex items-center gap-8">
             <a href="#about" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Về Chúng tôi</a>
             <a href="#products" className="text-m font-medium text-muted hover:text-dark transition-colors duration-300">Sản phẩm</a>

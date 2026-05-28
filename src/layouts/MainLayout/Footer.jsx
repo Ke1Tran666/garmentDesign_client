@@ -1,8 +1,9 @@
-import { ArrowRight, Scissors } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FaFacebookF, FaYoutube } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
+import Logo from "../../components/ui/Logo/Logo";
 
 const socials = [
     {
@@ -48,13 +49,8 @@ const { showNotification } = useNotification();
         <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
                 <div className="md:col-span-4">
-                    <a href="#" className="font-brand text-xl font-600 tracking-tight flex items-center gap-2.5">
-                        <span
-                            className="w-9 h-9 bg-brand rounded-xl flex items-center justify-center shadow-[0_4px_15px_rgba(1,146,245,0.3)]">
-                            <Scissors className="w-4 h-4 text-white"/>
-                        </span>
-                        <span className="text-dark">HoaTran <span className="text-brand">maymac</span></span>
-                    </a>
+                    {/* LOGO */}
+                    <Logo textColor="text-dark" />
                     <p className="text-sm text-subtle mt-4 leading-relaxed max-w-xs">
                         Đơn vị hàng đầu về dịch vụ kỹ thuật may mặc: in sơ đồ, in rập, thiết kế và tính định mức cho
                         ngành thời trang Việt Nam.

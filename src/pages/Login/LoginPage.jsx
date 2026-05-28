@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Mail, Phone, Scissors } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Mail, Phone } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
 import '../../index.css'
@@ -7,6 +7,28 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
+import Logo from "../../components/ui/Logo/Logo";
+import PrimaryButton from "../../components/ui/Button/PrimaryButton";
+import BackHomeButton from "../../components/ui/Button/BackHomeButton";
+
+const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="
+        mb-3 flex w-full items-center justify-center gap-2.5
+        rounded-xl border border-white/20 bg-white/10! px-5 py-3
+        text-sm font-medium text-white/85 backdrop-blur-xl
+        transition-all duration-300 hover:-translate-y-1
+        hover:bg-white/20 hover:border-white/30
+      "
+    >
+      <Icon className="h-5 w-5 shrink-0 text-[#80d0ff]" />
+      {children}
+    </button>
+  );
+};
 
 const LoginPage = () => {
 
@@ -244,34 +266,8 @@ const LoginPage = () => {
         >
           
           {/* LOGO */}
-          <div 
-            className="
-              mb-7 text-center
-              "
-          >
-            <a 
-              href="#" 
-              className="
-                flex justify-center items-center gap-2.5 font-brand
-                "
-            >
-                <div 
-                  className="
-                    w-9 h-9 bg-brand rounded-xl flex justify-center 
-                    items-center shadow-[0_4px_15px_rgba(1,146,245,0.3)]
-                    "
-                >
-                    <Scissors className="text-white" />
-                </div>
-                <span 
-                  className="
-                    text-text-primary font-brand font-semibold text-xl
-                    "
-                >
-                  HoaTran
-                  <span className="text-brand"> maymac</span>
-                </span>
-            </a>
+          <div className="mb-7 text-center">
+            <Logo className="justify-center" />
 
             <p 
               className="
@@ -489,17 +485,11 @@ const LoginPage = () => {
             </div>
             
             {/* button submit */}
-            <button
+            <PrimaryButton
               type="submit"
               disabled={loading}
-              className="
-                mt-2 w-full flex items-center justify-center gap-2
-                rounded-xl border border-white/20 bg-brand! px-5 py-3.25
-                text-[15px] font-semibold tracking-[0.2px] text-white
-                backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-brand-dark
-                hover:shadow-[0_8px_25px_rgba(1,146,245,0.35)]
-                disabled:cursor-not-allowed disabled:opacity-70
-                "
+              className="mt-2"
+              icon={ArrowRight}
             >
               {loading
                 ? "Đang xử lý..."
@@ -508,8 +498,7 @@ const LoginPage = () => {
                   : loginStep === "input"
                     ? "Gửi mã OTP"
                     : "Xác nhận OTP"}
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            </PrimaryButton>
           </form>
 
           {/* OR */}
@@ -521,67 +510,39 @@ const LoginPage = () => {
             <div className="h-px flex-1 bg-white/15" />
           </div>
 
-          {/* PHONE */}
-          <button
-            type="button"
+          {/* BUTTON PHONE */}
+          <SocialLoginButton
+            icon={loginType === "account" ? Phone : Mail}
             onClick={() => {
               setLoginType(loginType === "account" ? "phone" : "account");
               resetPhoneLogin();
             }}
-            className="
-              mb-3 flex w-full items-center justify-center gap-2.5 
-              rounded-xl border border-white/20 bg-white/10! px-5 py-3 
-              text-sm font-medium text-white/85 backdrop-blur-xl 
-              transition-all duration-300 hover:-translate-y-1 
-              hover:bg-white/20 hover:border-white/30
-            "
           >
-            {loginType === "account" ? (
-              <Phone className="h-5 w-5 shrink-0 text-[#80d0ff]" />
-            ) : (
-              <Mail className="h-5 w-5 shrink-0 text-[#80d0ff]" />
-            )}
-
-            <span
-              key={loginType}
-              className="animate-fadeText"
-            >
+            <span key={loginType} className="animate-fadeText">
               {loginType === "account"
                 ? "Đăng nhập với số điện thoại"
                 : "Đăng nhập bằng tài khoản đã đăng ký"}
             </span>
-          </button>
-
-          {/* GOOGLE */}
-          <button 
-            type="button"
-            className="
-              flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/20 bg-white/10! px-5 py-3 text-sm font-medium text-white/85 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/20 hover:border-white/30
-              "
-          >
-            <FcGoogle className="h-5 w-5 shrink-0" />
+          </SocialLoginButton>
+          
+          {/* BUTTON GOOGLE */}
+          <SocialLoginButton icon={FcGoogle}>
             Đăng nhập với Google
-          </button>
+          </SocialLoginButton>
 
           <p className="mt-5 text-center text-[13px] text-white/45">
             Chưa có tài khoản?{" "}
-            <a href="#" className="font-medium text-[#80d0ff] hover:text-white">
+            <Link
+              to="/register"
+              className="font-medium text-[#80d0ff] hover:text-white"
+            >
               Đăng ký miễn phí
-            </a>
+            </Link>
           </p>
         </div>
       </div>
       {/* BUTTON TRỞ VỀ */}
-      <Link
-        to="/"
-        className="
-          fixed bottom-6 left-6 z-50 flex items-center gap-2
-          rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-medium text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/20
-          "
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Trở về trang chủ
-      </Link>
+      <BackHomeButton/>
     </div>
   );
 };

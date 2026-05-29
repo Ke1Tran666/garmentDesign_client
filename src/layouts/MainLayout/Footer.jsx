@@ -3,7 +3,7 @@ import { FaFacebookF, FaYoutube } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
-import Logo from "../../components/ui/Logo/Logo";
+import Logo from "../../components/common/Logo/Logo";
 
 const socials = [
     {

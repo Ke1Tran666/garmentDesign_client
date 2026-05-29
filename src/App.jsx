@@ -2,8 +2,9 @@ import './App.css'
 import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import { NotificationProvider } from './components/ui/Notification/NotificationContext';
-import LoginPage from './pages/Login/LoginPage';
-import RegisterPage from './pages/Register/RegisterPage';
+import LoginPage from './pages/Auth/LoginPage';
+import RegisterPage from './pages/Auth/RegisterPage';
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 
 const App = () => {
 
@@ -16,6 +17,8 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         {/* REGISTER */}
         <Route path="/register" element={<RegisterPage/>} />
+        {/* FORGOT PASSWORD */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Routes>
     </NotificationProvider>
   )

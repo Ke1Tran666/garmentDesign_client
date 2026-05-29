@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { X } from 'lucide-react';
 
 import '../../css/components.css'
-import Logo from "../../components/ui/Logo/Logo";
+import Logo from "../../components/common/Logo/Logo";
 
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);

@@ -7,9 +7,10 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
-import Logo from "../../components/ui/Logo/Logo";
+import Logo from "../../components/common/Logo/Logo";
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
 import BackHomeButton from "../../components/ui/Button/BackHomeButton";
+import AuthBackground from "../../components/layout/AuthBackground";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (
@@ -202,56 +203,7 @@ const LoginPage = () => {
         "
     >
       {/* BACKGROUND */}
-      <div 
-        className="
-          fixed inset-0 z-0 
-          bg-[radial-gradient(ellipse_at_20%_50%,#1a6fe8_0%,#0a52c4_40%,#0038a0_100%)]
-          "
-      >
-        <div 
-          className="
-            absolute left-[8%] top-[5%] h-50 w-50 
-            rounded-[40%_60%_70%_30%/50%_60%_40%_50%] 
-            bg-[#3a9fff] opacity-25 animate-float1
-            " 
-        />
-        <div 
-          className="
-            absolute right-[10%] top-[15%] h-35 w-35 
-            rounded-[60%_40%_30%_70%/60%_30%_70%_40%] 
-            bg-[#60baff] opacity-25 animate-float2
-            " 
-        />
-        <div 
-          className="
-            absolute bottom-[20%] left-[15%] h-25 w-25 
-            rounded-[50%_60%_40%_70%/40%_50%_60%_50%] 
-            bg-[#2080ff] opacity-25 
-            animate-[float1_12s_ease-in-out_infinite_reverse]
-            " 
-        />
-        <div 
-          className="
-            absolute bottom-[10%] right-[8%] h-20 w-45 
-            rounded-[60%_40%_50%_60%/40%_60%_40%_60%] 
-            bg-[#80d0ff] opacity-25 
-            animate-[float2_9s_ease-in-out_infinite]
-            " 
-        />
-        <div 
-          className="
-            absolute left-[5%] top-[40%] h-30 w-17.5 
-            rounded-[40%_60%_50%_50%/60%_40%_60%_40%] 
-            bg-[#50a8ff] opacity-25 
-            animate-[float1_11s_ease-in-out_infinite_2s]
-            " 
-        />
-        <div 
-          className="
-            absolute right-[5%] top-[55%] h-22.5 w-22.5 rounded-full 
-            bg-[#90ccff] opacity-25 animate-[float2_7s_ease-in-out_infinite_1s]" 
-        />
-      </div>
+      <AuthBackground />
       {/* CONTENT */}
       <div 
         className="
@@ -327,15 +279,13 @@ const LoginPage = () => {
 
                   {/* Password */}
                   <div className="mb-4">
-                    <div className="mb-1.5 flex justify-end">
-                      <a
-                        href="#"
-                        className="
-                          text-xs text-[#80d0ff] transition hover:text-white
-                          "
+                    <div className="flex justify-end mb-5">
+                      <Link
+                        to="/forgot-password"
+                        className="text-sm text-[#80d0ff] hover:text-white transition"
                       >
                         Quên mật khẩu?
-                      </a>
+                      </Link>
                     </div>
 
                     <div className="relative">

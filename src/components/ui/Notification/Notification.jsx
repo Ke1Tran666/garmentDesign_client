@@ -28,19 +28,19 @@ const DEFAULT_MESSAGES = {
   warning: { title: "Cảnh báo", msg: "Hành động này không thể hoàn tác." },
 };
 
-const Notification = ({type = "success",message,description, onClose}) => {
+const Notification = ({type = "success",message,description, onClose, visible}) => {
 
   const config = TYPES[type] ?? TYPES.success;
   const defaults = DEFAULT_MESSAGES[type] ?? DEFAULT_MESSAGES.success;
   const Icon = config.icon;
 
   return (
-    <div className={`notification ${type ? "show" : ""} bg-white border ${config.borderClass} rounded-2xl px-6 py-4 flex items-center gap-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)]`}
+    <div className={`notification ${visible ? "show" : ""} bg-white border ${config.borderClass} rounded-2xl px-6 py-4 flex items-center gap-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)]`}
     >
       <div className={`w-8 h-8 rounded-full ${config.wrapClass} flex items-center justify-center shrink-0`}>
         <Icon className={`w-4 h-4 ${config.iconClass}`} />
       </div>
-      <div>
+      <div className="flex-1">
         <div className="text-sm font-heading font-500 text-dark">
           {message ?? defaults.title}
         </div>

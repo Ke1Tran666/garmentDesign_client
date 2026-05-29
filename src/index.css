@@ -104,6 +104,32 @@
     }
 }
 
+@keyframes formSwitch {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+        filter: blur(4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes fadeText {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @theme {
     --animate-play-ud: play-ud 0.4s ease-in-out;
     --animate-float: float 5s ease-in-out infinite;
@@ -111,4 +137,6 @@
     --animate-float1: float1 8s ease-in-out infinite;
     --animate-float2: float2 10s ease-in-out infinite;
     --animate-slide-up: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    --animate-formSwitch: formSwitch 0.35s ease;
+    --animate-fadeText: fadeText 0.25s ease;
 }

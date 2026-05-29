@@ -6,7 +6,10 @@ import '../../index.css'
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import { useGoogleLogin } from "@react-oauth/google";
+
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
+
 import Logo from "../../components/common/Logo/Logo";
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
 import BackHomeButton from "../../components/ui/Button/BackHomeButton";
@@ -43,6 +46,51 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
+
+  // Xử lý đăng nhập Google
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setLoading(true);
+
+        const response = await axios.post(
+          "http://localhost:8080/api/auth/google-login",
+          {
+            accessToken: tokenResponse.access_token,
+          }
+        );
+
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        showNotification(
+          "success",
+          "Đăng nhập thành công",
+          "Đăng nhập Google thành công"
+        );
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
+      } catch (err) {
+        showNotification(
+          "error",
+          "Đăng nhập Google thất bại",
+          err.response?.data?.message || "Không thể đăng nhập bằng Google"
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+
+    onError: () => {
+      showNotification(
+        "error",
+        "Đăng nhập Google thất bại",
+        "Bạn đã hủy hoặc Google không thể xác thực"
+      );
+    },
+  });
 
   const resetPhoneLogin = () => {
     setLoginStep("input");
@@ -476,7 +524,7 @@ const LoginPage = () => {
           </SocialLoginButton>
           
           {/* BUTTON GOOGLE */}
-          <SocialLoginButton icon={FcGoogle}>
+          <SocialLoginButton icon={FcGoogle} onClick={handleGoogleLogin}>
             Đăng nhập với Google
           </SocialLoginButton>
 

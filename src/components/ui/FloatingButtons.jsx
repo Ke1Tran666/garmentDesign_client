@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { ArrowUp, LogIn, User } from "lucide-react";
+import { ArrowUp, LogIn, User, Settings, LogOut } from "lucide-react";
 
 const FloatingButtons = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
     const [scrollPercent, setScrollPercent] = useState(0);
+    const [menuOpen, setMenuOpen] = useState(false);
 
-    // ví dụ user đã đăng nhập
     const user = JSON.parse(localStorage.getItem("user"));
 
     useEffect(() => {
@@ -37,23 +37,104 @@ const FloatingButtons = () => {
 
     const handleLoginOrAccount = () => {
         if (user) {
-            // đã đăng nhập
             window.location.href = "/profile";
         } else {
-            // chưa đăng nhập
             window.location.href = "/login";
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("user");
+        window.location.reload();
+    };
+
     return (
         <div className="fixed bottom-6 right-6 z-50 flex items-end gap-3">
-            <button
-                onClick={handleLoginOrAccount}
-                className="w-12 h-12 rounded-full bg-dark! text-white flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
-            >
-                {user ? <User size={20} /> : <LogIn size={20} />}
-            </button>
 
+            {/* LOGIN / PROFILE MENU */}
+            <div
+                className="relative w-35 h-35"
+                onMouseLeave={() => setMenuOpen(false)}
+            >
+                {/* SETTING BUTTON */}
+                <button
+                    onClick={() => window.location.href = "/settings"}
+                    className={`
+                        absolute top-2 right-2
+                        w-10 h-10 rounded-full
+                        bg-white! text-dark!
+                        shadow-lg border border-gray-200
+                        flex items-center justify-center
+                        transition-all duration-300
+                        hover:scale-110
+                        hover:bg-dark!
+                        hover:text-white!
+                        ${menuOpen
+                            ? "opacity-100 scale-100 pointer-events-auto"
+                            : "opacity-0 scale-50 pointer-events-none"}
+                    `}
+                >
+                    <Settings size={18} />
+                </button>
+
+                {/* LOGOUT BUTTON */}
+                {user && (
+                    <button
+                        onClick={handleLogout}
+                        className={`
+                            absolute bottom-2 left-2
+                            w-10 h-10 rounded-full
+                            bg-red-500! text-white!
+                            shadow-lg
+                            flex items-center justify-center
+                            transition-all duration-300
+                            hover:scale-110
+                            hover:bg-red-600!
+                            ${menuOpen
+                                ? "opacity-100 scale-100 pointer-events-auto"
+                                : "opacity-0 scale-50 pointer-events-none"}
+                        `}
+                    >
+                        <LogOut size={18} />
+                    </button>
+                )}
+
+                {/* TOOLTIP */}
+                <div
+                    className={`
+                        absolute bottom-14 -right-1
+                        px-3 py-1 rounded-md
+                        bg-dark! text-white! text-xs font-medium
+                        whitespace-nowrap shadow-lg
+                        pointer-events-none
+                        transition-all duration-300
+                        ${menuOpen
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 translate-y-2"}
+                    `}
+                >
+                    {user ? "Profile" : "Login"}
+                </div>
+
+                {/* MAIN BUTTON */}
+                <button
+                    onMouseEnter={() => setMenuOpen(true)}
+                    onClick={handleLoginOrAccount}
+                    className="
+                        absolute bottom-0 right-0
+                        w-12 h-12 rounded-full
+                        bg-dark! text-white
+                        flex items-center justify-center
+                        shadow-lg
+                        transition-all duration-300
+                        hover:scale-110
+                    "
+                >
+                    {user ? <User size={20} /> : <LogIn size={20} />}
+                </button>
+            </div>
+
+            {/* SCROLL TOP */}
             <div
                 className={`relative transition-all duration-300 ${
                     showScrollTop
@@ -67,7 +148,14 @@ const FloatingButtons = () => {
 
                 <button
                     onClick={handleScrollToTop}
-                    className="w-12 h-12 rounded-full bg-brand! text-white flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
+                    className="
+                        w-12 h-12 rounded-full
+                        bg-brand! text-white
+                        flex items-center justify-center
+                        shadow-lg
+                        transition-all duration-300
+                        hover:scale-110
+                    "
                 >
                     <ArrowUp size={20} />
                 </button>

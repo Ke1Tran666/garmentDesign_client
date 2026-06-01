@@ -5,6 +5,7 @@ import { NotificationProvider } from './components/ui/Notification/NotificationC
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
+import ProfilePage from './pages/Profile/ProfilePage';
 
 const App = () => {
 
@@ -19,6 +20,9 @@ const App = () => {
         <Route path="/register" element={<RegisterPage/>} />
         {/* FORGOT PASSWORD */}
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        {/* PROFILE */}
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </NotificationProvider>
   )

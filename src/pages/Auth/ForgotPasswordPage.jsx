@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, EyeOff, Mail } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
@@ -7,8 +7,13 @@ import "../../index.css";
 
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
 import BackHomeButton from "../../components/ui/Button/BackHomeButton";
+
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
+
 import Logo from "../../components/common/Logo/Logo";
+import AuthBackground from "../../components/layout/AuthBackground";
+import FloatingInput from "../../components/ui/Form/FloatingInput";
+import PasswordInput from "../../components/ui/Form/PasswordInput";
 
 const ForgotPasswordSteps = ({ currentStep }) => {
   const steps = ["Nhập Email", "Xác thực OTP", "Đổi mật khẩu", "Hoàn thành"];
@@ -73,9 +78,6 @@ const ForgotPasswordPage = () => {
 
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
-
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleOtpChange = (index, value) => {
     if (!/^\d?$/.test(value)) return;
@@ -229,14 +231,7 @@ const ForgotPasswordPage = () => {
   return (
     <div className="relative min-h-screen overflow-hidden bg-brand font-brand">
       {/* BACKGROUND */}
-      <div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_20%_50%,#1a6fe8_0%,#0a52c4_40%,#0038a0_100%)]">
-        <div className="absolute left-[8%] top-[5%] h-50 w-50 rounded-[40%_60%_70%_30%/50%_60%_40%_50%] bg-[#3a9fff] opacity-25 animate-float1" />
-        <div className="absolute right-[10%] top-[15%] h-35 w-35 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] bg-[#60baff] opacity-25 animate-float2" />
-        <div className="absolute bottom-[20%] left-[15%] h-25 w-25 rounded-[50%_60%_40%_70%/40%_50%_60%_50%] bg-[#2080ff] opacity-25 animate-[float1_12s_ease-in-out_infinite_reverse]" />
-        <div className="absolute bottom-[10%] right-[8%] h-20 w-45 rounded-[60%_40%_50%_60%/40%_60%_40%_60%] bg-[#80d0ff] opacity-25 animate-[float2_9s_ease-in-out_infinite]" />
-        <div className="absolute left-[5%] top-[40%] h-30 w-17.5 rounded-[40%_60%_50%_50%/60%_40%_60%_40%] bg-[#50a8ff] opacity-25 animate-[float1_11s_ease-in-out_infinite_2s]" />
-        <div className="absolute right-[5%] top-[55%] h-22.5 w-22.5 rounded-full bg-[#90ccff] opacity-25 animate-[float2_7s_ease-in-out_infinite_1s]" />
-      </div>
+      <AuthBackground />
 
       {/* CONTENT */}
       <div className="relative z-10 flex min-h-screen items-center justify-center p-8">
@@ -275,37 +270,15 @@ const ForgotPasswordPage = () => {
 
             <div key={step} className="animate-formSwitch">
               {step === 1 && (
-                <div className="relative mb-5">
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="
-                      peer w-full rounded-xl border-2 border-white/25 
-                      bg-transparent px-4 pt-5 pb-2 pr-12 text-sm text-white outline-none 
-                      transition-all duration-300 placeholder:text-transparent 
-                      focus:border-[#80d0ff] 
-                      focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                    "
-                    placeholder="Email"
-                  />
-
-                  <label
-                    className="
-                      pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
-                      bg-transparent text-sm text-white/55 transition-all duration-300 
-                      peer-valid:top-2 peer-valid:translate-y-0 
-                      peer-valid:text-xs peer-valid:text-[#80d0ff] 
-                      peer-focus:top-2 peer-focus:translate-y-0 
-                      peer-focus:text-xs peer-focus:text-[#80d0ff]
-                    "
-                  >
-                    Email
-                  </label>
-
-                  <Mail className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/45" />
-                </div>
+                <FloatingInput
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  label="Email"
+                  icon={Mail}
+                  containerClassName="mb-5"
+                  required
+                />
               )}
 
               {step === 2 && (
@@ -392,71 +365,21 @@ const ForgotPasswordPage = () => {
 
               {step === 3 && (
                 <>
-                  <div className="relative mb-5">
-                    <input
-                      type={showNewPassword ? "text" : "password"}
-                      required
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="
-                        peer w-full rounded-xl border-2 border-white/25 
-                        bg-transparent px-4 pt-5 pb-2 pr-12 text-sm text-white outline-none 
-                        transition-all duration-300 placeholder:text-transparent 
-                        focus:border-[#80d0ff] 
-                        focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                      "
-                      placeholder="Mật khẩu mới"
-                    />
+                  <PasswordInput
+                    containerClassName="mb-5"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    label="Mật khẩu mới"
+                    required
+                  />
 
-                    <label className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 bg-transparent text-sm text-white/55 transition-all duration-300 peer-valid:top-2 peer-valid:translate-y-0 peer-valid:text-xs peer-valid:text-[#80d0ff] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#80d0ff]">
-                      Mật khẩu mới
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white"
-                    >
-                      {showNewPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="relative mb-5">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="
-                        peer w-full rounded-xl border-2 border-white/25 
-                        bg-transparent px-4 pt-5 pb-2 pr-12 text-sm text-white outline-none 
-                        transition-all duration-300 placeholder:text-transparent 
-                        focus:border-[#80d0ff] 
-                        focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                      "
-                      placeholder="Nhập lại mật khẩu"
-                    />
-
-                    <label className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 bg-transparent text-sm text-white/55 transition-all duration-300 peer-valid:top-2 peer-valid:translate-y-0 peer-valid:text-xs peer-valid:text-[#80d0ff] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#80d0ff]">
-                      Nhập lại mật khẩu
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
+                  <PasswordInput
+                    containerClassName="mb-5"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    label="Nhập lại mật khẩu"
+                    required
+                  />
                 </>
               )}
 

@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, EyeOff, Mail, Phone } from "lucide-react";
+import { ArrowRight, Mail, Phone } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
 import '../../index.css'
@@ -14,6 +14,8 @@ import Logo from "../../components/common/Logo/Logo";
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
 import BackHomeButton from "../../components/ui/Button/BackHomeButton";
 import AuthBackground from "../../components/layout/AuthBackground";
+import FloatingInput from "../../components/ui/Form/FloatingInput";
+import PasswordInput from "../../components/ui/Form/PasswordInput";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (
@@ -36,7 +38,6 @@ const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
 
 const LoginPage = () => {
 
-  const [showPassword, setShowPassword] = useState(false);
   const [loginType, setLoginType] = useState("account");
   const [loginStep, setLoginStep] = useState("input");
   const [phone, setPhone] = useState("");
@@ -299,35 +300,27 @@ const LoginPage = () => {
               {loginType === "account" ? (
                 <>
                   {/* Email */}
-                  <div className="relative mb-5">
-                    <input 
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="
-                        peer w-full rounded-xl border-2 border-white/25 
-                        bg-transparent px-4 pt-5 pb-2 text-sm text-white outline-none 
-                        transition-all duration-300 placeholder:text-transparent 
-                        focus:border-[#80d0ff] 
-                        focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                        "
-                      placeholder="Email"
-                    />
-                    <label
-                      className="
-                        pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
-                        bg-transparent text-sm text-white/55 transition-all duration-300 peer-valid:top-2 peer-valid:translate-y-0 
-                        peer-valid:text-xs peer-valid:text-[#80d0ff] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#80d0ff]
-                      "
-                    >
-                      Email
-                    </label>
-                  </div>
+                  <FloatingInput
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    label="Email đăng nhập"
+                    required
+                    containerClassName="mb-5"
+                  />
 
                   {/* Password */}
                   <div className="mb-4">
-                    <div className="flex justify-end mb-5">
+                    <PasswordInput
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      label="Mật Khẩu"
+                      required
+                      containerClassName="mb-5"
+                    />
+
+                    {/* Forgot password */}
+                    <div className="flex justify-end mb-2">
                       <Link
                         to="/forgot-password"
                         className="text-sm text-[#80d0ff] hover:text-white transition"
@@ -335,78 +328,17 @@ const LoginPage = () => {
                         Quên mật khẩu?
                       </Link>
                     </div>
-
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="
-                          peer w-full rounded-xl border-2 border-white/25 bg-transparent px-4 pt-5 pb-2 pr-12 text-sm text-white outline-none transition-all duration-300 placeholder:text-transparent focus:border-[#80d0ff]
-                          focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                          "
-                        placeholder="Mật khẩu"
-                      />
-
-                      <label
-                        className="
-                          pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
-                          bg-transparent text-sm text-white/55 transition-all duration-300 peer-valid:top-2 peer-valid:translate-y-0 peer-valid:text-xs peer-valid:text-[#80d0ff]
-                          peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#80d0ff]
-                          "
-                      >
-                        Mật khẩu
-                      </label>
-
-                      {/* TOGGLE PASSWORD */}
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="
-                          absolute right-4 top-1/2 -translate-y-1/2
-                          text-white/45 transition hover:text-white
-                          "
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-5 h-5" />
-                        ) : (
-                          <Eye className="w-5 h-5" />
-                        )}
-                      </button>
-                    </div>
                   </div>
                 </>
               ) : loginStep === "input" ? (
-                <div className="relative mb-5">
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="
-                      peer w-full rounded-xl border-2 border-white/25 
-                      bg-transparent px-4 pt-5 pb-2 text-sm text-white outline-none 
-                      transition-all duration-300 placeholder:text-transparent 
-                      focus:border-[#80d0ff] 
-                      focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                    "
-                    placeholder="Số điện thoại"
-                  />
-
-                  <label
-                    className="
-                      pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
-                      bg-transparent text-sm text-white/55 transition-all duration-300 
-                      peer-valid:top-2 peer-valid:translate-y-0 
-                      peer-valid:text-xs peer-valid:text-[#80d0ff] 
-                      peer-focus:top-2 peer-focus:translate-y-0 
-                      peer-focus:text-xs peer-focus:text-[#80d0ff]
-                    "
-                  >
-                    Số điện thoại
-                  </label>
-                </div>
+                <FloatingInput
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  label="Số điện thoại"
+                  required
+                  containerClassName="mb-5"
+                />
               ) : (
                 <div className="mb-5">
                   <p className="mb-4 text-center text-sm text-white/60">

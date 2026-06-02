@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Bell,
-  Search,
   User,
   LayoutDashboard,
   ClipboardList,
@@ -29,6 +28,7 @@ import {
 import Logo from '../../components/common/Logo/Logo'
 import FloatingInput from "../../components/ui/Form/FloatingInput";
 import BirthdayInput from "../../components/ui/Form/BirthdayInput";
+import GooeySearchBar from "@/components/ui/Search/GooeySearchBar";
 
 const BRAND = "var(--color-brand)";
 const BRAND_SHADOW = "rgba(1,146,245,0.35)";
@@ -98,11 +98,15 @@ const ProfilePage = () => {
   const getGreeting = () => {
   const hour = new Date().getHours();
 
-  if (hour >= 5 && hour < 12) {
+  if (hour >= 5 && hour < 10) {
     return "Chào buổi sáng";
   }
 
-  if (hour >= 12 && hour < 18) {
+  if (hour >= 10 && hour < 13) {
+    return "Chào buổi trưa";
+  }
+
+  if (hour >= 13 && hour < 18) {
     return "Chào buổi chiều";
   }
 
@@ -199,50 +203,15 @@ const ProfilePage = () => {
         <main className="flex-1 bg-[#f5f7fb]">
           {/* HEADER */}
           <header className="flex h-22 items-center justify-between bg-white px-8">
-            <div className="group relative w-80 transition-all duration-300 focus-within:w-96">
-                <Search
-                    size={20}
-                    className="
-                    absolute left-4 top-1/2 -translate-y-1/2
-                    text-gray-400
-                    transition-all duration-300
-                    group-hover:text-brand
-                    group-focus-within:text-brand
-                    group-focus-within:-translate-x-1
-                    "
-                />
-
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm..."
-                    className="
-                    h-12 w-full
-                    rounded-2xl
-                    border-2 border-transparent
-                    bg-white
-                    pl-12 pr-4
-                    text-sm text-gray-700
-                    shadow-sm
-                    outline-none
-
-                    transition-all duration-300
-
-                    placeholder:text-gray-400
-
-                    hover:border-gray-200
-                    hover:shadow-md
-
-                    focus:border-brand
-                    focus:shadow-[0_10px_30px_rgba(1,146,245,0.15)]
-                    focus:pl-14
-                    "
-                />
+            {/* SEARCH */}
+            <div className="flex-1">
+              <GooeySearchBar />
             </div>
 
             <div className="flex items-center gap-4">
-              <button className="relative flex h-11 w-11 items-center justify-center rounded-full bg-[#f5f7fb]">
-                <Bell size={18} />
-                <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-red-500"></span>
+              <button className="relative flex h-11 w-11 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-brand hover:from-indigo-600 hover:to-brand transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95">
+                <Bell size={20} className="text-white" />
+                <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/50 animate-pulse"></span>
               </button>
 
               <div className="flex items-center gap-3">
@@ -306,7 +275,7 @@ const ProfilePage = () => {
 
                     <button
                       type="button"
-                      className="flex items-center gap-2 rounded-full border border-red-300 px-5 py-2.5 text-sm font-medium text-red-500"
+                      className="flex items-center gap-2 rounded-full border! border-red-300! px-5 py-2.5 text-sm font-medium text-red-500"
                     >
                       <X size={16} />
                       Remove

@@ -270,7 +270,7 @@ const ProfilePage = () => {
                       style={{ backgroundColor: BRAND }}
                     >
                       <Upload size={16} />
-                      Upload
+                      Tải lên
                     </button>
 
                     <button
@@ -278,7 +278,7 @@ const ProfilePage = () => {
                       className="flex items-center gap-2 rounded-full border! border-red-300! px-5 py-2.5 text-sm font-medium text-red-500"
                     >
                       <X size={16} />
-                      Remove
+                      Xóa
                     </button>
                   </div>
 

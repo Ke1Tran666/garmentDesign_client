@@ -1,8 +1,37 @@
 import { CalendarDays, ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+const parseBirthdayValue = (value) => {
+  if (!value || typeof value !== "string") {
+    return {
+      day: "",
+      month: "",
+      year: "",
+    };
+  }
+
+  const parts = value.split("-");
+
+  if (parts.length !== 3) {
+    return {
+      day: "",
+      month: "",
+      year: "",
+    };
+  }
+
+  const [year, month, day] = parts;
+
+  return {
+    day: String(Number(day)),
+    month: String(Number(month)),
+    year,
+  };
+};
+
 const BirthdayInput = ({
-  onChange,
+  value = "",
+  onChange = () => {},
 
   containerClassName = "",
   inputClassName = "",
@@ -12,16 +41,22 @@ const BirthdayInput = ({
   selectedDateClassName = "bg-brand text-white",
 }) => {
   const today = new Date();
-
+  
   const [openBirthday, setOpenBirthday] = useState(false);
   const birthdayPickerRef = useRef(null);
+  const initialBirthday = parseBirthdayValue(value);
 
-  const [birthDay, setBirthDay] = useState("");
-  const [birthMonth, setBirthMonth] = useState("");
-  const [birthYear, setBirthYear] = useState("");
+  const [birthDay, setBirthDay] = useState(initialBirthday.day);
+  const [birthMonth, setBirthMonth] = useState(initialBirthday.month);
+  const [birthYear, setBirthYear] = useState(initialBirthday.year);
 
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(
+    initialBirthday.month ? Number(initialBirthday.month) - 1 : today.getMonth()
+  );
+
+  const [currentYear, setCurrentYear] = useState(
+    initialBirthday.year ? Number(initialBirthday.year) : today.getFullYear()
+  );
 
   const birthDayRef = useRef(birthDay);
 
@@ -254,7 +289,7 @@ const BirthdayInput = ({
       {openBirthday && (
         <div
           className={`
-            absolute right-0 bottom-[calc(100%+12px)] z-50
+            absolute right-0 bottom-0 z-50
             w-full overflow-hidden rounded-2xl border-2 border-[#e5d84c]
             bg-white text-black shadow-2xl
             ${popupClassName}

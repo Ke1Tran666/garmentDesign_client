@@ -1,9 +1,11 @@
 import { GooeyInput } from "./GooeyInput";
 
-const GooeySearchBar = () => {
+const GooeySearchBar = ({ value, onSearch }) => {
   return (
     <div className="flex items-center justify-center">
       <GooeyInput
+        value={value}
+        onValueChange={onSearch}
         placeholder="Tìm kiếm ..."
         collapsedWidth={145}
         expandedWidth={250}
@@ -20,7 +22,7 @@ const GooeySearchBar = () => {
         }}
       />
     </div>
-  )
-}
+  );
+};
 
-export default GooeySearchBar
+export default GooeySearchBar;

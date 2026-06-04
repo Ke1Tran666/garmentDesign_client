@@ -48,6 +48,11 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
 
+  const saveAuthData = (data) => {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("idUser", data.idUser);
+  };
+
   // Xử lý đăng nhập Google
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -61,8 +66,7 @@ const LoginPage = () => {
           }
         );
 
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        saveAuthData(response.data);
 
         showNotification(
           "success",
@@ -151,8 +155,7 @@ const LoginPage = () => {
           }
         );
 
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        saveAuthData(response.data);
 
         showNotification(
           "success",
@@ -218,8 +221,7 @@ const LoginPage = () => {
           }
         );
 
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        saveAuthData(response.data);
 
         showNotification(
           "success",

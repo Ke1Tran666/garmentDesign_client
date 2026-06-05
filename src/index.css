@@ -138,6 +138,30 @@
     }
 }
 
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
 @theme {
     --animate-play-ud: play-ud 0.4s ease-in-out;
     --animate-float: float 5s ease-in-out infinite;
@@ -147,6 +171,8 @@
     --animate-slide-up: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     --animate-formSwitch: formSwitch 0.35s ease;
     --animate-fadeText: fadeText 0.25s ease;
+    --animate-slideInRight: slideInRight 0.3s ease-out;
+    --animate-slideOutLeft: slideOutLeft 0.3s ease;
 }
 
 @theme inline {
@@ -262,13 +288,15 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+    * {
+        @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
+
+    body {
+        @apply bg-background text-foreground;
     }
-  html {
-    @apply font-sans;
+
+    html {
+        @apply font-sans;
     }
 }

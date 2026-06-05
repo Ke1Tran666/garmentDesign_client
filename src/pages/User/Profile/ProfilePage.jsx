@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import BirthdayInput from "@/components/ui/Form/BirthdayInput";
 import FloatingInput from "@/components/ui/Form/FloatingInput";
-import { Settings, Trash2 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
+import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
+import { useNotification } from "@/components/ui/Notification/NotificationContext";
+import OTPModal from "@/components/ui/OTP/OTPModal";
 
 const BRAND = "var(--color-brand)";
 
@@ -12,8 +14,18 @@ const ProfilePage = () => {
   const [birthday, setBirthday] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showPhoneInput, setShowPhoneInput] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(false);
+  const { showNotification } = useNotification();
 
   const { searchKeyword = "" } = useOutletContext() || {};
+
+  const [otpModal, setOtpModal] = useState({
+  open: false,
+  type: "",
+  target: "",
+  });
+  const [otpLoading, setOtpLoading] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -79,6 +91,40 @@ const ProfilePage = () => {
     );
   }
 
+  // Gỡ liên kết
+  const handleRemoveProvider = (item) => {
+    if (authProviders.length <= 1) {
+      showNotification(
+        "error",
+        "Không thể gỡ bỏ",
+        "Tài khoản phải có ít nhất 1 phương thức đăng nhập để duy trì quyền truy cập."
+      );
+      return;
+    }
+
+    console.log("Cho phép gỡ bỏ:", item);
+
+    // Sau này gọi API ở đây
+    // await axios.delete(`http://localhost:8080/api/auth-providers/${item.id}`);
+  };
+
+  // Mở OTP Modal
+  const openPhoneVerify = (phone) => {
+    setOtpModal({
+      open: true,
+      type: "phone",
+      target: phone,
+    });
+  };
+
+  const openEmailVerify = (email) => {
+    setOtpModal({
+      open: true,
+      type: "email",
+      target: email,
+    });
+  };
+
   return (
     <div className="px-6 py-6">
       <Section
@@ -90,12 +136,13 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Input 
             label="Full name" 
-            defaultValue={user?.fullName || "Kei Tran"} 
-            type="fullname" />
+            defaultValue={user?.fullName} 
+            type="text" />
           <Input 
             label="User code" 
-            defaultValue={user?.userCode || "TRAU0112345"}
-            type="user_code" 
+            defaultValue={user?.userCode}
+            type="text"
+            readOnly 
             />
 
           <div className="md:col-span-2">
@@ -142,6 +189,7 @@ const ProfilePage = () => {
 
       <Divider />
 
+      {/* PHONE */}
       <Section
         title="Link phone number"
         desc="Link your phone number to verify your account for the best support."
@@ -149,27 +197,43 @@ const ProfilePage = () => {
       >
         <div className="space-y-3">
           {phones.length > 0 ? (
-            phones.map((item, index) => (
-              <PhoneRow
-                key={`${item.provider}-${item.phone}`}
-                phone={item.phone}
-                isDefault={index === 0}
+            phones.map((item) => (
+              <ContactRow
+                value={item.phone}
+                provider={item.provider}
+                isLocked={item.provider === "phone"}
+                badgeText="active"
+                badgeStatus="active"
+                showSetting
+                canDelete={item.provider !== "phone"}
+                onRemove={() => handleRemoveProvider(item)}
+                onVerify={() => openPhoneVerify(item.phone)}
               />
             ))
           ) : (
-            <div>
-              <PhoneRow phone="" />
-
-              <p className="mt-2 text-sm text-red-500">
-                Chưa liên kết số điện thoại.
-              </p>
-            </div>
+            <EmptyContact
+              message="Chưa liên kết số điện thoại."
+              buttonText="Add phone number"
+              showForm={showPhoneInput}
+              onAdd={() => setShowPhoneInput(true)}
+            >
+              <ContactRow
+                value=""
+                badgeText="inactive"
+                badgeStatus="inactive"
+                showSetting
+                canDelete
+                onVerify={() => openPhoneVerify("")}
+                onDelete={() => setShowPhoneInput(false)}
+              />
+            </EmptyContact>
           )}
         </div>
       </Section>
 
       <Divider />
 
+      {/* EMAIL */}
       <Section
         title="Associated email"
         desc="Manage email accounts linked to your profile."
@@ -177,22 +241,37 @@ const ProfilePage = () => {
       >
         <div className="space-y-3">
           {emails.length > 0 ? (
-            emails.map((item, index) => (
-              <EmailRow
-                key={`${item.provider}-${item.email}`}
-                email={item.email}
+            emails.map((item) => (
+              <ContactRow
+                value={item.email}
                 provider={item.provider}
-                isDefault={index === 0}
+                showProvider
+                isLocked={item.provider === "local" || item.provider === "google"}
+                badgeText="active"
+                badgeStatus="active"
+                showSetting
+                canDelete={item.provider !== "local" && item.provider !== "google"}
+                onRemove={() => handleRemoveProvider(item)}
+                onVerify={() => openEmailVerify(item.email)}
               />
             ))
           ) : (
-            <div>
-              <EmailRow email="" provider={null} />
-
-              <p className="mt-2 text-sm text-red-500">
-                Chưa liên kết email.
-              </p>
-            </div>
+            <EmptyContact
+              message="Chưa liên kết email."
+              buttonText="Add Email"
+              showForm={showEmailInput}
+              onAdd={() => setShowEmailInput(true)}
+            >
+              <ContactRow
+                value=""
+                badgeText="inactive"
+                badgeStatus="inactive"
+                showSetting
+                canDelete
+                onVerify={() => openEmailVerify("")}
+                onDelete={() => setShowEmailInput(false)}
+              />
+            </EmptyContact>
           )}
         </div>
       </Section>
@@ -204,7 +283,7 @@ const ProfilePage = () => {
           type="button"
           className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
         >
-          Cancel
+          Default
         </button>
 
         <button
@@ -215,6 +294,35 @@ const ProfilePage = () => {
           Save changes
         </button>
       </div>
+      
+      <OTPModal
+        open={otpModal.open}
+        target={otpModal.target}
+        loading={otpLoading}
+        title={
+          otpModal.type === "phone"
+            ? "Xác thực số điện thoại"
+            : "Xác thực email"
+        }
+        desc={
+          otpModal.type === "phone"
+            ? "Nhập mã OTP 6 số đã gửi đến số điện thoại của bạn."
+            : "Nhập mã OTP 6 số đã gửi đến email của bạn."
+        }
+        onClose={() =>
+          setOtpModal({
+            open: false,
+            type: "",
+            target: "",
+          })
+        }
+        onVerify={(otpCode) => {
+          console.log("OTP:", otpCode);
+        }}
+        onResend={() => {
+          console.log("Gửi lại OTP");
+        }}
+      />
     </div>
   );
 };
@@ -269,16 +377,18 @@ const Divider = () => {
 
 const Input = ({
   label,
-  defaultValue,
+  defaultValue = "",
   placeholder,
   type = "text",
   readOnly = false,
 }) => {
+  const hasValue = String(defaultValue || "").trim() !== "";
+
   return (
     <FloatingInput
       type={type}
       label={label}
-      value={defaultValue}
+      defaultValue={defaultValue}
       readOnly={readOnly}
       placeholder={placeholder || label}
       containerClassName="w-full"
@@ -289,11 +399,11 @@ const Input = ({
         focus:border-brand!
         focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]!
       `}
-      labelClassName="
+      labelClassName={`
         text-gray-500!
-        peer-valid:text-brand!
         peer-focus:text-brand!
-      "
+        ${hasValue ? "top-2! translate-y-0! text-xs! text-brand!" : ""}
+      `}
     />
   );
 };
@@ -336,105 +446,6 @@ const GenderOption = ({ label, name, defaultChecked = false }) => {
       />
       {label}
     </label>
-  );
-};
-
-const PhoneRow = ({ phone, isDefault = false }) => {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-
-      <input
-        type="text"
-        defaultValue={phone || ""}
-        className="h-11 min-w-55 flex-1 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition focus:border-brand focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]"
-      />
-
-      {isDefault && (
-        <span className="rounded-full bg-green-100 px-4 py-1.5 text-xs font-semibold text-green-700">
-          active
-        </span>
-      )}
-
-      <button
-        type="button"
-        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50"
-      >
-        <Settings size={16} />
-      </button>
-
-      {!isDefault && (
-        <button
-          type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-500 transition hover:bg-red-50"
-        >
-          <Trash2 size={16} />
-        </button>
-      )}
-    </div>
-  );
-};
-
-const EmailRow = ({
-  email,
-  provider,
-  isDefault = false,
-}) => {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-
-      {provider && (
-        <ProviderBadge provider={provider} />
-      )}
-
-      <input
-        type="text"
-        value={email}
-        readOnly
-        className="
-          h-11 min-w-55 flex-1
-          rounded-lg border border-gray-300
-          bg-gray-100 px-3 text-sm
-          text-gray-500 outline-none
-        "
-      />
-
-      {isDefault && (
-        <span className="rounded-full bg-green-100 px-4 py-1.5 text-xs font-semibold text-green-700">
-          Default
-        </span>
-      )}
-
-      <button
-        type="button"
-        className="
-          flex h-10 w-10 items-center justify-center
-          rounded-lg border border-gray-200
-          text-gray-500 transition hover:bg-gray-50
-        "
-      >
-        <Settings size={16} />
-      </button>
-    </div>
-  );
-};
-
-const ProviderBadge = ({ provider }) => {
-  const styles = {
-    local: "bg-blue-100 text-blue-700",
-    google: "bg-red-100 text-red-700",
-    phone: "bg-purple-100 text-purple-700",
-  };
-
-  return (
-    <span
-      className={`
-        rounded-full px-4 py-1.5
-        text-xs font-semibold
-        ${styles[provider] || "bg-gray-100 text-gray-600"}
-      `}
-    >
-      {provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : "Unknown"}
-    </span>
   );
 };
 

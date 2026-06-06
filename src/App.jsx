@@ -7,6 +7,7 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import UserLayout from './layouts/UserLayout/UserLayout';
 import ProfilePage from './pages/User/Profile/ProfilePage';
+import AuthLayout from './layouts/AuthLayout/AuthLayout';
 
 const App = () => {
 
@@ -15,12 +16,18 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />}/>
 
-        {/* LOGIN */}
-        <Route path="/login" element={<LoginPage />} />
-        {/* REGISTER */}
-        <Route path="/register" element={<RegisterPage/>} />
-        {/* FORGOT PASSWORD */}
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        {/* AUTH */}
+        <Route element={<AuthLayout />}>
+
+          {/* LOGIN */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* REGISTER */}
+          <Route path="/register" element={<RegisterPage />} />
+          
+          {/* FORGOT PASSWORD */}
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        </Route>
 
         {/* USER */}
         <Route path="/user" element={<UserLayout />}>

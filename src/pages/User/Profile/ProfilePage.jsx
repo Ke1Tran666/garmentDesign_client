@@ -20,17 +20,22 @@ const ProfilePage = () => {
   const [error, setError] = useState("");
   const [showPhoneInput, setShowPhoneInput] = useState(false);
   const [showEmailInput, setShowEmailInput] = useState(false);
+  const [newPhone, setNewPhone] = useState("");
+  const [newEmail, setNewEmail] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const { showNotification } = useNotification();
 
   const { searchKeyword = "" } = useOutletContext() || {};
 
+  
+
   // OTP
   const [otpModal, setOtpModal] = useState({
     open: false,
     type: "",
     target: "",
+    mode: "",
   });
 
   const [otpLoading, setOtpLoading] = useState(false);
@@ -124,57 +129,55 @@ const ProfilePage = () => {
   };
 
   // Mở OTP Modal
-  const openPhoneVerify = async (phone) => {
+  const openPhoneVerify = async (phone, mode = "existing") => {
     try {
-      if (!phone) {
-        showNotification("warning", "Thiếu số điện thoại", "Vui lòng thêm số điện thoại trước.");
+      const targetPhone = phone.trim();
+
+      if (!targetPhone) {
+        showNotification("warning", "Thiếu số điện thoại", "Vui lòng nhập số điện thoại trước.");
         return;
       }
 
       await axios.post("http://localhost:8080/api/auth/send-otp", {
-        phone,
+        phone: targetPhone,
       });
 
       setOtpModal({
         open: true,
         type: "phone",
-        target: phone,
+        target: targetPhone,
+        mode,
       });
 
       showNotification("success", "Đã gửi OTP", "Mã OTP đã được gửi đến số điện thoại.");
     } catch (error) {
-      showNotification(
-        "error",
-        "Gửi OTP thất bại",
-        error.response?.data?.message || "Không thể gửi OTP."
-      );
+      showNotification("error", "Gửi OTP thất bại", error.response?.data?.message || "Không thể gửi OTP.");
     }
   };
 
-  const openEmailVerify = async (email) => {
+  const openEmailVerify = async (email, mode = "existing") => {
     try {
-      if (!email) {
-        showNotification("warning", "Thiếu email", "Vui lòng thêm email trước.");
+      const targetEmail = email.trim();
+
+      if (!targetEmail) {
+        showNotification("warning", "Thiếu email", "Vui lòng nhập email trước.");
         return;
       }
 
       await axios.post("http://localhost:8080/api/auth/send-email-otp", {
-        email,
+        email: targetEmail,
       });
 
       setOtpModal({
         open: true,
         type: "email",
-        target: email,
+        target: targetEmail,
+        mode,
       });
 
       showNotification("success", "Đã gửi OTP", "Mã OTP đã được gửi đến email.");
     } catch (error) {
-      showNotification(
-        "error",
-        "Gửi OTP thất bại",
-        error.response?.data?.message || "Không thể gửi OTP."
-      );
+      showNotification("error", "Gửi OTP thất bại", error.response?.data?.message || "Không thể gửi OTP.");
     }
   };
 
@@ -389,15 +392,22 @@ const ProfilePage = () => {
               showForm={showPhoneInput}
               onAdd={() => setShowPhoneInput(true)}
             >
-              <ContactRow
-                value=""
-                badgeText="inactive"
-                badgeStatus="inactive"
-                showSetting
-                canDelete
-                onVerify={() => openPhoneVerify("")}
-                onDelete={() => setShowPhoneInput(false)}
-              />
+            <ContactRow
+              value={newPhone}
+              editable
+              inputType="tel"
+              placeholder="Nhập số điện thoại"
+              badgeText="inactive"
+              badgeStatus="inactive"
+              showSetting
+              canDelete
+              onChange={(e) => setNewPhone(e.target.value)}
+              onVerify={() => openPhoneVerify(newPhone, "new")}
+              onDelete={() => {
+                setNewPhone("");
+                setShowPhoneInput(false);
+              }}
+            />
             </EmptyContact>
           )}
         </div>
@@ -435,13 +445,20 @@ const ProfilePage = () => {
               onAdd={() => setShowEmailInput(true)}
             >
               <ContactRow
-                value=""
+                value={newEmail}
+                editable
+                inputType="email"
+                placeholder="Nhập email"
                 badgeText="inactive"
                 badgeStatus="inactive"
                 showSetting
                 canDelete
-                onVerify={() => openEmailVerify("")}
-                onDelete={() => setShowEmailInput(false)}
+                onChange={(e) => setNewEmail(e.target.value)}
+                onVerify={() => openEmailVerify(newEmail, "new")}
+                onDelete={() => {
+                  setNewEmail("");
+                  setShowEmailInput(false);
+                }}
               />
             </EmptyContact>
           )}
@@ -487,6 +504,7 @@ const ProfilePage = () => {
             open: false,
             type: "",
             target: "",
+            mode: "",
           })
         }
         onVerify={async (otpCode) => {
@@ -498,17 +516,23 @@ const ProfilePage = () => {
 
             setOtpLoading(true);
 
+            const idUser = localStorage.getItem("idUser");
+
             if (otpModal.type === "phone") {
               await axios.post("http://localhost:8080/api/auth/verify-otp", {
+                idUser,
                 phone: otpModal.target,
                 otp: otpCode,
+                mode: otpModal.mode,
               });
             }
 
             if (otpModal.type === "email") {
               await axios.post("http://localhost:8080/api/auth/verify-email-otp", {
+                idUser,
                 email: otpModal.target,
                 otp: otpCode,
+                mode: otpModal.mode,
               });
             }
 
@@ -524,6 +548,7 @@ const ProfilePage = () => {
               open: false,
               type: "",
               target: "",
+              mode: "",
             });
 
             await reloadProfile();

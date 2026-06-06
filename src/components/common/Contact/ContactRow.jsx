@@ -156,10 +156,14 @@ export const ContactRow = ({
   provider,
   showProvider = false,
   isLocked = false,
+  editable = false,
+  inputType = "text",
+  placeholder = "Enter value",
   badgeText = "inactive",
   badgeStatus = "inactive",
   showSetting = true,
   canDelete = true,
+  onChange,
   onDelete,
   onVerify,
   onRemove,
@@ -172,11 +176,7 @@ export const ContactRow = ({
   };
 
   return (
-    <div 
-        className="
-            relative flex flex-wrap items-center gap-3 overflow-visible
-        "
-    >
+    <div className="relative flex flex-wrap items-center gap-3 overflow-visible">
       {showProvider && provider && <ProviderBadge provider={provider} />}
 
       <span
@@ -189,33 +189,31 @@ export const ContactRow = ({
       </span>
 
       <input
-        type="text"
-        defaultValue={value || ""}
-        readOnly={isLocked}
+        type={inputType}
+        value={value || ""}
+        onChange={editable ? onChange : undefined}
+        readOnly={!editable || isLocked}
+        placeholder={placeholder}
         className={`
           h-11 min-w-55 flex-1 rounded-lg border px-3 text-sm outline-none transition
           ${
-            isLocked
+            !editable || isLocked
               ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
               : "border-gray-300 bg-white text-gray-800 focus:border-brand focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]"
           }
         `}
       />
 
-        {showSetting && (
-            <SettingMenu
-                badgeStatus={badgeStatus}
-                onVerify={onVerify}
-                onRemove={onRemove}
-            />
-        )}
+      {showSetting && (
+        <SettingMenu
+          badgeStatus={badgeStatus}
+          onVerify={onVerify}
+          onRemove={onRemove}
+        />
+      )}
 
       {canDelete && (
-        <ActionButton
-          icon={Trash2}
-          danger
-          onClick={onDelete}
-        />
+        <ActionButton icon={Trash2} danger onClick={onDelete} />
       )}
     </div>
   );

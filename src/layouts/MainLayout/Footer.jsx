@@ -67,16 +67,16 @@ const { showNotification } = useNotification();
                     <h4 className="text-xs font-mono tracking-widest uppercase text-subtle mb-4 font-500">Dịch vụ</h4>
                     <ul className="space-y-3">
                         <li><a href="#services"
-                                className="text-sm text-muted hover:text-brand transition-colors duration-300">In Sơ Đồ</a>
+                                className="text-sm text-muted1 hover:text-brand transition-colors duration-300">In Sơ Đồ</a>
                         </li>
                         <li><a href="#services"
-                                className="text-sm text-muted hover:text-brand transition-colors duration-300">In Rập</a>
+                                className="text-sm text-muted1 hover:text-brand transition-colors duration-300">In Rập</a>
                         </li>
                         <li><a href="#services"
-                                className="text-sm text-muted hover:text-brand transition-colors duration-300">Thiết Kế</a>
+                                className="text-sm text-muted1 hover:text-brand transition-colors duration-300">Thiết Kế</a>
                         </li>
                         <li><a href="#services"
-                                className="text-sm text-muted hover:text-brand transition-colors duration-300">Tính Định
+                                className="text-sm text-muted1 hover:text-brand transition-colors duration-300">Tính Định
                                 Mức</a></li>
                     </ul>
                 </div>
@@ -84,15 +84,15 @@ const { showNotification } = useNotification();
                     <h4 className="text-xs font-mono tracking-widest uppercase text-subtle mb-4 font-500">Về chúng tôi</h4>
                     <ul className="space-y-3">
                         <li><a href="#about"
-                                className="text-sm text-muted hover:text-brand transition-colors duration-300">Câu
+                                className="text-sm text-muted1 hover:text-brand transition-colors duration-300">Câu
                                 chuyện</a></li>
                         <li><a href="#process"
-                                className="text-sm text-muted hover:text-brand transition-colors duration-300">Quy trình</a>
+                                className="text-sm text-muted1 hover:text-brand transition-colors duration-300">Quy trình</a>
                         </li>
                         <li><a href="#testimonials"
-                                className="text-sm text-muted hover:text-brand transition-colors duration-300">Đánh giá</a>
+                                className="text-sm text-muted1 hover:text-brand transition-colors duration-300">Đánh giá</a>
                         </li>
-                        <li><a href="#" className="text-sm text-muted hover:text-brand transition-colors duration-300">Tuyển
+                        <li><a href="#" className="text-sm text-muted1 hover:text-brand transition-colors duration-300">Tuyển
                                 dụng</a></li>
                     </ul>
                 </div>
@@ -114,8 +114,8 @@ const { showNotification } = useNotification();
                 className="mt-16 pt-8 border-t border-border/60 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="text-xs text-subtle">© 2025 HoaTran maymac. All rights reserved.</div>
                 <div className="flex gap-6">
-                    <a href="#" className="text-xs text-subtle hover:text-muted transition-colors">Chính sách bảo mật</a>
-                    <a href="#" className="text-xs text-subtle hover:text-muted transition-colors">Điều khoản sử dụng</a>
+                    <a href="#" className="text-xs text-subtle hover:text-muted1 transition-colors">Chính sách bảo mật</a>
+                    <a href="#" className="text-xs text-subtle hover:text-muted1 transition-colors">Điều khoản sử dụng</a>
                 </div>
             </div>
         </div>

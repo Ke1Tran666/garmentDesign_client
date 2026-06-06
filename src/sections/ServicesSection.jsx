@@ -47,7 +47,7 @@ const ServiceCard = ({icon: Icon, title, description, tags, delay}) =>(
                 <h3 className="font-heading font-medium text-xl text-dark mb-2">
                     {title}  
                 </h3>
-                <p className="text-sm text-muted leading-relaxed mb-4">
+                <p className="text-sm text-muted1 leading-relaxed mb-4">
                     {description}    
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -69,9 +69,9 @@ const ServicesSection = () => {
                         <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium reveal">Dịch vụ</span>
                         <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-dark reveal" style={{transitionDelay:"100ms"}}>
                             4 dịch vụ
-                            <span className="text-muted"> cốt lõi</span>
+                            <span className="text-muted1"> cốt lõi</span>
                         </h2>
-                        <p className="text-muted font-body font-300 mt-4 max-w-lg mx-auto reveal" style={{transitionDelay:"200ms"}}>
+                        <p className="text-muted1 font-body font-300 mt-4 max-w-lg mx-auto reveal" style={{transitionDelay:"200ms"}}>
                             Đầy đủ công đoạn kỹ thuật cho ngành may mặc — từ bản vẽ đến con số sản xuất.
                         </p>
                 </div>

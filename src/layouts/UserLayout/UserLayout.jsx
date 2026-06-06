@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bell,
   User,
@@ -27,6 +27,9 @@ import {
 import Logo from "../../components/common/Logo/Logo";
 import { Outlet } from "react-router-dom";
 import GooeySearchBar from "../../components/ui/Search/GooeySearchBar";
+import axios from "axios";
+
+import defaultAvatar from "@/assets/images/image-default.jpg";
 
 const BRAND = "var(--color-brand)";
 const BRAND_SHADOW = "rgba(1,146,245,0.35)";
@@ -84,8 +87,29 @@ const UserLayout = ({ title = "My Account" }) => {
   const [activeItem, setActiveItem] = useState(0);
 
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [user, setUser] = useState(null);
 
   const currentGroup = GROUPS[activeGroup];
+  
+  useEffect(() => {
+  const loadUser = async () => {
+    try {
+      const idUser = localStorage.getItem("idUser");
+
+      if (!idUser) return;
+
+      const response = await axios.get(
+        `http://localhost:8080/api/users/me/${idUser}`
+      );
+
+      setUser(response.data?.user);
+    } catch (error) {
+      console.error("Không thể tải thông tin user:", error);
+    }
+  };
+
+  loadUser();
+}, []);
 
   const handleGroupChange = (gIndex) => {
     setActiveGroup(gIndex);
@@ -114,7 +138,7 @@ const UserLayout = ({ title = "My Account" }) => {
           </h2>
 
           <h3 className="mt-2 text-base font-semibold text-[#1570EF]">
-              Kei Tran
+              {user?.fullName || user?.userCode || "Guest"}
           </h3>
 
           <p className="mt-3 text-sm text-[#667085]">
@@ -216,11 +240,14 @@ const UserLayout = ({ title = "My Account" }) => {
             </div>
             <div className="flex items-center gap-3">
               <img
-                    src="https://i.pravatar.cc/100?img=12"
-                    alt="avatar"
-                    className="h-10 w-10 rounded-xl object-cover"
-                />
-              <span className="font-semibold text-gray-800">Kei Tran</span>
+                src={user?.avatar || defaultAvatar}
+                alt={user?.fullName || "User"}
+                className="h-10 w-10 rounded-xl object-cover"
+              />
+
+              <span className="font-semibold text-gray-800">
+                {user?.fullName || "Guest"}
+              </span>
             </div>
           </div>
         </div>

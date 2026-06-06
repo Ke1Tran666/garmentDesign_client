@@ -6,16 +6,22 @@ import { useOutletContext } from "react-router-dom";
 import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import OTPModal from "@/components/ui/OTP/OTPModal";
+import defaultAvatar from "@/assets/images/image-default.jpg";
 
 const BRAND = "var(--color-brand)";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [birthday, setBirthday] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [gender, setGender] = useState("Unknown");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showPhoneInput, setShowPhoneInput] = useState(false);
   const [showEmailInput, setShowEmailInput] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
   const { showNotification } = useNotification();
 
   const { searchKeyword = "" } = useOutletContext() || {};
@@ -44,8 +50,15 @@ const ProfilePage = () => {
           `http://localhost:8080/api/users/me/${idUser}`
         );
 
+        const userData = response.data?.user;
+
         setProfile(response.data);
-        setBirthday(response.data?.user?.birthday || "");
+
+        setFullName(userData?.fullName || "");
+        setGender(userData?.gender || "Unknown");
+        setBirthday(userData?.birthday || "");
+        setAvatarPreview(userData?.avatar || "");
+        setAvatarPreview(response.data?.user?.avatar || "");
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -125,6 +138,73 @@ const ProfilePage = () => {
     });
   };
 
+
+  // AVATAR
+  const handleUploadAvatar = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleDeleteAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview("");
+  };
+
+  // HANDLE SAVE PROFILE
+  const handleSaveProfile = async () => {
+    try {
+
+      const idUser = localStorage.getItem("idUser");
+
+      const payload = {
+        fullName,
+        gender,
+        birthday,
+      };
+
+      await axios.put(
+        `http://localhost:8080/api/users/${idUser}`,
+        payload
+      );
+
+      if (avatarFile) {
+
+        const formData = new FormData();
+
+        formData.append("file", avatarFile);
+
+        await axios.put(
+          `http://localhost:8080/api/users/me/${idUser}/avatar`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+
+      showNotification(
+        "success",
+        "Thành công",
+        "Thông tin cá nhân đã được cập nhật."
+      );
+
+    } catch (error) {
+
+      showNotification(
+        "error",
+        "Thất bại",
+        error.response?.data?.message ||
+        "Không thể cập nhật thông tin."
+      );
+    }
+  };
+
   return (
     <div className="px-6 py-6">
       <Section
@@ -134,10 +214,21 @@ const ProfilePage = () => {
         highlight={isSearching(["personal", "profile", "birthday", "gender"])}
       >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Input 
-            label="Full name" 
-            defaultValue={user?.fullName} 
-            type="text" />
+          <FloatingInput
+            type="text"
+            label="Full name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Full name"
+            containerClassName="w-full"
+            className="
+              border-gray-300!
+              bg-white!
+              text-gray-800!
+              placeholder:text-transparent!
+              focus:border-brand!
+            "
+          />
           <Input 
             label="User code" 
             defaultValue={user?.userCode}
@@ -152,32 +243,49 @@ const ProfilePage = () => {
           </div>
 
           <div className="md:col-span-2">
-            <Gender value={user?.gender} />
+            <Gender
+              value={gender}
+              onChange={setGender}
+            />
           </div>
         </div>
 
+        {/* AVATAR */}
         <div className="mt-5 overflow-hidden rounded-xl border border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_220px]">
             <div className="flex min-h-32 items-center justify-center bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] bg-size-[18px_18px]">
               <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-gray-200 bg-white">
                 <img
-                  src={user?.avatar || "https://i.pravatar.cc/120?img=12"}
+                  src={avatarPreview || user?.avatar || defaultAvatar}
                   alt="avatar"
-                  className="h-14 w-14 rounded-full object-cover"
+                  className="h-20 w-20 rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = defaultAvatar;
+                  }}
                 />
               </div>
             </div>
 
             <div className="grid border-t border-gray-200 md:border-l md:border-t-0">
-              <button
-                type="button"
-                className="border-b! border-gray-200! text-sm font-semibold transition hover:bg-gray-50 "
+              <label
+                htmlFor="avatar-upload"
+                className="flex cursor-pointer items-center justify-center border-b! border-gray-200! text-sm font-semibold transition hover:bg-gray-50"
                 style={{ color: BRAND }}
               >
                 Upload picture
-              </button>
+              </label>
+
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleUploadAvatar}
+              />
+
               <button
                 type="button"
+                onClick={handleDeleteAvatar}
                 className="text-sm font-semibold text-red-500 transition hover:bg-red-50"
               >
                 Delete picture
@@ -288,6 +396,7 @@ const ProfilePage = () => {
 
         <button
           type="button"
+          onClick={handleSaveProfile}
           className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
           style={{ backgroundColor: BRAND }}
         >
@@ -408,42 +517,51 @@ const Input = ({
   );
 };
 
-const Gender = ({ value }) => {
+const Gender = ({ value, onChange }) => {
   return (
     <div>
       <p className="mb-3 text-sm font-semibold text-gray-700">Gender</p>
 
       <div className="flex flex-wrap gap-3">
-        <GenderOption 
-          label="Male" 
-          name="gender" 
-          defaultChecked={value === "Male"} 
-        />
-        <GenderOption 
-          label="Female" 
+        <GenderOption
+          label="Male"
           name="gender"
-          defaultChecked={value === "Female"}
+          checked={value === "Male"}
+          onChange={() => onChange("Male")}
         />
-        <GenderOption 
-          label="Unknown" 
-          name="gender" 
-          defaultChecked={value === "Unknown"}
+        <GenderOption
+          label="Female"
+          name="gender"
+          checked={value === "Female"}
+          onChange={() => onChange("Female")}
+        />
+        <GenderOption
+          label="Unknown"
+          name="gender"
+          checked={value === "Unknown"}
+          onChange={() => onChange("Unknown")}
         />
       </div>
     </div>
   );
 };
 
-const GenderOption = ({ label, name, defaultChecked = false }) => {
+const GenderOption = ({
+  label,
+  name,
+  checked,
+  onChange,
+}) => {
   return (
     <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-brand hover:bg-gray-50">
-      <input
-        type="radio"
-        name={name}
-        defaultChecked={defaultChecked}
-        className="h-4 w-4"
-        style={{ accentColor: BRAND }}
-      />
+    <input
+      type="radio"
+      name={name}
+      checked={checked}
+      onChange={onChange}
+      className="h-4 w-4"
+      style={{ accentColor: BRAND }}
+    />
       {label}
     </label>
   );

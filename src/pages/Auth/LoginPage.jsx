@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, EyeOff, Mail, Phone } from "lucide-react";
+import { ArrowRight, Mail, Phone } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
 import '../../index.css'
@@ -10,10 +10,10 @@ import { useGoogleLogin } from "@react-oauth/google";
 
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
 
-import Logo from "../../components/common/Logo/Logo";
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
-import BackHomeButton from "../../components/ui/Button/BackHomeButton";
-import AuthBackground from "../../components/layout/AuthBackground";
+import FloatingInput from "../../components/ui/Form/FloatingInput";
+import PasswordInput from "../../components/ui/Form/PasswordInput";
+import BrandHeader from "@/components/common/Logo/BrandHeader";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (
@@ -36,7 +36,6 @@ const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
 
 const LoginPage = () => {
 
-  const [showPassword, setShowPassword] = useState(false);
   const [loginType, setLoginType] = useState("account");
   const [loginStep, setLoginStep] = useState("input");
   const [phone, setPhone] = useState("");
@@ -245,303 +244,210 @@ const LoginPage = () => {
   };
   
   return (
-    <div 
-      className="
-        relative min-h-screen overflow-hidden bg-brand font-brand
-        "
-    >
-      {/* BACKGROUND */}
-      <AuthBackground />
+    <>
       {/* CONTENT */}
       <div 
-        className="
-          relative z-10 flex min-h-screen items-center justify-center p-8
-          "
+        className="w-full max-w-105 rounded-3xl border border-white/20 
+        bg-white/10 px-10 py-10 shadow-[0_8px_40px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px]
+        animate-slide-up
+        "
       >
-        <div 
-          className="w-full max-w-105 rounded-3xl border border-white/20 
-          bg-white/10 px-10 py-10 shadow-[0_8px_40px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px]
-          animate-slide-up
-          "
-        >
-          
-          {/* LOGO */}
-          <div className="mb-7 text-center">
-            <Logo className="justify-center" />
+        
+        {/* LOGO */}
+        <BrandHeader subtitle="Giải pháp thiết kế may mặc chuyên nghiệp"/>
 
-            <p 
-              className="
-                text-xs font-light tracking-[0.4px] text-white/55 mt-2
-                "
-            >
-              Giải pháp thiết kế may mặc chuyên nghiệp
-            </p>
-          </div>
+        <hr className="mb-6 border-white/10" />
 
-          <hr className="mb-6 border-white/10" />
+        <h1 className="mb-2 text-[22px] font-semibold text-white">
+          {loginType === "phone" && loginStep === "otp" ? "Xác thực OTP" : "Đăng nhập"}
+        </h1>
 
-          <h1 className="mb-2 text-[22px] font-semibold text-white">
-            {loginType === "phone" && loginStep === "otp" ? "Xác thực OTP" : "Đăng nhập"}
-          </h1>
+        <p className="mb-6 text-[13px] font-light text-white/55">
+          {loginType === "phone" && loginStep === "otp"
+            ? "Nhập mã OTP 6 số được gửi đến điện thoại của bạn."
+            : "Chào mừng trở lại! Vui lòng nhập thông tin của bạn."}
+        </p>
 
-          <p className="mb-6 text-[13px] font-light text-white/55">
-            {loginType === "phone" && loginStep === "otp"
-              ? "Nhập mã OTP 6 số được gửi đến điện thoại của bạn."
-              : "Chào mừng trở lại! Vui lòng nhập thông tin của bạn."}
-          </p>
+        {/* FORM */}
+        <form onSubmit={handleLogin}>
+          <div
+            key={`${loginType}-${loginStep}`}
+            className="animate-formSwitch"
+          >
+            {loginType === "account" ? (
+              <>
+                {/* Email */}
+                <FloatingInput
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  label="Email đăng nhập"
+                  required
+                  containerClassName="mb-5"
+                />
 
-          {/* FORM */}
-          <form onSubmit={handleLogin}>
-            <div
-              key={`${loginType}-${loginStep}`}
-              className="animate-formSwitch"
-            >
-              {loginType === "account" ? (
-                <>
-                  {/* Email */}
-                  <div className="relative mb-5">
-                    <input 
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="
-                        peer w-full rounded-xl border-2 border-white/25 
-                        bg-transparent px-4 pt-5 pb-2 text-sm text-white outline-none 
-                        transition-all duration-300 placeholder:text-transparent 
-                        focus:border-[#80d0ff] 
-                        focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                        "
-                      placeholder="Email"
-                    />
-                    <label
-                      className="
-                        pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
-                        bg-transparent text-sm text-white/55 transition-all duration-300 peer-valid:top-2 peer-valid:translate-y-0 
-                        peer-valid:text-xs peer-valid:text-[#80d0ff] peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#80d0ff]
-                      "
-                    >
-                      Email
-                    </label>
-                  </div>
-
-                  {/* Password */}
-                  <div className="mb-4">
-                    <div className="flex justify-end mb-5">
-                      <Link
-                        to="/forgot-password"
-                        className="text-sm text-[#80d0ff] hover:text-white transition"
-                      >
-                        Quên mật khẩu?
-                      </Link>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="
-                          peer w-full rounded-xl border-2 border-white/25 bg-transparent px-4 pt-5 pb-2 pr-12 text-sm text-white outline-none transition-all duration-300 placeholder:text-transparent focus:border-[#80d0ff]
-                          focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                          "
-                        placeholder="Mật khẩu"
-                      />
-
-                      <label
-                        className="
-                          pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
-                          bg-transparent text-sm text-white/55 transition-all duration-300 peer-valid:top-2 peer-valid:translate-y-0 peer-valid:text-xs peer-valid:text-[#80d0ff]
-                          peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-[#80d0ff]
-                          "
-                      >
-                        Mật khẩu
-                      </label>
-
-                      {/* TOGGLE PASSWORD */}
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="
-                          absolute right-4 top-1/2 -translate-y-1/2
-                          text-white/45 transition hover:text-white
-                          "
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-5 h-5" />
-                        ) : (
-                          <Eye className="w-5 h-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : loginStep === "input" ? (
-                <div className="relative mb-5">
-                  <input
-                    type="tel"
+                {/* Password */}
+                <div className="mb-4">
+                  <PasswordInput
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    label="Mật Khẩu"
                     required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="
-                      peer w-full rounded-xl border-2 border-white/25 
-                      bg-transparent px-4 pt-5 pb-2 text-sm text-white outline-none 
-                      transition-all duration-300 placeholder:text-transparent 
-                      focus:border-[#80d0ff] 
-                      focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                    "
-                    placeholder="Số điện thoại"
+                    containerClassName="mb-5"
                   />
 
-                  <label
-                    className="
-                      pointer-events-none absolute left-4 top-1/2 -translate-y-1/2
-                      bg-transparent text-sm text-white/55 transition-all duration-300 
-                      peer-valid:top-2 peer-valid:translate-y-0 
-                      peer-valid:text-xs peer-valid:text-[#80d0ff] 
-                      peer-focus:top-2 peer-focus:translate-y-0 
-                      peer-focus:text-xs peer-focus:text-[#80d0ff]
-                    "
+                  {/* Forgot password */}
+                  <div className="flex justify-end mb-2">
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm text-[#80d0ff] hover:text-white transition"
+                    >
+                      Quên mật khẩu?
+                    </Link>
+                  </div>
+                </div>
+              </>
+            ) : loginStep === "input" ? (
+              <FloatingInput
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                label="Số điện thoại"
+                required
+                containerClassName="mb-5"
+              />
+            ) : (
+              <div className="mb-5">
+                <p className="mb-4 text-center text-sm text-white/60">
+                  Mã OTP đã gửi đến{" "}
+                  <span className="font-medium text-[#80d0ff]">{phone}</span>
+                </p>
+
+                <div className="flex justify-between gap-2">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength="1"
+                      value={digit}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      onPaste={handleOtpPaste}
+                      className="
+                        h-12 w-12 rounded-xl border-2 border-white/25 
+                        bg-white/10 text-center text-lg font-semibold text-white 
+                        outline-none transition-all duration-300 placeholder:text-transparent
+                        focus:border-[#80d0ff] 
+                        focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
+                      "
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={resetPhoneLogin}
+                    className="text-xs text-[#80d0ff] transition hover:text-white"
                   >
-                    Số điện thoại
-                  </label>
+                    Đổi số điện thoại
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await axios.post("http://localhost:8080/api/auth/send-otp", {
+                          phone,
+                        });
+
+                        showNotification(
+                          "success",
+                          "Đã gửi lại OTP",
+                          "Vui lòng xem OTP mới trong console BE"
+                        );
+
+                        setOtp(["", "", "", "", "", ""]);
+
+                        setTimeout(() => {
+                          document.getElementById("otp-0")?.focus();
+                        }, 100);
+                      } catch (err) {
+                        showNotification(
+                          "error",
+                          "Gửi lại OTP thất bại",
+                          err.response?.data?.message || "Vui lòng thử lại"
+                        );
+                      }
+                    }}
+                    className="text-xs text-white/55 transition hover:text-white"
+                  >
+                    Gửi lại mã
+                  </button>
                 </div>
-              ) : (
-                <div className="mb-5">
-                  <p className="mb-4 text-center text-sm text-white/60">
-                    Mã OTP đã gửi đến{" "}
-                    <span className="font-medium text-[#80d0ff]">{phone}</span>
-                  </p>
-
-                  <div className="flex justify-between gap-2">
-                    {otp.map((digit, index) => (
-                      <input
-                        key={index}
-                        id={`otp-${index}`}
-                        type="text"
-                        inputMode="numeric"
-                        maxLength="1"
-                        value={digit}
-                        onChange={(e) => handleOtpChange(index, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        onPaste={handleOtpPaste}
-                        className="
-                          h-12 w-12 rounded-xl border-2 border-white/25 
-                          bg-white/10 text-center text-lg font-semibold text-white 
-                          outline-none transition-all duration-300 placeholder:text-transparent
-                          focus:border-[#80d0ff] 
-                          focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                        "
-                      />
-                    ))}
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={resetPhoneLogin}
-                      className="text-xs text-[#80d0ff] transition hover:text-white"
-                    >
-                      Đổi số điện thoại
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          await axios.post("http://localhost:8080/api/auth/send-otp", {
-                            phone,
-                          });
-
-                          showNotification(
-                            "success",
-                            "Đã gửi lại OTP",
-                            "Vui lòng xem OTP mới trong console BE"
-                          );
-
-                          setOtp(["", "", "", "", "", ""]);
-
-                          setTimeout(() => {
-                            document.getElementById("otp-0")?.focus();
-                          }, 100);
-                        } catch (err) {
-                          showNotification(
-                            "error",
-                            "Gửi lại OTP thất bại",
-                            err.response?.data?.message || "Vui lòng thử lại"
-                          );
-                        }
-                      }}
-                      className="text-xs text-white/55 transition hover:text-white"
-                    >
-                      Gửi lại mã
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* button submit */}
-            <PrimaryButton
-              type="submit"
-              disabled={loading}
-              className="mt-2"
-              icon={ArrowRight}
-            >
-              {loading
-                ? "Đang xử lý..."
-                : loginType === "account"
-                  ? "Đăng nhập"
-                  : loginStep === "input"
-                    ? "Gửi mã OTP"
-                    : "Xác nhận OTP"}
-            </PrimaryButton>
-          </form>
-
-          {/* OR */}
-          <div className="my-5 flex items-center gap-2.5">
-            <div className="h-px flex-1 bg-white/15" />
-            <span className="whitespace-nowrap text-xs text-white/40">
-              hoặc tiếp tục với
-            </span>
-            <div className="h-px flex-1 bg-white/15" />
+              </div>
+            )}
           </div>
-
-          {/* BUTTON PHONE */}
-          <SocialLoginButton
-            icon={loginType === "account" ? Phone : Mail}
-            onClick={() => {
-              setLoginType(loginType === "account" ? "phone" : "account");
-              resetPhoneLogin();
-            }}
-          >
-            <span key={loginType} className="animate-fadeText">
-              {loginType === "account"
-                ? "Đăng nhập với số điện thoại"
-                : "Đăng nhập bằng tài khoản đã đăng ký"}
-            </span>
-          </SocialLoginButton>
           
-          {/* BUTTON GOOGLE */}
-          <SocialLoginButton icon={FcGoogle} onClick={handleGoogleLogin}>
-            Đăng nhập với Google
-          </SocialLoginButton>
+          {/* button submit */}
+          <PrimaryButton
+            type="submit"
+            disabled={loading}
+            className="mt-2"
+            icon={ArrowRight}
+          >
+            {loading
+              ? "Đang xử lý..."
+              : loginType === "account"
+                ? "Đăng nhập"
+                : loginStep === "input"
+                  ? "Gửi mã OTP"
+                  : "Xác nhận OTP"}
+          </PrimaryButton>
+        </form>
 
-          <p className="mt-5 text-center text-[13px] text-white/45">
-            Chưa có tài khoản?{" "}
-            <Link
-              to="/register"
-              className="font-medium text-[#80d0ff] hover:text-white"
-            >
-              Đăng ký miễn phí
-            </Link>
-          </p>
+        {/* OR */}
+        <div className="my-5 flex items-center gap-2.5">
+          <div className="h-px flex-1 bg-white/15" />
+          <span className="whitespace-nowrap text-xs text-white/40">
+            hoặc tiếp tục với
+          </span>
+          <div className="h-px flex-1 bg-white/15" />
         </div>
+
+        {/* BUTTON PHONE */}
+        <SocialLoginButton
+          icon={loginType === "account" ? Phone : Mail}
+          onClick={() => {
+            setLoginType(loginType === "account" ? "phone" : "account");
+            resetPhoneLogin();
+          }}
+        >
+          <span key={loginType} className="animate-fadeText">
+            {loginType === "account"
+              ? "Đăng nhập với số điện thoại"
+              : "Đăng nhập bằng tài khoản đã đăng ký"}
+          </span>
+        </SocialLoginButton>
+        
+        {/* BUTTON GOOGLE */}
+        <SocialLoginButton icon={FcGoogle} onClick={handleGoogleLogin}>
+          Đăng nhập với Google
+        </SocialLoginButton>
+
+        <p className="mt-5 text-center text-[13px] text-white/45">
+          Chưa có tài khoản?{" "}
+          <Link
+            to="/register"
+            className="font-medium text-[#80d0ff] hover:text-white"
+          >
+            Đăng ký miễn phí
+          </Link>
+        </p>
       </div>
-      {/* BUTTON TRỞ VỀ */}
-      <BackHomeButton/>
-    </div>
+    </>
   );
 };
 

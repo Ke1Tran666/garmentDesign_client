@@ -84,7 +84,7 @@ const ProductsSection = () => {
             <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-dark">
               Sản phẩm của chúng tôi
             </h2>
-            <p className="text-muted font-light mt-3 max-w-lg">
+            <p className="text-muted1 font-light mt-3 max-w-lg">
               Những sản phẩm thực tế chúng tôi đã hoàn thành cho khách hàng trên khắp Việt Nam.
             </p>
           </div>
@@ -101,7 +101,7 @@ const ProductsSection = () => {
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={`tab-btn text-sm font-heading px-5 py-2 rounded-full border transition-all duration-300 hover:border-brand/30 
-                ${activeTab === tab.id ? "active border-brand text-brand" : "border-border text-muted"}`}
+                ${activeTab === tab.id ? "active border-brand text-brand" : "border-border text-muted1"}`}
             >
               {tab.label}
             </button>

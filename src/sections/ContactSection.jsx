@@ -72,7 +72,7 @@ function ContactForm({ onSubmit }) {
 
       <div>
         <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">Dịch vụ cần *</label>
-        <select required className={`${inputCls} appearance-none cursor-pointer text-muted`} defaultValue="">
+        <select required className={`${inputCls} appearance-none cursor-pointer text-muted1`} defaultValue="">
           <option value="" disabled>Chọn dịch vụ</option>
           {SERVICES.map((s) => <option key={s}>{s}</option>)}
         </select>
@@ -120,10 +120,10 @@ const ContactSection = () => {
               style={{ transitionDelay: "100ms" }}
             >
               Kết nối với<br />
-              <span className="text-muted">HoaTran maymac</span>
+              <span className="text-muted1">HoaTran maymac</span>
             </h2>
             <p
-              className="text-muted font-body font-300 mt-4 text-sm leading-relaxed reveal"
+              className="text-muted1 font-body font-300 mt-4 text-sm leading-relaxed reveal"
               style={{ transitionDelay: "200ms" }}
             >
               Gửi form hoặc liên hệ trực tiếp. Chúng tôi phản hồi trong vòng 2 giờ trong giờ hành chính.

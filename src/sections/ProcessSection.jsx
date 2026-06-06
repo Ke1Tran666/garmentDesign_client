@@ -46,7 +46,7 @@ const ProcessSection = () => {
                 <div className="text-center mb-16">
                     <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium reveal">Quy trình</span>
                     <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-dark reveal" style={{transitionDelay:"100ms"}}>
-                        4 bước <span className="text-muted">đơn giản</span>
+                        4 bước <span className="text-muted1">đơn giản</span>
                     </h2>
                 </div>
 

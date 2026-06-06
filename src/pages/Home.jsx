@@ -37,7 +37,7 @@ const Home = () => {
                         <br />
                         cho mọi thương hiệu
                     </h1>
-                    <p className="mt-8 text-muted font-light text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
+                    <p className="mt-8 text-muted1 font-light text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
                         Từ in sơ đồ, in rập, thiết kế đến tính định mức — HoaTran maymac cung cấp trọn gói giải pháp kỹ thuật
                         giúp tối ưu quy trình sản xuất thời trang của bạn.
                     </p>
@@ -46,7 +46,7 @@ const Home = () => {
                             Khám phá dịch vụ
                             <ArrowRight className="w-4 h-4" />
                         </a>
-                        <a href="#" className="flex items-center gap-2.5 text-muted hover:text-dark text-base transition-colors duration-300 group">
+                        <a href="#" className="flex items-center gap-2.5 text-muted1 hover:text-dark text-base transition-colors duration-300 group">
                             <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 transition-all duration-300">
                                 <Play className="w-4 h-4 ml-0.5 group-hover:animate-play-ud" />
                             </span>
@@ -112,7 +112,7 @@ const Home = () => {
                                 Đội ngũ kỹ thuật
                                 </div>
 
-                                <div className="text-xs text-muted">
+                                <div className="text-xs text-muted1">
                                 15+ chuyên viên lành nghề
                                 </div>
                             </div>
@@ -136,14 +136,14 @@ const Home = () => {
                         >
                         Đơn vị tiên phong về
                         <br />
-                        <span className="text-muted">
+                        <span className="text-muted1">
                             kỹ thuật may mặc
                         </span>{" "}
                         tại Việt Nam
                         </h2>
 
                         <p
-                        className="mt-6 text-base leading-relaxed md:text-lg text-muted font-light reveal"
+                        className="mt-6 text-base leading-relaxed md:text-lg text-muted1 font-light reveal"
                         style={{ transitionDelay: "200ms" }}
                         >
                         HoaTran maymac chuyên cung cấp các dịch vụ kỹ thuật thời trang bao gồm

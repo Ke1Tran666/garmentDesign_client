@@ -26,11 +26,13 @@ const ProfilePage = () => {
 
   const { searchKeyword = "" } = useOutletContext() || {};
 
+  // OTP
   const [otpModal, setOtpModal] = useState({
-  open: false,
-  type: "",
-  target: "",
+    open: false,
+    type: "",
+    target: "",
   });
+
   const [otpLoading, setOtpLoading] = useState(false);
 
   useEffect(() => {
@@ -122,22 +124,59 @@ const ProfilePage = () => {
   };
 
   // Mở OTP Modal
-  const openPhoneVerify = (phone) => {
-    setOtpModal({
-      open: true,
-      type: "phone",
-      target: phone,
-    });
+  const openPhoneVerify = async (phone) => {
+    try {
+      if (!phone) {
+        showNotification("warning", "Thiếu số điện thoại", "Vui lòng thêm số điện thoại trước.");
+        return;
+      }
+
+      await axios.post("http://localhost:8080/api/auth/send-otp", {
+        phone,
+      });
+
+      setOtpModal({
+        open: true,
+        type: "phone",
+        target: phone,
+      });
+
+      showNotification("success", "Đã gửi OTP", "Mã OTP đã được gửi đến số điện thoại.");
+    } catch (error) {
+      showNotification(
+        "error",
+        "Gửi OTP thất bại",
+        error.response?.data?.message || "Không thể gửi OTP."
+      );
+    }
   };
 
-  const openEmailVerify = (email) => {
-    setOtpModal({
-      open: true,
-      type: "email",
-      target: email,
-    });
-  };
+  const openEmailVerify = async (email) => {
+    try {
+      if (!email) {
+        showNotification("warning", "Thiếu email", "Vui lòng thêm email trước.");
+        return;
+      }
 
+      await axios.post("http://localhost:8080/api/auth/send-email-otp", {
+        email,
+      });
+
+      setOtpModal({
+        open: true,
+        type: "email",
+        target: email,
+      });
+
+      showNotification("success", "Đã gửi OTP", "Mã OTP đã được gửi đến email.");
+    } catch (error) {
+      showNotification(
+        "error",
+        "Gửi OTP thất bại",
+        error.response?.data?.message || "Không thể gửi OTP."
+      );
+    }
+  };
 
   // AVATAR
   const handleUploadAvatar = (e) => {
@@ -203,6 +242,31 @@ const ProfilePage = () => {
         "Không thể cập nhật thông tin."
       );
     }
+  };
+
+  // Status email
+  const getEmailStatus = (provider) =>
+    provider?.emailVerifiedAt ? "active" : "inactive";
+
+  // Status phone
+  const getPhoneStatus = (provider) =>
+    provider?.phoneVerifiedAt ? "active" : "inactive";
+
+  // OTP
+  const reloadProfile = async () => {
+    const idUser = localStorage.getItem("idUser");
+
+    const response = await axios.get(
+      `http://localhost:8080/api/users/me/${idUser}`
+    );
+
+    const userData = response.data?.user;
+
+    setProfile(response.data);
+    setFullName(userData?.fullName || "");
+    setGender(userData?.gender || "Unknown");
+    setBirthday(userData?.birthday || "");
+    setAvatarPreview(userData?.avatar || "");
   };
 
   return (
@@ -310,8 +374,8 @@ const ProfilePage = () => {
                 value={item.phone}
                 provider={item.provider}
                 isLocked={item.provider === "phone"}
-                badgeText="active"
-                badgeStatus="active"
+                badgeText={getPhoneStatus(item)}
+                badgeStatus={getPhoneStatus(item)}
                 showSetting
                 canDelete={item.provider !== "phone"}
                 onRemove={() => handleRemoveProvider(item)}
@@ -355,8 +419,8 @@ const ProfilePage = () => {
                 provider={item.provider}
                 showProvider
                 isLocked={item.provider === "local" || item.provider === "google"}
-                badgeText="active"
-                badgeStatus="active"
+                badgeText={getEmailStatus(item)}
+                badgeStatus={getEmailStatus(item)}
                 showSetting
                 canDelete={item.provider !== "local" && item.provider !== "google"}
                 onRemove={() => handleRemoveProvider(item)}
@@ -425,11 +489,76 @@ const ProfilePage = () => {
             target: "",
           })
         }
-        onVerify={(otpCode) => {
-          console.log("OTP:", otpCode);
+        onVerify={async (otpCode) => {
+          try {
+            if (!otpCode) {
+              showNotification("warning", "OTP chưa hợp lệ", "Vui lòng nhập đủ 6 số OTP.");
+              return;
+            }
+
+            setOtpLoading(true);
+
+            if (otpModal.type === "phone") {
+              await axios.post("http://localhost:8080/api/auth/verify-otp", {
+                phone: otpModal.target,
+                otp: otpCode,
+              });
+            }
+
+            if (otpModal.type === "email") {
+              await axios.post("http://localhost:8080/api/auth/verify-email-otp", {
+                email: otpModal.target,
+                otp: otpCode,
+              });
+            }
+
+            showNotification(
+              "success",
+              "Xác thực thành công",
+              otpModal.type === "phone"
+                ? "Số điện thoại đã được xác thực."
+                : "Email đã được xác thực."
+            );
+
+            setOtpModal({
+              open: false,
+              type: "",
+              target: "",
+            });
+
+            await reloadProfile();
+          } catch (error) {
+            showNotification(
+              "error",
+              "OTP không đúng",
+              error.response?.data?.message || "Mã OTP không hợp lệ hoặc đã hết hạn."
+            );
+          } finally {
+            setOtpLoading(false);
+          }
         }}
-        onResend={() => {
-          console.log("Gửi lại OTP");
+        onResend={async () => {
+          try {
+            if (otpModal.type === "phone") {
+              await axios.post("http://localhost:8080/api/auth/send-otp", {
+                phone: otpModal.target,
+              });
+            }
+
+            if (otpModal.type === "email") {
+              await axios.post("http://localhost:8080/api/auth/send-email-otp", {
+                email: otpModal.target,
+              });
+            }
+
+            showNotification("success", "Đã gửi lại OTP", "Vui lòng kiểm tra mã mới.");
+          } catch (error) {
+            showNotification(
+              "error",
+              "Gửi lại OTP thất bại",
+              error.response?.data?.message || "Vui lòng thử lại."
+            );
+          }
         }}
       />
     </div>

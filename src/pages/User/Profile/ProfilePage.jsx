@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import BirthdayInput from "@/components/ui/Form/BirthdayInput";
 import FloatingInput from "@/components/ui/Form/FloatingInput";
-import { useOutletContext } from "react-router-dom";
+import { useBeforeUnload, useOutletContext } from "react-router-dom";
 import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import OTPModal from "@/components/ui/OTP/OTPModal";
@@ -24,11 +24,53 @@ const ProfilePage = () => {
   const [newEmail, setNewEmail] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarDeleted, setAvatarDeleted] = useState(false);
+
+  const [originalProfile, setOriginalProfile] = useState(null);
   const { showNotification } = useNotification();
 
   const { searchKeyword = "" } = useOutletContext() || {};
 
-  
+  // snapshot
+  const createProfileSnapshot = (data) => ({
+    fullName: data?.user?.fullName || "",
+    gender: data?.user?.gender || "Unknown",
+    birthday: data?.user?.birthday || "",
+    avatar: data?.user?.avatar || "",
+  });
+
+  const isDirty =
+  originalProfile &&
+  (
+    fullName !== originalProfile.fullName ||
+    gender !== originalProfile.gender ||
+    birthday !== originalProfile.birthday ||
+    avatarFile !== null ||
+    avatarPreview !== (originalProfile.avatar || "")
+  );
+
+  useBeforeUnload(
+    (event) => {
+      if (isDirty) {
+        event.preventDefault();
+
+        // eslint disable next line no param reassign
+        event.returnValue = "";
+      }
+    },
+    { capture: true }
+  );
+
+  // Default
+  const handleResetProfile = () => {
+    if (!originalProfile) return;
+
+    setFullName(originalProfile.fullName);
+    setGender(originalProfile.gender);
+    setBirthday(originalProfile.birthday);
+    setAvatarFile(null);
+    setAvatarPreview(originalProfile.avatar || "");
+  };
 
   // OTP
   const [otpModal, setOtpModal] = useState({
@@ -60,12 +102,12 @@ const ProfilePage = () => {
         const userData = response.data?.user;
 
         setProfile(response.data);
+        setOriginalProfile(createProfileSnapshot(response.data));
 
         setFullName(userData?.fullName || "");
         setGender(userData?.gender || "Unknown");
         setBirthday(userData?.birthday || "");
         setAvatarPreview(userData?.avatar || "");
-        setAvatarPreview(response.data?.user?.avatar || "");
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -211,13 +253,15 @@ const ProfilePage = () => {
 
     if (!file) return;
 
+    setAvatarDeleted(false);
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   };
 
   const handleDeleteAvatar = () => {
     setAvatarFile(null);
-    setAvatarPreview("");
+    setAvatarDeleted(true);
+    setAvatarPreview(defaultAvatar);
   };
 
   // HANDLE SAVE PROFILE
@@ -237,8 +281,12 @@ const ProfilePage = () => {
         payload
       );
 
-      if (avatarFile) {
-
+      if (avatarDeleted) {
+        await axios.delete(
+          `http://localhost:8080/api/users/me/${idUser}/avatar`
+        );
+      }
+      else if (avatarFile) {
         const formData = new FormData();
 
         formData.append("file", avatarFile);
@@ -253,6 +301,10 @@ const ProfilePage = () => {
           }
         );
       }
+
+      await reloadProfile();
+
+      setAvatarFile(null);
 
       showNotification(
         "success",
@@ -290,6 +342,7 @@ const ProfilePage = () => {
     const userData = response.data?.user;
 
     setProfile(response.data);
+    setOriginalProfile(createProfileSnapshot(response.data));
     setFullName(userData?.fullName || "");
     setGender(userData?.gender || "Unknown");
     setBirthday(userData?.birthday || "");
@@ -398,6 +451,7 @@ const ProfilePage = () => {
           {phones.length > 0 ? (
             phones.map((item) => (
               <ContactRow
+                key={item.id}
                 value={item.phone}
                 provider={item.provider}
                 isLocked={item.provider === "phone"}
@@ -449,6 +503,7 @@ const ProfilePage = () => {
           {emails.length > 0 ? (
             emails.map((item) => (
               <ContactRow
+                key={item.id}
                 value={item.email}
                 provider={item.provider}
                 showProvider
@@ -456,7 +511,7 @@ const ProfilePage = () => {
                 badgeText={getEmailStatus(item)}
                 badgeStatus={getEmailStatus(item)}
                 showSetting
-                canDelete={item.provider !== "local" && item.provider !== "google"}
+                canDelete={item.provider === "local" && !item.emailVerifiedAt}
                 onRemove={() => handleRemoveProvider(item)}
                 onVerify={() => openEmailVerify(item.email)}
               />
@@ -494,6 +549,7 @@ const ProfilePage = () => {
       <div className="flex justify-end gap-3">
         <button
           type="button"
+          onClick={handleResetProfile}
           className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
         >
           Default

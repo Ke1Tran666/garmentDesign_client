@@ -112,20 +112,44 @@ const ProfilePage = () => {
   }
 
   // Gỡ liên kết
-  const handleRemoveProvider = (item) => {
-    if (authProviders.length <= 1) {
+  const handleRemoveProvider = async (item) => {
+    try {
+      if (authProviders.length <= 1) {
+        showNotification(
+          "error",
+          "Không thể gỡ bỏ",
+          "Tài khoản phải có ít nhất 1 phương thức đăng nhập để duy trì quyền truy cập."
+        );
+        return;
+      }
+
+      const confirmRemove = window.confirm(
+        `Bạn có chắc muốn hủy liên kết ${
+          item.email || item.phone
+        } không?`
+      );
+
+      if (!confirmRemove) return;
+
+      await axios.delete(
+        `http://localhost:8080/api/user-auth-providers/${item.id}`
+      );
+
+      showNotification(
+        "success",
+        "Thành công",
+        "Đã hủy liên kết tài khoản."
+      );
+
+      await reloadProfile();
+    } catch (error) {
       showNotification(
         "error",
-        "Không thể gỡ bỏ",
-        "Tài khoản phải có ít nhất 1 phương thức đăng nhập để duy trì quyền truy cập."
+        "Thất bại",
+        error.response?.data?.message ||
+          "Không thể hủy liên kết tài khoản."
       );
-      return;
     }
-
-    console.log("Cho phép gỡ bỏ:", item);
-
-    // Sau này gọi API ở đây
-    // await axios.delete(`http://localhost:8080/api/auth-providers/${item.id}`);
   };
 
   // Mở OTP Modal

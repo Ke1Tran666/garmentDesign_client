@@ -9,7 +9,10 @@ const FloatingButtons = () => {
     const [openSettings, setOpenSettings] = useState(false);
 
     const menuRef = useRef(null);
-    const user = JSON.parse(localStorage.getItem("user"));
+    // local database
+    const token = localStorage.getItem("token");
+    const idUser = localStorage.getItem("idUser");
+    const isLoggedIn = Boolean(token && idUser);
 
     // Detect thiết bị có touch (mobile/tablet) hay không
     const isTouchDevice = () =>
@@ -69,16 +72,16 @@ const FloatingButtons = () => {
                 setMenuOpen(true);
             } else {
                 setMenuOpen(false);
-                window.location.href = user ? "/profile" : "/login";
+                window.location.href = isLoggedIn ? "/user" : "/login";
             }
         } else {
             // Desktop: click navigate luôn (menu đã mở bằng hover)
-            window.location.href = user ? "/profile" : "/login";
+            window.location.href = isLoggedIn ? "/user" : "/login";
         }
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
+        localStorage.removeItem("idUser");
         window.location.reload();
     };
 
@@ -117,7 +120,7 @@ const FloatingButtons = () => {
                     </button>
 
                     {/* LOGOUT BUTTON */}
-                    {user && (
+                    {isLoggedIn && (
                         <button
                             onClick={handleLogout}
                             className={`
@@ -152,7 +155,7 @@ const FloatingButtons = () => {
                                 : "opacity-0 translate-y-2"}
                         `}
                     >
-                        {user ? "Profile" : "Login"}
+                        {isLoggedIn ? "Profile" : "Login"}
                     </div>
 
                     {/* MAIN BUTTON */}
@@ -169,7 +172,7 @@ const FloatingButtons = () => {
                             hover:scale-110
                         "
                     >
-                        {user ? <User size={20} /> : <LogIn size={20} />}
+                        {isLoggedIn ? <User size={20} /> : <LogIn size={20} />}
                     </button>
                 </div>
 

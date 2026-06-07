@@ -168,7 +168,7 @@ const SidebarItem = ({ icon, label, active, onClick }) => (
             px-4 py-3 rounded-xl mb-1
             transition-all text-sm
             ${active
-                ? "bg-brand text-white"
+                ? "bg-brand! text-white"
                 : "text-gray-700 hover:bg-gray-100"
             }
         `}

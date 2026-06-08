@@ -11,6 +11,7 @@ import BirthdayInput from "../../components/ui/Form/BirthdayInput";
 import FloatingInput from "../../components/ui/Form/FloatingInput";
 import PasswordInput from "../../components/ui/Form/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
+import { AUTH_API } from "@/api/config";
 
 const RegisterPage = () => {
 
@@ -48,7 +49,7 @@ const RegisterPage = () => {
     try {
       setLoading(true);
 
-      await axios.post("http://localhost:8080/api/auth/register", {
+      await axios.post(`${AUTH_API}/register`, {
         email,
         password,
         fullName,

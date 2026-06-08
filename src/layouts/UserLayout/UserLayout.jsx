@@ -30,6 +30,7 @@ import GooeySearchBar from "../../components/ui/Search/GooeySearchBar";
 import axios from "axios";
 
 import defaultAvatar from "@/assets/images/image-default.jpg";
+import { USER_API } from "@/api/config";
 
 const BRAND = "var(--color-brand)";
 const BRAND_SHADOW = "rgba(1,146,245,0.35)";
@@ -99,7 +100,7 @@ const UserLayout = ({ title = "My Account" }) => {
       if (!idUser) return;
 
       const response = await axios.get(
-        `http://localhost:8080/api/users/me/${idUser}`
+        `${USER_API}/me/${idUser}`
       );
 
       setUser(response.data?.user);

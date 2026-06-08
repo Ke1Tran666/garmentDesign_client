@@ -7,6 +7,7 @@ import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import OTPModal from "@/components/ui/OTP/OTPModal";
 import defaultAvatar from "@/assets/images/image-default.jpg";
+import { AUTH_API, BASE_URL_API, USER_API } from "@/api/config";
 
 const BRAND = "var(--color-brand)";
 
@@ -96,7 +97,7 @@ const ProfilePage = () => {
         }
 
         const response = await axios.get(
-          `http://localhost:8080/api/users/me/${idUser}`
+          `${USER_API}/me/${idUser}`
         );
 
         const userData = response.data?.user;
@@ -174,7 +175,7 @@ const ProfilePage = () => {
       if (!confirmRemove) return;
 
       await axios.delete(
-        `http://localhost:8080/api/user-auth-providers/${item.id}`
+        `${BASE_URL_API}/user-auth-providers/${item.id}`
       );
 
       showNotification(
@@ -204,7 +205,7 @@ const ProfilePage = () => {
         return;
       }
 
-      await axios.post("http://localhost:8080/api/auth/send-otp", {
+      await axios.post(`${AUTH_API}/send-otp`, {
         phone: targetPhone,
       });
 
@@ -230,7 +231,7 @@ const ProfilePage = () => {
         return;
       }
 
-      await axios.post("http://localhost:8080/api/auth/send-email-otp", {
+      await axios.post(`${AUTH_API}/send-email-otp`, {
         email: targetEmail,
       });
 
@@ -277,13 +278,13 @@ const ProfilePage = () => {
       };
 
       await axios.put(
-        `http://localhost:8080/api/users/${idUser}`,
+        `${USER_API}/${idUser}`,
         payload
       );
 
       if (avatarDeleted) {
         await axios.delete(
-          `http://localhost:8080/api/users/me/${idUser}/avatar`
+          `${USER_API}/me/${idUser}/avatar`
         );
       }
       else if (avatarFile) {
@@ -292,7 +293,7 @@ const ProfilePage = () => {
         formData.append("file", avatarFile);
 
         await axios.put(
-          `http://localhost:8080/api/users/me/${idUser}/avatar`,
+          `${USER_API}/me/${idUser}/avatar`,
           formData,
           {
             headers: {
@@ -336,7 +337,7 @@ const ProfilePage = () => {
     const idUser = localStorage.getItem("idUser");
 
     const response = await axios.get(
-      `http://localhost:8080/api/users/me/${idUser}`
+      `${USER_API}/me/${idUser}`
     );
 
     const userData = response.data?.user;
@@ -599,7 +600,7 @@ const ProfilePage = () => {
             const idUser = localStorage.getItem("idUser");
 
             if (otpModal.type === "phone") {
-              await axios.post("http://localhost:8080/api/auth/verify-otp", {
+              await axios.post(`${AUTH_API}/verify-otp`, {
                 idUser,
                 phone: otpModal.target,
                 otp: otpCode,
@@ -608,7 +609,7 @@ const ProfilePage = () => {
             }
 
             if (otpModal.type === "email") {
-              await axios.post("http://localhost:8080/api/auth/verify-email-otp", {
+              await axios.post(`${AUTH_API}/verify-email-otp`, {
                 idUser,
                 email: otpModal.target,
                 otp: otpCode,
@@ -645,13 +646,13 @@ const ProfilePage = () => {
         onResend={async () => {
           try {
             if (otpModal.type === "phone") {
-              await axios.post("http://localhost:8080/api/auth/send-otp", {
+              await axios.post(`${AUTH_API}/send-otp`, {
                 phone: otpModal.target,
               });
             }
 
             if (otpModal.type === "email") {
-              await axios.post("http://localhost:8080/api/auth/send-email-otp", {
+              await axios.post(`${AUTH_API}/send-email-otp`, {
                 email: otpModal.target,
               });
             }

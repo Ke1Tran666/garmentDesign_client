@@ -14,6 +14,7 @@ import PrimaryButton from "../../components/ui/Button/PrimaryButton";
 import FloatingInput from "../../components/ui/Form/FloatingInput";
 import PasswordInput from "../../components/ui/Form/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
+import { AUTH_API } from "@/api/config";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (
@@ -58,7 +59,7 @@ const LoginPage = () => {
         setLoading(true);
 
         const response = await axios.post(
-          "http://localhost:8080/api/auth/google-login",
+          `${AUTH_API}/google-login`,
           {
             accessToken: tokenResponse.access_token,
           }
@@ -146,7 +147,7 @@ const LoginPage = () => {
       // 1. Login bằng email + password
       if (loginType === "account") {
         const response = await axios.post(
-          "http://localhost:8080/api/auth/login",
+          `${AUTH_API}/login`,
           {
             email,
             password,
@@ -179,7 +180,7 @@ const LoginPage = () => {
           return;
         }
 
-        await axios.post("http://localhost:8080/api/auth/send-otp", {
+        await axios.post(`${AUTH_API}/send-otp`, {
           phone,
         });
 
@@ -212,7 +213,7 @@ const LoginPage = () => {
         }
 
         const response = await axios.post(
-          "http://localhost:8080/api/auth/verify-otp",
+          `${AUTH_API}/verify-otp`,
           {
             phone,
             otp: otpCode,
@@ -361,7 +362,7 @@ const LoginPage = () => {
                     type="button"
                     onClick={async () => {
                       try {
-                        await axios.post("http://localhost:8080/api/auth/send-otp", {
+                        await axios.post(`${AUTH_API}/send-otp`, {
                           phone,
                         });
 

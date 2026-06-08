@@ -12,6 +12,7 @@ import { useNotification } from "../../components/ui/Notification/NotificationCo
 import FloatingInput from "../../components/ui/Form/FloatingInput";
 import PasswordInput from "../../components/ui/Form/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
+import { AUTH_API } from "@/api/config";
 
 const ForgotPasswordSteps = ({ currentStep }) => {
   const steps = ["Nhập Email", "Xác thực OTP", "Đổi mật khẩu", "Hoàn thành"];
@@ -133,7 +134,7 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await axios.post("http://localhost:8080/api/auth/forgot-password", {
+        await axios.post(`${AUTH_API}/forgot-password`, {
           email,
         });
 
@@ -164,7 +165,7 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await axios.post("http://localhost:8080/api/auth/verify-forgot-otp", {
+        await axios.post(`${AUTH_API}/verify-forgot-otp`, {
           email,
           otp: otpCode,
         });
@@ -198,7 +199,7 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await axios.post("http://localhost:8080/api/auth/reset-password", {
+        await axios.post(`${AUTH_API}/reset-password`, {
           email,
           newPassword,
         });
@@ -319,7 +320,7 @@ const ForgotPasswordPage = () => {
                     onClick={async () => {
                       try {
                         await axios.post(
-                          "http://localhost:8080/api/auth/forgot-password",
+                          `${AUTH_API}/forgot-password`,
                           { email }
                         );
 

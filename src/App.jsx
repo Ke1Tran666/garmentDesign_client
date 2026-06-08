@@ -6,8 +6,9 @@ import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import UserLayout from './layouts/UserLayout/UserLayout';
-import ProfilePage from './pages/User/Profile/ProfilePage';
 import AuthLayout from './layouts/AuthLayout/AuthLayout';
+import ProfilePage from './pages/User/Account/ProfilePage';
+import AddressPage from './pages/User/Account/AddressPage';
 
 const App = () => {
 
@@ -33,6 +34,7 @@ const App = () => {
         <Route path="/user" element={<UserLayout />}>
           <Route index element={<Navigate to="profile" replace />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="address" element={<AddressPage />} />
         </Route>
       </Routes>
     </NotificationProvider>

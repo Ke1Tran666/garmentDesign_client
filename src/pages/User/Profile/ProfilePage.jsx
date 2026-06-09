@@ -6,11 +6,13 @@ import { useBeforeUnload, useOutletContext } from "react-router-dom";
 import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import OTPModal from "@/components/ui/OTP/OTPModal";
-import defaultAvatar from "@/assets/images/image-default.jpg";
+import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { AUTH_API, BASE_URL_API, USER_API } from "@/api/config";
 import { HandleButton } from "@/components/ui/Button/Button";
-
-const BRAND = "var(--color-brand)";
+import { SectionCard } from "@/components/ui/Section/Section";
+import { Divider } from "@/components/ui/Divider/Divider";
+import RadioGroup from "@/components/ui/RadioGroup/RadioGroup";
+import UploadBox from "@/components/ui/Upload/UploadBox";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -135,6 +137,16 @@ const ProfilePage = () => {
   const authProviders = profile?.authProviders || [];
   const emails = authProviders.filter((item) => item.email);
   const phones = authProviders.filter((item) => item.phone);
+  console.log("phones:", phones);
+  console.log("authProviders:", authProviders);
+
+  const phoneSectionStatus = phones.some((item) => item.phoneVerifiedAt)
+  ? "active"
+  : "inactive";
+
+  const emailSectionStatus = emails.some((item) => item.emailVerifiedAt)
+    ? "active"
+    : "inactive";
 
   // Tìm kiếm
   const isSearching = (keywords) => {
@@ -361,34 +373,26 @@ const ProfilePage = () => {
 
   return (
     <div className="px-6 py-6">
-      <Section
+      <SectionCard
         title="Personal"
         desc="Edit your name and profile picture"
         active={user?.status || "active"}
         highlight={isSearching(["personal", "profile", "birthday", "gender"])}
       >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <FloatingInput
-            type="text"
+          {/* Input fullname */}
+          <Input
             label="Full name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Full name"
-            containerClassName="w-full"
-            className="
-              border-gray-300!
-              bg-white!
-              text-gray-800!
-              placeholder:text-transparent!
-              focus:border-brand!
-            "
           />
-          <Input 
-            label="User code" 
-            defaultValue={user?.userCode}
+          {/* Input user code */}
+          <Input
+            label="User code"
+            value={user?.userCode}
             type="text"
-            readOnly 
-            />
+            readOnly
+          />
 
           <div className="md:col-span-2">
             <BirthdayField 
@@ -398,64 +402,40 @@ const ProfilePage = () => {
           </div>
 
           <div className="md:col-span-2">
-            <Gender
+            <RadioGroup
+              label="Gender"
+              name="gender"
               value={gender}
               onChange={setGender}
+              options={[
+                { label: "Male", value: "Male" },
+                { label: "Female", value: "Female" },
+                { label: "Unknown", value: "Unknown" },
+              ]}
             />
           </div>
         </div>
 
         {/* AVATAR */}
-        <div className="mt-5 overflow-hidden rounded-xl border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_220px]">
-            <div className="flex min-h-32 items-center justify-center bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] bg-size-[18px_18px]">
-              <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-gray-200 bg-white">
-                <img
-                  src={avatarPreview || user?.avatar || defaultAvatar}
-                  alt="avatar"
-                  className="h-20 w-20 rounded-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = defaultAvatar;
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="grid border-t border-gray-200 md:border-l md:border-t-0">
-              <label
-                htmlFor="avatar-upload"
-                className="flex cursor-pointer items-center justify-center border-b! border-gray-200! text-sm font-semibold transition hover:bg-gray-50"
-                style={{ color: BRAND }}
-              >
-                Upload picture
-              </label>
-
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleUploadAvatar}
-              />
-
-              <button
-                type="button"
-                onClick={handleDeleteAvatar}
-                className="text-sm font-semibold text-red-500 transition hover:bg-red-50"
-              >
-                Delete picture
-              </button>
-            </div>
-          </div>
-        </div>
-      </Section>
+        <UploadBox
+          variant="avatar"
+          preview={avatarPreview || user?.avatar}
+          fallback={defaultAvatar}
+          uploadText="Upload picture"
+          deleteText="Delete picture"
+          onUpload={handleUploadAvatar}
+          onDelete={handleDeleteAvatar}
+          className={`mt-4`}
+        />
+      </SectionCard>
 
       <Divider />
 
       {/* PHONE */}
-      <Section
+      <SectionCard
         title="Link phone number"
         desc="Link your phone number to verify your account for the best support."
+        active={phoneSectionStatus}
         highlight={isSearching(["phone", "number", "sdt", "số điện thoại"])}
       >
         <div className="space-y-3">
@@ -465,6 +445,7 @@ const ProfilePage = () => {
                 key={item.id}
                 value={item.phone}
                 provider={item.provider}
+                showProvider
                 isLocked={item.provider === "phone"}
                 badgeText={getPhoneStatus(item)}
                 badgeStatus={getPhoneStatus(item)}
@@ -500,14 +481,15 @@ const ProfilePage = () => {
             </EmptyContact>
           )}
         </div>
-      </Section>
+      </SectionCard>
 
       <Divider />
 
       {/* EMAIL */}
-      <Section
+      <SectionCard
         title="Associated email"
         desc="Manage email accounts linked to your profile."
+        active={emailSectionStatus}
         highlight={isSearching(["email", "mail", "gmail", "google", "local"])}
       >
         <div className="space-y-3">
@@ -553,7 +535,7 @@ const ProfilePage = () => {
             </EmptyContact>
           )}
         </div>
-      </Section>
+      </SectionCard>
 
       <Divider />
 
@@ -678,74 +660,32 @@ const ProfilePage = () => {
   );
 };
 
-const Section = ({ title, desc, active, highlight, children }) => {
-  return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr]">
-      <div>
-        <div className="flex w-fit flex-col">
-          <div className="flex items-center gap-3">
-            <h4 className="text-sm font-semibold text-gray-900">
-              {title}
-            </h4>
-
-            {active && (
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  active === "active"
-                    ? "bg-green-100 text-green-700"
-                    : active === "pending"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : active === "banned"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {active}
-              </span>
-            )}
-          </div>
-
-          <span
-            className={`mt-1 h-0.5 rounded-full bg-brand transition-all duration-300 ${
-              highlight ? "w-full opacity-100" : "w-0 opacity-0"
-            }`}
-          />
-        </div>
-
-        <p className="mt-2 max-w-52 text-sm leading-5 text-gray-500">
-          {desc}
-        </p>
-      </div>
-
-      <div>{children}</div>
-    </div>
-  );
-};
-
-const Divider = () => {
-  return <div className="my-7 h-px w-full bg-gray-200" />;
-};
-
 const Input = ({
   label,
-  defaultValue = "",
+  value,
+  onChange,
   placeholder,
   type = "text",
   readOnly = false,
 }) => {
-  const hasValue = String(defaultValue || "").trim() !== "";
+  const hasValue = String(value || "").trim() !== "";
 
   return (
     <FloatingInput
       type={type}
       label={label}
-      defaultValue={defaultValue}
+      value={value || ""}
+      onChange={onChange}
       readOnly={readOnly}
       placeholder={placeholder || label}
       containerClassName="w-full"
       className={`
         border-gray-300!
-        ${readOnly ? "bg-gray-100! text-gray-500! cursor-not-allowed!" : "bg-white! text-gray-800!"}
+        ${
+          readOnly
+            ? "bg-gray-100! text-gray-500! cursor-not-allowed!"
+            : "bg-white! text-gray-800!"
+        }
         placeholder:text-transparent!
         focus:border-brand!
         focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]!
@@ -756,56 +696,6 @@ const Input = ({
         ${hasValue ? "top-2! translate-y-0! text-xs! text-brand!" : ""}
       `}
     />
-  );
-};
-
-const Gender = ({ value, onChange }) => {
-  return (
-    <div>
-      <p className="mb-3 text-sm font-semibold text-gray-700">Gender</p>
-
-      <div className="flex flex-wrap gap-3">
-        <GenderOption
-          label="Male"
-          name="gender"
-          checked={value === "Male"}
-          onChange={() => onChange("Male")}
-        />
-        <GenderOption
-          label="Female"
-          name="gender"
-          checked={value === "Female"}
-          onChange={() => onChange("Female")}
-        />
-        <GenderOption
-          label="Unknown"
-          name="gender"
-          checked={value === "Unknown"}
-          onChange={() => onChange("Unknown")}
-        />
-      </div>
-    </div>
-  );
-};
-
-const GenderOption = ({
-  label,
-  name,
-  checked,
-  onChange,
-}) => {
-  return (
-    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-brand hover:bg-gray-50">
-    <input
-      type="radio"
-      name={name}
-      checked={checked}
-      onChange={onChange}
-      className="h-4 w-4"
-      style={{ accentColor: BRAND }}
-    />
-      {label}
-    </label>
   );
 };
 

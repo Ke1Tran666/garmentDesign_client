@@ -8,6 +8,7 @@ import { useNotification } from "@/components/ui/Notification/NotificationContex
 import OTPModal from "@/components/ui/OTP/OTPModal";
 import defaultAvatar from "@/assets/images/image-default.jpg";
 import { AUTH_API, BASE_URL_API, USER_API } from "@/api/config";
+import { HandleButton } from "@/components/ui/Button/Button";
 
 const BRAND = "var(--color-brand)";
 
@@ -71,6 +72,12 @@ const ProfilePage = () => {
     setBirthday(originalProfile.birthday);
     setAvatarFile(null);
     setAvatarPreview(originalProfile.avatar || "");
+
+    showNotification(
+      "success",
+      "Thành công",
+      "Thông tin cá nhân đã về trạng thái mặc định."
+    );
   };
 
   // OTP
@@ -548,22 +555,19 @@ const ProfilePage = () => {
       <Divider />
 
       <div className="flex justify-end gap-3">
-        <button
-          type="button"
+        <HandleButton
           onClick={handleResetProfile}
-          className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+          className={`bg-[#F5F5F5]! text-gray-600!`}
         >
           Default
-        </button>
+        </HandleButton>
 
-        <button
-          type="button"
+        <HandleButton
           onClick={handleSaveProfile}
-          className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-          style={{ backgroundColor: BRAND }}
+          className={`bg-brand!`}
         >
           Save changes
-        </button>
+        </HandleButton>
       </div>
       
       <OTPModal

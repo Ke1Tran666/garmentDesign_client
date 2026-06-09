@@ -31,6 +31,7 @@ import axios from "axios";
 
 import defaultAvatar from "@/assets/images/image-default.jpg";
 import { USER_API } from "@/api/config";
+import { ButtonIcon } from "@/components/ui/Button/Button";
 
 const BRAND = "var(--color-brand)";
 const BRAND_SHADOW = "rgba(1,146,245,0.35)";
@@ -234,10 +235,23 @@ const UserLayout = ({ title = "My Account" }) => {
 
           <div className="flex items-center justify-center gap-4">
             <div className="flex items-center gap-4">
-              <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-brand shadow-lg transition-all duration-200 hover:from-indigo-600 hover:to-brand hover:shadow-xl active:scale-95">
-                <Bell size={22} className="text-white" />
-                <span className="absolute right-2 top-2 h-2.5 w-2.5 animate-pulse rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/50" />
-              </button>
+              <ButtonIcon
+                icon={Bell}
+                sizeIcon={22}
+                className="
+                  relative
+                  bg-linear-to-br from-indigo-500 to-brand shadow-lg
+                  hover:from-indigo-600 hover:to-brand hover:shadow-xl
+                  active:scale-95
+                "
+                classNameIcon="text-white"
+              >
+                <span 
+                  className="
+                    absolute right-2 top-2 h-2.5 w-2.5 animate-pulse rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/50
+                    " 
+                />
+              </ButtonIcon>
             </div>
             <div className="flex items-center gap-3">
               <img

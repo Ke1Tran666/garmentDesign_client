@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, LogIn, User, Settings, LogOut } from "lucide-react";
 import SettingsModal from "./Settings/SettingsModal";
+import { ButtonIcon } from "./Button/Button";
 
 const FloatingButtons = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
@@ -96,49 +97,39 @@ const FloatingButtons = () => {
                     onMouseLeave={handleMouseLeave}
                 >
                     {/* SETTING BUTTON */}
-                    <button
+                    <ButtonIcon
+                        icon={Settings}
+                        sizeIcon={18}
                         onClick={() => {
                             setMenuOpen(false);
                             setOpenSettings(true);
                         }}
                         className={`
                             absolute top-2 right-2
-                            w-10 h-10 rounded-full
+                            border border-gray-200
                             bg-white! text-dark!
-                            shadow-lg border border-gray-200
-                            flex items-center justify-center
-                            transition-all duration-300
-                            hover:scale-110
-                            hover:bg-dark!
-                            hover:text-white!
+                            hover:bg-dark! hover:text-white!
                             ${menuOpen
-                                ? "opacity-100 scale-100 pointer-events-auto"
-                                : "opacity-0 scale-50 pointer-events-none"}
+                            ? "opacity-100 scale-100 pointer-events-auto"
+                            : "opacity-0 scale-50 pointer-events-none"}
                         `}
-                    >
-                        <Settings size={18} />
-                    </button>
+                    />
 
                     {/* LOGOUT BUTTON */}
                     {isLoggedIn && (
-                        <button
+                        <ButtonIcon
+                            icon={LogOut}
+                            sizeIcon={18}
                             onClick={handleLogout}
                             className={`
                                 absolute bottom-2 left-2
-                                w-10 h-10 rounded-full
                                 bg-red-500! text-white!
-                                shadow-lg
-                                flex items-center justify-center
-                                transition-all duration-300
-                                hover:scale-110
                                 hover:bg-red-600!
                                 ${menuOpen
-                                    ? "opacity-100 scale-100 pointer-events-auto"
-                                    : "opacity-0 scale-50 pointer-events-none"}
+                                ? "opacity-100 scale-100 pointer-events-auto"
+                                : "opacity-0 scale-50 pointer-events-none"}
                             `}
-                        >
-                            <LogOut size={18} />
-                        </button>
+                        />
                     )}
 
                     {/* TOOLTIP */}
@@ -159,21 +150,16 @@ const FloatingButtons = () => {
                     </div>
 
                     {/* MAIN BUTTON */}
-                    <button
+                    <ButtonIcon
+                        icon={isLoggedIn ? User : LogIn}
+                        sizeIcon={20}
                         onMouseEnter={handleMouseEnter}
                         onClick={handleMainButtonClick}
                         className="
-                            absolute bottom-0 right-0
-                            w-12 h-12 rounded-full
+                            absolute bottom-0 right-0 h-12 w-12
                             bg-dark! text-white
-                            flex items-center justify-center
-                            shadow-lg
-                            transition-all duration-300
-                            hover:scale-110
                         "
-                    >
-                        {isLoggedIn ? <User size={20} /> : <LogIn size={20} />}
-                    </button>
+                    />
                 </div>
 
                 {/* SCROLL TOP */}
@@ -187,19 +173,12 @@ const FloatingButtons = () => {
                     <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-dark">
                         {scrollPercent}%
                     </div>
-                    <button
+                    <ButtonIcon
+                        icon={ArrowUp}
+                        sizeIcon={20}
                         onClick={handleScrollToTop}
-                        className="
-                            w-12 h-12 rounded-full
-                            bg-brand! text-white
-                            flex items-center justify-center
-                            shadow-lg
-                            transition-all duration-300
-                            hover:scale-110
-                        "
-                    >
-                        <ArrowUp size={20} />
-                    </button>
+                        className="bg-brand! text-white h-12 w-12"
+                    />
                 </div>
             </div>
 

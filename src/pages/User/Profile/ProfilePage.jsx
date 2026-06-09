@@ -17,6 +17,7 @@ const ProfilePage = () => {
   const [birthday, setBirthday] = useState("");
   const [fullName, setFullName] = useState("");
   const [gender, setGender] = useState("Unknown");
+  const [birthdayResetKey, setBirthdayResetKey] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,6 +71,7 @@ const ProfilePage = () => {
     setFullName(originalProfile.fullName);
     setGender(originalProfile.gender);
     setBirthday(originalProfile.birthday);
+    setBirthdayResetKey((prev) => prev + 1);  
     setAvatarFile(null);
     setAvatarPreview(originalProfile.avatar || "");
 
@@ -391,7 +393,8 @@ const ProfilePage = () => {
           <div className="md:col-span-2">
             <BirthdayField 
               birthday={birthday} 
-              setBirthday={setBirthday} />
+              setBirthday={setBirthday}
+              birthdayResetKey={birthdayResetKey} />
           </div>
 
           <div className="md:col-span-2">
@@ -806,7 +809,7 @@ const GenderOption = ({
   );
 };
 
-const BirthdayField = ({ birthday, setBirthday }) => {
+const BirthdayField = ({ birthday, setBirthday, birthdayResetKey }) => {
   return (
     <div>
       <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -814,6 +817,7 @@ const BirthdayField = ({ birthday, setBirthday }) => {
       </label>
 
       <BirthdayInput
+        key={birthdayResetKey}
         value={birthday}
         onChange={setBirthday}
         inputClassName="

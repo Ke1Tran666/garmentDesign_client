@@ -68,7 +68,6 @@ const BirthdayInput = ({
   const updateBirthday = useCallback(
     (day, month, year) => {
       if (!day || !month || !year || String(year).length !== 4) {
-        onChange("");
         return;
       }
 
@@ -185,7 +184,6 @@ const BirthdayInput = ({
 
             if (value === "") {
               setBirthDay("");
-              onChange("");
               return;
             }
 
@@ -218,7 +216,6 @@ const BirthdayInput = ({
 
             if (value === "") {
               setBirthMonth("");
-              onChange("");
               return;
             }
 

@@ -159,7 +159,6 @@ export const ContactRow = ({
   editable = false,
   inputType = "text",
   placeholder = "Enter value",
-  badgeText = "inactive",
   badgeStatus = "inactive",
   showSetting = true,
   canDelete = true,
@@ -168,25 +167,10 @@ export const ContactRow = ({
   onVerify,
   onRemove,
 }) => {
-  const badgeStyles = {
-    active: "bg-green-100 text-green-700",
-    inactive: "bg-gray-100 text-gray-600",
-    pending: "bg-yellow-100 text-yellow-700",
-    banned: "bg-red-100 text-red-700",
-  };
 
   return (
     <div className="relative flex flex-wrap items-center gap-3 overflow-visible">
-      {showProvider && provider && <ProviderBadge provider={provider} />}
-
-      <span
-        className={`
-          rounded-full px-4 py-1.5 text-xs font-semibold
-          ${badgeStyles[badgeStatus] || badgeStyles.inactive}
-        `}
-      >
-        {badgeText}
-      </span>
+      {showProvider && provider && (<ProviderBadge provider={provider} />)}
 
       <input
         type={inputType}

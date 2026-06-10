@@ -137,8 +137,6 @@ const ProfilePage = () => {
   const authProviders = profile?.authProviders || [];
   const emails = authProviders.filter((item) => item.email);
   const phones = authProviders.filter((item) => item.phone);
-  console.log("phones:", phones);
-  console.log("authProviders:", authProviders);
 
   const phoneSectionStatus = phones.some((item) => item.phoneVerifiedAt)
   ? "active"

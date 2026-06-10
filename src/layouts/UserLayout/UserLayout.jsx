@@ -29,7 +29,7 @@ import { Outlet } from "react-router-dom";
 import GooeySearchBar from "../../components/ui/Search/GooeySearchBar";
 import axios from "axios";
 
-import defaultAvatar from "@/assets/images/image-default.jpg";
+import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { USER_API } from "@/api/config";
 import { ButtonIcon } from "@/components/ui/Button/Button";
 

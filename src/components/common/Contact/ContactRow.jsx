@@ -1,4 +1,5 @@
-import { Plus, Settings, Trash2, ShieldCheck, Unlink } from "lucide-react";
+import { ButtonIconText} from "@/components/ui/Button/Button";
+import { Settings, Trash2, ShieldCheck, Unlink, Plus } from "lucide-react";
 import { useState } from "react";
 
 const ProviderBadge = ({ provider }) => {
@@ -41,30 +42,6 @@ const ActionButton = ({ icon: Icon, danger = false, onClick }) => {
   );
 };
 
-const AddButton = ({ text, onClick }) => {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="
-        inline-flex items-center gap-2
-        rounded-lg border! border-gray-300!
-        bg-white px-4 py-2
-        text-sm font-semibold text-gray-700
-        transition-all duration-300 ease-out
-        animate-slideInRight
-        hover:border-brand hover:bg-gray-50 hover:text-brand
-      "
-    >
-      <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-brand text-brand">
-        <Plus size={13} strokeWidth={3} />
-      </span>
-
-      {text}
-    </button>
-  );
-};
-
 export const EmptyContact = ({
   message,
   buttonText,
@@ -78,7 +55,7 @@ export const EmptyContact = ({
 
       <div className="overflow-visible">
         {!showForm ? (
-          <AddButton text={buttonText} onClick={onAdd} />
+          <ButtonIconText text={buttonText} onClick={onAdd} Icon={Plus}/>
         ) : (
           <div className="origin-top space-y-3 animate-slideOutLeft">
             {children}

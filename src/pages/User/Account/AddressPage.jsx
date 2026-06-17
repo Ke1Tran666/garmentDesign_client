@@ -1,5 +1,8 @@
 import { ButtonIconText } from "@/components/ui/Button/Button";
 import { SectionCard } from "@/components/ui/Section/Section";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { USER_ADDRESS_API, USER_API } from "@/api/config";
 import {
   ArrowDownAZ,
   ChevronLeft,
@@ -9,33 +12,8 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import { useMemo, useState } from "react";
 
 const ADDRESS_TOTAL = 25;
-
-const addresses = [
-  {
-    id: 1,
-    status: "Active",
-    companyName: "Sample Company",
-    companyAddress: ["123 Street, Ward 5", "District 3, HCM City"],
-    notes: "Giao giờ HC",
-  },
-  {
-    id: 2,
-    status: "Inactive",
-    companyName: "Tech Solution JSC",
-    companyAddress: ["456 Avenue, Long Bien Dist.", "Ha Noi City"],
-    notes: "-",
-  },
-  {
-    id: 3,
-    status: "Active",
-    companyName: "Green Logistics",
-    companyAddress: ["789 Boulevard, Sontra Dist.", "Da Nang City"],
-    notes: "Gọi trước",
-  },
-];
 
 const statusClassName = {
   Active: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
@@ -44,6 +22,45 @@ const statusClassName = {
 
 const AddressPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [addresses, setAddresses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [defaultAddressId, setDefaultAddressId] = useState(null);
+
+  const [actionMenu, setActionMenu] = useState({
+    open: false,
+    x: 0,
+    y: 0,
+    address: null,
+  });
+
+  const [confirmDefaultAddress, setConfirmDefaultAddress] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const idUser = localStorage.getItem("idUser");
+
+        const userResponse = await axios.get(
+          `${USER_API}/me/${idUser}`
+        );
+
+        const addressResponse = await axios.get(
+          `${USER_ADDRESS_API}/user/${idUser}`
+        );
+        console.log(userResponse.data.user);
+
+        setDefaultAddressId(userResponse.data?.user?.defaultAddress?.addressId ?? null);
+        setAddresses(addressResponse.data);
+      } catch (error) {
+        console.error("Lỗi tải địa chỉ:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const filteredAddresses = useMemo(() => {
     const keyword = searchKeyword.trim().toLowerCase();
@@ -52,19 +69,81 @@ const AddressPage = () => {
 
     return addresses.filter((item) =>
       [
-        item.status,
         item.companyName,
-        item.notes,
-        ...item.companyAddress,
-      ].some((value) => value.toLowerCase().includes(keyword))
+        item.address,
+        item.note,
+      ]
+        .filter(Boolean)
+        .some((value) =>
+          value.toLowerCase().includes(keyword)
+        )
     );
-  }, [searchKeyword]);
+  }, [searchKeyword, addresses]);
 
   const showingEnd = filteredAddresses.length;
 
   const handleAddMail = ()=>{
     console.log(`Thêm địa chỉ`);
   }
+
+  if (loading) {
+    return (
+      <SectionCard
+        title="Address"
+        desc="Edit the user's address."
+      >
+        <p>Loading...</p>
+      </SectionCard>
+    );
+  }
+
+  // Trạng thái hoạt động của địa chỉ
+  const getAddressStatus = (item) => {
+    return item.addressId === defaultAddressId ? "Active" : "Inactive";
+  };
+
+  // Handle
+  const handleOpenActionMenu = (event, item) => {
+    event.preventDefault();
+
+    setActionMenu({
+      open: true,
+      x: event.clientX,
+      y: event.clientY,
+      address: item,
+    });
+  };
+
+  const handleOpenConfirmDefault = () => {
+    setConfirmDefaultAddress(actionMenu.address);
+    setActionMenu({
+      open: false,
+      x: 0,
+      y: 0,
+      address: null,
+    });
+  };
+
+  const handleConfirmSetDefault = async () => {
+    if (!confirmDefaultAddress) return;
+
+    try {
+      setSubmitting(true);
+
+      const idUser = localStorage.getItem("idUser");
+
+      await axios.put(
+        `${USER_ADDRESS_API}/user/${idUser}/default/${confirmDefaultAddress.addressId}`
+      );
+
+      setDefaultAddressId(confirmDefaultAddress.addressId);
+      setConfirmDefaultAddress(null);
+    } catch (error) {
+      console.error("Lỗi cập nhật địa chỉ mặc định:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
       <SectionCard
@@ -152,7 +231,10 @@ const AddressPage = () => {
                   {filteredAddresses.length > 0 ? (
                     filteredAddresses.map((item) => (
                       <tr
-                        key={item.id}
+                        key={item.addressId}
+                        onContextMenu={
+                          (event) => handleOpenActionMenu(event, item)
+                        }
                         className="transition hover:bg-gray-50"
                       >
                         <td className="px-4 py-4 align-top">
@@ -164,10 +246,10 @@ const AddressPage = () => {
                             />
                             <span
                               className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                statusClassName[item.status]
+                                statusClassName[getAddressStatus(item)]
                               }`}
                             >
-                              {item.status}
+                              {getAddressStatus(item)}
                             </span>
                           </div>
                         </td>
@@ -177,21 +259,20 @@ const AddressPage = () => {
                         </td>
 
                         <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
-                          {item.companyAddress.map((line) => (
-                            <span key={line} className="block">
-                              {line}
-                            </span>
-                          ))}
+                            {item.address}
                         </td>
 
                         <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
-                          {item.notes}
+                          {item.note}
                         </td>
 
                         <td className="px-4 py-4 align-top">
                           <button
                             type="button"
                             aria-label={`Open actions for ${item.companyName}`}
+                            onClick={
+                              (event) => handleOpenActionMenu(event, item)
+                            }
                             className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition hover:border-brand hover:bg-brand/5 hover:text-brand"
                           >
                             <Ellipsis size={19} />
@@ -253,6 +334,77 @@ const AddressPage = () => {
             </div>
           </div>
         </div>
+        {actionMenu.open && (
+          <>
+            <button
+              type="button"
+              className="fixed inset-0 z-40 cursor-default"
+              onClick={() =>
+                setActionMenu({
+                  open: false,
+                  x: 0,
+                  y: 0,
+                  address: null,
+                })
+              }
+            />
+
+            <div
+              className="fixed z-50 w-52 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
+              style={{
+                top: actionMenu.y,
+                left: actionMenu.x,
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleOpenConfirmDefault}
+                disabled={actionMenu.address?.addressId === defaultAddressId}
+                className="w-full px-4 py-3 text-left text-sm font-medium text-gray-700 transition hover:bg-brand/5 hover:text-brand disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-white"
+              >
+                Đặt làm mặc định
+              </button>
+            </div>
+          </>
+        )}
+
+        {confirmDefaultAddress && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
+            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-gray-900">
+                Xác nhận địa chỉ mặc định
+              </h3>
+
+              <p className="mt-3 text-sm leading-6 text-gray-600">
+                Bạn có chắc muốn chọn{" "}
+                <span className="font-semibold text-gray-900">
+                  {confirmDefaultAddress.companyName}
+                </span>{" "}
+                làm địa chỉ mặc định không?
+              </p>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDefaultAddress(null)}
+                  disabled={submitting}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
+                >
+                  Hủy
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleConfirmSetDefault}
+                  disabled={submitting}
+                  className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {submitting ? "Đang lưu..." : "Xác nhận"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </SectionCard>
   );
 };

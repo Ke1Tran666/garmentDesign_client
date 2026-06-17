@@ -15,7 +15,7 @@ export const USER_API = `${BASE_URL_API}/users`;
 export const ROLE_API = `${BASE_URL_API}/roles`;
 
 // User Address API
-export const USER_ADDRESS_API = `${BASE_URL_API}/userAddresses`;
+export const USER_ADDRESS_API = `${BASE_URL_API}/user-addresses`;
 
 // User Auth Provider API
 export const USER_AUTH_PROVIDER_API = `${BASE_URL_API}/userAuthProviders`;

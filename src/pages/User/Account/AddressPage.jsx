@@ -3,6 +3,7 @@ import { SectionCard } from "@/components/ui/Section/Section";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
+import FormModal from "@/components/ui/Form/FormModal";
 import { USER_ADDRESS_API, USER_API } from "@/api/config";
 import {
   ArrowDownAZ,
@@ -14,12 +15,27 @@ import {
   Search,
 } from "lucide-react";
 
-const ADDRESS_TOTAL = 25;
-
 const statusClassName = {
   Active: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
   Inactive: "bg-gray-100 text-gray-600 ring-1 ring-gray-200",
 };
+
+const addressFields = [
+  {
+    name: "companyName",
+    placeholder: "Tên công ty",
+  },
+  {
+    name: "address",
+    placeholder: "Địa chỉ công ty",
+  },
+  {
+    name: "note",
+    placeholder: "Ghi chú",
+    type: "textarea",
+    rows: 4,
+  },
+];
 
 const AddressPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -28,8 +44,7 @@ const AddressPage = () => {
   const [defaultAddressId, setDefaultAddressId] = useState(null);
   const [editingAddress, setEditingAddress] = useState(null);
   const [deleteAddress, setDeleteAddress] = useState(null);
-
-  const [editForm, setEditForm] = useState({
+  const [form, setForm] = useState({
     companyName: "",
     address: "",
     note: "",
@@ -49,11 +64,8 @@ const AddressPage = () => {
 
   const [addingAddress, setAddingAddress] = useState(false);
 
-  const [addForm, setAddForm] = useState({
-    companyName: "",
-    address: "",
-    note: "",
-  });
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -129,15 +141,35 @@ const AddressPage = () => {
     return result;
   }, [addresses, searchKeyword, sortType, defaultAddressId]);
 
-  const showingEnd = filteredAddresses.length;
+  const totalPages = Math.ceil(
+    filteredAddresses.length / ITEMS_PER_PAGE
+  );
+
+  const paginatedAddresses = filteredAddresses.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const showingStart =
+    filteredAddresses.length === 0
+      ? 0
+      : (currentPage - 1) * ITEMS_PER_PAGE + 1;
+
+  const showingEnd = Math.min(
+    currentPage * ITEMS_PER_PAGE,
+    filteredAddresses.length
+  );
 
   const handleAddMail = () => {
-    setAddingAddress(true);
-    setAddForm({
+    setEditingAddress(null);
+
+    setForm({
       companyName: "",
       address: "",
       note: "",
     });
+
+    setAddingAddress(true);
   };
 
   if (loading) {
@@ -157,13 +189,28 @@ const AddressPage = () => {
   };
 
   // Handle
+  const ACTION_MENU_WIDTH = 208;
+  const ACTION_MENU_HEIGHT = 156;
+  const GAP = 8;
+
   const handleOpenActionMenu = (event, item) => {
     event.preventDefault();
 
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    let x = rect.right - ACTION_MENU_WIDTH;
+    let y = rect.bottom + GAP;
+
+    if (x < GAP) x = GAP;
+
+    if (y + ACTION_MENU_HEIGHT > window.innerHeight - GAP) {
+      y = rect.top - ACTION_MENU_HEIGHT - GAP;
+    }
+
     setActionMenu({
       open: true,
-      x: event.clientX,
-      y: event.clientY,
+      x,
+      y,
       address: item,
     });
   };
@@ -212,15 +259,28 @@ const AddressPage = () => {
   // Handle sort
   const handleShowAllAddress = () => {
     setSortType("all");
+    setCurrentPage(1);
   };
 
   const handleSortNameAZ = () => {
     setSortType("name-asc");
+    setCurrentPage(1);
+  };
+
+  const handleChangeForm = (event) => {
+    const { name, value } = event.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleOpenEdit = (address) => {
+    setAddingAddress(false);
     setEditingAddress(address);
-    setEditForm({
+
+    setForm({
       companyName: address.companyName || "",
       address: address.address || "",
       note: address.note || "",
@@ -234,23 +294,14 @@ const AddressPage = () => {
     });
   };
 
-  const handleChangeEditForm = (event) => {
-    const { name, value } = event.target;
-
-    setEditForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleUpdateAddress = async () => {
     if (!editingAddress) return;
-    if (!editForm.companyName.trim()) {
+    if (!form.companyName.trim()) {
       alert("Tên công ty không được để trống");
       return;
     }
 
-    if (!editForm.address.trim()) {
+    if (!form.address.trim()) {
       alert("Địa chỉ không được để trống");
       return;
     }
@@ -260,7 +311,7 @@ const AddressPage = () => {
 
       await axios.put(
         `${USER_ADDRESS_API}/${editingAddress.addressId}`,
-        editForm
+        form
       );
 
       setAddresses((prev) =>
@@ -268,9 +319,9 @@ const AddressPage = () => {
           item.addressId === editingAddress.addressId
             ? {
                 ...item,
-                companyName: editForm.companyName,
-                address: editForm.address,
-                note: editForm.note,
+                companyName: form.companyName,
+                address: form.address,
+                note: form.note,
               }
             : item
         )
@@ -334,17 +385,8 @@ const AddressPage = () => {
     }
   };
 
-  const handleChangeAddForm = (event) => {
-    const { name, value } = event.target;
-
-    setAddForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleCreateAddress = async () => {
-    if (!addForm.companyName.trim()) {
+    if (!form.companyName.trim()) {
       showNotification(
         "error",
         "Thất bại",
@@ -353,7 +395,7 @@ const AddressPage = () => {
       return;
     }
 
-    if (!addForm.address.trim()) {
+    if (!form.address.trim()) {
       showNotification(
         "error",
         "Thất bại",
@@ -369,7 +411,7 @@ const AddressPage = () => {
 
       const response = await axios.post(
         `${USER_ADDRESS_API}/user/${idUser}`,
-        addForm
+        form
       );
 
       setAddresses((prev) => [...prev, response.data]);
@@ -419,7 +461,10 @@ const AddressPage = () => {
               <input
                 type="text"
                 value={searchKeyword}
-                onChange={(event) => setSearchKeyword(event.target.value)}
+                onChange={(event) => {
+                  setSearchKeyword(event.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Tìm kiếm địa chỉ..."
                 className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-brand focus:ring-4 focus:ring-brand/10"
               />
@@ -482,13 +527,10 @@ const AddressPage = () => {
                 </thead>
 
                 <tbody className="divide-y divide-gray-200">
-                  {filteredAddresses.length > 0 ? (
-                    filteredAddresses.map((item) => (
+                  {paginatedAddresses.length > 0 ? (
+                    paginatedAddresses.map((item) => (
                       <tr
                         key={item.addressId}
-                        onContextMenu={
-                          (event) => handleOpenActionMenu(event, item)
-                        }
                         className="transition hover:bg-gray-50"
                       >
                         <td className="px-4 py-4 align-top">
@@ -545,26 +587,31 @@ const AddressPage = () => {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-gray-500">
-              Showing {showingEnd > 0 ? 1 : 0}-{showingEnd} of{" "}
-              {ADDRESS_TOTAL} addresses
+            <p className="text-sm text-gray-500!">
+              Hiển thị {showingStart}-{showingEnd} trong số {filteredAddresses.length} địa chỉ
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
                 className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-600 transition hover:border-brand hover:text-brand"
               >
                 <ChevronLeft size={16} />
                 Previous
               </button>
 
-              {[1, 2, 3].map((page) => (
+              {Array.from(
+                { length: totalPages },
+                (_, index) => index + 1
+              ).map((page) => (
                 <button
                   key={page}
                   type="button"
+                  onClick={() => setCurrentPage(page)}
                   className={`h-9 min-w-9 rounded-lg border px-3 text-sm font-semibold transition ${
-                    page === 1
+                    page === currentPage
                       ? "border-brand bg-brand text-subtle"
                       : "border-gray-300 bg-white text-gray-600 hover:border-brand hover:text-brand"
                   }`}
@@ -575,6 +622,8 @@ const AddressPage = () => {
 
               <button
                 type="button"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
                 className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-600 transition hover:border-brand hover:text-brand"
               >
                 Next
@@ -599,7 +648,7 @@ const AddressPage = () => {
             />
 
             <div
-              className="fixed z-50 w-52 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
+              className="fixed z-50 w-52 max-w-[calc(100vw-16px)] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
               style={{
                 top: actionMenu.y,
                 left: actionMenu.x,
@@ -705,66 +754,6 @@ const AddressPage = () => {
           </div>
         )}
 
-        {/* EDIT */}
-        {editingAddress && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
-            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
-              <h3 className="text-lg font-bold text-gray-900">
-                Chỉnh sửa địa chỉ
-              </h3>
-
-              <div className="mt-5 space-y-4">
-                <input
-                  type="text"
-                  name="companyName"
-                  value={editForm.companyName}
-                  onChange={handleChangeEditForm}
-                  placeholder="Tên công ty"
-                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-                />
-
-                <input
-                  type="text"
-                  name="address"
-                  value={editForm.address}
-                  onChange={handleChangeEditForm}
-                  placeholder="Địa chỉ công ty"
-                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-                />
-
-                <textarea
-                  name="note"
-                  value={editForm.note}
-                  onChange={handleChangeEditForm}
-                  placeholder="Ghi chú"
-                  rows={4}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-                />
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setEditingAddress(null)}
-                  disabled={submitting}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
-                >
-                  Hủy
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleUpdateAddress}
-                  disabled={submitting}
-                  className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                >
-                  {submitting ? "Đang lưu..." : "Lưu thay đổi"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* DELETE */}
         {deleteAddress && (
           <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
@@ -804,65 +793,22 @@ const AddressPage = () => {
           </div>
         )}
 
-        {/* ADD */}
-        {addingAddress && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
-            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
-              <h3 className="text-lg font-bold text-gray-900">
-                Thêm địa chỉ
-              </h3>
-
-              <div className="mt-5 space-y-4">
-                <input
-                  type="text"
-                  name="companyName"
-                  value={addForm.companyName}
-                  onChange={handleChangeAddForm}
-                  placeholder="Tên công ty"
-                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-                />
-
-                <input
-                  type="text"
-                  name="address"
-                  value={addForm.address}
-                  onChange={handleChangeAddForm}
-                  placeholder="Địa chỉ công ty"
-                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-                />
-
-                <textarea
-                  name="note"
-                  value={addForm.note}
-                  onChange={handleChangeAddForm}
-                  placeholder="Ghi chú"
-                  rows={4}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-                />
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setAddingAddress(false)}
-                  disabled={submitting}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
-                >
-                  Hủy
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleCreateAddress}
-                  disabled={submitting}
-                  className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                >
-                  {submitting ? "Đang thêm..." : "Thêm địa chỉ"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* ADD & EDIT*/}
+        <FormModal
+          open={addingAddress || !!editingAddress}
+          title={editingAddress ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ"}
+          fields={addressFields}
+          form={form}
+          onChange={handleChangeForm}
+          onClose={() => {
+            setAddingAddress(false);
+            setEditingAddress(null);
+          }}
+          onSubmit={editingAddress ? handleUpdateAddress : handleCreateAddress}
+          submitText={editingAddress ? "Lưu thay đổi" : "Thêm địa chỉ"}
+          loadingText={editingAddress ? "Đang lưu..." : "Đang thêm..."}
+          submitting={submitting}
+        />
       </SectionCard>
   );
 };

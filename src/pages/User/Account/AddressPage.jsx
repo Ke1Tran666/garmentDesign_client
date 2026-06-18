@@ -2,6 +2,7 @@ import { ButtonIconText } from "@/components/ui/Button/Button";
 import { SectionCard } from "@/components/ui/Section/Section";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import { USER_ADDRESS_API, USER_API } from "@/api/config";
 import {
   ArrowDownAZ,
@@ -25,6 +26,14 @@ const AddressPage = () => {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [defaultAddressId, setDefaultAddressId] = useState(null);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [deleteAddress, setDeleteAddress] = useState(null);
+
+  const [editForm, setEditForm] = useState({
+    companyName: "",
+    address: "",
+    note: "",
+  });
 
   const [actionMenu, setActionMenu] = useState({
     open: false,
@@ -35,6 +44,16 @@ const AddressPage = () => {
 
   const [confirmDefaultAddress, setConfirmDefaultAddress] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [sortType, setSortType] = useState("all");
+  const { showNotification } = useNotification();
+
+  const [addingAddress, setAddingAddress] = useState(false);
+
+  const [addForm, setAddForm] = useState({
+    companyName: "",
+    address: "",
+    note: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +67,6 @@ const AddressPage = () => {
         const addressResponse = await axios.get(
           `${USER_ADDRESS_API}/user/${idUser}`
         );
-        console.log(userResponse.data.user);
 
         setDefaultAddressId(userResponse.data?.user?.defaultAddress?.addressId ?? null);
         setAddresses(addressResponse.data);
@@ -65,26 +83,62 @@ const AddressPage = () => {
   const filteredAddresses = useMemo(() => {
     const keyword = searchKeyword.trim().toLowerCase();
 
-    if (!keyword) return addresses;
+    let result = [...addresses];
 
-    return addresses.filter((item) =>
-      [
-        item.companyName,
-        item.address,
-        item.note,
-      ]
-        .filter(Boolean)
-        .some((value) =>
-          value.toLowerCase().includes(keyword)
-        )
-    );
-  }, [searchKeyword, addresses]);
+    // Search
+    if (keyword) {
+      result = result.filter((item) =>
+        [
+          item.companyName,
+          item.address,
+          item.note,
+        ]
+          .filter(Boolean)
+          .some((value) =>
+            value.toLowerCase().includes(keyword)
+          )
+      );
+    }
+
+    // Active luôn lên đầu
+    result.sort((a, b) => {
+      const aActive = a.addressId === defaultAddressId ? 1 : 0;
+      const bActive = b.addressId === defaultAddressId ? 1 : 0;
+
+      return bActive - aActive;
+    });
+
+    // Sort theo tên
+    if (sortType === "name-asc") {
+      result.sort((a, b) => {
+        const aActive = a.addressId === defaultAddressId ? 1 : 0;
+        const bActive = b.addressId === defaultAddressId ? 1 : 0;
+
+        // Active luôn đứng đầu
+        if (aActive !== bActive) {
+          return bActive - aActive;
+        }
+
+        return (a.companyName || "").localeCompare(
+          b.companyName || "",
+          "vi"
+        );
+      });
+    }
+
+    return result;
+  }, [addresses, searchKeyword, sortType, defaultAddressId]);
 
   const showingEnd = filteredAddresses.length;
 
-  const handleAddMail = ()=>{
-    console.log(`Thêm địa chỉ`);
-  }
+  const handleAddMail = () => {
+    setAddingAddress(true);
+    setAddForm({
+      companyName: "",
+      address: "",
+      note: "",
+    });
+  };
 
   if (loading) {
     return (
@@ -138,8 +192,203 @@ const AddressPage = () => {
 
       setDefaultAddressId(confirmDefaultAddress.addressId);
       setConfirmDefaultAddress(null);
+      showNotification(
+        "success",
+        "Thành công",
+        "Đã cập nhật địa chỉ mặc định."
+      );
     } catch (error) {
-      console.error("Lỗi cập nhật địa chỉ mặc định:", error);
+      showNotification(
+        "error",
+        "Thất bại",
+        error.response?.data?.message ||
+          "Lỗi cập nhật địa chỉ mặc định."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle sort
+  const handleShowAllAddress = () => {
+    setSortType("all");
+  };
+
+  const handleSortNameAZ = () => {
+    setSortType("name-asc");
+  };
+
+  const handleOpenEdit = (address) => {
+    setEditingAddress(address);
+    setEditForm({
+      companyName: address.companyName || "",
+      address: address.address || "",
+      note: address.note || "",
+    });
+
+    setActionMenu({
+      open: false,
+      x: 0,
+      y: 0,
+      address: null,
+    });
+  };
+
+  const handleChangeEditForm = (event) => {
+    const { name, value } = event.target;
+
+    setEditForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdateAddress = async () => {
+    if (!editingAddress) return;
+    if (!editForm.companyName.trim()) {
+      alert("Tên công ty không được để trống");
+      return;
+    }
+
+    if (!editForm.address.trim()) {
+      alert("Địa chỉ không được để trống");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      await axios.put(
+        `${USER_ADDRESS_API}/${editingAddress.addressId}`,
+        editForm
+      );
+
+      setAddresses((prev) =>
+        prev.map((item) =>
+          item.addressId === editingAddress.addressId
+            ? {
+                ...item,
+                companyName: editForm.companyName,
+                address: editForm.address,
+                note: editForm.note,
+              }
+            : item
+        )
+      );
+
+      setEditingAddress(null);
+
+      showNotification(
+        "success",
+        "Thành công",
+        "Đã cập nhật địa chỉ."
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Thất bại",
+        error.response?.data?.message ||
+          "Không thể cập nhật địa chỉ."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleConfirmDeleteAddress = async () => {
+    if (!deleteAddress) return;
+    if (deleteAddress.addressId === defaultAddressId) {
+      alert("Không thể xóa địa chỉ mặc định");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      await axios.delete(`${USER_ADDRESS_API}/${deleteAddress.addressId}`);
+
+      setAddresses((prev) =>
+        prev.filter((item) => item.addressId !== deleteAddress.addressId)
+      );
+
+      if (deleteAddress.addressId === defaultAddressId) {
+        setDefaultAddressId(null);
+      }
+
+      setDeleteAddress(null);
+
+      showNotification(
+        "success",
+        "Thành công",
+        "Đã xóa địa chỉ."
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Thất bại",
+        error.response?.data?.message ||
+          "Không thể xóa địa chỉ."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleChangeAddForm = (event) => {
+    const { name, value } = event.target;
+
+    setAddForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCreateAddress = async () => {
+    if (!addForm.companyName.trim()) {
+      showNotification(
+        "error",
+        "Thất bại",
+        "Tên công ty không được để trống."
+      );
+      return;
+    }
+
+    if (!addForm.address.trim()) {
+      showNotification(
+        "error",
+        "Thất bại",
+        "Địa chỉ không được để trống."
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const idUser = localStorage.getItem("idUser");
+
+      const response = await axios.post(
+        `${USER_ADDRESS_API}/user/${idUser}`,
+        addForm
+      );
+
+      setAddresses((prev) => [...prev, response.data]);
+
+      setAddingAddress(false);
+
+      showNotification(
+        "success",
+        "Thành công",
+        "Đã thêm địa chỉ."
+      );
+    } catch (error) {
+      console.error("Lỗi thêm địa chỉ:", error);
+
+      showNotification(
+        "error",
+        "Thất bại",
+        "Không thể thêm địa chỉ."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -152,7 +401,7 @@ const AddressPage = () => {
       > 
         <div className="flex justify-end items-center">
           <ButtonIconText
-            text="Add Email"
+            text="Add Address"
             icon={Plus}
             onClick={handleAddMail}
             className="bg-brand! text-brand-light! hover:text-brand-light/85! hover:shadow-2xl transition"
@@ -180,13 +429,23 @@ const AddressPage = () => {
               <ButtonIconText
                 text="Show All Address"
                 icon={MapPin}
-                className="rounded-full!"
+                onClick={handleShowAllAddress}
+                className={`
+                  rounded-full!
+                  ${sortType === "all" ? "bg-brand! text-white!" : ""}
+                `}
+                classNameIcon={`${sortType === "all" ? "bg-brand! text-white! border-white!" : ""}`}
               />
 
               <ButtonIconText
                 text="Show by name A-Z"
                 icon={ArrowDownAZ}
-                className="rounded-full!"
+                onClick={handleSortNameAZ}
+                className={`
+                  rounded-full!
+                  ${sortType === "name-asc" ? "bg-brand! text-white!" : ""}
+                `}
+                classNameIcon={`${sortType === "name-asc" ? "bg-brand! text-white! border-white!" : ""}`}
               />
             </div>
           </div>
@@ -206,22 +465,17 @@ const AddressPage = () => {
                   <tr className="border-b border-gray-200 bg-gray-50">
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
                       <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          aria-label="Select all addresses"
-                          className="h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand"
-                        />
-                        Status
+                        Trạng thái
                       </div>
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
-                      Company Name
+                      Tên công ty
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
-                      Company Address
+                      Địa chỉ công ty
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
-                      Notes
+                      Ghi chú
                     </th>
                     <th className="px-4 py-3" />
                   </tr>
@@ -239,11 +493,6 @@ const AddressPage = () => {
                       >
                         <td className="px-4 py-4 align-top">
                           <div className="flex items-start gap-3">
-                            <input
-                              type="checkbox"
-                              aria-label={`Select ${item.companyName}`}
-                              className="mt-1 h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand"
-                            />
                             <span
                               className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
                                 statusClassName[getAddressStatus(item)]
@@ -358,9 +607,58 @@ const AddressPage = () => {
             >
               <button
                 type="button"
+                onClick={() => handleOpenEdit(actionMenu.address)}
+                className="
+                  w-full px-4 py-3 text-left text-sm font-medium
+                  text-gray-700 transition
+                  hover:bg-brand/5 hover:text-brand
+                "
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
+                disabled={
+                  actionMenu.address?.addressId === defaultAddressId
+                }
+                onClick={() => {
+                  setDeleteAddress(actionMenu.address);
+                  setActionMenu({
+                    open: false,
+                    x: 0,
+                    y: 0,
+                    address: null,
+                  });
+                }}
+                className="
+                  w-full px-4 py-3 text-left text-sm font-medium
+                  text-red-600 transition
+                  hover:bg-red-50
+
+                  disabled:cursor-not-allowed disabled:opacity-50
+                  disabled:hover:bg-white
+                "
+              >
+                Delete
+              </button>
+
+              <div className="h-px bg-gray-200" />
+
+              <button
+                type="button"
                 onClick={handleOpenConfirmDefault}
-                disabled={actionMenu.address?.addressId === defaultAddressId}
-                className="w-full px-4 py-3 text-left text-sm font-medium text-gray-700 transition hover:bg-brand/5 hover:text-brand disabled:cursor-not-allowed disabled:text-gray-400 disabled:hover:bg-white"
+                disabled={
+                  actionMenu.address?.addressId === defaultAddressId
+                }
+                className="
+                  w-full px-4 py-3 text-left text-sm font-medium
+                  text-gray-700 transition
+                  hover:bg-brand/5 hover:text-brand
+                  disabled:cursor-not-allowed
+                  disabled:text-gray-400
+                  disabled:hover:bg-white
+                "
               >
                 Đặt làm mặc định
               </button>
@@ -368,6 +666,7 @@ const AddressPage = () => {
           </>
         )}
 
+        {/* CONFIRM */}
         {confirmDefaultAddress && (
           <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
@@ -400,6 +699,165 @@ const AddressPage = () => {
                   className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
                 >
                   {submitting ? "Đang lưu..." : "Xác nhận"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* EDIT */}
+        {editingAddress && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
+            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-gray-900">
+                Chỉnh sửa địa chỉ
+              </h3>
+
+              <div className="mt-5 space-y-4">
+                <input
+                  type="text"
+                  name="companyName"
+                  value={editForm.companyName}
+                  onChange={handleChangeEditForm}
+                  placeholder="Tên công ty"
+                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                />
+
+                <input
+                  type="text"
+                  name="address"
+                  value={editForm.address}
+                  onChange={handleChangeEditForm}
+                  placeholder="Địa chỉ công ty"
+                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                />
+
+                <textarea
+                  name="note"
+                  value={editForm.note}
+                  onChange={handleChangeEditForm}
+                  placeholder="Ghi chú"
+                  rows={4}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingAddress(null)}
+                  disabled={submitting}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
+                >
+                  Hủy
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleUpdateAddress}
+                  disabled={submitting}
+                  className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {submitting ? "Đang lưu..." : "Lưu thay đổi"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DELETE */}
+        {deleteAddress && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
+            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-gray-900">
+                Xóa địa chỉ
+              </h3>
+
+              <p className="mt-3 text-sm leading-6 text-gray-600">
+                Bạn có chắc muốn xóa địa chỉ của{" "}
+                <span className="font-semibold text-gray-900">
+                  {deleteAddress.companyName}
+                </span>{" "}
+                không?
+              </p>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDeleteAddress(null)}
+                  disabled={submitting}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
+                >
+                  Hủy
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteAddress}
+                  disabled={submitting}
+                  className="rounded-lg bg-red-600! px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
+                >
+                  {submitting ? "Đang xóa..." : "Xóa"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ADD */}
+        {addingAddress && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
+            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-gray-900">
+                Thêm địa chỉ
+              </h3>
+
+              <div className="mt-5 space-y-4">
+                <input
+                  type="text"
+                  name="companyName"
+                  value={addForm.companyName}
+                  onChange={handleChangeAddForm}
+                  placeholder="Tên công ty"
+                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                />
+
+                <input
+                  type="text"
+                  name="address"
+                  value={addForm.address}
+                  onChange={handleChangeAddForm}
+                  placeholder="Địa chỉ công ty"
+                  className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                />
+
+                <textarea
+                  name="note"
+                  value={addForm.note}
+                  onChange={handleChangeAddForm}
+                  placeholder="Ghi chú"
+                  rows={4}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setAddingAddress(false)}
+                  disabled={submitting}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
+                >
+                  Hủy
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCreateAddress}
+                  disabled={submitting}
+                  className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {submitting ? "Đang thêm..." : "Thêm địa chỉ"}
                 </button>
               </div>
             </div>

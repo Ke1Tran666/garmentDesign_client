@@ -55,7 +55,7 @@ export const EmptyContact = ({
 
       <div className="overflow-visible">
         {!showForm ? (
-          <ButtonIconText text={buttonText} onClick={onAdd} Icon={Plus}/>
+          <ButtonIconText text={buttonText} onClick={onAdd} icon={Plus}/>
         ) : (
           <div className="origin-top space-y-3 animate-slideOutLeft">
             {children}

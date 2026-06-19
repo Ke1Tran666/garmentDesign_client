@@ -92,7 +92,12 @@ const GROUPS = [
         text: "Personal address",
         path: "/user/address",
       },
-      { icon: Shield, label: "Security" },
+      { 
+        icon: Shield, 
+        label: "Security",
+        text: "Personal security",
+        path: "/user/security",
+      },
       { icon: Lock, label: "Privacy" },
       { icon: CreditCard, label: "Billing" },
     ],

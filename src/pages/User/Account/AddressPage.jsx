@@ -458,6 +458,7 @@ const AddressPage = () => {
   };
 
   return (
+    <>
       <SectionCard
         title="Address"
         desc="Edit the user's address."
@@ -731,6 +732,7 @@ const AddressPage = () => {
           submitting={submitting}
         />
       </SectionCard>
+    </>
   );
 };
 

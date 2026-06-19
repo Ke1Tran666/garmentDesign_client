@@ -370,7 +370,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="px-6 py-6">
+    <>
       <SectionCard
         title="Personal"
         desc="Edit your name and profile picture"
@@ -654,7 +654,7 @@ const ProfilePage = () => {
           }
         }}
       />
-    </div>
+    </>
   );
 };
 

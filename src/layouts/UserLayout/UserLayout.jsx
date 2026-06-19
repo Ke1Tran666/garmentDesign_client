@@ -22,16 +22,17 @@ import {
   HelpCircle,
   CircleDot,
   ChevronRight,
+  MapPin,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
-import { Outlet } from "react-router-dom";
-import GooeySearchBar from "../../components/ui/Search/GooeySearchBar";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { USER_API } from "@/api/config";
 import { ButtonIcon } from "@/components/ui/Button/Button";
+import GooeySearchBar from "@/components/ui/Search/GooeyInput/GooeySearchBar";
 
 const BRAND = "var(--color-brand)";
 const BRAND_SHADOW = "rgba(1,146,245,0.35)";
@@ -64,7 +65,16 @@ const GROUPS = [
     btn: { icon: CircleDot, bg: BRAND, shadow: BRAND_SHADOW, dark: false },
     label: "Account",
     items: [
-      { icon: User, label: "My Profile" },
+      { 
+        icon: User, 
+        label: "My Profile",
+        text:"Personal Information", 
+        path: "/user/profile" 
+      },{ 
+        icon: MapPin, 
+        label: "My Address", 
+        text:"Personal address", 
+        path: "/user/address" },
       { icon: Shield, label: "Security" },
       { icon: Lock, label: "Privacy" },
       { icon: CreditCard, label: "Billing" },
@@ -90,6 +100,8 @@ const UserLayout = ({ title = "My Account" }) => {
 
   const [searchKeyword, setSearchKeyword] = useState("");
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const currentGroup = GROUPS[activeGroup];
   
@@ -162,8 +174,17 @@ const UserLayout = ({ title = "My Account" }) => {
                   key={item.label}
                   icon={<Icon size={18} />}
                   label={item.label}
-                  active={activeItem === index}
-                  onClick={() => setActiveItem(index)}
+                  active={
+                    activeItem === index ||
+                    location.pathname === item.path
+                  }
+                  onClick={() => {
+                    setActiveItem(index);
+
+                    if (item.path) {
+                      navigate(item.path);
+                    }
+                  }}
               />
               );
           })}
@@ -271,9 +292,11 @@ const UserLayout = ({ title = "My Account" }) => {
         <header className="flex justify-between items-center py-6 border-b-3 border-zinc-50">
           <div className="flex flex-col gap-2 justify-center">
             <h2 className="text-3xl font-bold text-gray-900">
-              {title}
+              {currentGroup.items[activeItem]?.label || title}
             </h2>
-            <p className="text-m text-[#667085]">Personal Information</p>
+            <p className="text-m text-[#667085]">
+              {currentGroup.items[activeItem]?.text}
+            </p>
           </div>
           <div>
             <GooeySearchBar

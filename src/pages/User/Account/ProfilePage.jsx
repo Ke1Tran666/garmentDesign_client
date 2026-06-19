@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import BirthdayInput from "@/components/ui/Form/BirthdayInput";
-import FloatingInput from "@/components/ui/Form/FloatingInput";
+import BirthdayInput from "@/components/ui/Input/BirthdayInput";
+import FloatingInput from "@/components/ui/Input/FloatingInput";
 import { useBeforeUnload, useOutletContext } from "react-router-dom";
 import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";

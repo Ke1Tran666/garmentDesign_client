@@ -1,19 +1,20 @@
-import { ButtonIconText } from "@/components/ui/Button/Button";
-import { SectionCard } from "@/components/ui/Section/Section";
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import FormModal from "@/components/ui/Form/FormModal";
-import { USER_ADDRESS_API, USER_API } from "@/api/config";
 import {
   ArrowDownAZ,
-  ChevronLeft,
-  ChevronRight,
   Ellipsis,
   MapPin,
   Plus,
-  Search,
 } from "lucide-react";
+import { USER_ADDRESS_API, USER_API } from "@/api/config";
+import { ButtonIconText } from "@/components/ui/Button/Button";
+import { SectionCard } from "@/components/ui/Section/Section";
+import axios from "axios";
+import { useNotification } from "@/components/ui/Notification/NotificationContext";
+import FormModal from "@/components/ui/Modal/FormModal";
+import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
+import SearchInput from "@/components/ui/Search/SearchInput/SearchInput";
+import DataTable from "@/components/ui/Table/DataTable";
+import Pagination from "@/components/ui/Table/Pagination";
 
 const statusClassName = {
   Active: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
@@ -141,8 +142,9 @@ const AddressPage = () => {
     return result;
   }, [addresses, searchKeyword, sortType, defaultAddressId]);
 
-  const totalPages = Math.ceil(
-    filteredAddresses.length / ITEMS_PER_PAGE
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredAddresses.length / ITEMS_PER_PAGE)
   );
 
   const paginatedAddresses = filteredAddresses.slice(
@@ -436,6 +438,25 @@ const AddressPage = () => {
     }
   };
 
+  // confirm và variant
+  const activeConfirm = confirmDefaultAddress || deleteAddress;
+
+  const isDeleteConfirm = !!deleteAddress;
+
+  const closeConfirmModal = () => {
+    setConfirmDefaultAddress(null);
+    setDeleteAddress(null);
+  };
+
+  const handleConfirmAction = () => {
+    if (isDeleteConfirm) {
+      handleConfirmDeleteAddress();
+      return;
+    }
+
+    handleConfirmSetDefault();
+  };
+
   return (
       <SectionCard
         title="Address"
@@ -453,22 +474,15 @@ const AddressPage = () => {
         {/* Table */}
         <div className="space-y-5 pt-5">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <label className="relative block w-full xl:max-w-sm">
-              <Search
-                size={18}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                value={searchKeyword}
-                onChange={(event) => {
-                  setSearchKeyword(event.target.value);
-                  setCurrentPage(1);
-                }}
-                placeholder="Tìm kiếm địa chỉ..."
-                className="h-11 w-full rounded-lg border border-gray-300 bg-white pl-11 pr-4 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-brand focus:ring-4 focus:ring-brand/10"
-              />
-            </label>
+            <SearchInput
+              value={searchKeyword}
+              placeholder="Tìm kiếm địa chỉ..."
+              className="xl:max-w-sm"
+              onChange={(value) => {
+                setSearchKeyword(value);
+                setCurrentPage(1);
+              }}
+            />
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <ButtonIconText
@@ -495,142 +509,97 @@ const AddressPage = () => {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-gray-200">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-205 table-fixed">
-                <colgroup>
-                  <col className="w-[16%]" />
-                  <col className="w-[25%]" />
-                  <col className="w-[34%]" />
-                  <col className="w-[18%]" />
-                  <col className="w-[7%]" />
-                </colgroup>
-
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
-                      <div className="flex items-center gap-3">
-                        Trạng thái
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
-                      Tên công ty
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
-                      Địa chỉ công ty
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-600">
-                      Ghi chú
-                    </th>
-                    <th className="px-4 py-3" />
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-gray-200">
-                  {paginatedAddresses.length > 0 ? (
-                    paginatedAddresses.map((item) => (
-                      <tr
-                        key={item.addressId}
-                        className="transition hover:bg-gray-50"
-                      >
-                        <td className="px-4 py-4 align-top">
-                          <div className="flex items-start gap-3">
-                            <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                statusClassName[getAddressStatus(item)]
-                              }`}
-                            >
-                              {getAddressStatus(item)}
-                            </span>
-                          </div>
-                        </td>
-
-                        <td className="px-4 py-4 align-top text-sm font-medium text-gray-800">
-                          {item.companyName}
-                        </td>
-
-                        <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
-                            {item.address}
-                        </td>
-
-                        <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
-                          {item.note}
-                        </td>
-
-                        <td className="px-4 py-4 align-top">
-                          <button
-                            type="button"
-                            aria-label={`Open actions for ${item.companyName}`}
-                            onClick={
-                              (event) => handleOpenActionMenu(event, item)
-                            }
-                            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition hover:border-brand hover:bg-brand/5 hover:text-brand"
-                          >
-                            <Ellipsis size={19} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="px-4 py-10 text-center text-sm text-gray-500"
-                      >
-                        Không tìm thấy địa chỉ phù hợp.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-gray-500!">
-              Hiển thị {showingStart}-{showingEnd} trong số {filteredAddresses.length} địa chỉ
-            </p>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-600 transition hover:border-brand hover:text-brand"
+          {/* TABLE */}
+          <DataTable
+            columns={[
+              {
+                key: "status",
+                title: "Trạng thái",
+              },
+              {
+                key: "companyName",
+                title: "Tên công ty",
+              },
+              {
+                key: "address",
+                title: "Địa chỉ công ty",
+              },
+              {
+                key: "note",
+                title: "Ghi chú",
+              },
+              {
+                key: "action",
+                title: "",
+              },
+            ]}
+            colGroup={[
+              "w-[16%]",
+              "w-[25%]",
+              "w-[34%]",
+              "w-[18%]",
+              "w-[7%]",
+            ]}
+            data={paginatedAddresses}
+            emptyText="Không tìm thấy địa chỉ phù hợp."
+            renderRow={(item) => (
+              <tr
+                key={item.addressId}
+                className="transition hover:bg-gray-50"
               >
-                <ChevronLeft size={16} />
-                Previous
-              </button>
+                <td className="px-4 py-4 align-top">
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        statusClassName[getAddressStatus(item)]
+                      }`}
+                    >
+                      {getAddressStatus(item)}
+                    </span>
+                  </div>
+                </td>
 
-              {Array.from(
-                { length: totalPages },
-                (_, index) => index + 1
-              ).map((page) => (
-                <button
-                  key={page}
-                  type="button"
-                  onClick={() => setCurrentPage(page)}
-                  className={`h-9 min-w-9 rounded-lg border px-3 text-sm font-semibold transition ${
-                    page === currentPage
-                      ? "border-brand bg-brand text-subtle"
-                      : "border-gray-300 bg-white text-gray-600 hover:border-brand hover:text-brand"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+                <td className="px-4 py-4 align-top text-sm font-medium text-gray-800">
+                  {item.companyName}
+                </td>
 
-              <button
-                type="button"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-600 transition hover:border-brand hover:text-brand"
-              >
-                Next
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
+                <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
+                  {item.address}
+                </td>
+
+                <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
+                  {item.note}
+                </td>
+
+                <td className="px-4 py-4 align-top">
+                  <button
+                    type="button"
+                    aria-label={`Open actions for ${item.companyName}`}
+                    onClick={(event) =>
+                      handleOpenActionMenu(event, item)
+                    }
+                    className="
+                      flex h-9 w-9 items-center justify-center
+                      rounded-full border border-gray-300
+                      text-gray-500 transition
+                      hover:border-brand hover:bg-brand/5 hover:text-brand
+                    "
+                  >
+                    <Ellipsis size={19} />
+                  </button>
+                </td>
+              </tr>
+            )}
+          />
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            showingStart={showingStart}
+            showingEnd={showingEnd}
+            totalItems={filteredAddresses.length}
+            onPageChange={setCurrentPage}
+          />
         </div>
         {actionMenu.open && (
           <>
@@ -715,83 +684,35 @@ const AddressPage = () => {
           </>
         )}
 
-        {/* CONFIRM */}
-        {confirmDefaultAddress && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
-            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-              <h3 className="text-lg font-bold text-gray-900">
-                Xác nhận địa chỉ mặc định
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-gray-600">
-                Bạn có chắc muốn chọn{" "}
-                <span className="font-semibold text-gray-900">
-                  {confirmDefaultAddress.companyName}
-                </span>{" "}
-                làm địa chỉ mặc định không?
-              </p>
-
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setConfirmDefaultAddress(null)}
-                  disabled={submitting}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
-                >
-                  Hủy
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleConfirmSetDefault}
-                  disabled={submitting}
-                  className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                >
-                  {submitting ? "Đang lưu..." : "Xác nhận"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* DELETE */}
-        {deleteAddress && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4">
-            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
-              <h3 className="text-lg font-bold text-gray-900">
-                Xóa địa chỉ
-              </h3>
-
-              <p className="mt-3 text-sm leading-6 text-gray-600">
-                Bạn có chắc muốn xóa địa chỉ của{" "}
-                <span className="font-semibold text-gray-900">
-                  {deleteAddress.companyName}
-                </span>{" "}
-                không?
-              </p>
-
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDeleteAddress(null)}
-                  disabled={submitting}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-60"
-                >
-                  Hủy
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleConfirmDeleteAddress}
-                  disabled={submitting}
-                  className="rounded-lg bg-red-600! px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
-                >
-                  {submitting ? "Đang xóa..." : "Xóa"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* DELETE & CONFIRM */}
+        <ConfirmModal
+          open={!!activeConfirm}
+          title={isDeleteConfirm ? "Xóa địa chỉ" : "Xác nhận địa chỉ mặc định"}
+          confirmText={isDeleteConfirm ? "Xóa" : "Xác nhận"}
+          loadingText={isDeleteConfirm ? "Đang xóa..." : "Đang lưu..."}
+          confirmVariant={isDeleteConfirm ? "danger" : "primary"}
+          submitting={submitting}
+          onClose={closeConfirmModal}
+          onConfirm={handleConfirmAction}
+        >
+          {isDeleteConfirm ? (
+            <>
+              Bạn có chắc muốn xóa {" "}
+              <span className="font-semibold text-gray-900">
+                {activeConfirm?.companyName} - {activeConfirm?.address}
+              </span>{" "}
+              không?
+            </>
+          ) : (
+            <>
+              Bạn có chắc muốn chọn{" "}
+              <span className="font-semibold text-gray-900">
+                {activeConfirm?.companyName} - {activeConfirm?.address}
+              </span>{" "}
+              làm địa chỉ mặc định không?
+            </>
+          )}
+        </ConfirmModal>
 
         {/* ADD & EDIT*/}
         <FormModal

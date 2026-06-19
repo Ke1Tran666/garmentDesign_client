@@ -7,9 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
-import BirthdayInput from "../../components/ui/Form/BirthdayInput";
-import FloatingInput from "../../components/ui/Form/FloatingInput";
-import PasswordInput from "../../components/ui/Form/PasswordInput";
+import BirthdayInput from "../../components/ui/Input/BirthdayInput";
+import FloatingInput from "../../components/ui/Input/FloatingInput";
+import PasswordInput from "../../components/ui/Input/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
 import { AUTH_API } from "@/api/config";
 

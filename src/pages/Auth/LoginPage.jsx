@@ -11,8 +11,8 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
 
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
-import FloatingInput from "../../components/ui/Form/FloatingInput";
-import PasswordInput from "../../components/ui/Form/PasswordInput";
+import FloatingInput from "../../components/ui/Input/FloatingInput";
+import PasswordInput from "../../components/ui/Input/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
 import { AUTH_API } from "@/api/config";
 

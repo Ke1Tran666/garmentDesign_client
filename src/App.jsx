@@ -9,6 +9,7 @@ import UserLayout from './layouts/UserLayout/UserLayout';
 import AuthLayout from './layouts/AuthLayout/AuthLayout';
 import ProfilePage from './pages/User/Account/ProfilePage';
 import AddressPage from './pages/User/Account/AddressPage';
+import SecurityPage from './pages/User/Account/SecurityPage';
 
 const App = () => {
 
@@ -35,6 +36,7 @@ const App = () => {
           <Route index element={<Navigate to="profile" replace />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="address" element={<AddressPage />} />
+          <Route path="security" element={<SecurityPage />} />
         </Route>
       </Routes>
     </NotificationProvider>

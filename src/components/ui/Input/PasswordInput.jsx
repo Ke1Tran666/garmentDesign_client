@@ -7,6 +7,8 @@ const PasswordInput = ({
   label = "Password",
   containerClassName = "",
   className = "",
+  labelClassName = "",
+  buttonClassName = "",
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +34,7 @@ const PasswordInput = ({
       />
 
       <label
-        className="
+        className={`
           pointer-events-none absolute left-4 top-1/2
           -translate-y-1/2 text-sm text-white/55
           transition-all duration-300
@@ -40,7 +42,9 @@ const PasswordInput = ({
           peer-valid:text-xs peer-valid:text-[#80d0ff]
           peer-focus:top-2 peer-focus:translate-y-0
           peer-focus:text-xs peer-focus:text-[#80d0ff]
-        "
+          ${labelClassName}
+        `}
+        
       >
         {label}
       </label>
@@ -48,7 +52,9 @@ const PasswordInput = ({
       <button
         type="button"
         onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white"
+        className={`
+          absolute right-4 top-1/2 -translate-y-1/2 text-white/45 transition hover:text-white ${buttonClassName}
+          `}
       >
         {showPassword ? (
           <EyeOff className="h-5 w-5" />

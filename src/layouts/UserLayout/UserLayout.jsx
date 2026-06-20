@@ -129,6 +129,17 @@ const UserLayout = ({ title = "My Account" }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  
+  const [openUserMenu, setOpenUserMenu] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("idUser");
+    localStorage.removeItem("user");
+    localStorage.removeItem("authProviders");
+
+    navigate("/");
+  };
 
   const findActiveRoute = () => {
     for (let gIndex = 0; gIndex < GROUPS.length; gIndex++) {
@@ -169,6 +180,20 @@ const UserLayout = ({ title = "My Account" }) => {
 
     loadUser();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenUserMenu(false);
+    };
+
+    if (openUserMenu) {
+      document.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [openUserMenu]);
 
   const handleGroupChange = (gIndex) => {
     const defaultItem = GROUPS[gIndex].defaultItem;
@@ -321,16 +346,76 @@ const UserLayout = ({ title = "My Account" }) => {
               />
             </ButtonIcon>
 
-            <div className="flex items-center gap-3">
-              <img
-                src={user?.avatar || defaultAvatar}
-                alt={user?.fullName || "User"}
-                className="h-10 w-10 rounded-xl object-cover"
-              />
+            <div className="relative">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenUserMenu((prev) => !prev);
+                }}
+                className="
+                  flex items-center gap-3
+                  rounded-xl px-2 py-1
+                  hover:bg-gray-50
+                  transition
+                "
+              >
+                <img
+                  src={user?.avatar || defaultAvatar}
+                  alt={user?.fullName || "User"}
+                  className="h-10 w-10 rounded-xl object-cover"
+                />
 
-              <span className="font-semibold text-gray-800">
-                {user?.fullName || "Guest"}
-              </span>
+                <span className="font-semibold text-gray-800">
+                  {user?.fullName || "Guest"}
+                </span>
+
+                <ChevronDown
+                  size={16}
+                  className={`transition ${
+                    openUserMenu ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {openUserMenu && (
+                <div
+                  className="
+                    absolute right-0 top-full mt-2
+                    w-48 rounded-xl border border-gray-200
+                    bg-white p-2 shadow-lg z-50
+                  "
+                >
+                  <button
+                    onClick={() => {
+                      navigate("/user/profile");
+                      setOpenUserMenu(false);
+                    }}
+                    className="
+                      flex w-full items-center gap-3
+                      rounded-lg px-3 py-2
+                      text-sm text-gray-700
+                      hover:bg-gray-100
+                    "
+                  >
+                    <User size={16} />
+                    My Profile
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className="
+                      flex w-full items-center gap-3
+                      rounded-lg px-3 py-2
+                      text-sm text-red-600
+                      hover:bg-red-50
+                    "
+                  >
+                    <Lock size={16} />
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

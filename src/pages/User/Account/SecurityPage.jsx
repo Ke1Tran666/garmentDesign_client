@@ -1,16 +1,258 @@
+import { useState } from "react";
+import axios from "axios";
+import { Info } from "lucide-react";
+import { USER_API } from "@/api/config";
+import { HandleButton } from "@/components/ui/Button/Button";
+import { Divider } from "@/components/ui/Divider/Divider";
+import PasswordInput from "@/components/ui/Input/PasswordInput";
 import { SectionCard } from "@/components/ui/Section/Section";
-
+import Switch from "@/components/ui/Switch/Switch";
+import { useNotification } from "@/components/ui/Notification/NotificationContext";
 const SecurityPage = () => {
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [email2FA, setEmail2FA] = useState(false);
+  const [sms2FA, setSms2FA] = useState(false);
+  const [app2FA, setApp2FA] = useState(false);
+
+  const { showNotification } = useNotification();
+
+  // Xác thực mật khẩu
+  const validatePassword = () => {
+    if (!oldPassword.trim()) {
+      showNotification(
+        "error",
+        "Lỗi",
+        "Vui lòng nhập mật khẩu hiện tại."
+      );
+      return false;
+    }
+
+    if (newPassword.length < 8) {
+      showNotification(
+        "error",
+        "Lỗi",
+        "Mật khẩu mới phải có ít nhất 8 ký tự."
+      );
+      return false;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showNotification(
+        "error",
+        "Lỗi",
+        "Xác nhận mật khẩu không khớp."
+      );
+      return false;
+    }
+
+    if (oldPassword === newPassword) {
+      showNotification(
+        "error",
+        "Lỗi",
+        "Mật khẩu mới phải khác mật khẩu hiện tại."
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleChangePassword = async () => {
+    if (!validatePassword()) return;
+
+    try {
+      const idUser = localStorage.getItem("idUser");
+
+      await axios.put(`${USER_API}/me/${idUser}/change-password`, {
+        oldPassword,
+        newPassword,
+      });
+
+      showNotification(
+        "success",
+        "Thành công",
+        "Đổi mật khẩu thành công."
+      );
+
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      showNotification(
+        "error",
+        "Thất bại",
+        error?.response?.data?.message ||
+          "Không thể đổi mật khẩu."
+      );
+    }
+  };
+
+  const canSubmit = oldPassword && newPassword && confirmPassword;
+
+  const handleResetPasswordForm = () => {
+    setOldPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
   return (
     <>
         <SectionCard
-            title="Security"
-            desc="User's account security."
+            title="Change password"
+            desc="Change user password."
         >
+          <div className="grid grid-cols-2 gap-x-3">
+            {/* INPUT */}
+            <InputPassword
+              label="Mật Khẩu hiện tại"
+              value={oldPassword || ""}
+              onChange={(e)=> setOldPassword(e.target.value)}
+            />
+            <InputPassword
+              label="Mật Khẩu mới"
+              value={newPassword || ""}
+              onChange={(e)=> setNewPassword(e.target.value)}
+            />
+          </div>
+            <InputPassword
+              label="Xác nhận mật khẩu"
+              value={confirmPassword || ""}
+              onChange={(e)=> setConfirmPassword(e.target.value)}
+            />
+          
+          <div className="flex justify-between items-center">
+            {/* HANDLE BUTTON */}
+            <div className="flex items-center gap-3 mb-5">
+              <HandleButton 
+                disabled={!canSubmit}
+                onClick={handleChangePassword}
+                className={`bg-brand!`}
+              >
+                Save change
+              </HandleButton>
+              <HandleButton 
+                onClick={handleResetPasswordForm}
+                className={`border! border-red-600! text-red-600!`}
+              >
+                Default
+              </HandleButton>
+            </div>
+            <div className="flex items-center gap-2 text-gray-500">
+               <div className="text-sm">
+                <div className="flex gap-1 items-center">
+                  <Info size={18}/>
+                  <p className="font-semibold">Lưu ý</p>
+                </div>
+                <ul className="mt-1 list-disc pl-4 space-y-1">
+                  <li>Mật khẩu phải có tối thiểu 8 ký tự.</li>
+                  <li>Nên bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</li>
+                  <li>Không sử dụng mật khẩu đã dùng trước đó.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
 
+        <Divider/>
+
+        <SectionCard
+          title="Two-Factor Authentication"
+          desc="Add an extra layer of security to your account."
+        >
+          <div className="space-y-5">
+
+            {/* Email Authentication */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-gray-800">
+                  Email Authentication
+                </h4>
+                <p className="text-sm text-gray-500">
+                  Receive verification codes via your registered email address.
+                </p>
+              </div>
+
+              <Switch
+                checked={email2FA}
+                onCheckedChange={setEmail2FA}
+              />
+            </div>
+
+            {/* SMS Authentication */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-gray-800">
+                  SMS Authentication
+                </h4>
+                <p className="text-sm text-gray-500">
+                  Receive verification codes via your phone number.
+                </p>
+              </div>
+
+              <Switch
+                checked={sms2FA}
+                onCheckedChange={setSms2FA}
+              />
+            </div>
+
+            {/* Authenticator App */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-gray-800">
+                  Authenticator App
+                </h4>
+                <p className="text-sm text-gray-500">
+                  Use Google Authenticator or Microsoft Authenticator to generate verification codes.
+                </p>
+              </div>
+
+              <Switch
+                checked={app2FA}
+                onCheckedChange={setApp2FA}
+              />
+            </div>
+
+          </div>
+
+          <div className="my-5">
+            <div className="text-sm text-gray-500 flex items-center gap-2">
+              <div className="flex gap-1 items-center">
+                  <Info size={18}/>
+                  <span className="font-semibold">Lưu ý:</span>{" "}
+              </div>
+              <p>
+                Sau khi thay đổi mật khẩu, bạn có thể bật xác thực hai lớp để tăng cường bảo mật cho tài khoản.
+              </p>
+            </div>
+          </div>
         </SectionCard>
     </>
   )
 }
 
 export default SecurityPage
+
+const InputPassword = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+})=>{
+  return(
+    <PasswordInput 
+      label={label}
+      value={value || ""}
+      onChange={onChange}
+      placeholder={placeholder || label}
+      containerClassName="mb-5"
+      className="
+        border-gray-300! text-gray-500! focus:border-brand!  placeholder:text-transparent!
+        "
+      labelClassName="text-gray-500! peer-focus:text-brand!"
+      buttonClassName="text-gray-500!"
+    />
+  )
+}

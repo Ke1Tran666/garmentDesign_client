@@ -6,9 +6,15 @@ import { SectionCard } from "@/components/ui/Section/Section";
 import { HandleButtonIcon } from "@/components/ui/Button/Button";
 import { Download, Trash2 } from "lucide-react";
 import { USER_API } from "@/api/config";
+import { useNavigate } from "react-router-dom";
+import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 
 const PrivacyPage = () => {
+  const navigate = useNavigate();
+
   const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const formatDateTime = (value) => {
     if (!value) return "";
@@ -115,7 +121,40 @@ const PrivacyPage = () => {
   };
 
   const handleDeleteAccount = () => {
-    console.log("Delete account");
+    setOpenDeleteModal(true);
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    const idUser = localStorage.getItem("idUser");
+
+    if (!idUser) {
+      alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+      return;
+    }
+
+    try {
+      setDeleting(true);
+
+      await axios.delete(`${USER_API}/me/${idUser}/delete-account`);
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("idUser");
+      localStorage.removeItem("user");
+      localStorage.removeItem("authProviders");
+
+      alert("Tài khoản đã được xóa.");
+      navigate("/login");
+    } catch (error) {
+      console.error("Delete account error:", error);
+      alert(
+        error?.response?.data?.message ||
+          error?.response?.data ||
+          "Xóa tài khoản thất bại"
+      );
+    } finally {
+      setDeleting(false);
+      setOpenDeleteModal(false);
+    }
   };
 
   return (
@@ -154,16 +193,32 @@ const PrivacyPage = () => {
               This action cannot be undone.
             </p>
           </div>
+
           <HandleButtonIcon
             variant="outline"
             icon={Trash2}
             onClick={handleDeleteAccount}
-            className={`bg-red-600!`}
+            disabled={deleting}
+            className="bg-red-600! disabled:cursor-not-allowed disabled:opacity-50"
           >
             Delete Account
           </HandleButtonIcon>
         </div>
       </SectionCard>
+
+      <ConfirmModal
+        open={openDeleteModal}
+        title="Xóa tài khoản vĩnh viễn"
+        confirmText="Xóa tài khoản"
+        loadingText="Đang xóa..."
+        confirmVariant="danger"
+        submitting={deleting}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={handleConfirmDeleteAccount}
+      >
+        Bạn có chắc chắn muốn xóa tài khoản này không? Hành động này sẽ xóa
+        vĩnh viễn tài khoản và không thể hoàn tác.
+      </ConfirmModal>
     </>
   );
 };

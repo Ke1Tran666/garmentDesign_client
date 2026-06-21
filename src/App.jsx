@@ -11,6 +11,7 @@ import ProfilePage from './pages/User/Account/ProfilePage';
 import AddressPage from './pages/User/Account/AddressPage';
 import SecurityPage from './pages/User/Account/SecurityPage';
 import PrivacyPage from './pages/User/Account/PrivacyPage';
+import DashboardPage from './pages/User/Main/DashboardPage';
 
 const App = () => {
 
@@ -30,6 +31,12 @@ const App = () => {
           
           {/* FORGOT PASSWORD */}
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        </Route>
+
+        {/* MAIN USER */}
+        <Route path="/user" element={<UserLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
         </Route>
 
         {/* USER */}

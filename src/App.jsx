@@ -10,6 +10,7 @@ import AuthLayout from './layouts/AuthLayout/AuthLayout';
 import ProfilePage from './pages/User/Account/ProfilePage';
 import AddressPage from './pages/User/Account/AddressPage';
 import SecurityPage from './pages/User/Account/SecurityPage';
+import PrivacyPage from './pages/User/Account/PrivacyPage';
 
 const App = () => {
 
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="address" element={<AddressPage />} />
           <Route path="security" element={<SecurityPage />} />
+          <Route path="privacy" element={<PrivacyPage />} />
         </Route>
       </Routes>
     </NotificationProvider>

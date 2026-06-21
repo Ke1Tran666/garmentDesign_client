@@ -73,16 +73,48 @@ export const HandleButton = ({
     className,
     onClick,
     children,
-    
 }) => {
   return (
     <button
         type="button"
         onClick={onClick}
         className={`
-            rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 ${className}
+            flex item-center justify-center gap-3
+            rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 
+            ${className}
+            
         `}
     >
+        {children}
+    </button>
+  )
+}
+
+export const HandleButtonIcon = ({
+    className,
+    classNameIcon,
+    onClick,
+    children,
+    icon:Icon,
+}) => {
+  return (
+    <button
+        type="button"
+        onClick={onClick}
+        className={`
+            flex item-center justify-center gap-3
+            rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 
+            ${className}
+            
+        `}
+    >
+        <span 
+          className={`
+            flex h-5 w-5 items-center justify-center rounded-full border-2 border-white text-white ${classNameIcon}
+            `}
+        >
+          {Icon && <Icon size={13} strokeWidth={3}/>}
+        </span>
         {children}
     </button>
   )

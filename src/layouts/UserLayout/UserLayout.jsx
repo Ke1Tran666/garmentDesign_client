@@ -24,7 +24,6 @@ import {
   Monitor,
   Settings2,
   Globe,
-  CreditCard,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
@@ -124,8 +123,12 @@ const GROUPS = [
         text: "Personal security",
         path: "/user/security",
       },
-      { icon: Lock, label: "Privacy" },
-      { icon: CreditCard, label: "Billing" },
+      { 
+        icon: Lock, 
+        label: "Privacy",
+        text: "Personal privacy",
+        path: "/user/privacy",
+      },
     ],
     defaultItem: 0,
   },

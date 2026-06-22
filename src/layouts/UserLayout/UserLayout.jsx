@@ -6,13 +6,8 @@ import {
   ClipboardList,
   FileText,
   BarChart2,
-  Settings,
   ChevronDown,
-  Settings2,
   Shield,
-  Globe,
-  Monitor,
-  BellRing,
   Lock,
   LineChart,
   FolderDown,
@@ -21,6 +16,15 @@ import {
   CircleDot,
   ChevronRight,
   MapPin,
+  ShoppingBag,
+  PackageCheck,
+  Star,
+  Settings,
+  BellRing,
+  Monitor,
+  Settings2,
+  Globe,
+  CreditCard,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
@@ -52,9 +56,44 @@ const GROUPS = [
         path: "/user/dashboard",
       },
       { icon: ClipboardList, label: "Appoint List" },
+      { 
+        icon: User, 
+        label: "My Profile",
+        text: "Personal Information",
+        path: "/user/profile", 
+      },
       { icon: FileText, label: "Reports" },
-      { icon: User, label: "My Profile" },
       { icon: BarChart2, label: "Clinic Overview" },
+    ],
+    defaultItem: 0,
+  },
+  {
+    btn: {
+      icon: ShoppingBag,
+      bg: "#7C3AED",
+      shadow: "rgba(124,58,237,0.35)",
+      dark: false,
+    },
+    label: "Dịch vụ",
+    items: [
+      {
+        icon: ShoppingBag,
+        label: "Đặt dịch vụ",
+        text: "Tạo đơn hàng thiết kế, chỉnh sửa hoặc yêu cầu dịch vụ mới",
+        path: "/user/services",
+      },
+      {
+        icon: PackageCheck,
+        label: "Đơn hàng của tôi",
+        text: "Quản lý các đơn hàng dịch vụ đã đặt",
+        path: "/user/service-orders",
+      },
+      {
+        icon: Star,
+        label: "Đánh giá dịch vụ",
+        text: "Đánh giá đơn hàng sau khi hoàn tất",
+        path: "/user/service-reviews",
+      },
     ],
     defaultItem: 0,
   },
@@ -85,12 +124,8 @@ const GROUPS = [
         text: "Personal security",
         path: "/user/security",
       },
-      { 
-        icon: Lock, 
-        label: "Privacy",
-        text: "Manage your personal data and accounts.",
-        path: "/user/privacy",
-      },
+      { icon: Lock, label: "Privacy" },
+      { icon: CreditCard, label: "Billing" },
     ],
     defaultItem: 0,
   },
@@ -137,6 +172,14 @@ const UserLayout = ({ title = "My Account" }) => {
   };
 
   const findActiveRoute = () => {
+    const currentGroupItemIndex = GROUPS[activeGroup].items.findIndex(
+      (item) => item.path === location.pathname
+    );
+
+    if (currentGroupItemIndex !== -1) {
+      return { gIndex: activeGroup, itemIndex: currentGroupItemIndex };
+    }
+
     for (let gIndex = 0; gIndex < GROUPS.length; gIndex++) {
       const itemIndex = GROUPS[gIndex].items.findIndex(
         (item) => item.path === location.pathname

@@ -9,7 +9,6 @@ import {
   Settings,
   ChevronDown,
   Settings2,
-  Wrench,
   Shield,
   Globe,
   Monitor,
@@ -46,27 +45,16 @@ const GROUPS = [
     },
     label: "Main",
     items: [
-      { icon: LayoutDashboard, label: "Dashboard" },
+      { 
+        icon: LayoutDashboard,
+        label: "Dashboard",
+        text: "Tổng quan file, đơn hàng và task cần xử lý",
+        path: "/user/dashboard",
+      },
       { icon: ClipboardList, label: "Appoint List" },
       { icon: FileText, label: "Reports" },
       { icon: User, label: "My Profile" },
       { icon: BarChart2, label: "Clinic Overview" },
-    ],
-    defaultItem: 0,
-  },
-  {
-    btn: {
-      icon: Settings,
-      bg: "#ffffff",
-      shadow: "rgba(15,23,42,0.08)",
-      dark: true,
-    },
-    label: "Settings",
-    items: [
-      { icon: Globe, label: "General" },
-      { icon: BellRing, label: "Notifications" },
-      { icon: Monitor, label: "Display" },
-      { icon: Settings2, label: "Preferences" },
     ],
     defaultItem: 0,
   },
@@ -108,20 +96,24 @@ const GROUPS = [
   },
   {
     btn: {
-      icon: Wrench,
+      icon: Settings,
       bg: "#ffffff",
       shadow: "rgba(15,23,42,0.08)",
       dark: true,
     },
-    label: "Tools",
+    label: "Settings",
     items: [
+      { icon: Globe,label: "General" },
+      { icon: BellRing, label: "Notifications" },
+      { icon: Monitor, label: "Display" },
+      { icon: Settings2, label: "Preferences" },
       { icon: LineChart, label: "Analytics" },
       { icon: FolderDown, label: "Export" },
       { icon: Plug, label: "Integrations" },
       { icon: HelpCircle, label: "Help" },
     ],
     defaultItem: 0,
-  },
+  }
 ];
 
 const UserLayout = ({ title = "My Account" }) => {

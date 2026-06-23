@@ -22,3 +22,6 @@ export const USER_AUTH_PROVIDER_API = `${BASE_URL_API}/userAuthProviders`;
 
 // Newsletter API
 export const NEWSLETTER_API = `${BASE_URL_API}/newsletter`;
+
+// Service API
+export const SERVICE_API = `${BASE_URL_API}/services`;

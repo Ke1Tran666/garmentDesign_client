@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Clock, Mail, MapPin, Phone, Send } from "lucide-react";
-import { SERVICE_API } from "@/api/config";
+import { SERVICE_API, CONTACT_API } from "@/api/config";
+import { useNotification } from "@/components/ui/Notification/NotificationContext";
 
 const CONTACT_INFO = [
   {
@@ -50,7 +51,7 @@ const ContactInfo = ({ icon: Icon, label, value, delay }) => {
   );
 };
 
-function ContactForm({ onSubmit, services, loadingServices }) {
+function ContactForm({ onSubmit, services, loadingServices, submitting }) {
   return (
     <form
       id="contactForm"
@@ -58,24 +59,44 @@ function ContactForm({ onSubmit, services, loadingServices }) {
       className="rounded-2xl bg-white border border-border/60 p-8 md:p-10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] space-y-6"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {[
-          { label: "Họ tên *", type: "text", placeholder: "Nguyễn Văn A" },
-          { label: "Số điện thoại *", type: "tel", placeholder: "090 123 4567" },
-        ].map(({ label, type, placeholder }) => (
-          <div key={label}>
-            <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
-              {label}
-            </label>
-            <input type={type} placeholder={placeholder} required className={inputCls} />
-          </div>
-        ))}
+        <div>
+          <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
+            Họ tên *
+          </label>
+          <input
+            name="fullName"
+            type="text"
+            placeholder="Nguyễn Văn A"
+            required
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
+            Số điện thoại *
+          </label>
+          <input
+            name="phone"
+            type="tel"
+            placeholder="090 123 4567"
+            required
+            className={inputCls}
+          />
+        </div>
       </div>
 
       <div>
         <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
           Email *
         </label>
-        <input type="email" placeholder="email@example.com" required className={inputCls} />
+        <input
+          name="email"
+          type="email"
+          placeholder="email@example.com"
+          required
+          className={inputCls}
+        />
       </div>
 
       <div>
@@ -88,7 +109,7 @@ function ContactForm({ onSubmit, services, loadingServices }) {
           required
           className={`${inputCls} appearance-none cursor-pointer text-muted1`}
           defaultValue=""
-          disabled={loadingServices}
+          disabled={loadingServices || submitting}
         >
           <option value="" disabled>
             {loadingServices ? "Đang tải dịch vụ..." : "Chọn dịch vụ"}
@@ -107,6 +128,7 @@ function ContactForm({ onSubmit, services, loadingServices }) {
           Mô tả yêu cầu
         </label>
         <textarea
+          name="message"
           rows={4}
           placeholder="Mô tả sản phẩm, số lượng, deadline..."
           className={`${inputCls} resize-none`}
@@ -115,9 +137,10 @@ function ContactForm({ onSubmit, services, loadingServices }) {
 
       <button
         type="submit"
-        className="btn-shine w-full bg-brand! text-white font-heading font-medium text-base py-3.5 rounded-xl tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-[1.02] hover:shadow-[0_8px_25px_rgba(1,146,245,0.3)] flex items-center justify-center gap-2"
+        disabled={submitting}
+        className="btn-shine w-full bg-brand! text-white font-heading font-medium text-base py-3.5 rounded-xl tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-[1.02] hover:shadow-[0_8px_25px_rgba(1,146,245,0.3)] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
-        Gửi yêu cầu
+        {submitting ? "Đang gửi..." : "Gửi yêu cầu"}
         <Send className="w-4 h-4" />
       </button>
     </form>
@@ -127,6 +150,9 @@ function ContactForm({ onSubmit, services, loadingServices }) {
 const ContactSection = () => {
   const [services, setServices] = useState([]);
   const [loadingServices, setLoadingServices] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const { showNotification } = useNotification();
 
   const activeServices = useMemo(() => {
     return services.filter((item) => {
@@ -169,9 +195,53 @@ const ContactSection = () => {
     return () => observer.disconnect();
   }, [activeServices]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    e.target.reset();
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    const payload = {
+      fullName: formData.get("fullName"),
+      phone: formData.get("phone"),
+      email: formData.get("email"),
+      serviceCode: formData.get("serviceCode"),
+      message: formData.get("message"),
+    };
+
+    if (!payload.email) {
+      showNotification(
+        "error",
+        "Có lỗi xảy ra!",
+        "Vui lòng nhập email của bạn."
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      await axios.post(CONTACT_API, payload);
+
+      showNotification(
+        "success",
+        "Gửi thành công",
+        "Chúng tôi sẽ phản hồi sớm nhất."
+      );
+
+      form.reset();
+    } catch (error) {
+      console.error("Lỗi gửi liên hệ:", error);
+
+      showNotification(
+        "error",
+        "Có lỗi xảy ra!",
+        error?.response?.data?.message ||
+          "Gửi yêu cầu thất bại. Vui lòng thử lại."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -213,6 +283,7 @@ const ContactSection = () => {
               onSubmit={handleSubmit}
               services={activeServices}
               loadingServices={loadingServices}
+              submitting={submitting}
             />
           </div>
         </div>

@@ -25,3 +25,6 @@ export const NEWSLETTER_API = `${BASE_URL_API}/newsletter`;
 
 // Service API
 export const SERVICE_API = `${BASE_URL_API}/services`;
+
+// Contact API
+export const CONTACT_API = `${BASE_URL_API}/mail/contact`;

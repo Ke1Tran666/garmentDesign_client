@@ -274,7 +274,7 @@ const Home = () => {
                                     Đặt lịch tư vấn
                                     <Calendar className="w-4 h-4"/>
                                 </a>
-                                <a href="tel:+84901234567"
+                                <a href="tel:+84918414470"
                                     className="flex items-center gap-2 text-white/70 hover:text-white font-body text-sm transition-colors duration-300">
                                     <Phone className="w-4 h-4"/>
                                     0918 414 470

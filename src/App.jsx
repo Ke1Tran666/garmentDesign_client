@@ -10,8 +10,8 @@ import AuthLayout from './layouts/AuthLayout/AuthLayout';
 import ProfilePage from './pages/User/Account/ProfilePage';
 import AddressPage from './pages/User/Account/AddressPage';
 import SecurityPage from './pages/User/Account/SecurityPage';
-import PrivacyPage from './pages/User/Account/PrivacyPage';
 import DashboardPage from './pages/User/Main/DashboardPage';
+import PrivacyPage from './pages/User/Account/PrivacyPage';
 
 const App = () => {
 

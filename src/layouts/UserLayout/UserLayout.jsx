@@ -6,13 +6,8 @@ import {
   ClipboardList,
   FileText,
   BarChart2,
-  Settings,
   ChevronDown,
-  Settings2,
   Shield,
-  Globe,
-  Monitor,
-  BellRing,
   Lock,
   LineChart,
   FolderDown,
@@ -24,6 +19,11 @@ import {
   ShoppingBag,
   PackageCheck,
   Star,
+  Settings,
+  BellRing,
+  Monitor,
+  Settings2,
+  Globe,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
@@ -126,7 +126,7 @@ const GROUPS = [
       { 
         icon: Lock, 
         label: "Privacy",
-        text: "Manage your personal data and accounts.",
+        text: "Personal privacy",
         path: "/user/privacy",
       },
     ],

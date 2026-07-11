@@ -19,3 +19,12 @@ export const USER_ADDRESS_API = `${BASE_URL_API}/user-addresses`;
 
 // User Auth Provider API
 export const USER_AUTH_PROVIDER_API = `${BASE_URL_API}/userAuthProviders`;
+
+// Newsletter API
+export const NEWSLETTER_API = `${BASE_URL_API}/newsletter`;
+
+// Service API
+export const SERVICE_API = `${BASE_URL_API}/services`;
+
+// Contact API
+export const CONTACT_API = `${BASE_URL_API}/mail/contact`;

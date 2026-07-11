@@ -12,6 +12,8 @@ import AddressPage from './pages/User/Account/AddressPage';
 import SecurityPage from './pages/User/Account/SecurityPage';
 import DashboardPage from './pages/User/Main/DashboardPage';
 import PrivacyPage from './pages/User/Account/PrivacyPage';
+import ServicesPage from './pages/User/Services/ServicesPage';
+import ServiceOrderPage from './pages/User/Services/ServiceOrderPage';
 
 const App = () => {
 
@@ -37,6 +39,13 @@ const App = () => {
         <Route path="/user" element={<UserLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
+        </Route>
+
+        {/* SERVICE USER */}
+        <Route path="/user" element={<UserLayout />}>
+          <Route index element={<Navigate to="services" replace />} />
+          <Route path="services" element={<ServicesPage />} />
+          <Route path="service-order" element={<ServiceOrderPage />} />
         </Route>
 
         {/* USER */}

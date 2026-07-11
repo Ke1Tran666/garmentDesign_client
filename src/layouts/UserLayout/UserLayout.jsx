@@ -54,7 +54,12 @@ const GROUPS = [
         text: "Tổng quan file, đơn hàng và task cần xử lý",
         path: "/user/dashboard",
       },
-      { icon: ClipboardList, label: "Appoint List" },
+      { 
+        icon: ClipboardList, 
+        label: "Order List",
+        text:"",
+        path: "/user/service-order"
+      },
       { 
         icon: User, 
         label: "My Profile",
@@ -85,7 +90,7 @@ const GROUPS = [
         icon: PackageCheck,
         label: "Đơn hàng của tôi",
         text: "Quản lý các đơn hàng dịch vụ đã đặt",
-        path: "/user/service-orders",
+        path: "/user/service-order",
       },
       {
         icon: Star,

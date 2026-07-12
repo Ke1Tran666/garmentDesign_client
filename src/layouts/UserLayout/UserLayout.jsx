@@ -17,7 +17,6 @@ import {
   ChevronRight,
   MapPin,
   ShoppingBag,
-  PackageCheck,
   Star,
   Settings,
   BellRing,
@@ -56,7 +55,7 @@ const GROUPS = [
       },
       { 
         icon: ClipboardList, 
-        label: "Order List",
+        label: "Service Orders",
         text:"",
         path: "/user/service-order"
       },
@@ -80,17 +79,11 @@ const GROUPS = [
     },
     label: "Dịch vụ",
     items: [
-      {
-        icon: ShoppingBag,
-        label: "Đặt dịch vụ",
-        text: "Tạo đơn hàng thiết kế, chỉnh sửa hoặc yêu cầu dịch vụ mới",
-        path: "/user/services",
-      },
-      {
-        icon: PackageCheck,
-        label: "Đơn hàng của tôi",
-        text: "Quản lý các đơn hàng dịch vụ đã đặt",
-        path: "/user/service-order",
+      { 
+        icon: ClipboardList, 
+        label: "Service Orders",
+        text:"",
+        path: "/user/service-order"
       },
       {
         icon: Star,

@@ -50,12 +50,14 @@ const formatDate = (dateValue) => {
 
 const mapOrderToTable = (order) => ({
   ...order,
-
   id: order.serviceOrderId,
   orderCode: `ORD-${order.serviceOrderId}`,
   customer: order.user?.fullName || "Không rõ",
-  service: order.service?.serviceName || "Không rõ dịch vụ",
-  deadline: formatDate(order.completedDate || order.receivedDate),
+  serviceName:
+    order.service?.serviceName || "Không rõ dịch vụ",
+  deadline: formatDate(
+    order.completedDate || order.receivedDate
+  ),
   status: order.status || "Đang xử lý",
   progress: getProgressByStatus(order.status),
 });
@@ -118,7 +120,12 @@ const ServiceOrderPage = () => {
     if (!keyword) return orders;
 
     return orders.filter((order) =>
-      [order.orderCode, order.customer, order.service, order.status]
+      [
+        order.orderCode,
+        order.customer,
+        order.serviceName,
+        order.status,
+      ]
         .join(" ")
         .toLowerCase()
         .includes(keyword)
@@ -174,6 +181,24 @@ const ServiceOrderPage = () => {
     // setSelectedOrder(order);
     // setOpenRemoveConfirm(true);
   };
+
+  const handleCloseDetail = useCallback(() => {
+    setSelectedOrder(null);
+  }, []);
+
+  const handleOrderUpdated = useCallback((updatedOrder) => {
+    const mappedOrder = mapOrderToTable(updatedOrder);
+
+    setOrders((previousOrders) =>
+      previousOrders.map((item) =>
+        item.serviceOrderId === mappedOrder.serviceOrderId
+          ? mappedOrder
+          : item
+      )
+    );
+
+    setSelectedOrder(mappedOrder);
+  }, []);
 
   const actionMenuItems = [
     {
@@ -275,7 +300,7 @@ const ServiceOrderPage = () => {
                   </td>
 
                   <td className="px-4 py-4 text-gray-700">
-                    {order.service}
+                    {order.serviceName}
                   </td>
 
                   <td className="px-4 py-4 text-gray-700">
@@ -365,7 +390,8 @@ const ServiceOrderPage = () => {
       <ServiceOrderDetailModal
         open={Boolean(selectedOrder)}
         order={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
+        onClose={handleCloseDetail}
+        onUpdated={handleOrderUpdated}
       />
     </SectionCard>
   );

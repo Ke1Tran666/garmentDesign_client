@@ -4,6 +4,7 @@ import { Clock, Eye, MoreVertical, Search, Trash2 } from "lucide-react";
 import { BASE_URL_API } from "@/api/config";
 import { SectionCard } from "@/components/ui/Section/Section";
 import MenuTable from "@/components/ui/Menu/MenuTable";
+import ServiceOrderDetailModal from "@/components/ui/ServiceOrder/ServiceOrderDetailModal";
 
 const getProgressByStatus = (status) => {
   const text = String(status || "").toLowerCase();
@@ -48,6 +49,8 @@ const formatDate = (dateValue) => {
 };
 
 const mapOrderToTable = (order) => ({
+  ...order,
+
   id: order.serviceOrderId,
   orderCode: `ORD-${order.serviceOrderId}`,
   customer: order.user?.fullName || "Không rõ",
@@ -69,6 +72,7 @@ const ServiceOrderPage = () => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const [actionMenu, setActionMenu] = useState(
     initialActionMenuState
@@ -159,11 +163,8 @@ const ServiceOrderPage = () => {
   };
 
   const handleViewDetail = (order) => {
-    console.log("Xem chi tiết đơn hàng:", order);
-
-    // Sau này có thể:
-    // setSelectedOrder(order);
-    // setOpenDetailModal(true);
+    setSelectedOrder(order);
+    handleCloseActionMenu();
   };
 
   const handleRemoveOrder = (order) => {
@@ -360,6 +361,11 @@ const ServiceOrderPage = () => {
         }}
         items={actionMenuItems}
         onClose={handleCloseActionMenu}
+      />
+      <ServiceOrderDetailModal
+        open={Boolean(selectedOrder)}
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
       />
     </SectionCard>
   );

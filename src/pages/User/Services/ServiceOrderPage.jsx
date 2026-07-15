@@ -52,14 +52,19 @@ const mapOrderToTable = (order) => ({
   ...order,
   id: order.serviceOrderId,
   orderCode: `ORD-${order.serviceOrderId}`,
-  customer: order.user?.fullName || "Không rõ",
+  customer:
+    order.user?.fullName || "Không rõ",
   serviceName:
-    order.service?.serviceName || "Không rõ dịch vụ",
+    order.service?.serviceName ||
+    "Không rõ dịch vụ",
   deadline: formatDate(
-    order.completedDate || order.receivedDate
+    order.completedDate ||
+      order.receivedDate
   ),
   status: order.status || "Đang xử lý",
-  progress: getProgressByStatus(order.status),
+  progress: getProgressByStatus(
+    order.status
+  ),
 });
 
 const initialActionMenuState = {
@@ -186,19 +191,24 @@ const ServiceOrderPage = () => {
     setSelectedOrder(null);
   }, []);
 
-  const handleOrderUpdated = useCallback((updatedOrder) => {
-    const mappedOrder = mapOrderToTable(updatedOrder);
+  const handleOrderUpdated = useCallback(
+    (updatedOrder) => {
+      const mappedOrder =
+        mapOrderToTable(updatedOrder);
 
-    setOrders((previousOrders) =>
-      previousOrders.map((item) =>
-        item.serviceOrderId === mappedOrder.serviceOrderId
-          ? mappedOrder
-          : item
-      )
-    );
+      setOrders((previousOrders) =>
+        previousOrders.map((item) =>
+          item.serviceOrderId ===
+          mappedOrder.serviceOrderId
+            ? mappedOrder
+            : item
+        )
+      );
 
-    setSelectedOrder(mappedOrder);
-  }, []);
+      setSelectedOrder(mappedOrder);
+    },
+    []
+  );
 
   const actionMenuItems = [
     {

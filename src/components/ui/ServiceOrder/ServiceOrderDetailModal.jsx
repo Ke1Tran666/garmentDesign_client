@@ -1,47 +1,73 @@
 import axios from "axios";
-import { memo, useEffect, useMemo, useState } from "react";
+import {
+  memo,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Building2,
   CalendarDays,
   CreditCard,
+  Download,
   FileText,
+  ImagePlus,
   LoaderCircle,
   MapPin,
   Package,
+  Paperclip,
   Pencil,
   Save,
+  Trash2,
   User,
   X,
 } from "lucide-react";
-import { BASE_URL_API, USER_API } from "@/api/config";
+import {
+  BACKEND_URL,
+  BASE_URL_API,
+  USER_API,
+} from "@/api/config";
 
 const EMPTY_VALUE = "Chưa có thông tin";
 
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const MAX_REQUEST_SIZE = 200 * 1024 * 1024;
+
 const employeeNameCache = new Map();
 
-const DATE_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-});
+const DATE_FORMATTER = new Intl.DateTimeFormat(
+  "vi-VN",
+  {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }
+);
 
-const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const DATE_TIME_FORMATTER =
+  new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-const CURRENCY_FORMATTER = new Intl.NumberFormat("vi-VN", {
-  style: "currency",
-  currency: "VND",
-});
+const CURRENCY_FORMATTER =
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  });
 
 const hasValue = (value) =>
-  value !== null && value !== undefined && value !== "";
+  value !== null &&
+  value !== undefined &&
+  value !== "";
 
-const formatDate = (value, includeTime = false) => {
+const formatDate = (
+  value,
+  includeTime = false
+) => {
   if (!value) return EMPTY_VALUE;
 
   const date = new Date(value);
@@ -65,53 +91,97 @@ const formatCurrency = (value) => {
     : CURRENCY_FORMATTER.format(number);
 };
 
+const formatFileSize = (size) => {
+  if (!Number.isFinite(size)) return "";
+
+  if (size < 1024) {
+    return `${size} B`;
+  }
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(
+    size /
+    1024 /
+    1024
+  ).toFixed(2)} MB`;
+};
+
+const resolveBackendUrl = (url) => {
+  if (!url) return "";
+
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  return `${BACKEND_URL}${
+    url.startsWith("/") ? url : `/${url}`
+  }`;
+};
+
 const getStatusStyle = (status) => {
-  const normalizedStatus = String(status || "").toLowerCase();
+  const text = String(status || "").toLowerCase();
 
   if (
-    normalizedStatus.includes("hoàn") ||
-    normalizedStatus.includes("complete")
+    text.includes("hoàn") ||
+    text.includes("complete")
   ) {
     return {
-      badge: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+      badge:
+        "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
       dot: "bg-emerald-500",
     };
   }
 
   if (
-    normalizedStatus.includes("hủy") ||
-    normalizedStatus.includes("cancel")
+    text.includes("hủy") ||
+    text.includes("cancel")
   ) {
     return {
-      badge: "bg-red-50 text-red-700 ring-red-600/20",
+      badge:
+        "bg-red-50 text-red-700 ring-red-600/20",
       dot: "bg-red-500",
     };
   }
 
   if (
-    normalizedStatus.includes("chờ") ||
-    normalizedStatus.includes("pending")
+    text.includes("chờ") ||
+    text.includes("pending")
   ) {
     return {
-      badge: "bg-amber-50 text-amber-700 ring-amber-600/20",
+      badge:
+        "bg-amber-50 text-amber-700 ring-amber-600/20",
       dot: "bg-amber-500",
     };
   }
 
   return {
-    badge: "bg-blue-50 text-blue-700 ring-blue-600/20",
+    badge:
+      "bg-blue-50 text-blue-700 ring-blue-600/20",
     dot: "bg-blue-500",
   };
 };
 
-const InfoItem = ({ label, value, fullWidth = false }) => (
-  <div className={fullWidth ? "sm:col-span-2" : ""}>
+const InfoItem = ({
+  label,
+  value,
+  fullWidth = false,
+}) => (
+  <div
+    className={
+      fullWidth ? "sm:col-span-2" : ""
+    }
+  >
     <dt className="text-xs font-medium uppercase tracking-wide text-gray-400">
       {label}
     </dt>
 
-    <dd className="mt-1.5 wrap-break-word text-sm font-medium leading-6 text-gray-800">
-      {hasValue(value) ? value : EMPTY_VALUE}
+    <dd className="mt-1.5 break-words text-sm font-medium leading-6 text-gray-800">
+      {hasValue(value)
+        ? value
+        : EMPTY_VALUE}
     </dd>
   </div>
 );
@@ -130,7 +200,9 @@ const CardHeader = ({
     </div>
 
     <div className="min-w-0">
-      <h4 className="font-bold text-gray-950">{title}</h4>
+      <h4 className="font-bold text-gray-950">
+        {title}
+      </h4>
 
       {description && (
         <p className="mt-0.5 text-xs text-gray-500">
@@ -148,12 +220,50 @@ const ServiceOrderDetailModal = ({
   onUpdated,
   title = "Chi tiết đơn hàng",
 }) => {
-  const [employeeNames, setEmployeeNames] = useState({});
-  const [isEditingProduct, setIsEditingProduct] = useState(false);
-  const [editForm, setEditForm] = useState(null);
-  const [updating, setUpdating] = useState(false);
-  const [updateError, setUpdateError] = useState("");
+  const [employeeNames, setEmployeeNames] =
+    useState({});
 
+  const [isEditingProduct, setIsEditingProduct] =
+    useState(false);
+
+  const [editForm, setEditForm] = useState({
+    productName: "",
+    unitType: "",
+    quantity: "",
+    customerRequest: "",
+  });
+
+  const [deletingFileId, setDeletingFileId] =
+    useState(null);
+
+  const [fileError, setFileError] =
+    useState("");
+
+  const [productImageFile, setProductImageFile] =
+    useState(null);
+
+  const [
+    productImagePreview,
+    setProductImagePreview,
+  ] = useState("");
+
+  const [
+    attachmentFiles,
+    setAttachmentFiles,
+  ] = useState([]);
+
+  const [fileState, setFileState] = useState({
+    orderId: null,
+    items: [],
+  });
+
+  const [updating, setUpdating] =
+    useState(false);
+
+  const [updateError, setUpdateError] =
+    useState("");
+
+  const orderId = order?.serviceOrderId;
   const createdBy = order?.createdBy;
   const updatedBy = order?.updatedBy;
   const serviceTags = order?.service?.tags;
@@ -167,241 +277,700 @@ const ServiceOrderDetailModal = ({
       .filter(Boolean);
   }, [serviceTags]);
 
-    useEffect(() => {
+  /*
+   * Ghép ảnh đại diện từ Service_Orders
+   * với file bổ sung từ Service_Order_Files.
+   */
+  const displayFiles = useMemo(() => {
+    const uploadedFiles =
+      fileState.orderId === orderId
+        ? fileState.items
+        : [];
+
+    const productImage =
+      order?.productImage;
+
+    const productImageItem =
+      productImage
+        ? {
+            fileId: `product-image-${orderId}`,
+            fileName: order.productName
+              ? `Ảnh đại diện - ${order.productName}`
+              : "Ảnh đại diện sản phẩm",
+            fileType: "image/product",
+            contentUrl: productImage,
+            uploadedAt:
+              order.updatedAt ||
+              order.createdAt,
+            isProductImage: true,
+          }
+        : null;
+
+    /*
+     * Loại record cũ nếu phiên bản trước
+     * từng lưu ảnh đại diện trong order-files.
+     */
+    const additionalFiles =
+      uploadedFiles.filter(
+        (file) =>
+          !productImage ||
+          file.contentUrl !== productImage
+      );
+
+    return productImageItem
+      ? [
+          productImageItem,
+          ...additionalFiles,
+        ]
+      : additionalFiles;
+  }, [fileState, order, orderId]);
+
+  /*
+   * Giải phóng object URL của ảnh preview.
+   */
+  useEffect(() => {
+    return () => {
+      if (productImagePreview) {
+        URL.revokeObjectURL(
+          productImagePreview
+        );
+      }
+    };
+  }, [productImagePreview]);
+
+  /*
+   * Khóa scroll trang và xử lý phím ESC.
+   */
+  useEffect(() => {
     if (!open) return undefined;
 
-    const previousOverflow = document.body.style.overflow;
+    const previousOverflow =
+      document.body.style.overflow;
 
     const handleKeyDown = (event) => {
-        if (event.key !== "Escape") return;
+      if (event.key !== "Escape") return;
 
-        if (isEditingProduct) {
-        setIsEditingProduct(false);
-        setEditForm(null);
-        setUpdateError("");
-        return;
+      if (isEditingProduct) {
+        if (productImagePreview) {
+          URL.revokeObjectURL(
+            productImagePreview
+          );
         }
 
-        onClose();
+        setIsEditingProduct(false);
+        setProductImageFile(null);
+        setProductImagePreview("");
+        setAttachmentFiles([]);
+        setUpdateError("");
+        return;
+      }
+
+      onClose();
     };
 
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
 
     return () => {
-        document.body.style.overflow = previousOverflow;
-        window.removeEventListener("keydown", handleKeyDown);
-    };
-    }, [open, onClose, isEditingProduct]);
+      document.body.style.overflow =
+        previousOverflow;
 
-    useEffect(() => {
-    if (!open || !order) return undefined;
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [
+    open,
+    onClose,
+    isEditingProduct,
+    productImagePreview,
+  ]);
+
+  /*
+   * Lấy tên người nhận và người cập nhật.
+   */
+  useEffect(() => {
+    if (!open) return undefined;
 
     const employeeIds = [
-        ...new Set([createdBy, updatedBy].filter(Boolean)),
+      ...new Set(
+        [createdBy, updatedBy].filter(Boolean)
+      ),
     ];
 
     const missingIds = employeeIds.filter(
-        (id) => !employeeNameCache.has(id)
+      (id) => !employeeNameCache.has(id)
     );
 
     if (missingIds.length === 0) {
-        return undefined;
+      return undefined;
     }
 
     const controller = new AbortController();
 
     const fetchEmployeeNames = async () => {
-        const results = await Promise.allSettled(
-        missingIds.map((id) =>
+      const results =
+        await Promise.allSettled(
+          missingIds.map((id) =>
             axios.get(`${USER_API}/${id}`, {
-            signal: controller.signal,
+              signal: controller.signal,
             })
-        )
+          )
         );
 
-        if (controller.signal.aborted) return;
+      if (controller.signal.aborted) return;
 
-        const loadedNames = {};
+      const loadedNames = {};
 
-        results.forEach((result, index) => {
-        const employeeId = missingIds[index];
+      results.forEach((result, index) => {
+        const employeeId =
+          missingIds[index];
 
         const employeeName =
-            result.status === "fulfilled"
-            ? result.value.data?.fullName || "Không xác định"
+          result.status === "fulfilled"
+            ? result.value.data?.fullName ||
+              "Không xác định"
             : "Không xác định";
 
-        employeeNameCache.set(employeeId, employeeName);
-        loadedNames[employeeId] = employeeName;
-        });
+        employeeNameCache.set(
+          employeeId,
+          employeeName
+        );
 
-        setEmployeeNames((previousNames) => ({
-        ...previousNames,
-        ...loadedNames,
-        }));
+        loadedNames[employeeId] =
+          employeeName;
+      });
+
+      setEmployeeNames(
+        (previousNames) => ({
+          ...previousNames,
+          ...loadedNames,
+        })
+      );
     };
 
     fetchEmployeeNames();
 
     return () => {
-        controller.abort();
+      controller.abort();
     };
-    }, [open, createdBy, updatedBy, order]);
+  }, [open, createdBy, updatedBy]);
+
+  /*
+   * Lấy file bổ sung của đơn hàng.
+   */
+  useEffect(() => {
+    if (!open || !orderId) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const fetchFiles = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL_API}/service-order-files/order/${orderId}`,
+          {
+            signal: controller.signal,
+          }
+        );
+
+        if (controller.signal.aborted) return;
+
+        setFileState({
+          orderId,
+          items: response.data || [],
+        });
+      } catch (error) {
+        if (
+          error.code !== "ERR_CANCELED" &&
+          error.name !== "CanceledError"
+        ) {
+          console.error(
+            "Không thể tải danh sách file:",
+            error
+          );
+
+          setFileState({
+            orderId,
+            items: [],
+          });
+        }
+      }
+    };
+
+    fetchFiles();
+
+    return () => {
+      controller.abort();
+    };
+  }, [open, orderId]);
 
   if (!open || !order) return null;
 
   const user = order.user || {};
   const service = order.service || {};
   const address = order.address || {};
-  const statusStyle = getStatusStyle(order.status);
 
-  const orderCode = `ORD-${order.serviceOrderId}`;
-  const unitType = order.unitType || service.unitType;
+  const statusStyle = getStatusStyle(
+    order.status
+  );
 
-    const getEmployeeName = (employeeId) => {
+  const orderCode = `ORD-${orderId}`;
+
+  const unitType =
+    order.unitType ||
+    service.unitType ||
+    "";
+
+  const currentProductImage =
+    productImagePreview ||
+    resolveBackendUrl(order.productImage);
+
+  const getEmployeeName = (employeeId) => {
     if (!employeeId) return EMPTY_VALUE;
 
     return (
-        employeeNames[employeeId] ||
-        employeeNameCache.get(employeeId) ||
-        "Đang tải..."
+      employeeNames[employeeId] ||
+      employeeNameCache.get(employeeId) ||
+      "Đang tải..."
     );
-    };
+  };
 
-  const receiverName = getEmployeeName(createdBy);
-  const updaterName = getEmployeeName(updatedBy);
+  const receiverName =
+    getEmployeeName(createdBy);
+
+  const updaterName =
+    getEmployeeName(updatedBy);
+
+  const resetSelectedFiles = () => {
+    if (productImagePreview) {
+      URL.revokeObjectURL(
+        productImagePreview
+      );
+    }
+
+    setProductImageFile(null);
+    setProductImagePreview("");
+    setAttachmentFiles([]);
+  };
 
   const handleStartEditProduct = () => {
+    resetSelectedFiles();
+
     setEditForm({
-        productName: order.productName || "",
-        unitType: order.unitType || service.unitType || "",
-        quantity: order.quantity ?? "",
-        customerRequest: order.customerRequest || "",
+      productName: order.productName || "",
+      unitType,
+      quantity: order.quantity ?? "",
+      customerRequest:
+        order.customerRequest || "",
     });
 
     setUpdateError("");
     setIsEditingProduct(true);
-    };
+  };
 
-    const handleCancelEditProduct = () => {
+  const handleCancelEditProduct = () => {
     if (updating) return;
 
-    setIsEditingProduct(false);
-    setEditForm(null);
-    setUpdateError("");
-    };
+    resetSelectedFiles();
 
-    const handleEditFormChange = (event) => {
+    setIsEditingProduct(false);
+    setUpdateError("");
+  };
+
+  const handleRequestClose = () => {
+    if (updating) return;
+
+    if (isEditingProduct) {
+      handleCancelEditProduct();
+      return;
+    }
+
+    onClose();
+  };
+
+  const handleEditFormChange = (event) => {
     const { name, value } = event.target;
 
     setEditForm((previousForm) => ({
-        ...previousForm,
-        [name]: value,
+      ...previousForm,
+      [name]: value,
     }));
-    };
+  };
 
-    const handleUpdateProduct = async (event) => {
-    event.preventDefault();
+  const handleProductImageChange = (
+    event
+  ) => {
+    const file = event.target.files?.[0];
 
-    const productName = editForm?.productName?.trim();
-    const unitTypeValue = editForm?.unitType?.trim();
-    const quantity = Number(editForm?.quantity);
-    const customerRequest =
-        editForm?.customerRequest?.trim() || "";
+    event.target.value = "";
 
-    if (!productName) {
-        setUpdateError("Vui lòng nhập tên sản phẩm.");
-        return;
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUpdateError(
+        "Vui lòng chọn đúng định dạng ảnh."
+      );
+      return;
     }
 
-    if (!unitTypeValue) {
-        setUpdateError("Vui lòng nhập đơn vị tính.");
-        return;
+    if (file.size > MAX_FILE_SIZE) {
+      setUpdateError(
+        "Ảnh không được vượt quá 50MB."
+      );
+      return;
     }
 
-    if (!Number.isFinite(quantity) || quantity <= 0) {
-        setUpdateError("Số lượng phải lớn hơn 0.");
-        return;
+    if (productImagePreview) {
+      URL.revokeObjectURL(
+        productImagePreview
+      );
+    }
+
+    setProductImageFile(file);
+
+    setProductImagePreview(
+      URL.createObjectURL(file)
+    );
+
+    setUpdateError("");
+  };
+
+  const handleAttachmentChange = (
+    event
+  ) => {
+    const selectedFiles = Array.from(
+      event.target.files || []
+    );
+
+    event.target.value = "";
+
+    const invalidFile = selectedFiles.find(
+      (file) => file.size > MAX_FILE_SIZE
+    );
+
+    if (invalidFile) {
+      setUpdateError(
+        `${invalidFile.name} vượt quá giới hạn 50MB.`
+      );
+      return;
+    }
+
+    setAttachmentFiles(
+      (previousFiles) => {
+        const fileMap = new Map();
+
+        [
+          ...previousFiles,
+          ...selectedFiles,
+        ].forEach((file) => {
+          const key = [
+            file.name,
+            file.size,
+            file.lastModified,
+          ].join("-");
+
+          fileMap.set(key, file);
+        });
+
+        return Array.from(
+          fileMap.values()
+        );
+      }
+    );
+
+    setUpdateError("");
+  };
+
+  const handleRemoveSelectedFile = (
+    fileIndex
+  ) => {
+    setAttachmentFiles(
+      (previousFiles) =>
+        previousFiles.filter(
+          (_, index) => index !== fileIndex
+        )
+    );
+  };
+
+  const handleDeleteUploadedFile = async (
+    file
+  ) => {
+    /*
+    * Ảnh đại diện là dữ liệu tổng hợp từ
+    * Service_Orders nên không xóa ở đây.
+    */
+    if (
+      file.isProductImage ||
+      !file.fileId
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn xóa file "${file.fileName}" không?`
+    );
+
+    if (!confirmed) return;
+
+    const idUser =
+      localStorage.getItem("idUser");
+
+    if (!idUser) {
+      setFileError(
+        "Không tìm thấy thông tin người dùng."
+      );
+      return;
     }
 
     try {
-        setUpdating(true);
-        setUpdateError("");
+      setDeletingFileId(file.fileId);
+      setFileError("");
 
-        const unitPrice = Number(order.unitPrice) || 0;
-        const discountAmount = Number(order.discountAmount) || 0;
+      await axios.delete(
+        `${BASE_URL_API}/service-order-files/${file.fileId}/user/${idUser}`
+      );
 
-        const totalPrice = Math.max(
-        unitPrice * quantity - discountAmount,
-        0
-        );
-
-        /*
-        * Backend hiện sử dụng PUT và BeanUtils.copyProperties,
-        * vì vậy cần gửi đầy đủ dữ liệu của ServiceOrder.
-        */
-        const payload = {
-        serviceOrderId: order.serviceOrderId,
-
-        user: order.user || null,
-        service: order.service || null,
-        address: order.address || null,
-
-        productName,
-        productImage: order.productImage || null,
-        customerRequest,
-        unitType: unitTypeValue,
-
-        quantity,
-        unitPrice: order.unitPrice,
-        discountAmount: order.discountAmount,
-        totalPrice,
-
-        status: order.status,
-        receivedDate: order.receivedDate,
-        completedDate: order.completedDate,
-
-        createdBy: order.createdBy,
-        updatedBy:
-            localStorage.getItem("idUser") || order.updatedBy,
-
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-        deletedAt: order.deletedAt,
-        };
-
-        const response = await axios.put(
-        `${BASE_URL_API}/service-orders/${order.serviceOrderId}`,
-        payload
-        );
-
-        onUpdated?.(response.data);
-
-        setIsEditingProduct(false);
-        setEditForm(null);
+      setFileState((previousState) => ({
+        ...previousState,
+        items: previousState.items.filter(
+          (item) =>
+            item.fileId !== file.fileId
+        ),
+      }));
     } catch (error) {
-        console.error("Không thể cập nhật đơn hàng:", error);
+      console.error(
+        "Không thể xóa file:",
+        error
+      );
 
-        setUpdateError(
+      setFileError(
         error.response?.data?.message ||
-            "Không thể cập nhật đơn hàng. Vui lòng thử lại."
-        );
+          "Không thể xóa file. Vui lòng thử lại."
+      );
     } finally {
-        setUpdating(false);
+      setDeletingFileId(null);
     }
-    };
+  };
+
+  const handleUpdateProduct = async (
+    event
+  ) => {
+    event.preventDefault();
+
+    const productName =
+      editForm.productName.trim();
+
+    const unitTypeValue =
+      editForm.unitType.trim();
+
+    const quantity = Number(
+      editForm.quantity
+    );
+
+    const customerRequest =
+      editForm.customerRequest.trim();
+
+    if (!productName) {
+      setUpdateError(
+        "Vui lòng nhập tên sản phẩm."
+      );
+      return;
+    }
+
+    if (!unitTypeValue) {
+      setUpdateError(
+        "Vui lòng nhập đơn vị tính."
+      );
+      return;
+    }
+
+    if (
+      !Number.isFinite(quantity) ||
+      quantity <= 0
+    ) {
+      setUpdateError(
+        "Số lượng phải lớn hơn 0."
+      );
+      return;
+    }
+
+    const idUser =
+      localStorage.getItem("idUser");
+
+    if (!idUser) {
+      setUpdateError(
+        "Không tìm thấy thông tin người dùng."
+      );
+      return;
+    }
+
+    const totalUploadSize =
+      (productImageFile?.size || 0) +
+      attachmentFiles.reduce(
+        (total, file) =>
+          total + file.size,
+        0
+      );
+
+    if (
+      totalUploadSize > MAX_REQUEST_SIZE
+    ) {
+      setUpdateError(
+        "Tổng dung lượng upload không được vượt quá 200MB."
+      );
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setUpdateError("");
+
+      /*
+       * Cập nhật thông tin đơn hàng trước.
+       * Endpoint này không cập nhật audit fields.
+       */
+      const updateResponse =
+        await axios.patch(
+          `${BASE_URL_API}/service-orders/${orderId}/user/${idUser}`,
+          {
+            productName,
+            unitType: unitTypeValue,
+            quantity,
+            customerRequest,
+          }
+        );
+
+      let updatedOrder =
+        updateResponse.data;
+
+      /*
+       * Upload ảnh đại diện và file bổ sung.
+       */
+      if (
+        productImageFile ||
+        attachmentFiles.length > 0
+      ) {
+        const uploadData = new FormData();
+
+        if (productImageFile) {
+          uploadData.append(
+            "image",
+            productImageFile
+          );
+        }
+
+        attachmentFiles.forEach((file) => {
+          uploadData.append(
+            "files",
+            file
+          );
+        });
+
+        uploadData.append(
+          "note",
+          "File do khách hàng cung cấp"
+        );
+
+        try {
+          const uploadResponse =
+            await axios.post(
+              `${BASE_URL_API}/service-order-files/order/${orderId}/user/${idUser}`,
+              uploadData
+            );
+
+          updatedOrder =
+            uploadResponse.data?.order ||
+            updatedOrder;
+
+          /*
+           * Response files chỉ chứa file bổ sung,
+           * không chứa ảnh đại diện.
+           */
+          const newFiles =
+            uploadResponse.data?.files || [];
+
+          setFileState(
+            (previousState) => {
+              const previousItems =
+                previousState.orderId === orderId
+                  ? previousState.items
+                  : [];
+
+              const fileMap = new Map();
+
+              [
+                ...previousItems,
+                ...newFiles,
+              ].forEach((file) => {
+                fileMap.set(
+                  file.fileId,
+                  file
+                );
+              });
+
+              return {
+                orderId,
+                items: Array.from(
+                  fileMap.values()
+                ),
+              };
+            }
+          );
+        } catch (uploadError) {
+          /*
+           * Thông tin đã cập nhật thành công,
+           * nhưng ảnh/file upload thất bại.
+           */
+          onUpdated?.(updatedOrder);
+
+          setUpdateError(
+            uploadError.response?.data?.message ||
+              "Thông tin đã được cập nhật, nhưng ảnh hoặc file tải lên thất bại."
+          );
+
+          return;
+        }
+      }
+
+      onUpdated?.(updatedOrder);
+
+      resetSelectedFiles();
+
+      setIsEditingProduct(false);
+    } catch (error) {
+      console.error(
+        "Không thể cập nhật đơn hàng:",
+        error
+      );
+
+      setUpdateError(
+        error.response?.data?.message ||
+          "Không thể cập nhật đơn hàng. Vui lòng thử lại."
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <div
       className="fixed inset-0 z-70 flex items-center justify-center bg-gray-950/45 px-3 py-4 animate-in fade-in duration-150 sm:px-6"
-      onClick={onClose}
+      onClick={handleRequestClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="service-order-title"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) =>
+          event.stopPropagation()
+        }
         className="flex max-h-[96vh] w-[96vw] max-w-360 flex-col overflow-hidden rounded-3xl bg-gray-50 shadow-xl animate-in zoom-in-95 slide-in-from-bottom-2 duration-200 ease-out"
       >
         {/* Header */}
@@ -427,7 +996,8 @@ const ServiceOrderDetailModal = ({
                       className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
                     />
 
-                    {order.status || "Đang xử lý"}
+                    {order.status ||
+                      "Đang xử lý"}
                   </span>
                 </div>
 
@@ -446,7 +1016,11 @@ const ServiceOrderDetailModal = ({
                         className="shrink-0 text-gray-400"
                       />
 
-                      Tạo ngày {formatDate(order.createdAt, true)}
+                      Tạo ngày{" "}
+                      {formatDate(
+                        order.createdAt,
+                        true
+                      )}
                     </span>
 
                     <span className="h-1 w-1 shrink-0 rounded-full bg-gray-300" />
@@ -454,7 +1028,8 @@ const ServiceOrderDetailModal = ({
                     <span className="truncate">
                       Khách hàng:{" "}
                       <span className="font-semibold text-gray-700">
-                        {user.fullName || "Chưa xác định"}
+                        {user.fullName ||
+                          "Chưa xác định"}
                       </span>
                     </span>
 
@@ -465,7 +1040,9 @@ const ServiceOrderDetailModal = ({
                         <span className="hidden truncate xl:block">
                           Dịch vụ:{" "}
                           <span className="font-semibold text-gray-700">
-                            {service.serviceName}
+                            {
+                              service.serviceName
+                            }
                           </span>
                         </span>
                       </>
@@ -477,9 +1054,10 @@ const ServiceOrderDetailModal = ({
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleRequestClose}
+              disabled={updating}
               aria-label="Đóng chi tiết đơn hàng"
-              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X
                 size={19}
@@ -492,286 +1070,586 @@ const ServiceOrderDetailModal = ({
         {/* Content */}
         <div className="overflow-y-auto">
           <div className="grid grid-cols-1 gap-6 p-4 sm:p-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-            {/* Left content */}
+            {/* Left */}
             <main className="min-w-0 space-y-6">
-              {/* Product overview */}
+              <form
+                id="product-edit-form"
+                onSubmit={handleUpdateProduct}
+                className="space-y-6"
+              >
+                {/* Product */}
                 <section
-                className={`overflow-hidden rounded-3xl border bg-white shadow-sm transition-colors ${
+                  className={`overflow-hidden rounded-3xl border bg-white shadow-sm transition ${
                     isEditingProduct
-                    ? "border-brand/30 ring-4 ring-brand/5"
-                    : "border-gray-100"
-                }`}
+                      ? "border-brand/30 ring-4 ring-brand/5"
+                      : "border-gray-100"
+                  }`}
                 >
-                <div className="grid grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]">
+                  <div className="grid grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]">
                     {/* Product image */}
-                    <div className="min-h-72 bg-gray-100">
-                    {order.productImage ? (
+                    <div className="relative min-h-72 overflow-hidden bg-gray-100">
+                      {currentProductImage ? (
                         <img
-                        src={order.productImage}
-                        alt={order.productName || "Sản phẩm"}
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                        className="h-full min-h-72 w-full object-cover"
+                          src={
+                            currentProductImage
+                          }
+                          alt={
+                            order.productName ||
+                            "Sản phẩm"
+                          }
+                          decoding="async"
+                          draggable={false}
+                          className="h-full min-h-72 w-full object-cover"
                         />
-                    ) : (
+                      ) : (
                         <div className="flex h-full min-h-72 flex-col items-center justify-center gap-4 text-gray-400">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-sm">
-                            <Package size={34} />
-                        </div>
+                          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-sm">
+                            <Package
+                              size={34}
+                            />
+                          </div>
 
-                        <span className="text-sm font-medium">
-                            Chưa có hình ảnh sản phẩm
-                        </span>
+                          <span className="text-sm font-medium">
+                            Chưa có hình ảnh
+                          </span>
                         </div>
-                    )}
+                      )}
+
+                      {isEditingProduct && (
+                        <label className="absolute inset-x-4 bottom-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-950/85 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-950">
+                          <ImagePlus
+                            size={18}
+                          />
+
+                          Chọn ảnh đại diện
+
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={
+                              handleProductImageChange
+                            }
+                            disabled={
+                              updating
+                            }
+                            className="hidden"
+                          />
+                        </label>
+                      )}
                     </div>
 
                     {/* Product information */}
-                    <form
-                    id="product-edit-form"
-                    onSubmit={handleUpdateProduct}
-                    className="flex min-w-0 flex-col p-6 sm:p-7"
-                    >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 flex-col p-6 sm:p-7">
+                      <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">
-                            {service.serviceName || "Dịch vụ"}
-                        </p>
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">
+                            {service.serviceName ||
+                              "Dịch vụ"}
+                          </p>
 
-                        {isEditingProduct ? (
+                          {isEditingProduct ? (
                             <div className="mt-3">
-                            <label
-                                htmlFor="edit-product-name"
+                              <label
+                                htmlFor="productName"
                                 className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
-                            >
+                              >
                                 Tên sản phẩm
-                            </label>
+                              </label>
 
-                            <input
-                                id="edit-product-name"
+                              <input
+                                id="productName"
                                 type="text"
                                 name="productName"
-                                value={editForm?.productName || ""}
-                                onChange={handleEditFormChange}
+                                value={
+                                  editForm.productName
+                                }
+                                onChange={
+                                  handleEditFormChange
+                                }
+                                disabled={
+                                  updating
+                                }
                                 autoFocus
-                                disabled={updating}
-                                className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-base font-semibold text-gray-900 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
-                            />
+                                className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-base font-semibold text-gray-900 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                              />
                             </div>
-                        ) : (
+                          ) : (
                             <h3 className="mt-3 text-2xl font-bold leading-tight text-gray-950">
-                            {order.productName || "Chưa có tên sản phẩm"}
+                              {order.productName ||
+                                "Chưa có tên sản phẩm"}
                             </h3>
-                        )}
+                          )}
 
-                        <p className="mt-2 text-sm text-gray-500">
+                          <p className="mt-2 text-sm text-gray-500">
                             Mã đơn hàng{" "}
                             <span className="font-semibold text-gray-800">
-                            {orderCode}
+                              {orderCode}
                             </span>
-                        </p>
+                          </p>
                         </div>
 
-                        {/* Actions */}
                         <div className="flex shrink-0 items-center gap-2">
-                        {!isEditingProduct && (
+                          {!isEditingProduct ? (
                             <>
-                            <span
+                              <span
                                 className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-inset ${statusStyle.badge}`}
-                            >
+                              >
                                 <span
-                                className={`h-2 w-2 rounded-full ${statusStyle.dot}`}
+                                  className={`h-2 w-2 rounded-full ${statusStyle.dot}`}
                                 />
 
-                                {order.status || "Đang xử lý"}
-                            </span>
+                                {order.status ||
+                                  "Đang xử lý"}
+                              </span>
 
-                            <button
+                              <button
                                 type="button"
-                                onClick={handleStartEditProduct}
-                                title="Chỉnh sửa thông tin"
-                                aria-label="Chỉnh sửa thông tin sản phẩm"
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition hover:border-brand/30 hover:bg-brand-light hover:text-brand"
-                            >
-                                <Pencil size={17} />
-                            </button>
+                                onClick={
+                                  handleStartEditProduct
+                                }
+                                title="Chỉnh sửa"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-brand/30 hover:bg-brand-light hover:text-brand"
+                              >
+                                <Pencil
+                                  size={17}
+                                />
+                              </button>
                             </>
-                        )}
-
-                        {isEditingProduct && (
+                          ) : (
                             <>
-                            <button
+                              <button
                                 type="submit"
-                                disabled={updating}
+                                disabled={
+                                  updating
+                                }
                                 className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
+                              >
                                 {updating ? (
-                                <LoaderCircle
+                                  <LoaderCircle
                                     size={15}
                                     className="animate-spin"
-                                />
+                                  />
                                 ) : (
-                                <Save size={15} />
+                                  <Save
+                                    size={15}
+                                  />
                                 )}
 
-                                {updating ? "Đang cập nhật" : "Cập nhật"}
-                            </button>
+                                {updating
+                                  ? "Đang cập nhật"
+                                  : "Cập nhật"}
+                              </button>
 
-                            <button
+                              <button
                                 type="button"
-                                onClick={handleCancelEditProduct}
-                                disabled={updating}
+                                onClick={
+                                  handleCancelEditProduct
+                                }
+                                disabled={
+                                  updating
+                                }
                                 title="Hủy chỉnh sửa"
-                                aria-label="Hủy chỉnh sửa"
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                              >
                                 <X size={17} />
-                            </button>
+                              </button>
                             </>
-                        )}
+                          )}
                         </div>
-                    </div>
+                      </div>
 
-                    <div className="my-6 h-px bg-gray-100" />
+                      <div className="my-6 h-px bg-gray-100" />
 
-                    {isEditingProduct ? (
+                      {isEditingProduct ? (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        {/* Service code */}
-                        <div>
+                          <div>
                             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
-                            Mã dịch vụ
+                              Mã dịch vụ
                             </label>
 
                             <div className="flex h-11 items-center rounded-xl bg-gray-100 px-3.5 text-sm font-medium text-gray-500">
-                            {service.serviceCode || EMPTY_VALUE}
+                              {service.serviceCode ||
+                                EMPTY_VALUE}
                             </div>
-                        </div>
+                          </div>
 
-                        {/* Unit type */}
-                        <div>
+                          <div>
                             <label
-                            htmlFor="edit-unit-type"
-                            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
+                              htmlFor="unitType"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
                             >
-                            Đơn vị tính
+                              Đơn vị tính
                             </label>
 
                             <input
-                            id="edit-unit-type"
-                            type="text"
-                            name="unitType"
-                            value={editForm?.unitType || ""}
-                            onChange={handleEditFormChange}
-                            disabled={updating}
-                            placeholder="Ví dụ: meter, cái..."
-                            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-900 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                              id="unitType"
+                              type="text"
+                              name="unitType"
+                              value={
+                                editForm.unitType
+                              }
+                              onChange={
+                                handleEditFormChange
+                              }
+                              disabled={
+                                updating
+                              }
+                              className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
                             />
-                        </div>
+                          </div>
 
-                        {/* Quantity */}
-                        <div>
+                          <div>
                             <label
-                            htmlFor="edit-quantity"
-                            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
+                              htmlFor="quantity"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
                             >
-                            Số lượng
+                              Số lượng
                             </label>
 
                             <input
-                            id="edit-quantity"
-                            type="number"
-                            name="quantity"
-                            min="0.01"
-                            step="0.01"
-                            value={editForm?.quantity ?? ""}
-                            onChange={handleEditFormChange}
-                            disabled={updating}
-                            className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-900 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                              id="quantity"
+                              type="number"
+                              name="quantity"
+                              min="0.01"
+                              step="0.01"
+                              value={
+                                editForm.quantity
+                              }
+                              onChange={
+                                handleEditFormChange
+                              }
+                              disabled={
+                                updating
+                              }
+                              className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
                             />
-                        </div>
+                          </div>
 
-                        {/* Created date */}
-                        <div>
+                          <div>
                             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
-                            Ngày tạo
+                              Ngày tạo
                             </label>
 
                             <div className="flex h-11 items-center rounded-xl bg-gray-100 px-3.5 text-sm font-medium text-gray-500">
-                            {formatDate(order.createdAt)}
+                              {formatDate(
+                                order.createdAt
+                              )}
                             </div>
-                        </div>
+                          </div>
 
-                        {/* Customer request */}
-                        <div className="sm:col-span-2">
+                          <div className="sm:col-span-2">
                             <label
-                            htmlFor="edit-customer-request"
-                            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
+                              htmlFor="customerRequest"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
                             >
-                            Yêu cầu của khách hàng
+                              Yêu cầu khách hàng
                             </label>
 
                             <textarea
-                            id="edit-customer-request"
-                            name="customerRequest"
-                            value={editForm?.customerRequest || ""}
-                            onChange={handleEditFormChange}
-                            disabled={updating}
-                            rows={4}
-                            placeholder="Nhập yêu cầu của khách hàng..."
-                            className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-3 text-sm leading-6 text-gray-900 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                              id="customerRequest"
+                              name="customerRequest"
+                              rows={4}
+                              value={
+                                editForm.customerRequest
+                              }
+                              onChange={
+                                handleEditFormChange
+                              }
+                              disabled={
+                                updating
+                              }
+                              className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
                             />
+                          </div>
                         </div>
-                        </div>
-                    ) : (
+                      ) : (
                         <>
-                        <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
+                          <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
                             <InfoItem
-                            label="Mã dịch vụ"
-                            value={service.serviceCode}
+                              label="Mã dịch vụ"
+                              value={
+                                service.serviceCode
+                              }
                             />
 
                             <InfoItem
-                            label="Đơn vị tính"
-                            value={unitType}
+                              label="Đơn vị tính"
+                              value={unitType}
                             />
 
                             <InfoItem
-                            label="Số lượng"
-                            value={order.quantity}
+                              label="Số lượng"
+                              value={
+                                order.quantity
+                              }
                             />
 
                             <InfoItem
-                            label="Ngày tạo"
-                            value={formatDate(order.createdAt)}
+                              label="Ngày tạo"
+                              value={formatDate(
+                                order.createdAt
+                              )}
                             />
-                        </dl>
+                          </dl>
 
-                        <div className="mt-auto pt-6">
+                          <div className="mt-auto pt-6">
                             <div className="rounded-2xl bg-brand-light/60 p-4">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-brand">
                                 Yêu cầu của khách hàng
-                            </p>
+                              </p>
 
-                            <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
-                                {order.customerRequest || EMPTY_VALUE}
-                            </p>
+                              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
+                                {order.customerRequest ||
+                                  EMPTY_VALUE}
+                              </p>
                             </div>
-                        </div>
+                          </div>
                         </>
+                      )}
+
+                      {updateError && (
+                        <div
+                          role="alert"
+                          className="mt-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
+                        >
+                          {updateError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Files */}
+                <section
+                  className={`rounded-3xl border bg-white p-6 shadow-sm transition ${
+                    isEditingProduct
+                      ? "border-brand/20"
+                      : "border-gray-100"
+                  }`}
+                >
+                  <CardHeader
+                    icon={Paperclip}
+                    title="File khách hàng"
+                    description="Ảnh bổ sung, tài liệu và file đính kèm"
+                    iconClassName="bg-cyan-50 text-cyan-600"
+                  />
+
+                  {isEditingProduct && (
+                    <div className="mt-6">
+                      <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 px-5 py-7 text-center transition hover:border-brand/40 hover:bg-brand-light/30">
+                        <Paperclip
+                          size={28}
+                          className="text-brand"
+                        />
+
+                        <span className="mt-2 text-sm font-semibold text-gray-800">
+                          Chọn file đính kèm
+                        </span>
+
+                        <span className="mt-1 text-xs text-gray-500">
+                          Nhận mọi định dạng,
+                          tối đa 50MB mỗi file
+                        </span>
+
+                        <input
+                          type="file"
+                          multiple
+                          onChange={
+                            handleAttachmentChange
+                          }
+                          disabled={updating}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {attachmentFiles.length >
+                        0 && (
+                        <div className="mt-4 space-y-2">
+                          {attachmentFiles.map(
+                            (file, index) => (
+                              <div
+                                key={[
+                                  file.name,
+                                  file.size,
+                                  file.lastModified,
+                                ].join("-")}
+                                className="flex items-center gap-3 rounded-xl border border-gray-100 px-3 py-2.5"
+                              >
+                                <FileText
+                                  size={17}
+                                  className="shrink-0 text-brand"
+                                />
+
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-medium text-gray-700">
+                                    {
+                                      file.name
+                                    }
+                                  </p>
+
+                                  <p className="text-xs text-gray-400">
+                                    {formatFileSize(
+                                      file.size
+                                    )}
+                                  </p>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleRemoveSelectedFile(
+                                      index
+                                    )
+                                  }
+                                  disabled={
+                                    updating
+                                  }
+                                  title="Bỏ file"
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-600"
+                                >
+                                  <Trash2
+                                    size={15}
+                                  />
+                                </button>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="mt-6">
+                    {fileError && (
+                      <div
+                        role="alert"
+                        className="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
+                      >
+                        {fileError}
+                      </div>
                     )}
 
-                    {updateError && (
-                        <div
-                        role="alert"
-                        className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
-                        >
-                        {updateError}
-                        </div>
+                    {displayFiles.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {displayFiles.map((file) => {
+                          const isImage =
+                            String(file.fileType || "")
+                              .toLowerCase()
+                              .startsWith("image/");
+
+                          const isDeleting =
+                            deletingFileId === file.fileId;
+
+                          return (
+                            <div
+                              key={file.fileId}
+                              className="group flex min-w-0 items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3 transition hover:border-brand/20 hover:bg-brand-light/30"
+                            >
+                              {/* File icon */}
+                              <div
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ${
+                                  isImage
+                                    ? "text-violet-600"
+                                    : "text-brand"
+                                }`}
+                              >
+                                {isImage ? (
+                                  <ImagePlus size={18} />
+                                ) : (
+                                  <FileText size={18} />
+                                )}
+                              </div>
+
+                              {/* File information */}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex min-w-0 items-center gap-2">
+                                  <p className="truncate text-sm font-semibold text-gray-700">
+                                    {file.fileName}
+                                  </p>
+
+                                  {file.isProductImage && (
+                                    <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600">
+                                      Ảnh đại diện
+                                    </span>
+                                  )}
+                                </div>
+
+                                <p className="mt-0.5 text-xs text-gray-400">
+                                  {file.isProductImage
+                                    ? "Ảnh chính của đơn hàng"
+                                    : formatDate(
+                                        file.uploadedAt,
+                                        true
+                                      )}
+                                </p>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex shrink-0 items-center gap-1">
+                                <a
+                                  href={resolveBackendUrl(
+                                    file.contentUrl
+                                  )}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={
+                                    isImage
+                                      ? "Xem ảnh"
+                                      : "Tải file"
+                                  }
+                                  aria-label={
+                                    isImage
+                                      ? `Xem ${file.fileName}`
+                                      : `Tải ${file.fileName}`
+                                  }
+                                  className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-brand-light hover:text-brand"
+                                >
+                                  <Download size={17} />
+                                </a>
+
+                                {!file.isProductImage && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleDeleteUploadedFile(file)
+                                    }
+                                    disabled={
+                                      isDeleting || updating
+                                    }
+                                    title="Xóa file"
+                                    aria-label={`Xóa ${file.fileName}`}
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {isDeleting ? (
+                                      <LoaderCircle
+                                        size={17}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      <Trash2 size={17} />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl bg-gray-50 px-5 py-7 text-center">
+                        <FileText
+                          size={26}
+                          className="mx-auto text-gray-300"
+                        />
+
+                        <p className="mt-2 text-sm text-gray-500">
+                          Chưa có file đính kèm
+                        </p>
+                      </div>
                     )}
-                    </form>
-                </div>
+                  </div>
                 </section>
+              </form>
 
               {/* Service */}
               <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -795,7 +1673,9 @@ const ServiceOrderDetailModal = ({
 
                   <InfoItem
                     label="Giá cơ bản"
-                    value={formatCurrency(service.basePrice)}
+                    value={formatCurrency(
+                      service.basePrice
+                    )}
                   />
                 </dl>
 
@@ -808,7 +1688,8 @@ const ServiceOrderDetailModal = ({
                     </p>
 
                     <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
-                      {service.description || EMPTY_VALUE}
+                      {service.description ||
+                        EMPTY_VALUE}
                     </p>
                   </div>
 
@@ -855,7 +1736,10 @@ const ServiceOrderDetailModal = ({
 
                     <InfoItem
                       label="Mã khách hàng"
-                      value={user.userCode || user.idUser}
+                      value={
+                        user.userCode ||
+                        user.idUser
+                      }
                     />
 
                     <InfoItem
@@ -865,7 +1749,9 @@ const ServiceOrderDetailModal = ({
 
                     <InfoItem
                       label="Ngày sinh"
-                      value={formatDate(user.birthday)}
+                      value={formatDate(
+                        user.birthday
+                      )}
                     />
 
                     <InfoItem
@@ -886,7 +1772,9 @@ const ServiceOrderDetailModal = ({
                   <dl className="mt-6 space-y-5">
                     <InfoItem
                       label="Tên công ty"
-                      value={address.companyName}
+                      value={
+                        address.companyName
+                      }
                     />
 
                     <InfoItem
@@ -915,7 +1803,9 @@ const ServiceOrderDetailModal = ({
                       </p>
 
                       <p className="mt-3 text-3xl font-bold tracking-tight">
-                        {formatCurrency(order.totalPrice)}
+                        {formatCurrency(
+                          order.totalPrice
+                        )}
                       </p>
                     </div>
 
@@ -927,47 +1817,55 @@ const ServiceOrderDetailModal = ({
                   <div className="my-6 h-px bg-white/10" />
 
                   <dl className="space-y-4">
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex justify-between gap-4">
                       <dt className="text-sm text-gray-400">
                         Đơn giá
                       </dt>
 
                       <dd className="text-sm font-semibold">
-                        {formatCurrency(order.unitPrice)}
+                        {formatCurrency(
+                          order.unitPrice
+                        )}
                       </dd>
                     </div>
 
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex justify-between gap-4">
                       <dt className="text-sm text-gray-400">
                         Số lượng
                       </dt>
 
                       <dd className="text-sm font-semibold">
-                        {hasValue(order.quantity)
-                          ? `${order.quantity} ${unitType || ""}`.trim()
+                        {hasValue(
+                          order.quantity
+                        )
+                          ? `${order.quantity} ${unitType}`.trim()
                           : EMPTY_VALUE}
                       </dd>
                     </div>
 
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex justify-between gap-4">
                       <dt className="text-sm text-gray-400">
                         Giảm giá
                       </dt>
 
                       <dd className="text-sm font-semibold text-emerald-400">
-                        {formatCurrency(order.discountAmount)}
+                        {formatCurrency(
+                          order.discountAmount
+                        )}
                       </dd>
                     </div>
                   </dl>
                 </div>
 
-                <div className="flex items-center justify-between bg-white/5 px-6 py-4">
+                <div className="flex justify-between bg-white/5 px-6 py-4">
                   <span className="text-xs text-gray-400">
                     Thành tiền sau giảm giá
                   </span>
 
-                  <span className="text-sm font-bold text-white">
-                    {formatCurrency(order.totalPrice)}
+                  <span className="text-sm font-bold">
+                    {formatCurrency(
+                      order.totalPrice
+                    )}
                   </span>
                 </div>
               </section>
@@ -989,12 +1887,14 @@ const ServiceOrderDetailModal = ({
                       <span className="h-2 w-2 rounded-full bg-blue-500" />
                     </span>
 
-                    <p className="text-xs font-medium text-gray-400">
+                    <p className="text-xs text-gray-400">
                       Ngày tiếp nhận
                     </p>
 
-                    <p className="mt-1 text-base font-bold text-gray-900">
-                      {formatDate(order.receivedDate)}
+                    <p className="mt-1 font-bold text-gray-900">
+                      {formatDate(
+                        order.receivedDate
+                      )}
                     </p>
                   </div>
 
@@ -1003,18 +1903,20 @@ const ServiceOrderDetailModal = ({
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     </span>
 
-                    <p className="text-xs font-medium text-gray-400">
+                    <p className="text-xs text-gray-400">
                       Ngày hoàn thành
                     </p>
 
-                    <p className="mt-1 text-base font-bold text-gray-900">
-                      {formatDate(order.completedDate)}
+                    <p className="mt-1 font-bold text-gray-900">
+                      {formatDate(
+                        order.completedDate
+                      )}
                     </p>
                   </div>
                 </div>
               </section>
 
-              {/* System information */}
+              {/* System */}
               <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
                 <CardHeader
                   icon={Building2}
@@ -1040,12 +1942,18 @@ const ServiceOrderDetailModal = ({
                   <dl className="grid grid-cols-2 gap-6">
                     <InfoItem
                       label="Thời gian nhận"
-                      value={formatDate(order.createdAt, true)}
+                      value={formatDate(
+                        order.createdAt,
+                        true
+                      )}
                     />
 
                     <InfoItem
                       label="Cập nhật gần nhất"
-                      value={formatDate(order.updatedAt, true)}
+                      value={formatDate(
+                        order.updatedAt,
+                        true
+                      )}
                     />
                   </dl>
                 </div>
@@ -1057,15 +1965,20 @@ const ServiceOrderDetailModal = ({
         {/* Footer */}
         <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-gray-100 bg-white px-5 py-4 sm:px-7">
           <p className="hidden text-xs text-gray-400 sm:block">
-            Nhấn phím ESC hoặc bên ngoài để đóng
+            {isEditingProduct
+              ? "Bạn đang chỉnh sửa đơn hàng"
+              : "Nhấn ESC hoặc bên ngoài để đóng"}
           </p>
 
           <button
             type="button"
-            onClick={onClose}
-            className="ml-auto min-w-28 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700"
+            onClick={handleRequestClose}
+            disabled={updating}
+            className="ml-auto min-w-28 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Đóng
+            {isEditingProduct
+              ? "Hủy chỉnh sửa"
+              : "Đóng"}
           </button>
         </footer>
       </div>
@@ -1073,4 +1986,6 @@ const ServiceOrderDetailModal = ({
   );
 };
 
-export default memo(ServiceOrderDetailModal);
+export default memo(
+  ServiceOrderDetailModal
+);

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Clock, Eye, MoreVertical, Search, Trash2 } from "lucide-react";
+import { Clock, Eye, MoreVertical, Plus, Search, Trash2 } from "lucide-react";
 import { BASE_URL_API } from "@/api/config";
 import { SectionCard } from "@/components/ui/Section/Section";
 import MenuTable from "@/components/ui/Menu/MenuTable";
 import ServiceOrderDetailModal from "@/components/ui/ServiceOrder/ServiceOrderDetailModal";
+import ServiceOrderCreateModal from "@/components/ui/ServiceOrder/ServiceOrderCreateModal";
 
 const getProgressByStatus = (status) => {
   const text = String(status || "").toLowerCase();
@@ -74,17 +75,18 @@ const initialActionMenuState = {
   order: null,
 };
 
+const PAGE_SIZE = 15;
+
 const ServiceOrderPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const deferredSearchValue = useDeferredValue(searchValue);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
-  const [actionMenu, setActionMenu] = useState(
-    initialActionMenuState
-  );
-  
+  const [createModalOpen,setCreateModalOpen] = useState(false);
+  const [actionMenu, setActionMenu] = useState(initialActionMenuState);
+  const [currentPage,setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchServiceOrders = async () => {
@@ -120,7 +122,10 @@ const ServiceOrderPage = () => {
   }, []);
 
   const filteredOrders = useMemo(() => {
-    const keyword = searchValue.trim().toLowerCase();
+    const keyword =
+      deferredSearchValue
+        .trim()
+        .toLowerCase();
 
     if (!keyword) return orders;
 
@@ -135,7 +140,33 @@ const ServiceOrderPage = () => {
         .toLowerCase()
         .includes(keyword)
     );
-  }, [orders, searchValue]);
+  }, [
+    orders,
+    deferredSearchValue,
+  ]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(
+      filteredOrders.length / PAGE_SIZE
+    )
+  );
+
+  const safeCurrentPage = Math.min(
+    currentPage,
+    totalPages
+  );
+
+  const visibleOrders = useMemo(() => {
+    const start =
+      (safeCurrentPage - 1) *
+      PAGE_SIZE;
+
+    return filteredOrders.slice(
+      start,
+      start + PAGE_SIZE
+    );
+  }, [filteredOrders,safeCurrentPage]);
 
 
   // HANDLE
@@ -210,6 +241,47 @@ const ServiceOrderPage = () => {
     []
   );
 
+  const handleOpenCreateModal = () => {
+    handleCloseActionMenu();
+    setCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal =
+    useCallback(() => {
+      setCreateModalOpen(false);
+    }, []);
+
+  const handleOrderCreated = useCallback((createdOrder) => {
+      const mappedOrder =
+        mapOrderToTable(createdOrder);
+
+      setOrders((previousOrders) => {
+        const existed =
+          previousOrders.some(
+            (item) =>
+              item.serviceOrderId ===
+              mappedOrder.serviceOrderId
+          );
+
+        if (existed) {
+          return previousOrders.map(
+            (item) =>
+              item.serviceOrderId ===
+              mappedOrder.serviceOrderId
+                ? mappedOrder
+                : item
+          );
+        }
+
+        return [
+          mappedOrder,
+          ...previousOrders,
+        ];
+      });
+
+      setCurrentPage(1);
+    }, []);
+
   const actionMenuItems = [
     {
       id: "detail",
@@ -239,26 +311,45 @@ const ServiceOrderPage = () => {
       title="Services Order List"
       desc="Theo dõi danh sách, trạng thái và tiến độ các đơn hàng dịch vụ của bạn."
     >
-      <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-sm font-medium text-gray-700">
             Tổng số đơn hàng: {orders.length}
           </p>
+
           <p className="mt-1 text-sm text-gray-500">
             Hiển thị {filteredOrders.length} kết quả
           </p>
         </div>
 
-        <div className="flex w-full items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 md:w-80">
-          <Search size={18} className="shrink-0 text-gray-400" />
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 sm:w-80">
+            <Search
+              size={18}
+              className="shrink-0 text-gray-400"
+            />
 
-          <input
-            type="text"
-            placeholder="Tìm mã đơn, dịch vụ, trạng thái..."
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            className="w-full bg-transparent text-sm outline-none"
-          />
+            <input
+              type="text"
+              placeholder="Tìm mã đơn, dịch vụ, trạng thái..."
+              value={searchValue}
+              onChange={(event) => {
+                setSearchValue(event.target.value);
+
+                setCurrentPage(1);
+              }}
+              className="w-full bg-transparent text-sm outline-none"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-brand! px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+          >
+            <Plus size={18} />
+            Thêm đơn hàng
+          </button>
         </div>
       </div>
 
@@ -296,7 +387,7 @@ const ServiceOrderPage = () => {
                 </td>
               </tr>
             ) : filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
+              visibleOrders.map((order) => (
                 <tr
                   key={order.id}
                   className="border-b border-gray-100 text-sm transition last:border-b-0 hover:bg-gray-50"
@@ -378,7 +469,7 @@ const ServiceOrderPage = () => {
                   colSpan={7}
                   className="px-4 py-10 text-center text-sm text-gray-500"
                 >
-                  {searchValue.trim()
+                  {deferredSearchValue.trim()
                     ? "Không tìm thấy đơn hàng phù hợp."
                     : "Chưa có đơn hàng dịch vụ."}
                 </td>
@@ -387,6 +478,128 @@ const ServiceOrderPage = () => {
           </tbody>
         </table>
       </div>
+
+      {filteredOrders.length >
+        PAGE_SIZE && (
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-gray-500">
+            Trang{" "}
+            <span className="font-semibold text-gray-700">
+              {safeCurrentPage}
+            </span>{" "}
+            / {totalPages}
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                setCurrentPage(
+                  (previousPage) =>
+                    Math.max(
+                      1,
+                      previousPage - 1
+                    )
+                )
+              }
+              disabled={
+                safeCurrentPage <= 1
+              }
+              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Trước
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from(
+                {
+                  length: totalPages,
+                },
+                (_, index) => index + 1
+              )
+                .filter((pageNumber) => {
+                  return (
+                    pageNumber === 1 ||
+                    pageNumber ===
+                      totalPages ||
+                    Math.abs(
+                      pageNumber -
+                        safeCurrentPage
+                    ) <= 1
+                  );
+                })
+                .map(
+                  (
+                    pageNumber,
+                    index,
+                    displayedPages
+                  ) => {
+                    const previousPage =
+                      displayedPages[
+                        index - 1
+                      ];
+
+                    const hasGap =
+                      previousPage &&
+                      pageNumber -
+                        previousPage >
+                        1;
+
+                    return (
+                      <div
+                        key={pageNumber}
+                        className="flex items-center gap-1"
+                      >
+                        {hasGap && (
+                          <span className="px-1 text-gray-400">
+                            ...
+                          </span>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCurrentPage(
+                              pageNumber
+                            )
+                          }
+                          className={`flex h-9 min-w-9 items-center justify-center rounded-xl px-2 text-sm font-semibold ${
+                            pageNumber ===
+                            safeCurrentPage
+                              ? "bg-brand text-white"
+                              : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      </div>
+                    );
+                  }
+                )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setCurrentPage(
+                  (previousPage) =>
+                    Math.min(
+                      totalPages,
+                      previousPage + 1
+                    )
+                )
+              }
+              disabled={
+                safeCurrentPage >=
+                totalPages
+              }
+              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Sau
+            </button>
+          </div>
+        </div>
+      )}
 
       <MenuTable
         open={actionMenu.open}
@@ -397,6 +610,13 @@ const ServiceOrderPage = () => {
         items={actionMenuItems}
         onClose={handleCloseActionMenu}
       />
+
+      <ServiceOrderCreateModal
+        open={createModalOpen}
+        onClose={handleCloseCreateModal}
+        onCreated={handleOrderCreated}
+      />
+      
       <ServiceOrderDetailModal
         open={Boolean(selectedOrder)}
         order={selectedOrder}

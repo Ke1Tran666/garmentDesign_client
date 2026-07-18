@@ -25,6 +25,7 @@ import {
 import {
   BACKEND_URL,
   BASE_URL_API,
+  USER_ADDRESS_API,
   USER_API,
 } from "@/api/config";
 
@@ -178,7 +179,7 @@ const InfoItem = ({
       {label}
     </dt>
 
-    <dd className="mt-1.5 break-words text-sm font-medium leading-6 text-gray-800">
+    <dd className="mt-1.5 wrap-break-word text-sm font-medium leading-6 text-gray-800">
       {hasValue(value)
         ? value
         : EMPTY_VALUE}
@@ -191,25 +192,34 @@ const CardHeader = ({
   title,
   description,
   iconClassName = "bg-gray-100 text-gray-600",
+  action,
 }) => (
-  <div className="flex items-center gap-3">
-    <div
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClassName}`}
-    >
-      <Icon size={21} />
+  <div className="flex items-start justify-between gap-4">
+    <div className="flex min-w-0 items-center gap-3">
+      <div
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClassName}`}
+      >
+        <Icon size={21} />
+      </div>
+
+      <div className="min-w-0">
+        <h4 className="font-bold text-gray-950">
+          {title}
+        </h4>
+
+        {description && (
+          <p className="mt-0.5 text-xs text-gray-500">
+            {description}
+          </p>
+        )}
+      </div>
     </div>
 
-    <div className="min-w-0">
-      <h4 className="font-bold text-gray-950">
-        {title}
-      </h4>
-
-      {description && (
-        <p className="mt-0.5 text-xs text-gray-500">
-          {description}
-        </p>
-      )}
-    </div>
+    {action && (
+      <div className="shrink-0">
+        {action}
+      </div>
+    )}
   </div>
 );
 
@@ -220,11 +230,9 @@ const ServiceOrderDetailModal = ({
   onUpdated,
   title = "Chi tiết đơn hàng",
 }) => {
-  const [employeeNames, setEmployeeNames] =
-    useState({});
+  const [employeeNames, setEmployeeNames] = useState({});
 
-  const [isEditingProduct, setIsEditingProduct] =
-    useState(false);
+  const [isEditingProduct, setIsEditingProduct] = useState(false);
 
   const [editForm, setEditForm] = useState({
     productName: "",
@@ -233,35 +241,116 @@ const ServiceOrderDetailModal = ({
     customerRequest: "",
   });
 
-  const [deletingFileId, setDeletingFileId] =
-    useState(null);
+  const [deletingFileId, setDeletingFileId] = useState(null);
 
-  const [fileError, setFileError] =
-    useState("");
+  const [fileError, setFileError] = useState("");
 
-  const [productImageFile, setProductImageFile] =
-    useState(null);
+  const [productImageFile, setProductImageFile] = useState(null);
 
-  const [
-    productImagePreview,
-    setProductImagePreview,
-  ] = useState("");
+  const [productImagePreview,setProductImagePreview] = useState("");
 
-  const [
-    attachmentFiles,
-    setAttachmentFiles,
-  ] = useState([]);
+  const [attachmentFiles,setAttachmentFiles] = useState([]);
 
-  const [fileState, setFileState] = useState({
-    orderId: null,
+  const [fileState, setFileState] = useState({orderId: null,items: []});
+
+  const [updating, setUpdating] = useState(false);
+
+  const [updateError, setUpdateError] = useState("");
+
+  const [addressState, setAddressState] = useState({
+    idUser: null,
     items: [],
+    error: "",
   });
 
-  const [updating, setUpdating] =
+  const [isEditingAddress, setIsEditingAddress] =
     useState(false);
 
-  const [updateError, setUpdateError] =
+  const [selectedAddressId, setSelectedAddressId] =
     useState("");
+
+  const [updatingAddress, setUpdatingAddress] =
+    useState(false);
+
+  const [addressError, setAddressError] =
+    useState("");
+
+  const currentUserId =
+  localStorage.getItem("idUser");
+
+  const userAddresses =
+    addressState.idUser === currentUserId
+      ? addressState.items
+      : [];
+
+  const addressesLoading =
+    isEditingAddress &&
+    Boolean(currentUserId) &&
+    addressState.idUser !== currentUserId;
+
+  const defaultAddressId =
+    order?.user?.defaultAddress?.addressId;
+
+  useEffect(() => {
+    if (
+      !open ||
+      !isEditingAddress ||
+      !currentUserId ||
+      addressState.idUser === currentUserId
+    ) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const fetchUserAddresses = async () => {
+      try {
+        const response = await axios.get(
+          `${USER_ADDRESS_API}/user/${currentUserId}`,
+          {
+            signal: controller.signal,
+          }
+        );
+
+        if (controller.signal.aborted) return;
+
+        setAddressState({
+          idUser: currentUserId,
+          items: response.data || [],
+          error: "",
+        });
+      } catch (error) {
+        if (
+          error.code === "ERR_CANCELED" ||
+          error.name === "CanceledError"
+        ) {
+          return;
+        }
+
+        console.error(
+          "Không thể tải địa chỉ:",
+          error
+        );
+
+        setAddressState({
+          idUser: currentUserId,
+          items: [],
+          error:
+            error.response?.data?.message ||
+            "Không thể tải danh sách địa chỉ.",
+        });
+      }
+    };
+
+    fetchUserAddresses();
+
+    return () => controller.abort();
+  }, [
+    open,
+    isEditingAddress,
+    currentUserId,
+    addressState.idUser,
+  ]);
 
   const orderId = order?.serviceOrderId;
   const createdBy = order?.createdBy;
@@ -339,8 +428,8 @@ const ServiceOrderDetailModal = ({
   }, [productImagePreview]);
 
   /*
-   * Khóa scroll trang và xử lý phím ESC.
-   */
+  * Khóa scroll trang và xử lý phím ESC.
+  */
   useEffect(() => {
     if (!open) return undefined;
 
@@ -349,6 +438,10 @@ const ServiceOrderDetailModal = ({
 
     const handleKeyDown = (event) => {
       if (event.key !== "Escape") return;
+
+      if (updating || updatingAddress) {
+        return;
+      }
 
       if (isEditingProduct) {
         if (productImagePreview) {
@@ -362,6 +455,13 @@ const ServiceOrderDetailModal = ({
         setProductImagePreview("");
         setAttachmentFiles([]);
         setUpdateError("");
+        return;
+      }
+
+      if (isEditingAddress) {
+        setIsEditingAddress(false);
+        setSelectedAddressId("");
+        setAddressError("");
         return;
       }
 
@@ -388,7 +488,10 @@ const ServiceOrderDetailModal = ({
     open,
     onClose,
     isEditingProduct,
+    isEditingAddress,
     productImagePreview,
+    updating,
+    updatingAddress,
   ]);
 
   /*
@@ -561,6 +664,14 @@ const ServiceOrderDetailModal = ({
   };
 
   const handleStartEditProduct = () => {
+    if (
+      isEditingAddress ||
+      updatingAddress ||
+      updating
+    ) {
+      return;
+    }
+
     resetSelectedFiles();
 
     setEditForm({
@@ -585,10 +696,17 @@ const ServiceOrderDetailModal = ({
   };
 
   const handleRequestClose = () => {
-    if (updating) return;
+    if (updating || updatingAddress) {
+      return;
+    }
 
     if (isEditingProduct) {
       handleCancelEditProduct();
+      return;
+    }
+
+    if (isEditingAddress) {
+      handleCancelEditAddress();
       return;
     }
 
@@ -959,6 +1077,104 @@ const ServiceOrderDetailModal = ({
     }
   };
 
+  const handleStartEditAddress = () => {
+    if (
+      updatingAddress ||
+      updating ||
+      isEditingProduct
+    ) {
+      return;
+    }
+
+    setSelectedAddressId(
+      order.address?.addressId != null
+        ? String(order.address.addressId)
+        : ""
+    );
+
+    setAddressError("");
+    setIsEditingAddress(true);
+  };
+
+  const handleCancelEditAddress = () => {
+    if (updatingAddress) return;
+
+    setSelectedAddressId("");
+    setAddressError("");
+    setIsEditingAddress(false);
+  };
+
+  const handleUpdateAddress = async () => {
+    const addressId = Number(
+      selectedAddressId
+    );
+
+    if (
+      !Number.isInteger(addressId) ||
+      addressId <= 0
+    ) {
+      setAddressError(
+        "Vui lòng chọn một địa chỉ nhận hàng."
+      );
+      return;
+    }
+
+    if (!currentUserId) {
+      setAddressError(
+        "Không tìm thấy thông tin người dùng."
+      );
+      return;
+    }
+
+    /*
+    * Không gọi API nếu người dùng vẫn chọn
+    * đúng địa chỉ hiện tại.
+    */
+    if (
+      String(order.address?.addressId) ===
+      String(addressId)
+    ) {
+      setSelectedAddressId("");
+      setAddressError("");
+      setIsEditingAddress(false);
+      return;
+    }
+
+    try {
+      setUpdatingAddress(true);
+      setAddressError("");
+
+      const response = await axios.patch(
+        `${BASE_URL_API}/service-orders/${orderId}/user/${currentUserId}/address`,
+        {
+          addressId,
+        }
+      );
+
+      /*
+      * ServiceOrderPage sẽ cập nhật cả danh sách
+      * và selectedOrder bằng dữ liệu BE trả về.
+      */
+      onUpdated?.(response.data);
+
+      setSelectedAddressId("");
+      setAddressError("");
+      setIsEditingAddress(false);
+    } catch (error) {
+      console.error(
+        "Không thể cập nhật địa chỉ:",
+        error
+      );
+
+      setAddressError(
+        error.response?.data?.message ||
+          "Không thể cập nhật địa chỉ. Vui lòng thử lại."
+      );
+    } finally {
+      setUpdatingAddress(false);
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-70 flex items-center justify-center bg-gray-950/45 px-3 py-4 animate-in fade-in duration-150 sm:px-6"
@@ -1055,7 +1271,7 @@ const ServiceOrderDetailModal = ({
             <button
               type="button"
               onClick={handleRequestClose}
-              disabled={updating}
+              disabled={updating || updatingAddress}
               aria-label="Đóng chi tiết đơn hàng"
               className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -1129,9 +1345,7 @@ const ServiceOrderDetailModal = ({
                             onChange={
                               handleProductImageChange
                             }
-                            disabled={
-                              updating
-                            }
+                            disabled={updating || updatingAddress}
                             className="hidden"
                           />
                         </label>
@@ -1166,9 +1380,7 @@ const ServiceOrderDetailModal = ({
                                 onChange={
                                   handleEditFormChange
                                 }
-                                disabled={
-                                  updating
-                                }
+                                disabled={updating || updatingAddress}
                                 autoFocus
                                 className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-base font-semibold text-gray-900 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
                               />
@@ -1204,24 +1416,27 @@ const ServiceOrderDetailModal = ({
 
                               <button
                                 type="button"
-                                onClick={
-                                  handleStartEditProduct
+                                onClick={handleStartEditProduct}
+                                disabled={
+                                  isEditingAddress ||
+                                  updatingAddress ||
+                                  updating
                                 }
-                                title="Chỉnh sửa"
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-brand/30 hover:bg-brand-light hover:text-brand"
+                                title={
+                                  isEditingAddress
+                                    ? "Hãy hoàn tất chỉnh sửa địa chỉ trước"
+                                    : "Chỉnh sửa đơn hàng"
+                                }
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-brand/30 hover:bg-brand-light hover:text-brand disabled:cursor-not-allowed disabled:opacity-40"
                               >
-                                <Pencil
-                                  size={17}
-                                />
+                                <Pencil size={17} />
                               </button>
                             </>
                           ) : (
                             <>
                               <button
                                 type="submit"
-                                disabled={
-                                  updating
-                                }
+                                disabled={updating || updatingAddress}
                                 className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 {updating ? (
@@ -1245,9 +1460,7 @@ const ServiceOrderDetailModal = ({
                                 onClick={
                                   handleCancelEditProduct
                                 }
-                                disabled={
-                                  updating
-                                }
+                                disabled={updating || updatingAddress}
                                 title="Hủy chỉnh sửa"
                                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                               >
@@ -1291,9 +1504,7 @@ const ServiceOrderDetailModal = ({
                               onChange={
                                 handleEditFormChange
                               }
-                              disabled={
-                                updating
-                              }
+                              disabled={updating || updatingAddress}
                               className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
                             />
                           </div>
@@ -1318,9 +1529,7 @@ const ServiceOrderDetailModal = ({
                               onChange={
                                 handleEditFormChange
                               }
-                              disabled={
-                                updating
-                              }
+                              disabled={updating || updatingAddress}
                               className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
                             />
                           </div>
@@ -1355,9 +1564,7 @@ const ServiceOrderDetailModal = ({
                               onChange={
                                 handleEditFormChange
                               }
-                              disabled={
-                                updating
-                              }
+                              disabled={updating || updatingAddress}
                               className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
                             />
                           </div>
@@ -1457,7 +1664,7 @@ const ServiceOrderDetailModal = ({
                           onChange={
                             handleAttachmentChange
                           }
-                          disabled={updating}
+                          disabled={updating || updatingAddress}
                           className="hidden"
                         />
                       </label>
@@ -1501,9 +1708,7 @@ const ServiceOrderDetailModal = ({
                                       index
                                     )
                                   }
-                                  disabled={
-                                    updating
-                                  }
+                                  disabled={updating || updatingAddress}
                                   title="Bỏ file"
                                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-600"
                                 >
@@ -1761,32 +1966,238 @@ const ServiceOrderDetailModal = ({
                   </dl>
                 </section>
 
-                <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                <section
+                  className={`rounded-3xl border bg-white p-6 shadow-sm transition ${
+                    isEditingAddress
+                      ? "border-orange-200 ring-4 ring-orange-50"
+                      : "border-gray-100"
+                  }`}
+                >
                   <CardHeader
                     icon={MapPin}
                     title="Địa chỉ"
-                    description="Địa chỉ tiếp nhận hoặc giao sản phẩm"
+                    description={
+                      isEditingAddress
+                        ? "Chọn một địa chỉ đã thêm trước đó"
+                        : "Địa chỉ tiếp nhận hoặc giao sản phẩm"
+                    }
                     iconClassName="bg-orange-50 text-orange-600"
+                    action={
+                      isEditingAddress ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleUpdateAddress}
+                            disabled={
+                              updatingAddress ||
+                              addressesLoading ||
+                              userAddresses.length === 0 ||
+                              !selectedAddressId
+                            }
+                            className="inline-flex h-9 items-center gap-2 rounded-xl bg-orange-500! px-3.5 text-xs font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {updatingAddress ? (
+                              <LoaderCircle
+                                size={15}
+                                className="animate-spin"
+                              />
+                            ) : (
+                              <Save size={15} />
+                            )}
+
+                            {updatingAddress
+                              ? "Đang cập nhật"
+                              : "Cập nhật"}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={
+                              handleCancelEditAddress
+                            }
+                            disabled={updatingAddress}
+                            aria-label="Hủy chỉnh sửa địa chỉ"
+                            title="Hủy chỉnh sửa"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={
+                            handleStartEditAddress
+                          }
+                          disabled={
+                            isEditingProduct ||
+                            updating ||
+                            updatingAddress
+                          }
+                          className="inline-flex h-9 items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-3.5 text-xs font-semibold text-orange-600 transition hover:border-orange-300 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      )
+                    }
                   />
 
-                  <dl className="mt-6 space-y-5">
-                    <InfoItem
-                      label="Tên công ty"
-                      value={
-                        address.companyName
-                      }
-                    />
+                  {isEditingAddress ? (
+                    <div className="mt-6">
+                      {addressesLoading ? (
+                        <div className="flex items-center justify-center gap-2 rounded-2xl bg-gray-50 px-4 py-8 text-sm text-gray-500">
+                          <LoaderCircle
+                            size={18}
+                            className="animate-spin"
+                          />
 
-                    <InfoItem
-                      label="Địa chỉ chi tiết"
-                      value={address.address}
-                    />
+                          Đang tải danh sách địa chỉ...
+                        </div>
+                      ) : addressState.error ? (
+                        <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                          {addressState.error}
+                        </div>
+                      ) : userAddresses.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-5 py-8 text-center">
+                          <MapPin
+                            size={26}
+                            className="mx-auto text-gray-300"
+                          />
 
-                    <InfoItem
-                      label="Ghi chú"
-                      value={address.note}
-                    />
-                  </dl>
+                          <p className="mt-2 text-sm font-medium text-gray-600">
+                            Bạn chưa có địa chỉ nào
+                          </p>
+
+                          <p className="mt-1 text-xs text-gray-400">
+                            Vui lòng thêm địa chỉ tại
+                            trang quản lý địa chỉ.
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          role="radiogroup"
+                          aria-label="Chọn địa chỉ cho đơn hàng"
+                          className="max-h-80 space-y-3 overflow-y-auto pr-1"
+                        >
+                          {userAddresses.map((item) => {
+                            const itemAddressId =
+                              String(item.addressId);
+
+                            const isSelected =
+                              itemAddressId ===
+                              String(selectedAddressId);
+
+                            const isCurrentAddress =
+                              itemAddressId ===
+                              String(
+                                order.address?.addressId
+                              );
+
+                            const isDefault =
+                              itemAddressId ===
+                              String(defaultAddressId);
+
+                            return (
+                              <label
+                                key={item.addressId}
+                                className={`relative flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
+                                  isSelected
+                                    ? "border-orange-400 bg-orange-50/70 ring-4 ring-orange-100/60"
+                                    : "border-gray-100 bg-gray-50 hover:border-orange-200 hover:bg-orange-50/30"
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="selectedOrderAddress"
+                                  value={item.addressId}
+                                  checked={isSelected}
+                                  onChange={(event) => {
+                                    setSelectedAddressId(
+                                      event.target.value
+                                    );
+
+                                    setAddressError("");
+                                  }}
+                                  disabled={
+                                    updatingAddress
+                                  }
+                                  className="mt-1 h-4 w-4 shrink-0 accent-orange-500"
+                                />
+
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <p className="font-semibold text-gray-900">
+                                      {item.companyName ||
+                                        "Địa chỉ cá nhân"}
+                                    </p>
+
+                                    {isCurrentAddress && (
+                                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">
+                                        Đang sử dụng
+                                      </span>
+                                    )}
+
+                                    {isDefault && (
+                                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                                        Mặc định
+                                      </span>
+                                    )}
+
+                                    {isSelected &&
+                                      !isCurrentAddress && (
+                                        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600">
+                                          Đang chọn
+                                        </span>
+                                      )}
+                                  </div>
+
+                                  <p className="mt-1 text-sm leading-6 text-gray-600">
+                                    {item.address ||
+                                      EMPTY_VALUE}
+                                  </p>
+
+                                  {item.note && (
+                                    <p className="mt-1 text-xs text-gray-400">
+                                      Ghi chú: {item.note}
+                                    </p>
+                                  )}
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {addressError && (
+                        <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                          {addressError}
+                        </div>
+                      )}
+
+                      <p className="mt-4 text-xs leading-5 text-gray-400">
+                        Địa chỉ này chỉ áp dụng cho đơn
+                        hàng hiện tại, không thay đổi địa
+                        chỉ mặc định của tài khoản.
+                      </p>
+                    </div>
+                  ) : (
+                    <dl className="mt-6 space-y-5">
+                      <InfoItem
+                        label="Tên công ty"
+                        value={address.companyName}
+                      />
+
+                      <InfoItem
+                        label="Địa chỉ chi tiết"
+                        value={address.address}
+                      />
+
+                      <InfoItem
+                        label="Ghi chú"
+                        value={address.note}
+                      />
+                    </dl>
+                  )}
                 </section>
               </div>
             </main>
@@ -1966,19 +2377,26 @@ const ServiceOrderDetailModal = ({
         <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-gray-100 bg-white px-5 py-4 sm:px-7">
           <p className="hidden text-xs text-gray-400 sm:block">
             {isEditingProduct
-              ? "Bạn đang chỉnh sửa đơn hàng"
-              : "Nhấn ESC hoặc bên ngoài để đóng"}
+              ? "Bạn đang chỉnh sửa thông tin đơn hàng"
+              : isEditingAddress
+                ? "Bạn đang thay đổi địa chỉ của đơn hàng"
+                : "Nhấn ESC hoặc bên ngoài để đóng"}
           </p>
 
           <button
             type="button"
             onClick={handleRequestClose}
-            disabled={updating}
+            disabled={
+              updating || updatingAddress
+            }
             className="ml-auto min-w-28 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isEditingProduct
-              ? "Hủy chỉnh sửa"
-              : "Đóng"}
+            {updating || updatingAddress
+              ? "Đang xử lý..."
+              : isEditingProduct ||
+                  isEditingAddress
+                ? "Hủy chỉnh sửa"
+                : "Đóng"}
           </button>
         </footer>
       </div>

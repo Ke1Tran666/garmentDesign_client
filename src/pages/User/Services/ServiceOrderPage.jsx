@@ -6,33 +6,63 @@ import { SectionCard } from "@/components/ui/Section/Section";
 import MenuTable from "@/components/ui/Menu/MenuTable";
 import ServiceOrderDetailModal from "@/components/ui/ServiceOrder/ServiceOrderDetailModal";
 import ServiceOrderCreateModal from "@/components/ui/ServiceOrder/ServiceOrderCreateModal";
+import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
+
+const hasEmployeeReceiver = (order) => {
+  const createdBy = String(order?.createdBy || "").trim();
+
+  const updatedBy = String(order?.updatedBy || "").trim();
+
+  return Boolean(createdBy || updatedBy);
+};
+
+const isCancelledOrder = (order) => {
+  const databaseStatus = String(
+    order?.databaseStatus ||
+      order?.status ||
+      ""
+  ).toLowerCase();
+
+  return (
+    databaseStatus === "inactive" &&
+    Boolean(order?.deletedAt)
+  );
+};
 
 const getProgressByStatus = (status) => {
   const text = String(status || "").toLowerCase();
 
-  if (text.includes("hoàn") || text.includes("complete")) return 100;
-  if (text.includes("chờ") || text.includes("pending")) return 35;
-  if (text.includes("hủy") || text.includes("cancel")) return 0;
+  if (text === "pending") {
+    return 35;
+  }
 
-  return 65;
+  if (text === "active") {
+    return 65;
+  }
+
+  if (text === "inactive") {
+    return 0;
+  }
+
+  return 0;
 };
 
 const getStatusClass = (status) => {
   const text = String(status || "").toLowerCase();
 
-  if (text.includes("hoàn") || text.includes("complete")) {
-    return "bg-emerald-50 text-emerald-600";
-  }
-
-  if (text.includes("hủy") || text.includes("cancel")) {
+  if (text.includes("hủy") || text === "inactive") {
     return "bg-red-50 text-red-600";
   }
 
-  if (text.includes("chờ") || text.includes("pending")) {
+  if (text === "pending") {
     return "bg-amber-50 text-amber-600";
   }
 
-  return "bg-brand-light text-brand";
+  if (text === "active") {
+    return "bg-blue-50 text-blue-600";
+  }
+
+  return "bg-gray-100 text-gray-600";
 };
 
 const formatDate = (dateValue) => {
@@ -49,24 +79,50 @@ const formatDate = (dateValue) => {
   }).format(date);
 };
 
-const mapOrderToTable = (order) => ({
-  ...order,
-  id: order.serviceOrderId,
-  orderCode: `ORD-${order.serviceOrderId}`,
-  customer:
-    order.user?.fullName || "Không rõ",
-  serviceName:
-    order.service?.serviceName ||
-    "Không rõ dịch vụ",
-  deadline: formatDate(
-    order.completedDate ||
-      order.receivedDate
-  ),
-  status: order.status || "Đang xử lý",
-  progress: getProgressByStatus(
-    order.status
-  ),
-});
+const mapOrderToTable = (order) => {
+  const databaseStatus = String(
+    order.status || "pending"
+  ).toLowerCase();
+
+  const cancelled =
+    databaseStatus === "inactive" &&
+    Boolean(order.deletedAt);
+
+  return {
+    ...order,
+    id: order.serviceOrderId,
+    orderCode:
+      `ORD-${order.serviceOrderId}`,
+    customer:
+      order.user?.fullName ||
+      "Không rõ",
+    serviceName:
+      order.service?.serviceName ||
+      "Không rõ dịch vụ",
+    deadline: formatDate(
+      order.completedDate ||
+        order.receivedDate
+    ),
+
+    /*
+     * Giữ trạng thái thật từ database.
+     */
+    databaseStatus,
+
+    /*
+     * Đây chỉ là nhãn dùng để hiển thị.
+     */
+    status: cancelled
+      ? "Đã hủy đơn hàng"
+      : databaseStatus,
+
+    progress: cancelled
+      ? 0
+      : getProgressByStatus(
+          databaseStatus
+        ),
+  };
+};
 
 const initialActionMenuState = {
   open: false,
@@ -87,6 +143,10 @@ const ServiceOrderPage = () => {
   const [createModalOpen,setCreateModalOpen] = useState(false);
   const [actionMenu, setActionMenu] = useState(initialActionMenuState);
   const [currentPage,setCurrentPage] = useState(1);
+
+  const [removingOrder,setRemovingOrder] = useState(null);
+  const [removing,setRemoving] = useState(false);
+  const [removeError,setRemoveError] = useState("");
 
   useEffect(() => {
     const fetchServiceOrders = async () => {
@@ -211,12 +271,117 @@ const ServiceOrderPage = () => {
   };
 
   const handleRemoveOrder = (order) => {
-    console.log("Gỡ bỏ đơn hàng:", order);
+    if (!order || isCancelledOrder(order)) {return;}
 
-    // Sau này có thể:
-    // setSelectedOrder(order);
-    // setOpenRemoveConfirm(true);
+    setRemoveError("");
+    setRemovingOrder(order);
+    handleCloseActionMenu();
   };
+
+  const handleCloseRemoveModal = useCallback(() => {
+    if (removing) return;
+
+    setRemovingOrder(null);
+    setRemoveError("");
+  }, [removing]);
+
+  const handleConfirmRemove = async () => {
+    if (!removingOrder || removing) {return;}
+
+    const idUser = localStorage.getItem("idUser");
+
+    if (!idUser) {
+      setRemoveError(
+        "Không tìm thấy thông tin người dùng."
+      );
+      return;
+    }
+
+    try {
+      setRemoving(true);
+      setRemoveError("");
+
+      const response =
+        await axios.delete(
+          `${BASE_URL_API}/service-orders/${removingOrder.serviceOrderId}/user/${idUser}`
+        );
+
+      const result =
+        response.data;
+
+      if (
+        result.action === "DELETED"
+      ) {
+        setOrders(
+          (previousOrders) =>
+            previousOrders.filter(
+              (order) =>
+                order.serviceOrderId !==
+                result.orderId
+            )
+        );
+
+        if (
+          selectedOrder
+            ?.serviceOrderId ===
+          result.orderId
+        ) {
+          setSelectedOrder(null);
+        }
+      }
+
+      if (
+        result.action ===
+          "CANCELLED" &&
+        result.order
+      ) {
+        const cancelledOrder =
+          mapOrderToTable(
+            result.order
+          );
+
+        setOrders(
+          (previousOrders) =>
+            previousOrders.map(
+              (order) =>
+                order.serviceOrderId ===
+                result.orderId
+                  ? cancelledOrder
+                  : order
+            )
+        );
+
+        if (
+          selectedOrder
+            ?.serviceOrderId ===
+          result.orderId
+        ) {
+          setSelectedOrder(
+            cancelledOrder
+          );
+        }
+      }
+
+      setRemovingOrder(null);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error(
+        "Không thể xử lý đơn hàng:",
+        error
+      );
+
+      setRemoveError(
+        error.response?.data?.detail ||
+          error.response?.data
+            ?.message ||
+          "Không thể xử lý đơn hàng. Vui lòng thử lại."
+      );
+    } finally {
+      setRemoving(false);
+    }
+  };
+
+  const removingOrderHasReceiver = hasEmployeeReceiver(removingOrder);
 
   const handleCloseDetail = useCallback(() => {
     setSelectedOrder(null);
@@ -295,12 +460,21 @@ const ServiceOrderPage = () => {
     },
     {
       id: "remove",
-      label: "Gỡ bỏ",
+      label: isCancelledOrder(actionMenu.order)
+        ? "Đơn hàng đã hủy"
+        : hasEmployeeReceiver(
+              actionMenu.order
+            )
+          ? "Hủy đơn hàng"
+          : "Gỡ bỏ vĩnh viễn",
       icon: Trash2,
       danger: true,
+      disabled: isCancelledOrder(actionMenu.order),
       onClick: () => {
         if (actionMenu.order) {
-          handleRemoveOrder(actionMenu.order);
+          handleRemoveOrder(
+            actionMenu.order
+          );
         }
       },
     },
@@ -610,6 +784,71 @@ const ServiceOrderPage = () => {
         items={actionMenuItems}
         onClose={handleCloseActionMenu}
       />
+
+      <ConfirmModal
+        open={Boolean(removingOrder)}
+        title={
+          removingOrderHasReceiver
+            ? "Hủy đơn hàng"
+            : "Gỡ bỏ đơn hàng"
+        }
+        confirmText={
+          removingOrderHasReceiver
+            ? "Hủy đơn hàng"
+            : "Xóa vĩnh viễn"
+        }
+        loadingText="Đang xử lý..."
+        confirmVariant="danger"
+        submitting={removing}
+        onClose={
+          handleCloseRemoveModal
+        }
+        onConfirm={
+          handleConfirmRemove
+        }
+      >
+        {removingOrderHasReceiver ? (
+          <>
+            <p>
+              Bạn có chắc muốn hủy đơn hàng{" "}
+              <span className="font-semibold text-gray-900">
+                {removingOrder?.orderCode}
+              </span>
+              ?
+            </p>
+
+            <p className="mt-2 text-xs text-gray-500">
+              Đơn hàng đã có nhân viên tiếp
+              nhận nên dữ liệu vẫn được giữ
+              lại và trạng thái sẽ chuyển
+              thành “Đã hủy đơn hàng”.
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Bạn có chắc muốn xóa vĩnh viễn
+              đơn hàng{" "}
+              <span className="font-semibold text-gray-900">
+                {removingOrder?.orderCode}
+              </span>
+              ?
+            </p>
+
+            <p className="mt-2 text-xs text-red-500">
+              Đơn chưa có nhân viên tiếp nhận.
+              Đơn hàng, ảnh đại diện và toàn bộ
+              file bổ sung sẽ bị xóa vĩnh viễn.
+            </p>
+          </>
+        )}
+
+        {removeError && (
+          <div className="mt-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2.5 text-sm text-red-600">
+            {removeError}
+          </div>
+        )}
+      </ConfirmModal>
 
       <ServiceOrderCreateModal
         open={createModalOpen}

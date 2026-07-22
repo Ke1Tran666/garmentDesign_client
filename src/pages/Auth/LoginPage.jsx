@@ -4,7 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import '../../index.css'
 
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 
@@ -15,6 +15,9 @@ import FloatingInput from "../../components/ui/Input/FloatingInput";
 import PasswordInput from "../../components/ui/Input/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
 import { AUTH_API } from "@/api/config";
+import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/components/ui/OTP/otp";
+
+import OtpInput from "@/components/ui/OTP/OtpInput";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (
@@ -40,7 +43,8 @@ const LoginPage = () => {
   const [loginType, setLoginType] = useState("account");
   const [loginStep, setLoginStep] = useState("input");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState(createEmptyOtp);
+  const otpInputRef = useRef(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -98,44 +102,7 @@ const LoginPage = () => {
 
   const resetPhoneLogin = () => {
     setLoginStep("input");
-    setOtp(["", "", "", "", "", ""]);
-  };
-
-  const handleOtpChange = (index, value) => {
-    if (!/^\d?$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    if (value && index < 5) {
-      document.getElementById(`otp-${index + 1}`)?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      document.getElementById(`otp-${index - 1}`)?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e) => {
-    e.preventDefault();
-
-    const pastedOtp = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-
-    if (!pastedOtp) return;
-
-    const newOtp = ["", "", "", "", "", ""];
-    pastedOtp.split("").forEach((digit, index) => {
-      newOtp[index] = digit;
-    });
-
-    setOtp(newOtp);
-    document.getElementById(`otp-${Math.min(pastedOtp.length, 6) - 1}`)?.focus();
+    setOtp(createEmptyOtp());
   };
 
   const handleLogin = async (e) => {
@@ -192,18 +159,14 @@ const LoginPage = () => {
 
         setLoginStep("otp");
 
-        setTimeout(() => {
-          document.getElementById("otp-0")?.focus();
-        }, 100);
-
         return;
       }
 
       // 3. Bước nhập OTP -> xác nhận OTP
       if (loginType === "phone" && loginStep === "otp") {
-        const otpCode = otp.join("");
+        const otpCode = toOtpCode(otp);
 
-        if (otpCode.length !== 6) {
+        if (!isOtpComplete(otp)) {
           showNotification(
             "warning",
             "OTP chưa hợp lệ",
@@ -326,28 +289,14 @@ const LoginPage = () => {
                   <span className="font-medium text-[#80d0ff]">{phone}</span>
                 </p>
 
-                <div className="flex justify-between gap-2">
-                  {otp.map((digit, index) => (
-                    <input
-                      key={index}
-                      id={`otp-${index}`}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength="1"
-                      value={digit}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      onPaste={handleOtpPaste}
-                      className="
-                        h-12 w-12 rounded-xl border-2 border-white/25 
-                        bg-white/10 text-center text-lg font-semibold text-white 
-                        outline-none transition-all duration-300 placeholder:text-transparent
-                        focus:border-[#80d0ff] 
-                        focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-                      "
-                    />
-                  ))}
-                </div>
+                <OtpInput
+                  ref={otpInputRef}
+                  value={otp}
+                  onChange={setOtp}
+                  variant="dark"
+                  autoFocus
+                  disabled={loading}
+                />
 
                 <div className="mt-4 flex items-center justify-between">
                   <button
@@ -372,11 +321,11 @@ const LoginPage = () => {
                           "Vui lòng xem OTP mới trong console BE"
                         );
 
-                        setOtp(["", "", "", "", "", ""]);
+                        setOtp(createEmptyOtp());
 
-                        setTimeout(() => {
-                          document.getElementById("otp-0")?.focus();
-                        }, 100);
+                        requestAnimationFrame(() => {
+                          otpInputRef.current?.focus();
+                        });
                       } catch (err) {
                         showNotification(
                           "error",

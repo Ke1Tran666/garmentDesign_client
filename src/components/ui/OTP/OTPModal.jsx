@@ -1,5 +1,7 @@
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { createEmptyOtp, isOtpComplete, toOtpCode } from "./otp";
+import OtpInput from "./OtpInput";
 
 const OTPModal = ({
   open,
@@ -12,88 +14,33 @@ const OTPModal = ({
   onResend,
 }) => {
 
-  const OTP_LENGTH = 6;
-
-  const createEmptyOtp = () => Array(OTP_LENGTH).fill("");
   const [otp, setOtp] = useState(createEmptyOtp);
+  const otpInputRef = useRef(null);
 
   const resetOtp = () => {
     setOtp(createEmptyOtp());
-    };
-
-    useEffect(() => {
-    if (!open) return;
-
-    const timer = setTimeout(() => {
-        document.getElementById("otp-modal-0")?.focus();
-    }, 100);
-
-    return () => clearTimeout(timer);
-    }, [open]);  
+  };
 
   if (!open) return null;
-
-  const handleOtpChange = (index, value) => {
-    if (!/^\d?$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    if (value && index < OTP_LENGTH - 1) {
-      document.getElementById(`otp-modal-${index + 1}`)?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      document.getElementById(`otp-modal-${index - 1}`)?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e) => {
-    e.preventDefault();
-
-    const pastedOtp = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, OTP_LENGTH);
-
-    if (!pastedOtp) return;
-
-    const newOtp = Array(OTP_LENGTH).fill("");
-
-    pastedOtp.split("").forEach((digit, index) => {
-      newOtp[index] = digit;
-    });
-
-    setOtp(newOtp);
-
-    document
-      .getElementById(`otp-modal-${Math.min(pastedOtp.length, OTP_LENGTH) - 1}`)
-      ?.focus();
-  };
 
   const handleClose = () => {
     resetOtp();
     onClose?.();
     };
 
-    const handleVerify = () => {
-    const otpCode = otp.join("");
-
-    if (otpCode.length !== OTP_LENGTH) {
-        onVerify?.("");
-        return;
+  const handleVerify = () => {
+    if (!isOtpComplete(otp)) {
+      onVerify?.("");
+      return;
     }
 
-    onVerify?.(otpCode);
-    };
+    onVerify?.(toOtpCode(otp));
+  };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
-      onMouseDown={onClose}
+      onMouseDown={handleClose}
     >
       <div
         className="w-full max-w-md animate-slide-up rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl"
@@ -120,35 +67,26 @@ const OTPModal = ({
             </button>
         </div>
 
-        <div className="mb-5 flex justify-between gap-2">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              id={`otp-modal-${index}`}
-              type="text"
-              inputMode="numeric"
-              maxLength="1"
-              value={digit}
-              onChange={(e) => handleOtpChange(index, e.target.value)}
-              onKeyDown={(e) => handleOtpKeyDown(index, e)}
-              onPaste={handleOtpPaste}
-              className="
-                h-12 w-12 rounded-xl border-2 border-gray-300
-                bg-white text-center text-lg font-semibold text-gray-900
-                outline-none transition-all duration-300
-                focus:border-brand
-                focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]
-              "
-            />
-          ))}
-        </div>
+        <OtpInput
+          ref={otpInputRef}
+          value={otp}
+          onChange={setOtp}
+          variant="light"
+          autoFocus
+          disabled={loading}
+          className="mb-5"
+        />
 
         <div className="mb-5 flex items-center justify-between">
             <button
                 type="button"
                 onClick={() => {
-                    resetOtp();
-                    onResend?.();
+                  resetOtp();
+                  onResend?.();
+
+                  requestAnimationFrame(() => {
+                    otpInputRef.current?.focus();
+                  });
                 }}
                 className="text-sm font-medium text-gray-500 transition hover:text-brand"
             >

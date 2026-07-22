@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import BirthdayInput from "@/components/ui/Input/BirthdayInput";
 import FloatingInput from "@/components/ui/Input/FloatingInput";
 import { useBeforeUnload, useOutletContext } from "react-router-dom";
@@ -7,12 +6,15 @@ import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import OTPModal from "@/components/ui/OTP/OTPModal";
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
-import { AUTH_API, BASE_URL_API, USER_API } from "@/api/config";
 import { HandleButton } from "@/components/ui/Button/Button";
 import { SectionCard } from "@/components/ui/Section/Section";
 import { Divider } from "@/components/ui/Divider/Divider";
 import RadioGroup from "@/components/ui/RadioGroup/RadioGroup";
 import UploadBox from "@/components/ui/Upload/UploadBox";
+import { userApi } from "@/api/userApi";
+import { authProviderApi } from "@/api/authProviderApi";
+import { authStorage } from "@/lib/authStorage";
+import { authApi } from "@/api/authApi";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -100,21 +102,18 @@ const ProfilePage = () => {
         setLoading(true);
         setError("");
 
-        const idUser = localStorage.getItem("idUser");
+        const idUser = authStorage.getUserId();
 
         if (!idUser) {
           setError("Không tìm thấy idUser. Vui lòng đăng nhập lại.");
           return;
         }
 
-        const response = await axios.get(
-          `${USER_API}/me/${idUser}`
-        );
+        const data = await userApi.getMe(idUser);
+        const userData = data?.user;
 
-        const userData = response.data?.user;
-
-        setProfile(response.data);
-        setOriginalProfile(createProfileSnapshot(response.data));
+        setProfile(data);
+        setOriginalProfile(createProfileSnapshot(data));
 
         setFullName(userData?.fullName || "");
         setGender(userData?.gender || "Unknown");
@@ -193,9 +192,7 @@ const ProfilePage = () => {
 
       if (!confirmRemove) return;
 
-      await axios.delete(
-        `${BASE_URL_API}/user-auth-providers/${item.id}`
-      );
+      await authProviderApi.remove(item.id)
 
       showNotification(
         "success",
@@ -224,9 +221,7 @@ const ProfilePage = () => {
         return;
       }
 
-      await axios.post(`${AUTH_API}/send-otp`, {
-        phone: targetPhone,
-      });
+      await authApi.sendPhoneOtp(targetPhone);
 
       setOtpModal({
         open: true,
@@ -250,9 +245,7 @@ const ProfilePage = () => {
         return;
       }
 
-      await axios.post(`${AUTH_API}/send-email-otp`, {
-        email: targetEmail,
-      });
+      await authApi.sendEmailOtp(targetEmail);
 
       setOtpModal({
         open: true,
@@ -288,7 +281,7 @@ const ProfilePage = () => {
   const handleSaveProfile = async () => {
     try {
 
-      const idUser = localStorage.getItem("idUser");
+      const idUser = authStorage.getUserId();
 
       const payload = {
         fullName,
@@ -296,30 +289,17 @@ const ProfilePage = () => {
         birthday,
       };
 
-      await axios.put(
-        `${USER_API}/${idUser}`,
-        payload
-      );
+      await userApi.update(idUser, payload)
 
       if (avatarDeleted) {
-        await axios.delete(
-          `${USER_API}/me/${idUser}/avatar`
-        );
+        await userApi.removeAvatar(idUser);
       }
       else if (avatarFile) {
         const formData = new FormData();
 
         formData.append("file", avatarFile);
 
-        await axios.put(
-          `${USER_API}/me/${idUser}/avatar`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await userApi.uploadAvatar(idUser, formData);
       }
 
       await reloadProfile();
@@ -353,16 +333,14 @@ const ProfilePage = () => {
 
   // OTP
   const reloadProfile = async () => {
-    const idUser = localStorage.getItem("idUser");
+    const idUser = authStorage.getUserId();
 
-    const response = await axios.get(
-      `${USER_API}/me/${idUser}`
-    );
+    const data = await userApi.getMe(idUser);
+    const userData = data?.user;
 
-    const userData = response.data?.user;
+    setProfile(data);
+    setOriginalProfile(createProfileSnapshot(data));
 
-    setProfile(response.data);
-    setOriginalProfile(createProfileSnapshot(response.data));
     setFullName(userData?.fullName || "");
     setGender(userData?.gender || "Unknown");
     setBirthday(userData?.birthday || "");
@@ -584,10 +562,10 @@ const ProfilePage = () => {
 
             setOtpLoading(true);
 
-            const idUser = localStorage.getItem("idUser");
+            const idUser = authStorage.getUserId();
 
             if (otpModal.type === "phone") {
-              await axios.post(`${AUTH_API}/verify-otp`, {
+              await authApi.verifyPhoneOtp({
                 idUser,
                 phone: otpModal.target,
                 otp: otpCode,
@@ -596,7 +574,7 @@ const ProfilePage = () => {
             }
 
             if (otpModal.type === "email") {
-              await axios.post(`${AUTH_API}/verify-email-otp`, {
+              await authApi.verifyEmailOtp({
                 idUser,
                 email: otpModal.target,
                 otp: otpCode,
@@ -633,15 +611,15 @@ const ProfilePage = () => {
         onResend={async () => {
           try {
             if (otpModal.type === "phone") {
-              await axios.post(`${AUTH_API}/send-otp`, {
-                phone: otpModal.target,
-              });
+              await authApi.sendPhoneOtp(
+                otpModal.target,
+              );
             }
 
             if (otpModal.type === "email") {
-              await axios.post(`${AUTH_API}/send-email-otp`, {
-                email: otpModal.target,
-              });
+              await authApi.sendEmailOtp(
+                otpModal.target,
+              );
             }
 
             showNotification("success", "Đã gửi lại OTP", "Vui lòng kiểm tra mã mới.");

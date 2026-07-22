@@ -1,4 +1,3 @@
-import axios from "axios";
 import {memo, useCallback, useEffect,useMemo,useState} from "react";
 import {
   AlertCircle,
@@ -12,11 +11,11 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import {
-  BASE_URL_API,
-  SERVICE_API,
-  USER_ADDRESS_API,
-} from "@/api/config";
+import { serviceApi } from "@/api/serviceApi";
+import { addressApi } from "@/api/addressApi";
+import { serviceOrderApi } from "@/api/serviceOrderApi";
+import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
+import { authStorage } from "@/lib/authStorage";
 
 const initialForm = {
   serviceId: "",
@@ -250,7 +249,7 @@ const ServiceOrderCreateModal = ({
   const [attachmentFiles,setAttachmentFiles] = useState([]);
   const [createdOrder,setCreatedOrder] = useState(null);
 
-  const currentUserId = localStorage.getItem("idUser");
+  const currentUserId = authStorage.getUserId();
 
   const optionsLoading =
     Boolean(open && currentUserId) &&
@@ -315,31 +314,27 @@ const ServiceOrderCreateModal = ({
     const fetchOptions = async () => {
       try {
         const [
-          serviceResponse,
-          addressResponse,
+          serviceData,
+          addressData,
         ] = await Promise.all([
-          axios.get(SERVICE_API, {
+          serviceApi.getAll({
             signal: controller.signal,
           }),
-          axios.get(
-            `${USER_ADDRESS_API}/user/${currentUserId}`,
+          addressApi.getByUser(
+            currentUserId,
             {
               signal: controller.signal,
-            }
+            },
           ),
         ]);
 
-        if (controller.signal.aborted) {
-          return;
-        }
-
         const availableServices = (
-          serviceResponse.data || []
+          serviceData || []
         ).filter((service) => {
           if (service.deletedAt) return false;
 
           const status = String(
-            service.status || ""
+            service.status || "",
           ).toLowerCase();
 
           return (
@@ -351,10 +346,14 @@ const ServiceOrderCreateModal = ({
         setOptionState({
           idUser: currentUserId,
           services: availableServices,
-          addresses:
-            addressResponse.data || [],
+          addresses: addressData || [],
           error: "",
         });
+
+        if (controller.signal.aborted) {
+          return;
+        }
+        
       } catch (error) {
         if (
           error.code === "ERR_CANCELED" ||
@@ -761,9 +760,7 @@ const ServiceOrderCreateModal = ({
           unitPrice * orderQuantity;
 
         const createResponse =
-          await axios.post(
-            `${BASE_URL_API}/service-orders`,
-            {
+          await serviceOrderApi.create({
               user: {
                 idUser: currentUserId,
               },
@@ -783,11 +780,9 @@ const ServiceOrderCreateModal = ({
               discountAmount: 0,
               totalPrice,
               status: "pending",
-            }
-          );
+            });
 
-        orderResult =
-          createResponse.data;
+        orderResult = createResponse;
 
         /*
         * Lưu lại để nếu upload lỗi,
@@ -835,19 +830,14 @@ const ServiceOrderCreateModal = ({
         );
 
         try {
-          const uploadResponse =
-            await axios.post(
-              `${BASE_URL_API}/service-order-files/order/${orderId}/user/${currentUserId}`,
-              uploadData
+          const uploadResult =
+            await serviceOrderFileApi.upload(
+              orderId,
+              currentUserId,
+              uploadData,
             );
 
-          /*
-          * Response order đã chứa
-          * productImage vừa cập nhật.
-          */
-          orderResult =
-            uploadResponse.data?.order ||
-            orderResult;
+          orderResult = uploadResult?.order || orderResult;
         } catch (uploadError) {
           /*
           * Đơn đã được tạo nên phải đưa

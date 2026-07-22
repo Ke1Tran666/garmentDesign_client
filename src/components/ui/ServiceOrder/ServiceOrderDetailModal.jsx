@@ -1,10 +1,4 @@
-import axios from "axios";
-import {
-  memo,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   Building2,
   CalendarDays,
@@ -22,12 +16,12 @@ import {
   User,
   X,
 } from "lucide-react";
-import {
-  BACKEND_URL,
-  BASE_URL_API,
-  USER_ADDRESS_API,
-  USER_API,
-} from "@/api/config";
+import { BACKEND_URL } from "@/api/config";
+import { authStorage } from "@/lib/authStorage";
+import { userApi } from "@/api/userApi";
+import { addressApi } from "@/api/addressApi";
+import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
+import { serviceOrderApi } from "@/api/serviceOrderApi";
 
 const EMPTY_VALUE = "Chưa có thông tin";
 
@@ -275,8 +269,7 @@ const ServiceOrderDetailModal = ({
   const [addressError, setAddressError] =
     useState("");
 
-  const currentUserId =
-  localStorage.getItem("idUser");
+  const currentUserId = authStorage.getUserId();
 
   const userAddresses =
     addressState.idUser === currentUserId
@@ -305,18 +298,18 @@ const ServiceOrderDetailModal = ({
 
     const fetchUserAddresses = async () => {
       try {
-        const response = await axios.get(
-          `${USER_ADDRESS_API}/user/${currentUserId}`,
+        const addresses = await addressApi.getByUser(
+          currentUserId,
           {
             signal: controller.signal,
-          }
+          },
         );
 
         if (controller.signal.aborted) return;
 
         setAddressState({
           idUser: currentUserId,
-          items: response.data || [],
+          items: addresses || [],
           error: "",
         });
       } catch (error) {
@@ -520,7 +513,7 @@ const ServiceOrderDetailModal = ({
       const results =
         await Promise.allSettled(
           missingIds.map((id) =>
-            axios.get(`${USER_API}/${id}`, {
+            userApi.getById(id, {
               signal: controller.signal,
             })
           )
@@ -536,7 +529,7 @@ const ServiceOrderDetailModal = ({
 
         const employeeName =
           result.status === "fulfilled"
-            ? result.value.data?.fullName ||
+            ? result.value?.fullName ||
               "Không xác định"
             : "Không xác định";
 
@@ -576,18 +569,18 @@ const ServiceOrderDetailModal = ({
 
     const fetchFiles = async () => {
       try {
-        const response = await axios.get(
-          `${BASE_URL_API}/service-order-files/order/${orderId}`,
+        const files = await serviceOrderFileApi.getByOrder(
+          orderId,
           {
             signal: controller.signal,
-          }
+          },
         );
 
         if (controller.signal.aborted) return;
 
         setFileState({
           orderId,
-          items: response.data || [],
+          items: files || [],
         });
       } catch (error) {
         if (
@@ -837,8 +830,7 @@ const ServiceOrderDetailModal = ({
 
     if (!confirmed) return;
 
-    const idUser =
-      localStorage.getItem("idUser");
+    const idUser = authStorage.getUserId();
 
     if (!idUser) {
       setFileError(
@@ -851,9 +843,7 @@ const ServiceOrderDetailModal = ({
       setDeletingFileId(file.fileId);
       setFileError("");
 
-      await axios.delete(
-        `${BASE_URL_API}/service-order-files/${file.fileId}/user/${idUser}`
-      );
+      await serviceOrderFileApi.remove(file.fileId,idUser);
 
       setFileState((previousState) => ({
         ...previousState,
@@ -919,8 +909,7 @@ const ServiceOrderDetailModal = ({
       return;
     }
 
-    const idUser =
-      localStorage.getItem("idUser");
+    const idUser =authStorage.getUserId();
 
     if (!idUser) {
       setUpdateError(
@@ -954,19 +943,17 @@ const ServiceOrderDetailModal = ({
        * Cập nhật thông tin đơn hàng trước.
        * Endpoint này không cập nhật audit fields.
        */
-      const updateResponse =
-        await axios.patch(
-          `${BASE_URL_API}/service-orders/${orderId}/user/${idUser}`,
+      let updatedOrder =
+        await serviceOrderApi.updateForUser(
+          orderId,
+          idUser,
           {
             productName,
             unitType: unitTypeValue,
             quantity,
             customerRequest,
-          }
+          },
         );
-
-      let updatedOrder =
-        updateResponse.data;
 
       /*
        * Upload ảnh đại diện và file bổ sung.
@@ -997,22 +984,18 @@ const ServiceOrderDetailModal = ({
         );
 
         try {
-          const uploadResponse =
-            await axios.post(
-              `${BASE_URL_API}/service-order-files/order/${orderId}/user/${idUser}`,
-              uploadData
+          const uploadResult =
+            await serviceOrderFileApi.upload(
+              orderId,
+              idUser,
+              uploadData,
             );
 
           updatedOrder =
-            uploadResponse.data?.order ||
-            updatedOrder;
+            uploadResult?.order || updatedOrder;
 
-          /*
-           * Response files chỉ chứa file bổ sung,
-           * không chứa ảnh đại diện.
-           */
           const newFiles =
-            uploadResponse.data?.files || [];
+            uploadResult?.files || [];
 
           setFileState(
             (previousState) => {
@@ -1144,18 +1127,14 @@ const ServiceOrderDetailModal = ({
       setUpdatingAddress(true);
       setAddressError("");
 
-      const response = await axios.patch(
-        `${BASE_URL_API}/service-orders/${orderId}/user/${currentUserId}/address`,
-        {
+      const updatedOrder =
+        await serviceOrderApi.updateAddress(
+          orderId,
+          currentUserId,
           addressId,
-        }
-      );
+        );
 
-      /*
-      * ServiceOrderPage sẽ cập nhật cả danh sách
-      * và selectedOrder bằng dữ liệu BE trả về.
-      */
-      onUpdated?.(response.data);
+      onUpdated?.(updatedOrder);
 
       setSelectedAddressId("");
       setAddressError("");

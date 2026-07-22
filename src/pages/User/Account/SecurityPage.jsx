@@ -1,13 +1,13 @@
 import { useState } from "react";
-import axios from "axios";
 import { Info } from "lucide-react";
-import { USER_API } from "@/api/config";
 import { HandleButton } from "@/components/ui/Button/Button";
 import { Divider } from "@/components/ui/Divider/Divider";
 import PasswordInput from "@/components/ui/Input/PasswordInput";
 import { SectionCard } from "@/components/ui/Section/Section";
 import Switch from "@/components/ui/Switch/Switch";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
+import { authStorage } from "@/lib/authStorage";
+import { userApi } from "@/api/userApi";
 const SecurityPage = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -64,9 +64,9 @@ const SecurityPage = () => {
     if (!validatePassword()) return;
 
     try {
-      const idUser = localStorage.getItem("idUser");
+      const idUser = authStorage.getUserId();
 
-      await axios.put(`${USER_API}/me/${idUser}/change-password`, {
+      await userApi.changePassword(idUser, {
         oldPassword,
         newPassword,
       });

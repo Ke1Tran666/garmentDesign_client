@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUp, LogIn, User, Settings, LogOut } from "lucide-react";
 import SettingsModal from "./Settings/SettingsModal";
 import { ButtonIcon } from "./Button/Button";
+import { authStorage } from "@/lib/authStorage";
 
 const FloatingButtons = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
@@ -11,8 +12,8 @@ const FloatingButtons = () => {
 
     const menuRef = useRef(null);
     // local database
-    const token = localStorage.getItem("token");
-    const idUser = localStorage.getItem("idUser");
+    const token = authStorage.getToken();
+    const idUser = authStorage.getUserId();
     const isLoggedIn = Boolean(token && idUser);
 
     // Detect thiết bị có touch (mobile/tablet) hay không
@@ -82,7 +83,7 @@ const FloatingButtons = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("idUser");
+        authStorage.clear();
         window.location.reload();
     };
 

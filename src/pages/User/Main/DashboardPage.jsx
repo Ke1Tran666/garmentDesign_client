@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
-import axios from "axios";
 import {
   DndContext,
   PointerSensor,
@@ -24,7 +23,9 @@ import {
   PackageCheck,
   Search,
 } from "lucide-react";
-import { BASE_URL_API } from "@/api/config";
+import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
+import { serviceOrderApi } from "@/api/serviceOrderApi";
+import { authStorage } from "@/lib/authStorage";
 
 const monthLabels = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -169,7 +170,7 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const idUser = localStorage.getItem("idUser");
+        const idUser = authStorage.getUserId();
 
         if (!idUser) {
           setOrders([]);
@@ -178,15 +179,16 @@ const DashboardPage = () => {
           return;
         }
 
-        const [ordersRes, filesRes] = await Promise.all([
-          axios.get(`${BASE_URL_API}/service-orders/user/${idUser}`),
-          axios.get(`${BASE_URL_API}/service-order-files`),
-        ]);
+        const [orderData, fileData] =
+          await Promise.all([
+            serviceOrderApi.getByUser(idUser),
+            serviceOrderFileApi.getAll()
+          ]);
 
-        const orderList = ordersRes.data || [];
+        const orderList = orderData || [];
 
         setOrders(orderList);
-        setFiles(filesRes.data || []);
+        setFiles(fileData || []);
         setTaskOrder(orderList.map(mapOrderToTask));
       } catch (error) {
         console.error("Lỗi tải dashboard:", error);

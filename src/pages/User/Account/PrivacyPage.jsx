@@ -1,13 +1,13 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import axios from "axios";
 import { Divider } from "@/components/ui/Divider/Divider";
 import { SectionCard } from "@/components/ui/Section/Section";
 import { HandleButtonIcon } from "@/components/ui/Button/Button";
 import { Download, Trash2 } from "lucide-react";
-import { USER_API } from "@/api/config";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
+import { userApi } from "@/api/userApi";
+import { authStorage } from "@/lib/authStorage";
 
 const PrivacyPage = () => {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ const PrivacyPage = () => {
   };
 
   const handleDownloadData = async () => {
-    const idUser = localStorage.getItem("idUser");
+    const idUser = authStorage.getUserId();
 
     if (!idUser) {
       alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
@@ -47,8 +47,14 @@ const PrivacyPage = () => {
     try {
       setExporting(true);
 
-      const response = await axios.get(`${USER_API}/me/${idUser}/export-data`);
-      const { user, addresses = [], authProviders = [], defaultAddress } = response.data;
+      const exportData = await userApi.exportData(idUser);
+
+      const {
+        user,
+        addresses = [],
+        authProviders = [],
+        defaultAddress,
+      } = exportData;
 
       const workbook = XLSX.utils.book_new();
 
@@ -125,7 +131,7 @@ const PrivacyPage = () => {
   };
 
   const handleConfirmDeleteAccount = async () => {
-    const idUser = localStorage.getItem("idUser");
+    const idUser = authStorage.getUserId();
 
     if (!idUser) {
       alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
@@ -135,12 +141,8 @@ const PrivacyPage = () => {
     try {
       setDeleting(true);
 
-      await axios.delete(`${USER_API}/me/${idUser}/delete-account`);
-
-      localStorage.removeItem("token");
-      localStorage.removeItem("idUser");
-      localStorage.removeItem("user");
-      localStorage.removeItem("authProviders");
+      await userApi.deleteAccount(idUser);
+      authStorage.clear();
 
       alert("Tài khoản đã được xóa.");
       navigate("/login");

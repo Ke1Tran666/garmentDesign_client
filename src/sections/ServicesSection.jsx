@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import { Calculator, FileText, PenTool, Scissors } from "lucide-react";
-import { SERVICE_API } from "@/api/config";
+import { serviceApi } from "@/api/serviceApi";
 
 const serviceMeta = {
   DES001: {
@@ -84,8 +83,8 @@ const ServicesSection = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await axios.get(SERVICE_API);
-        setServices(res.data || []);
+        const data = await serviceApi.getAll();
+        setServices(data || []);
       } catch (error) {
         console.error("Lỗi lấy danh sách dịch vụ:", error);
       } finally {

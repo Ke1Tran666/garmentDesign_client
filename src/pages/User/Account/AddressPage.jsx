@@ -9,16 +9,17 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { USER_ADDRESS_API, USER_API } from "@/api/config";
 import { ButtonIconText } from "@/components/ui/Button/Button";
 import { SectionCard } from "@/components/ui/Section/Section";
-import axios from "axios";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import FormModal from "@/components/ui/Modal/FormModal";
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 import DataTable from "@/components/ui/Table/DataTable";
 import Pagination from "@/components/ui/Table/Pagination";
 import MenuTable from "@/components/ui/Menu/MenuTable";
+import { addressApi } from "@/api/addressApi";
+import { userApi } from "@/api/userApi";
+import { authStorage } from "@/lib/authStorage";
 
 const statusClassName = {
   Active: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
@@ -107,7 +108,7 @@ const AddressPage = () => {
         setLoading(true);
         setErrorMessage("");
 
-        const idUser = localStorage.getItem("idUser");
+        const idUser = authStorage.getUserId();
 
         if (!idUser) {
           setAddresses([]);
@@ -117,20 +118,18 @@ const AddressPage = () => {
           return;
         }
 
-        const [userResponse, addressResponse] =
+        const [userData, addressData] =
           await Promise.all([
-            axios.get(`${USER_API}/me/${idUser}`),
-            axios.get(
-              `${USER_ADDRESS_API}/user/${idUser}`,
-            ),
+            userApi.getMe(idUser),
+            addressApi.getByUser(idUser),
           ]);
 
         setDefaultAddressId(
-          userResponse.data?.user?.defaultAddress
-            ?.addressId ?? null,
+          userData?.user?.defaultAddress?.addressId ?? null,
         );
 
-        setAddresses(addressResponse.data || []);
+        setAddresses(addressData || []);
+
       } catch (error) {
         console.error("Lỗi tải địa chỉ:", error);
 
@@ -277,10 +276,17 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      const idUser = localStorage.getItem("idUser");
+      const idUser = authStorage.getUserId();
 
-      await axios.put(
-        `${USER_ADDRESS_API}/user/${idUser}/default/${confirmDefaultAddress.addressId}`
+      if (!idUser) {
+        throw new Error(
+          "Không tìm thấy thông tin người dùng.",
+        );
+      }
+
+      await addressApi.setDefault(
+        idUser,
+        confirmDefaultAddress.addressId,
       );
 
       setDefaultAddressId(confirmDefaultAddress.addressId);
@@ -350,9 +356,9 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      await axios.put(
-        `${USER_ADDRESS_API}/${editingAddress.addressId}`,
-        form
+      await addressApi.update(
+        editingAddress.addressId,
+        form,
       );
 
       setAddresses((prev) =>
@@ -397,7 +403,9 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      await axios.delete(`${USER_ADDRESS_API}/${deleteAddress.addressId}`);
+      await addressApi.remove(
+        deleteAddress.addressId,
+      );
 
       setAddresses((prev) =>
         prev.filter((item) => item.addressId !== deleteAddress.addressId)
@@ -448,14 +456,21 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      const idUser = localStorage.getItem("idUser");
+      const idUser = authStorage.getUserId();
 
-      const response = await axios.post(
-        `${USER_ADDRESS_API}/user/${idUser}`,
-        form
-      );
+      if (!idUser) {
+        throw new Error(
+          "Không tìm thấy thông tin người dùng.",
+        );
+      }
 
-      setAddresses((prev) => [...prev, response.data]);
+      const createdAddress =
+        await addressApi.create(idUser, form);
+
+      setAddresses((prev) => [
+        ...prev,
+        createdAddress,
+      ]);
 
       setAddingAddress(false);
 

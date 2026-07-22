@@ -4,14 +4,13 @@ import "../../index.css";
 
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
 import PrimaryButton from "../../components/ui/Button/PrimaryButton";
 import BirthdayInput from "../../components/ui/Input/BirthdayInput";
 import FloatingInput from "../../components/ui/Input/FloatingInput";
 import PasswordInput from "../../components/ui/Input/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
-import { AUTH_API } from "@/api/config";
+import { authApi } from "@/api/authApi";
 
 const RegisterPage = () => {
 
@@ -49,7 +48,7 @@ const RegisterPage = () => {
     try {
       setLoading(true);
 
-      await axios.post(`${AUTH_API}/register`, {
+      await authApi.register({
         email,
         password,
         fullName,

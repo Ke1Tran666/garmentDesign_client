@@ -5,7 +5,6 @@ import '../../index.css'
 
 import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
-import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
@@ -14,10 +13,11 @@ import PrimaryButton from "../../components/ui/Button/PrimaryButton";
 import FloatingInput from "../../components/ui/Input/FloatingInput";
 import PasswordInput from "../../components/ui/Input/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
-import { AUTH_API } from "@/api/config";
 import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/components/ui/OTP/otp";
 
 import OtpInput from "@/components/ui/OTP/OtpInput";
+import { authStorage } from "@/lib/authStorage";
+import { authApi } from "@/api/authApi";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (
@@ -51,25 +51,17 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
 
-  const saveAuthData = (data) => {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("idUser", data.idUser);
-  };
-
   // Xử lý đăng nhập Google
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
         setLoading(true);
 
-        const response = await axios.post(
-          `${AUTH_API}/google-login`,
-          {
-            accessToken: tokenResponse.access_token,
-          }
+        const data = await authApi.googleLogin(
+          tokenResponse.access_token,
         );
 
-        saveAuthData(response.data);
+        authStorage.save(data);
 
         showNotification(
           "success",
@@ -113,15 +105,12 @@ const LoginPage = () => {
 
       // 1. Login bằng email + password
       if (loginType === "account") {
-        const response = await axios.post(
-          `${AUTH_API}/login`,
-          {
-            email,
-            password,
-          }
-        );
+        const data = await authApi.login({
+          email,
+          password,
+        });
 
-        saveAuthData(response.data);
+        authStorage.save(data);
 
         showNotification(
           "success",
@@ -147,9 +136,7 @@ const LoginPage = () => {
           return;
         }
 
-        await axios.post(`${AUTH_API}/send-otp`, {
-          phone,
-        });
+        await authApi.sendPhoneOtp(phone);
 
         showNotification(
           "success",
@@ -175,15 +162,12 @@ const LoginPage = () => {
           return;
         }
 
-        const response = await axios.post(
-          `${AUTH_API}/verify-otp`,
-          {
-            phone,
-            otp: otpCode,
-          }
-        );
+        const data = await authApi.verifyPhoneOtp({
+          phone,
+          otp: otpCode,
+        });
 
-        saveAuthData(response.data);
+        authStorage.save(data);
 
         showNotification(
           "success",
@@ -311,9 +295,7 @@ const LoginPage = () => {
                     type="button"
                     onClick={async () => {
                       try {
-                        await axios.post(`${AUTH_API}/send-otp`, {
-                          phone,
-                        });
+                        await authApi.sendPhoneOtp(phone);
 
                         showNotification(
                           "success",

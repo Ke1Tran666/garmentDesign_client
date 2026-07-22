@@ -1,7 +1,6 @@
 import { ArrowRight, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
-import axios from "axios";
 
 import "../../index.css";
 
@@ -12,9 +11,9 @@ import { useNotification } from "../../components/ui/Notification/NotificationCo
 import FloatingInput from "../../components/ui/Input/FloatingInput";
 import PasswordInput from "../../components/ui/Input/PasswordInput";
 import BrandHeader from "@/components/common/Logo/BrandHeader";
-import { AUTH_API } from "@/api/config";
 import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/components/ui/OTP/otp";
 import OtpInput from "@/components/ui/OTP/OtpInput";
+import { authApi } from "@/api/authApi";
 
 const ForgotPasswordSteps = ({ currentStep }) => {
   const steps = ["Nhập Email", "Xác thực OTP", "Đổi mật khẩu", "Hoàn thành"];
@@ -97,9 +96,7 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await axios.post(`${AUTH_API}/forgot-password`, {
-          email,
-        });
+        await authApi.forgotPassword(email);
 
         showNotification(
           "success",
@@ -124,7 +121,7 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await axios.post(`${AUTH_API}/verify-forgot-otp`, {
+        await authApi.verifyForgotOtp({
           email,
           otp: otpCode,
         });
@@ -158,7 +155,7 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await axios.post(`${AUTH_API}/reset-password`, {
+        await authApi.resetPassword({
           email,
           newPassword,
         });
@@ -262,10 +259,7 @@ const ForgotPasswordPage = () => {
                     type="button"
                     onClick={async () => {
                       try {
-                        await axios.post(
-                          `${AUTH_API}/forgot-password`,
-                          { email }
-                        );
+                        await authApi.forgotPassword(email);
 
                         showNotification(
                           "success",

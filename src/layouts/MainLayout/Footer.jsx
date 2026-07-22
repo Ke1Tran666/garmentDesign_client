@@ -2,9 +2,9 @@ import { ArrowRight } from "lucide-react";
 import { FaFacebookF, FaYoutube } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa6";
 import { SiZalo } from "react-icons/si";
-import { NEWSLETTER_API } from "@/api/config";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import Logo from "../../components/common/Logo/Logo";
+import { newsletterApi } from "@/api/newsletterApi";
 
 const socials = [
   {
@@ -44,40 +44,24 @@ const Footer = () => {
     }
 
     try {
-        const res = await fetch(`${NEWSLETTER_API}/subscribe`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-        });
+    const data =
+        await newsletterApi.subscribe(email);
 
-        const data = await res.json();
-
-        if (!res.ok) {
-        showNotification(
-            "error",
-            "Đăng ký thất bại!",
-            data.message || "Email này đã đăng ký nhận tin."
-        );
-        return;
-        }
-
-        showNotification(
+    showNotification(
         "success",
         "Đăng ký thành công!",
-        data.message || "Chúng tôi sẽ gửi tin cập nhật đến Gmail của bạn."
-        );
+        data?.message ||
+        "Cảm ơn bạn đã đăng ký nhận tin.",
+    );
 
-        form.reset();
+    form.reset();
     } catch (error) {
-        console.error("Newsletter error:", error);
-
-        showNotification(
+    showNotification(
         "error",
-        "Lỗi kết nối!",
-        "Không thể kết nối đến máy chủ."
-        );
+        "Đăng ký thất bại!",
+        error.response?.data?.message ||
+        "Không thể đăng ký nhận tin.",
+    );
     }
     };
 

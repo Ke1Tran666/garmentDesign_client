@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import { Clock, Mail, MapPin, Phone, Send } from "lucide-react";
-import { SERVICE_API, CONTACT_API } from "@/api/config";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
+import { serviceApi } from "@/api/serviceApi";
+import { contactApi } from "@/api/contactApi";
 
 const CONTACT_INFO = [
   {
@@ -164,8 +164,8 @@ const ContactSection = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await axios.get(SERVICE_API);
-        setServices(res.data || []);
+        const data = await serviceApi.getAll();
+        setServices(data || []);
       } catch (error) {
         console.error("Lỗi lấy danh sách dịch vụ:", error);
       } finally {
@@ -221,7 +221,7 @@ const ContactSection = () => {
     try {
       setSubmitting(true);
 
-      await axios.post(CONTACT_API, payload);
+      await contactApi.send(payload);
 
       showNotification(
         "success",

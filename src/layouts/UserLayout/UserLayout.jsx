@@ -27,12 +27,12 @@ import {
 
 import Logo from "../../components/common/Logo/Logo";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
-import { USER_API } from "@/api/config";
 import { ButtonIcon } from "@/components/ui/Button/Button";
 import GooeySearchBar from "@/components/ui/Search/GooeyInput/GooeySearchBar";
+import { authStorage } from "@/lib/authStorage";
+import { userApi } from "@/api/userApi";
 
 const BRAND = "var(--color-brand)";
 const BRAND_SHADOW = "rgba(1,146,245,0.35)";
@@ -164,11 +164,7 @@ const UserLayout = ({ title = "My Account" }) => {
   const [openUserMenu, setOpenUserMenu] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("idUser");
-    localStorage.removeItem("user");
-    localStorage.removeItem("authProviders");
-
+    authStorage.clear();
     navigate("/");
   };
 
@@ -205,13 +201,13 @@ const UserLayout = ({ title = "My Account" }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const idUser = localStorage.getItem("idUser");
+        const idUser = authStorage.getUserId();
 
         if (!idUser) return;
 
-        const response = await axios.get(`${USER_API}/me/${idUser}`);
+        const data = await userApi.getMe(idUser);
 
-        setUser(response.data?.user);
+        setUser(data?.user);
       } catch (error) {
         console.error("Không thể tải thông tin user:", error);
       }

@@ -1,7 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import { Clock, Eye, MoreVertical, Plus, Search, Trash2 } from "lucide-react";
-import { BASE_URL_API } from "@/api/config";
 import { SectionCard } from "@/components/ui/Section/Section";
 import MenuTable from "@/components/ui/Menu/MenuTable";
 import ServiceOrderDetailModal from "@/components/ui/ServiceOrder/ServiceOrderDetailModal";
@@ -9,6 +7,9 @@ import ServiceOrderCreateModal from "@/components/ui/ServiceOrder/ServiceOrderCr
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 import DataTable from "@/components/ui/Table/DataTable";
 import Pagination from "@/components/ui/Table/Pagination";
+
+import { serviceOrderApi } from "@/api/serviceOrderApi";
+import { authStorage } from "@/lib/authStorage";
 
 const hasEmployeeReceiver = (order) => {
   const createdBy = String(order?.createdBy || "").trim();
@@ -188,19 +189,20 @@ const ServiceOrderPage = () => {
         setLoading(true);
         setErrorMessage("");
 
-        const idUser = localStorage.getItem("idUser");
+        const idUser = authStorage.getUserId();
 
         if (!idUser) {
           setOrders([]);
-          setErrorMessage("Không tìm thấy thông tin người dùng.");
+          setErrorMessage(
+            "Không tìm thấy thông tin người dùng.",
+          );
           return;
         }
 
-        const response = await axios.get(
-          `${BASE_URL_API}/service-orders/user/${idUser}`
-        );
+        const orderData =
+          await serviceOrderApi.getByUser(idUser);
 
-        setOrders((response.data || []).map(mapOrderToTable));
+        setOrders((orderData || []).map(mapOrderToTable));
       } catch (error) {
         console.error("Lỗi tải danh sách đơn hàng:", error);
         setOrders([]);
@@ -322,7 +324,7 @@ const ServiceOrderPage = () => {
   const handleConfirmRemove = async () => {
     if (!removingOrder || removing) {return;}
 
-    const idUser = localStorage.getItem("idUser");
+    const idUser = authStorage.getUserId();
 
     if (!idUser) {
       setRemoveError(
@@ -335,17 +337,9 @@ const ServiceOrderPage = () => {
       setRemoving(true);
       setRemoveError("");
 
-      const response =
-        await axios.delete(
-          `${BASE_URL_API}/service-orders/${removingOrder.serviceOrderId}/user/${idUser}`
-        );
+      const result = await serviceOrderApi.removeForUser(removingOrder.serviceOrderId,idUser);
 
-      const result =
-        response.data;
-
-      if (
-        result.action === "DELETED"
-      ) {
+      if (result.action === "DELETED") {
         setOrders(
           (previousOrders) =>
             previousOrders.filter(
@@ -364,11 +358,7 @@ const ServiceOrderPage = () => {
         }
       }
 
-      if (
-        result.action ===
-          "CANCELLED" &&
-        result.order
-      ) {
+      if (result.action === "CANCELLED" && result.order) {
         const cancelledOrder =
           mapOrderToTable(
             result.order

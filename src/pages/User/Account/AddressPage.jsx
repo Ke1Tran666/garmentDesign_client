@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownAZ,
-  Ellipsis,
+  Check,
   MapPin,
+  MoreVertical,
+  Pencil,
   Plus,
+  Search,
+  Trash2,
 } from "lucide-react";
 import { USER_ADDRESS_API, USER_API } from "@/api/config";
 import { ButtonIconText } from "@/components/ui/Button/Button";
@@ -12,9 +16,9 @@ import axios from "axios";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import FormModal from "@/components/ui/Modal/FormModal";
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
-import SearchInput from "@/components/ui/Search/SearchInput/SearchInput";
 import DataTable from "@/components/ui/Table/DataTable";
 import Pagination from "@/components/ui/Table/Pagination";
+import MenuTable from "@/components/ui/Menu/MenuTable";
 
 const statusClassName = {
   Active: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
@@ -38,6 +42,39 @@ const addressFields = [
   },
 ];
 
+const ITEMS_PER_PAGE = 10;
+
+const ADDRESS_COLUMNS = [
+  {
+    key: "status",
+    title: "Trạng thái",
+  },
+  {
+    key: "companyName",
+    title: "Tên công ty",
+  },
+  {
+    key: "address",
+    title: "Địa chỉ công ty",
+  },
+  {
+    key: "note",
+    title: "Ghi chú",
+  },
+  {
+    key: "action",
+    title: "Action",
+    className: "text-center",
+  },
+];
+
+const initialActionMenuState = {
+  open: false,
+  x: 0,
+  y: 0,
+  address: null,
+};
+
 const AddressPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [addresses, setAddresses] = useState([]);
@@ -51,12 +88,7 @@ const AddressPage = () => {
     note: "",
   });
 
-  const [actionMenu, setActionMenu] = useState({
-    open: false,
-    x: 0,
-    y: 0,
-    address: null,
-  });
+  const [actionMenu, setActionMenu] = useState(initialActionMenuState);
 
   const [confirmDefaultAddress, setConfirmDefaultAddress] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -65,26 +97,48 @@ const AddressPage = () => {
 
   const [addingAddress, setAddingAddress] = useState(false);
 
-  const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setErrorMessage("");
+
         const idUser = localStorage.getItem("idUser");
 
-        const userResponse = await axios.get(
-          `${USER_API}/me/${idUser}`
+        if (!idUser) {
+          setAddresses([]);
+          setErrorMessage(
+            "Không tìm thấy thông tin người dùng.",
+          );
+          return;
+        }
+
+        const [userResponse, addressResponse] =
+          await Promise.all([
+            axios.get(`${USER_API}/me/${idUser}`),
+            axios.get(
+              `${USER_ADDRESS_API}/user/${idUser}`,
+            ),
+          ]);
+
+        setDefaultAddressId(
+          userResponse.data?.user?.defaultAddress
+            ?.addressId ?? null,
         );
 
-        const addressResponse = await axios.get(
-          `${USER_ADDRESS_API}/user/${idUser}`
-        );
-
-        setDefaultAddressId(userResponse.data?.user?.defaultAddress?.addressId ?? null);
-        setAddresses(addressResponse.data);
+        setAddresses(addressResponse.data || []);
       } catch (error) {
         console.error("Lỗi tải địa chỉ:", error);
+
+        setAddresses([]);
+        setErrorMessage(
+          error.response?.data?.message ||
+            "Không thể tải danh sách địa chỉ.",
+        );
       } finally {
         setLoading(false);
       }
@@ -144,23 +198,23 @@ const AddressPage = () => {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredAddresses.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredAddresses.length / ITEMS_PER_PAGE),
   );
 
-  const paginatedAddresses = filteredAddresses.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+  const safeCurrentPage = Math.min(
+    currentPage,
+    totalPages,
   );
 
-  const showingStart =
-    filteredAddresses.length === 0
-      ? 0
-      : (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const paginatedAddresses = useMemo(() => {
+    const start =
+      (safeCurrentPage - 1) * ITEMS_PER_PAGE;
 
-  const showingEnd = Math.min(
-    currentPage * ITEMS_PER_PAGE,
-    filteredAddresses.length
-  );
+    return filteredAddresses.slice(
+      start,
+      start + ITEMS_PER_PAGE,
+    );
+  }, [filteredAddresses, safeCurrentPage]);
 
   const handleAddMail = () => {
     setEditingAddress(null);
@@ -174,39 +228,35 @@ const AddressPage = () => {
     setAddingAddress(true);
   };
 
-  if (loading) {
-    return (
-      <SectionCard
-        title="Address"
-        desc="Edit the user's address."
-      >
-        <p>Loading...</p>
-      </SectionCard>
-    );
-  }
-
   // Trạng thái hoạt động của địa chỉ
   const getAddressStatus = (item) => {
     return item.addressId === defaultAddressId ? "Active" : "Inactive";
   };
 
   // Handle
-  const ACTION_MENU_WIDTH = 208;
-  const ACTION_MENU_HEIGHT = 156;
-  const GAP = 8;
 
   const handleOpenActionMenu = (event, item) => {
-    event.preventDefault();
+    event.stopPropagation();
 
     const rect = event.currentTarget.getBoundingClientRect();
 
-    let x = rect.right - ACTION_MENU_WIDTH;
-    let y = rect.bottom + GAP;
+    const menuWidth = 208;
+    const menuHeight = 156;
+    const screenPadding = 12;
 
-    if (x < GAP) x = GAP;
+    let x = rect.right - menuWidth;
+    let y = rect.bottom + 8;
 
-    if (y + ACTION_MENU_HEIGHT > window.innerHeight - GAP) {
-      y = rect.top - ACTION_MENU_HEIGHT - GAP;
+    if (x < screenPadding) {
+      x = screenPadding;
+    }
+
+    if (x + menuWidth > window.innerWidth - screenPadding) {
+      x = window.innerWidth - menuWidth - screenPadding;
+    }
+
+    if (y + menuHeight > window.innerHeight - screenPadding) {
+      y = rect.top - menuHeight - 8;
     }
 
     setActionMenu({
@@ -217,14 +267,8 @@ const AddressPage = () => {
     });
   };
 
-  const handleOpenConfirmDefault = () => {
-    setConfirmDefaultAddress(actionMenu.address);
-    setActionMenu({
-      open: false,
-      x: 0,
-      y: 0,
-      address: null,
-    });
+  const handleCloseActionMenu = () => {
+    setActionMenu(initialActionMenuState);
   };
 
   const handleConfirmSetDefault = async () => {
@@ -288,12 +332,7 @@ const AddressPage = () => {
       note: address.note || "",
     });
 
-    setActionMenu({
-      open: false,
-      x: 0,
-      y: 0,
-      address: null,
-    });
+    handleCloseActionMenu();
   };
 
   const handleUpdateAddress = async () => {
@@ -457,233 +496,222 @@ const AddressPage = () => {
     handleConfirmSetDefault();
   };
 
+  const selectedAddress = actionMenu.address;
+
+  const actionMenuItems = [
+    {
+      id: "edit",
+      label: "Chỉnh sửa",
+      icon: Pencil,
+      onClick: () => {
+        if (selectedAddress) {
+          handleOpenEdit(selectedAddress);
+        }
+      },
+    },
+    {
+      id: "delete",
+      label: "Xóa địa chỉ",
+      icon: Trash2,
+      danger: true,
+      disabled:
+        selectedAddress?.addressId === defaultAddressId,
+      onClick: () => {
+        if (selectedAddress) {
+          setDeleteAddress(selectedAddress);
+        }
+      },
+    },
+    {
+      id: "divider",
+      type: "divider",
+    },
+    {
+      id: "default",
+      label: "Đặt làm mặc định",
+      icon: Check,
+      disabled:
+        selectedAddress?.addressId === defaultAddressId,
+      onClick: () => {
+        if (selectedAddress) {
+          setConfirmDefaultAddress(selectedAddress);
+        }
+      },
+    },
+  ];
+
   return (
     <>
       <SectionCard
         title="Address"
         desc="Edit the user's address."
       > 
-        <div className="flex justify-end items-center">
-          <ButtonIconText
-            text="Add Address"
-            icon={Plus}
-            onClick={handleAddMail}
-            className="bg-brand! text-brand-light! hover:text-brand-light/85! hover:shadow-2xl transition"
-            classNameIcon="text-brand-light! border-brand-light!"
-          />
-        </div>
-        {/* Table */}
-        <div className="space-y-5 pt-5">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <SearchInput
-              value={searchKeyword}
-              placeholder="Tìm kiếm địa chỉ..."
-              className="xl:max-w-sm"
-              onChange={(value) => {
-                setSearchKeyword(value);
-                setCurrentPage(1);
-              }}
-            />
+        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-700">
+              Tổng số địa chỉ: {addresses.length}
+            </p>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <ButtonIconText
-                text="Show All Address"
-                icon={MapPin}
-                onClick={handleShowAllAddress}
-                className={`
-                  rounded-full!
-                  ${sortType === "all" ? "bg-brand! text-white!" : ""}
-                `}
-                classNameIcon={`${sortType === "all" ? "bg-brand! text-white! border-white!" : ""}`}
-              />
-
-              <ButtonIconText
-                text="Show by name A-Z"
-                icon={ArrowDownAZ}
-                onClick={handleSortNameAZ}
-                className={`
-                  rounded-full!
-                  ${sortType === "name-asc" ? "bg-brand! text-white!" : ""}
-                `}
-                classNameIcon={`${sortType === "name-asc" ? "bg-brand! text-white! border-white!" : ""}`}
-              />
-            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              Hiển thị {filteredAddresses.length} kết quả
+            </p>
           </div>
 
-          {/* TABLE */}
-          <DataTable
-            columns={[
-              {
-                key: "status",
-                title: "Trạng thái",
-              },
-              {
-                key: "companyName",
-                title: "Tên công ty",
-              },
-              {
-                key: "address",
-                title: "Địa chỉ công ty",
-              },
-              {
-                key: "note",
-                title: "Ghi chú",
-              },
-              {
-                key: "action",
-                title: "",
-              },
-            ]}
-            colGroup={[
-              "w-[16%]",
-              "w-[25%]",
-              "w-[34%]",
-              "w-[18%]",
-              "w-[7%]",
-            ]}
-            data={paginatedAddresses}
-            emptyText="Không tìm thấy địa chỉ phù hợp."
-            renderRow={(item) => (
-              <tr
-                key={item.addressId}
-                className="transition hover:bg-gray-50"
-              >
-                <td className="px-4 py-4 align-top">
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        statusClassName[getAddressStatus(item)]
-                      }`}
-                    >
-                      {getAddressStatus(item)}
-                    </span>
-                  </div>
-                </td>
+          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 sm:w-80">
+              <Search
+                size={18}
+                className="shrink-0 text-gray-400"
+              />
 
-                <td className="px-4 py-4 align-top text-sm font-medium text-gray-800">
-                  {item.companyName}
-                </td>
+              <input
+                type="text"
+                value={searchKeyword}
+                placeholder="Tìm tên công ty, địa chỉ, ghi chú..."
+                onChange={(event) => {
+                  setSearchKeyword(event.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full bg-transparent text-sm outline-none"
+              />
+            </div>
 
-                <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
-                  {item.address}
-                </td>
-
-                <td className="px-4 py-4 align-top text-sm leading-6 text-gray-600">
-                  {item.note}
-                </td>
-
-                <td className="px-4 py-4 align-top">
-                  <button
-                    type="button"
-                    aria-label={`Open actions for ${item.companyName}`}
-                    onClick={(event) =>
-                      handleOpenActionMenu(event, item)
-                    }
-                    className="
-                      flex h-9 w-9 items-center justify-center
-                      rounded-full border border-gray-300
-                      text-gray-500 transition
-                      hover:border-brand hover:bg-brand/5 hover:text-brand
-                    "
-                  >
-                    <Ellipsis size={19} />
-                  </button>
-                </td>
-              </tr>
-            )}
-          />
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            showingStart={showingStart}
-            showingEnd={showingEnd}
-            totalItems={filteredAddresses.length}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-        {actionMenu.open && (
-          <>
             <button
               type="button"
-              className="fixed inset-0 z-40 cursor-default"
-              onClick={() =>
-                setActionMenu({
-                  open: false,
-                  x: 0,
-                  y: 0,
-                  address: null,
-                })
-              }
-            />
-
-            <div
-              className="fixed z-50 w-52 max-w-[calc(100vw-16px)] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
-              style={{
-                top: actionMenu.y,
-                left: actionMenu.x,
-              }}
+              onClick={handleAddMail}
+              className="
+                inline-flex h-11 shrink-0 items-center justify-center
+                gap-2 rounded-xl bg-brand! px-5
+                text-sm font-semibold text-white shadow-sm
+                transition hover:opacity-90
+              "
             >
-              <button
-                type="button"
-                onClick={() => handleOpenEdit(actionMenu.address)}
-                className="
-                  w-full px-4 py-3 text-left text-sm font-medium
-                  text-gray-700 transition
-                  hover:bg-brand/5 hover:text-brand
-                "
-              >
-                Edit
-              </button>
+              <Plus size={18} />
+              Thêm địa chỉ
+            </button>
+          </div>
+        </div>
 
-              <button
-                type="button"
-                disabled={
-                  actionMenu.address?.addressId === defaultAddressId
-                }
-                onClick={() => {
-                  setDeleteAddress(actionMenu.address);
-                  setActionMenu({
-                    open: false,
-                    x: 0,
-                    y: 0,
-                    address: null,
-                  });
-                }}
-                className="
-                  w-full px-4 py-3 text-left text-sm font-medium
-                  text-red-600 transition
-                  hover:bg-red-50
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <ButtonIconText
+            text="Tất cả địa chỉ"
+            icon={MapPin}
+            onClick={handleShowAllAddress}
+            className={`
+              rounded-full!
+              ${sortType === "all" ? "bg-brand! text-white!" : ""}
+            `}
+            classNameIcon={
+              sortType === "all"
+                ? "border-white! bg-brand! text-white!"
+                : ""
+            }
+          />
 
-                  disabled:cursor-not-allowed disabled:opacity-50
-                  disabled:hover:bg-white
-                "
-              >
-                Delete
-              </button>
+          <ButtonIconText
+            text="Tên A-Z"
+            icon={ArrowDownAZ}
+            onClick={handleSortNameAZ}
+            className={`
+              rounded-full!
+              ${sortType === "name-asc" ? "bg-brand! text-white!" : ""}
+            `}
+            classNameIcon={
+              sortType === "name-asc"
+                ? "border-white! bg-brand! text-white!"
+                : ""
+            }
+          />
+        </div>
 
-              <div className="h-px bg-gray-200" />
+        <DataTable
+          columns={ADDRESS_COLUMNS}
+          data={paginatedAddresses}
+          loading={loading}
+          loadingText="Đang tải danh sách địa chỉ..."
+          error={errorMessage}
+          minWidth="min-w-200"
+          emptyText={
+            searchKeyword.trim()
+              ? "Không tìm thấy địa chỉ phù hợp."
+              : "Chưa có địa chỉ."
+          }
+          renderRow={(item) => (
+            <tr
+              key={item.addressId}
+              className="text-sm transition hover:bg-gray-50"
+            >
+              <td className="px-4 py-4">
+                <span
+                  className={`
+                    inline-flex rounded-full px-3 py-1
+                    text-xs font-semibold
+                    ${statusClassName[getAddressStatus(item)]}
+                  `}
+                >
+                  {getAddressStatus(item)}
+                </span>
+              </td>
 
-              <button
-                type="button"
-                onClick={handleOpenConfirmDefault}
-                disabled={
-                  actionMenu.address?.addressId === defaultAddressId
-                }
-                className="
-                  w-full px-4 py-3 text-left text-sm font-medium
-                  text-gray-700 transition
-                  hover:bg-brand/5 hover:text-brand
-                  disabled:cursor-not-allowed
-                  disabled:text-gray-400
-                  disabled:hover:bg-white
-                "
-              >
-                Đặt làm mặc định
-              </button>
-            </div>
-          </>
-        )}
+              <td className="px-4 py-4 font-semibold text-gray-900">
+                {item.companyName || "Chưa có"}
+              </td>
+
+              <td className="px-4 py-4 leading-6 text-gray-700">
+                {item.address || "Chưa có"}
+              </td>
+
+              <td className="px-4 py-4 leading-6 text-gray-700">
+                {item.note || "Không có ghi chú"}
+              </td>
+
+              <td className="px-4 py-4 text-center">
+                <button
+                  type="button"
+                  onClick={(event) =>
+                    handleOpenActionMenu(event, item)
+                  }
+                  aria-label={`Mở thao tác cho ${item.companyName}`}
+                  aria-haspopup="menu"
+                  aria-expanded={
+                    actionMenu.open &&
+                    actionMenu.address?.addressId === item.addressId
+                  }
+                  className={`
+                    rounded-lg border p-2 transition
+                    ${
+                      actionMenu.open &&
+                      actionMenu.address?.addressId === item.addressId
+                        ? "border-brand bg-brand-light text-brand"
+                        : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }
+                  `}
+                >
+                  <MoreVertical size={18} />
+                </button>
+              </td>
+            </tr>
+          )}
+        />
+
+        <div className="mt-4">
+          <Pagination
+            currentPage={safeCurrentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            showOnSinglePage
+          />
+        </div>
+        <MenuTable
+          open={actionMenu.open}
+          position={{
+            x: actionMenu.x,
+            y: actionMenu.y,
+          }}
+          width={208}
+          items={actionMenuItems}
+          onClose={handleCloseActionMenu}
+        />
 
         {/* DELETE & CONFIRM */}
         <ConfirmModal

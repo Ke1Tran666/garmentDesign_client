@@ -7,6 +7,8 @@ import MenuTable from "@/components/ui/Menu/MenuTable";
 import ServiceOrderDetailModal from "@/components/ui/ServiceOrder/ServiceOrderDetailModal";
 import ServiceOrderCreateModal from "@/components/ui/ServiceOrder/ServiceOrderCreateModal";
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
+import DataTable from "@/components/ui/Table/DataTable";
+import Pagination from "@/components/ui/Table/Pagination";
 
 const hasEmployeeReceiver = (order) => {
   const createdBy = String(order?.createdBy || "").trim();
@@ -132,6 +134,38 @@ const initialActionMenuState = {
 };
 
 const PAGE_SIZE = 15;
+
+const SERVICE_ORDER_COLUMNS = [
+  {
+    key: "orderCode",
+    title: "Mã đơn",
+  },
+  {
+    key: "customer",
+    title: "Khách hàng",
+  },
+  {
+    key: "serviceName",
+    title: "Dịch vụ",
+  },
+  {
+    key: "deadline",
+    title: "Deadline",
+  },
+  {
+    key: "progress",
+    title: "Tiến độ",
+  },
+  {
+    key: "status",
+    title: "Trạng thái",
+  },
+  {
+    key: "action",
+    title: "Action",
+    className: "text-center",
+  },
+];
 
 const ServiceOrderPage = () => {
   const [orders, setOrders] = useState([]);
@@ -527,253 +561,112 @@ const ServiceOrderPage = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-100">
-        <table className="w-full min-w-200 text-left">
-          <thead>
-            <tr className="border-b border-gray-100 bg-gray-50 text-sm text-gray-500">
-              <th className="px-4 py-3 font-medium">Mã đơn</th>
-              <th className="px-4 py-3 font-medium">Khách hàng</th>
-              <th className="px-4 py-3 font-medium">Dịch vụ</th>
-              <th className="px-4 py-3 font-medium">Deadline</th>
-              <th className="px-4 py-3 font-medium">Tiến độ</th>
-              <th className="px-4 py-3 font-medium">Trạng thái</th>
-              <th className="px-4 py-3 text-center font-medium">Action</th>
-            </tr>
-          </thead>
+      <DataTable
+        columns={SERVICE_ORDER_COLUMNS}
+        data={visibleOrders}
+        minWidth="min-w-200"
+        loading={loading}
+        loadingText="Đang tải danh sách đơn hàng..."
+        error={errorMessage}
+        emptyText={
+          deferredSearchValue.trim()
+            ? "Không tìm thấy đơn hàng phù hợp."
+            : "Chưa có đơn hàng dịch vụ."
+        }
+        renderRow={(order) => (
+          <tr
+            key={order.id}
+            className="text-sm transition hover:bg-gray-50"
+          >
+            <td className="px-4 py-4 font-semibold text-gray-900">
+              {order.orderCode}
+            </td>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-4 py-10 text-center text-sm text-gray-500"
-                >
-                  Đang tải danh sách đơn hàng...
-                </td>
-              </tr>
-            ) : errorMessage ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-4 py-10 text-center text-sm text-red-500"
-                >
-                  {errorMessage}
-                </td>
-              </tr>
-            ) : filteredOrders.length > 0 ? (
-              visibleOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  className="border-b border-gray-100 text-sm transition last:border-b-0 hover:bg-gray-50"
-                >
-                  <td className="px-4 py-4 font-semibold text-gray-900">
-                    {order.orderCode}
-                  </td>
+            <td className="px-4 py-4 text-gray-700">
+              {order.customer}
+            </td>
 
-                  <td className="px-4 py-4 text-gray-700">
-                    {order.customer}
-                  </td>
+            <td className="px-4 py-4 text-gray-700">
+              {order.serviceName}
+            </td>
 
-                  <td className="px-4 py-4 text-gray-700">
-                    {order.serviceName}
-                  </td>
+            <td className="px-4 py-4 text-gray-700">
+              <div className="flex items-center gap-2">
+                <Clock
+                  size={16}
+                  className="shrink-0 text-gray-400"
+                />
 
-                  <td className="px-4 py-4 text-gray-700">
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} className="shrink-0 text-gray-400" />
-                      {order.deadline}
-                    </div>
-                  </td>
+                {order.deadline}
+              </div>
+            </td>
 
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 w-28 overflow-hidden rounded-full bg-gray-100">
-                        <div
-                          className="h-full rounded-full bg-brand transition-all"
-                          style={{ width: `${order.progress}%` }}
-                        />
-                      </div>
+            <td className="px-4 py-4">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-28 overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className="h-full rounded-full bg-brand transition-all"
+                    style={{
+                      width: `${order.progress}%`,
+                    }}
+                  />
+                </div>
 
-                      <span className="min-w-9 text-xs font-medium text-gray-500">
-                        {order.progress}%
-                      </span>
-                    </div>
-                  </td>
+                <span className="min-w-9 text-xs font-medium text-gray-500">
+                  {order.progress}%
+                </span>
+              </div>
+            </td>
 
-                  <td className="px-4 py-4">
-                    <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getStatusClass(
-                        order.status
-                      )}`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
+            <td className="px-4 py-4">
+              <span
+                className={`
+                  inline-flex rounded-full px-3 py-1
+                  text-xs font-semibold
+                  ${getStatusClass(order.status)}
+                `}
+              >
+                {order.status}
+              </span>
+            </td>
 
-                  <td className="px-4 py-4 text-center">
-                    <button
-                      type="button"
-                      onClick={(event) =>
-                        handleOpenActionMenu(event, order)
-                      }
-                      aria-label={`Mở thao tác cho ${order.orderCode}`}
-                      aria-haspopup="menu"
-                      aria-expanded={
-                        actionMenu.open &&
-                        actionMenu.order?.id === order.id
-                      }
-                      className={`
-                        rounded-lg border p-2 transition
-                        ${
-                          actionMenu.open &&
-                          actionMenu.order?.id === order.id
-                            ? "border-brand bg-brand-light text-brand"
-                            : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                        }
-                      `}
-                    >
-                      <MoreVertical size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-4 py-10 text-center text-sm text-gray-500"
-                >
-                  {deferredSearchValue.trim()
-                    ? "Không tìm thấy đơn hàng phù hợp."
-                    : "Chưa có đơn hàng dịch vụ."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {filteredOrders.length >
-        PAGE_SIZE && (
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-gray-500">
-            Trang{" "}
-            <span className="font-semibold text-gray-700">
-              {safeCurrentPage}
-            </span>{" "}
-            / {totalPages}
-          </p>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() =>
-                setCurrentPage(
-                  (previousPage) =>
-                    Math.max(
-                      1,
-                      previousPage - 1
-                    )
-                )
-              }
-              disabled={
-                safeCurrentPage <= 1
-              }
-              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Trước
-            </button>
-
-            <div className="flex items-center gap-1">
-              {Array.from(
-                {
-                  length: totalPages,
-                },
-                (_, index) => index + 1
-              )
-                .filter((pageNumber) => {
-                  return (
-                    pageNumber === 1 ||
-                    pageNumber ===
-                      totalPages ||
-                    Math.abs(
-                      pageNumber -
-                        safeCurrentPage
-                    ) <= 1
-                  );
-                })
-                .map(
-                  (
-                    pageNumber,
-                    index,
-                    displayedPages
-                  ) => {
-                    const previousPage =
-                      displayedPages[
-                        index - 1
-                      ];
-
-                    const hasGap =
-                      previousPage &&
-                      pageNumber -
-                        previousPage >
-                        1;
-
-                    return (
-                      <div
-                        key={pageNumber}
-                        className="flex items-center gap-1"
-                      >
-                        {hasGap && (
-                          <span className="px-1 text-gray-400">
-                            ...
-                          </span>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setCurrentPage(
-                              pageNumber
-                            )
-                          }
-                          className={`flex h-9 min-w-9 items-center justify-center rounded-xl px-2 text-sm font-semibold ${
-                            pageNumber ===
-                            safeCurrentPage
-                              ? "bg-brand text-white"
-                              : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                          }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      </div>
-                    );
+            <td className="px-4 py-4 text-center">
+              <button
+                type="button"
+                onClick={(event) =>
+                  handleOpenActionMenu(event, order)
+                }
+                aria-label={`Mở thao tác cho ${order.orderCode}`}
+                aria-haspopup="menu"
+                aria-expanded={
+                  actionMenu.open &&
+                  actionMenu.order?.id === order.id
+                }
+                className={`
+                  rounded-lg border p-2 transition
+                  ${
+                    actionMenu.open &&
+                    actionMenu.order?.id === order.id
+                      ? "border-brand bg-brand-light text-brand"
+                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
                   }
-                )}
-            </div>
+                `}
+              >
+                <MoreVertical size={18} />
+              </button>
+            </td>
+          </tr>
+        )}
+      />
 
-            <button
-              type="button"
-              onClick={() =>
-                setCurrentPage(
-                  (previousPage) =>
-                    Math.min(
-                      totalPages,
-                      previousPage + 1
-                    )
-                )
-              }
-              disabled={
-                safeCurrentPage >=
-                totalPages
-              }
-              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="mt-4">
+        <Pagination
+          currentPage={safeCurrentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          showOnSinglePage
+        />
+      </div>
 
       <MenuTable
         open={actionMenu.open}

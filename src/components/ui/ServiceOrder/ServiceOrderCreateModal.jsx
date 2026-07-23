@@ -1,21 +1,13 @@
 import {memo, useCallback, useEffect,useMemo,useState} from "react";
-import {
-  AlertCircle,
-  FileText,
-  ImagePlus,
-  LoaderCircle,
-  MapPin,
-  PackagePlus,
-  Paperclip,
-  Save,
-  Trash2,
-  X,
-} from "lucide-react";
+import { AlertCircle, LoaderCircle, MapPin, PackagePlus, Save, X } from "lucide-react";
 import { serviceApi } from "@/api/serviceApi";
 import { addressApi } from "@/api/addressApi";
 import { serviceOrderApi } from "@/api/serviceOrderApi";
 import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
 import { authStorage } from "@/lib/authStorage";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import ProductImagePicker from "@/components/ui/FileUpload/ProductImagePicker";
+import AttachmentPicker from "@/components/ui/FileUpload/AttachmentPicker";
 
 const initialForm = {
   serviceId: "",
@@ -23,102 +15,6 @@ const initialForm = {
   productName: "",
   quantity: "",
   customerRequest: "",
-};
-
-const createImageThumbnailUrl = async (file) => {
-  try {
-    const bitmap =
-      await createImageBitmap(file, {
-        imageOrientation: "from-image",
-      });
-
-    const maxPreviewSize = 1200;
-
-    const scale = Math.min(
-      1,
-      maxPreviewSize /
-        Math.max(
-          bitmap.width,
-          bitmap.height
-        )
-    );
-
-    const width = Math.max(
-      1,
-      Math.round(bitmap.width * scale)
-    );
-
-    const height = Math.max(
-      1,
-      Math.round(bitmap.height * scale)
-    );
-
-    const canvas =
-      document.createElement("canvas");
-
-    canvas.width = width;
-    canvas.height = height;
-
-    const context =
-      canvas.getContext("2d", {
-        alpha: false,
-      });
-
-    if (!context) {
-      bitmap.close();
-      return URL.createObjectURL(file);
-    }
-
-    context.drawImage(
-      bitmap,
-      0,
-      0,
-      width,
-      height
-    );
-
-    bitmap.close();
-
-    const previewBlob =
-      await new Promise((resolve) => {
-        canvas.toBlob(
-          resolve,
-          "image/jpeg",
-          0.82
-        );
-      });
-
-    return URL.createObjectURL(
-      previewBlob || file
-    );
-  } catch {
-    return URL.createObjectURL(file);
-  }
-};
-
-const MAX_FILE_SIZE =
-  50 * 1024 * 1024;
-
-const MAX_REQUEST_SIZE =
-  200 * 1024 * 1024;
-
-const formatFileSize = (size) => {
-  if (!Number.isFinite(size)) {
-    return "0 B";
-  }
-
-  if (size < 1024) {
-    return `${size} B`;
-  }
-
-  if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(1)} KB`;
-  }
-
-  return `${(
-    size /
-    (1024 * 1024)
-  ).toFixed(1)} MB`;
 };
 
 const currencyFormatter =
@@ -189,42 +85,6 @@ const AddressOption = memo(({address,selected,disabled,onSelect}) => {
 
 AddressOption.displayName = "AddressOption";
 
-const AttachmentFileItem = memo(
-  ({
-    file,
-    disabled,
-    onRemove,
-  }) => (
-    <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-        <FileText size={17} />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-gray-700">
-          {file.name}
-        </p>
-
-        <p className="mt-0.5 text-[11px] text-gray-400">
-          {formatFileSize(file.size)}
-        </p>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => onRemove(file)}
-        disabled={disabled}
-        aria-label={`Xóa ${file.name}`}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-      >
-        <Trash2 size={15} />
-      </button>
-    </div>
-  )
-);
-
-AttachmentFileItem.displayName = "AttachmentFileItem";
-
 const ServiceOrderCreateModal = ({
   open,
   onClose,
@@ -244,10 +104,23 @@ const ServiceOrderCreateModal = ({
   const [submitting, setSubmitting] = useState(false);
 
   const [submitError, setSubmitError] = useState("");
-  const [productImageFile,setProductImageFile] = useState(null);
-  const [productImagePreview,setProductImagePreview] = useState("");
-  const [attachmentFiles,setAttachmentFiles] = useState([]);
   const [createdOrder,setCreatedOrder] = useState(null);
+
+  const {
+    productImageFile,
+    productImagePreview,
+    attachmentFiles,
+    hasUpload,
+    handleProductImageChange,
+    handleAttachmentChange,
+    removeProductImage,
+    removeAttachment,
+    resetFiles,
+    validateTotalSize,
+    buildFormData,
+  } = useFileUpload({
+    onError: setSubmitError,
+  });
 
   const currentUserId = authStorage.getUserId();
 
@@ -403,19 +276,10 @@ const ServiceOrderCreateModal = ({
         return;
       }
 
-      if (productImagePreview) {
-        URL.revokeObjectURL(
-          productImagePreview
-        );
-      }
-
+      resetFiles();
       setForm(initialForm);
       setSubmitError("");
-      setProductImageFile(null);
-      setProductImagePreview("");
-      setAttachmentFiles([]);
       setCreatedOrder(null);
-
       onClose();
     };
 
@@ -436,17 +300,7 @@ const ServiceOrderCreateModal = ({
         handleKeyDown
       );
     };
-  }, [open, submitting, productImagePreview, onClose]);
-
-  useEffect(() => {
-    return () => {
-      if (productImagePreview) {
-        URL.revokeObjectURL(
-          productImagePreview
-        );
-      }
-    };
-  }, [productImagePreview]);
+  }, [open, submitting, onClose, resetFiles]);
 
   const handleChange = useCallback(
     (event) => {
@@ -463,21 +317,8 @@ const ServiceOrderCreateModal = ({
     []
   );
 
-  const resetSelectedFiles = () => {
-    if (productImagePreview) {
-      URL.revokeObjectURL(
-        productImagePreview
-      );
-    }
-
-    setProductImageFile(null);
-    setProductImagePreview("");
-    setAttachmentFiles([]);
-  };
-
   const resetCreateForm = () => {
-    resetSelectedFiles();
-
+    resetFiles();
     setForm(initialForm);
     setSubmitError("");
     setCreatedOrder(null);
@@ -492,139 +333,6 @@ const ServiceOrderCreateModal = ({
     setSubmitError("");
   }, []);
 
-  const handleProductImageChange = async (event) => {
-    const file =
-      event.target.files?.[0];
-
-    event.target.value = "";
-
-    if (!file) return;
-
-    if (
-      !file.type.startsWith("image/")
-    ) {
-      setSubmitError(
-        "Ảnh đại diện không đúng định dạng."
-      );
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      setSubmitError(
-        "Ảnh đại diện không được vượt quá 50MB."
-      );
-      return;
-    }
-
-    try {
-      const nextPreview =
-        await createImageThumbnailUrl(
-          file
-        );
-
-      if (productImagePreview) {
-        URL.revokeObjectURL(
-          productImagePreview
-        );
-      }
-
-      setProductImageFile(file);
-      setProductImagePreview(
-        nextPreview
-      );
-      setSubmitError("");
-    } catch {
-      setSubmitError(
-        "Không thể tạo ảnh xem trước."
-      );
-    }
-  };
-
-  const handleRemoveProductImage = () => {
-    if (submitting) return;
-
-    if (productImagePreview) {
-      URL.revokeObjectURL(
-        productImagePreview
-      );
-    }
-
-    setProductImageFile(null);
-    setProductImagePreview("");
-    setSubmitError("");
-  };
-
-  const handleAttachmentChange = (
-    event
-  ) => {
-    const selectedFiles = Array.from(
-      event.target.files || []
-    );
-
-    event.target.value = "";
-
-    if (selectedFiles.length === 0) {
-      return;
-    }
-
-    const oversizedFile =
-      selectedFiles.find(
-        (file) =>
-          file.size > MAX_FILE_SIZE
-      );
-
-    if (oversizedFile) {
-      setSubmitError(
-        `File "${oversizedFile.name}" vượt quá 50MB.`
-      );
-      return;
-    }
-
-    setAttachmentFiles(
-      (previousFiles) => {
-        const fileMap = new Map();
-
-        [
-          ...previousFiles,
-          ...selectedFiles,
-        ].forEach((file) => {
-          const key = [
-            file.name,
-            file.size,
-            file.lastModified,
-          ].join("-");
-
-          fileMap.set(key, file);
-        });
-
-        return Array.from(
-          fileMap.values()
-        );
-      }
-    );
-
-    setSubmitError("");
-  };
-
-  const handleRemoveAttachment = useCallback((removingFile) => {
-      setAttachmentFiles(
-        (previousFiles) =>
-          previousFiles.filter(
-            (file) =>
-              !(
-                file.name ===
-                  removingFile.name &&
-                file.size ===
-                  removingFile.size &&
-                file.lastModified ===
-                  removingFile.lastModified
-              )
-          )
-      );
-
-      setSubmitError("");
-    }, []);
-
   const handleClose = () => {
     if (submitting) return;
 
@@ -635,25 +343,7 @@ const ServiceOrderCreateModal = ({
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const hasUpload =
-      Boolean(productImageFile) ||
-      attachmentFiles.length > 0;
-
-    const totalUploadSize =
-      (productImageFile?.size || 0) +
-      attachmentFiles.reduce(
-        (total, file) =>
-          total + file.size,
-        0
-      );
-
-    if (
-      totalUploadSize >
-      MAX_REQUEST_SIZE
-    ) {
-      setSubmitError(
-        "Tổng dung lượng ảnh và file không được vượt quá 200MB."
-      );
+    if (!validateTotalSize()) {
       return;
     }
 
@@ -805,28 +495,8 @@ const ServiceOrderCreateModal = ({
       * và file bổ sung.
       */
       if (hasUpload) {
-        const uploadData =
-          new FormData();
-
-        if (productImageFile) {
-          uploadData.append(
-            "image",
-            productImageFile
-          );
-        }
-
-        attachmentFiles.forEach(
-          (file) => {
-            uploadData.append(
-              "files",
-              file
-            );
-          }
-        );
-
-        uploadData.append(
-          "note",
-          "File do khách hàng cung cấp khi tạo đơn"
+        const uploadData = buildFormData(
+          "File do khách hàng cung cấp khi tạo đơn",
         );
 
         try {
@@ -1134,65 +804,13 @@ const ServiceOrderCreateModal = ({
                       </span>
                     </div>
 
-                    {productImagePreview ? (
-                      <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100">
-                        <img
-                          src={productImagePreview}
-                          alt="Xem trước ảnh sản phẩm"
-                          className="h-52 w-full object-cover"
-                        />
-
-                        <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-xl bg-gray-950/85 px-3 py-2 text-white">
-                          <div className="min-w-0">
-                            <p className="truncate text-xs font-semibold">
-                              {productImageFile?.name}
-                            </p>
-
-                            <p className="mt-0.5 text-[11px] text-gray-300">
-                              {formatFileSize(
-                                productImageFile?.size
-                              )}
-                            </p>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={
-                              handleRemoveProductImage
-                            }
-                            disabled={submitting}
-                            aria-label="Xóa ảnh đã chọn"
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-red-500 disabled:opacity-50"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <label className="flex h-52 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 text-center transition hover:border-brand hover:bg-brand-light">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand shadow-sm">
-                          <ImagePlus size={22} />
-                        </div>
-
-                        <p className="mt-3 text-sm font-semibold text-gray-700">
-                          Chọn ảnh đại diện
-                        </p>
-
-                        <p className="mt-1 text-xs text-gray-400">
-                          JPG, PNG, WEBP...
-                        </p>
-
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={
-                            handleProductImageChange
-                          }
-                          disabled={submitting}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
+                    <ProductImagePicker
+                      imageUrl={productImagePreview}
+                      selectedFile={productImageFile}
+                      disabled={submitting}
+                      onChange={handleProductImageChange}
+                      onRemove={removeProductImage}
+                    />
                   </div>
 
                   {/* File bổ sung */}
@@ -1207,55 +825,12 @@ const ServiceOrderCreateModal = ({
                       </span>
                     </div>
 
-                    <label className="flex min-h-28 cursor-pointer items-center gap-4 rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 transition hover:border-brand hover:bg-brand-light">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-brand shadow-sm">
-                        <Paperclip size={20} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-700">
-                          Chọn file bổ sung
-                        </p>
-
-                        <p className="mt-1 text-xs leading-5 text-gray-400">
-                          Nhận mọi định dạng file,
-                          tối đa 50MB mỗi file
-                        </p>
-                      </div>
-
-                      <input
-                        type="file"
-                        multiple
-                        onChange={
-                          handleAttachmentChange
-                        }
-                        disabled={submitting}
-                        className="hidden"
-                      />
-                    </label>
-
-                    {attachmentFiles.length > 0 && (
-                      <div className="mt-3 max-h-48 space-y-2 overflow-y-auto pr-1">
-                        {attachmentFiles.map((file) => {
-                          const fileKey = [
-                            file.name,
-                            file.size,
-                            file.lastModified,
-                          ].join("-");
-
-                          return (
-                            <AttachmentFileItem
-                              key={fileKey}
-                              file={file}
-                              disabled={submitting}
-                              onRemove={
-                                handleRemoveAttachment
-                              }
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
+                    <AttachmentPicker
+                      files={attachmentFiles}
+                      disabled={submitting}
+                      onChange={handleAttachmentChange}
+                      onRemove={removeAttachment}
+                    />
                   </div>
                 </div>
 

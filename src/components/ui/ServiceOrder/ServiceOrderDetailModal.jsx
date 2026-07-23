@@ -8,7 +8,6 @@ import {
   ImagePlus,
   LoaderCircle,
   MapPin,
-  Package,
   Paperclip,
   Pencil,
   Save,
@@ -22,11 +21,11 @@ import { userApi } from "@/api/userApi";
 import { addressApi } from "@/api/addressApi";
 import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
 import { serviceOrderApi } from "@/api/serviceOrderApi";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import ProductImagePicker from "@/components/ui/FileUpload/ProductImagePicker";
+import AttachmentPicker from "@/components/ui/FileUpload/AttachmentPicker";
 
 const EMPTY_VALUE = "Chưa có thông tin";
-
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
-const MAX_REQUEST_SIZE = 200 * 1024 * 1024;
 
 const employeeNameCache = new Map();
 
@@ -84,24 +83,6 @@ const formatCurrency = (value) => {
   return Number.isNaN(number)
     ? String(value)
     : CURRENCY_FORMATTER.format(number);
-};
-
-const formatFileSize = (size) => {
-  if (!Number.isFinite(size)) return "";
-
-  if (size < 1024) {
-    return `${size} B`;
-  }
-
-  if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(1)} KB`;
-  }
-
-  return `${(
-    size /
-    1024 /
-    1024
-  ).toFixed(2)} MB`;
 };
 
 const resolveBackendUrl = (url) => {
@@ -239,17 +220,28 @@ const ServiceOrderDetailModal = ({
 
   const [fileError, setFileError] = useState("");
 
-  const [productImageFile, setProductImageFile] = useState(null);
+  const [updateError, setUpdateError] = useState("");
 
-  const [productImagePreview,setProductImagePreview] = useState("");
-
-  const [attachmentFiles,setAttachmentFiles] = useState([]);
+  const {
+    productImageFile,
+    productImagePreview,
+    attachmentFiles,
+    hasUpload,
+    handleProductImageChange,
+    handleAttachmentChange,
+    removeAttachment,
+    resetFiles,
+    validateTotalSize,
+    buildFormData,
+  } = useFileUpload({
+    onError: setUpdateError,
+  });
 
   const [fileState, setFileState] = useState({orderId: null,items: []});
 
   const [updating, setUpdating] = useState(false);
 
-  const [updateError, setUpdateError] = useState("");
+
 
   const [addressState, setAddressState] = useState({
     idUser: null,
@@ -408,19 +400,6 @@ const ServiceOrderDetailModal = ({
   }, [fileState, order, orderId]);
 
   /*
-   * Giải phóng object URL của ảnh preview.
-   */
-  useEffect(() => {
-    return () => {
-      if (productImagePreview) {
-        URL.revokeObjectURL(
-          productImagePreview
-        );
-      }
-    };
-  }, [productImagePreview]);
-
-  /*
   * Khóa scroll trang và xử lý phím ESC.
   */
   useEffect(() => {
@@ -437,16 +416,8 @@ const ServiceOrderDetailModal = ({
       }
 
       if (isEditingProduct) {
-        if (productImagePreview) {
-          URL.revokeObjectURL(
-            productImagePreview
-          );
-        }
-
+        resetFiles();
         setIsEditingProduct(false);
-        setProductImageFile(null);
-        setProductImagePreview("");
-        setAttachmentFiles([]);
         setUpdateError("");
         return;
       }
@@ -482,9 +453,9 @@ const ServiceOrderDetailModal = ({
     onClose,
     isEditingProduct,
     isEditingAddress,
-    productImagePreview,
     updating,
     updatingAddress,
+    resetFiles,
   ]);
 
   /*
@@ -644,18 +615,6 @@ const ServiceOrderDetailModal = ({
   const updaterName =
     getEmployeeName(updatedBy);
 
-  const resetSelectedFiles = () => {
-    if (productImagePreview) {
-      URL.revokeObjectURL(
-        productImagePreview
-      );
-    }
-
-    setProductImageFile(null);
-    setProductImagePreview("");
-    setAttachmentFiles([]);
-  };
-
   const handleStartEditProduct = () => {
     if (
       isEditingAddress ||
@@ -665,7 +624,7 @@ const ServiceOrderDetailModal = ({
       return;
     }
 
-    resetSelectedFiles();
+    resetFiles();
 
     setEditForm({
       productName: order.productName || "",
@@ -682,7 +641,7 @@ const ServiceOrderDetailModal = ({
   const handleCancelEditProduct = () => {
     if (updating) return;
 
-    resetSelectedFiles();
+    resetFiles();
 
     setIsEditingProduct(false);
     setUpdateError("");
@@ -713,101 +672,6 @@ const ServiceOrderDetailModal = ({
       ...previousForm,
       [name]: value,
     }));
-  };
-
-  const handleProductImageChange = (
-    event
-  ) => {
-    const file = event.target.files?.[0];
-
-    event.target.value = "";
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      setUpdateError(
-        "Vui lòng chọn đúng định dạng ảnh."
-      );
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      setUpdateError(
-        "Ảnh không được vượt quá 50MB."
-      );
-      return;
-    }
-
-    if (productImagePreview) {
-      URL.revokeObjectURL(
-        productImagePreview
-      );
-    }
-
-    setProductImageFile(file);
-
-    setProductImagePreview(
-      URL.createObjectURL(file)
-    );
-
-    setUpdateError("");
-  };
-
-  const handleAttachmentChange = (
-    event
-  ) => {
-    const selectedFiles = Array.from(
-      event.target.files || []
-    );
-
-    event.target.value = "";
-
-    const invalidFile = selectedFiles.find(
-      (file) => file.size > MAX_FILE_SIZE
-    );
-
-    if (invalidFile) {
-      setUpdateError(
-        `${invalidFile.name} vượt quá giới hạn 50MB.`
-      );
-      return;
-    }
-
-    setAttachmentFiles(
-      (previousFiles) => {
-        const fileMap = new Map();
-
-        [
-          ...previousFiles,
-          ...selectedFiles,
-        ].forEach((file) => {
-          const key = [
-            file.name,
-            file.size,
-            file.lastModified,
-          ].join("-");
-
-          fileMap.set(key, file);
-        });
-
-        return Array.from(
-          fileMap.values()
-        );
-      }
-    );
-
-    setUpdateError("");
-  };
-
-  const handleRemoveSelectedFile = (
-    fileIndex
-  ) => {
-    setAttachmentFiles(
-      (previousFiles) =>
-        previousFiles.filter(
-          (_, index) => index !== fileIndex
-        )
-    );
   };
 
   const handleDeleteUploadedFile = async (
@@ -918,20 +782,7 @@ const ServiceOrderDetailModal = ({
       return;
     }
 
-    const totalUploadSize =
-      (productImageFile?.size || 0) +
-      attachmentFiles.reduce(
-        (total, file) =>
-          total + file.size,
-        0
-      );
-
-    if (
-      totalUploadSize > MAX_REQUEST_SIZE
-    ) {
-      setUpdateError(
-        "Tổng dung lượng upload không được vượt quá 200MB."
-      );
+    if (!validateTotalSize()) {
       return;
     }
 
@@ -958,29 +809,9 @@ const ServiceOrderDetailModal = ({
       /*
        * Upload ảnh đại diện và file bổ sung.
        */
-      if (
-        productImageFile ||
-        attachmentFiles.length > 0
-      ) {
-        const uploadData = new FormData();
-
-        if (productImageFile) {
-          uploadData.append(
-            "image",
-            productImageFile
-          );
-        }
-
-        attachmentFiles.forEach((file) => {
-          uploadData.append(
-            "files",
-            file
-          );
-        });
-
-        uploadData.append(
-          "note",
-          "File do khách hàng cung cấp"
+      if (hasUpload) {
+        const uploadData = buildFormData(
+          "File do khách hàng cung cấp",
         );
 
         try {
@@ -1042,7 +873,7 @@ const ServiceOrderDetailModal = ({
 
       onUpdated?.(updatedOrder);
 
-      resetSelectedFiles();
+      resetFiles();
 
       setIsEditingProduct(false);
     } catch (error) {
@@ -1282,54 +1113,15 @@ const ServiceOrderDetailModal = ({
                 >
                   <div className="grid grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]">
                     {/* Product image */}
-                    <div className="relative min-h-72 overflow-hidden bg-gray-100">
-                      {currentProductImage ? (
-                        <img
-                          src={
-                            currentProductImage
-                          }
-                          alt={
-                            order.productName ||
-                            "Sản phẩm"
-                          }
-                          decoding="async"
-                          draggable={false}
-                          className="h-full min-h-72 w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full min-h-72 flex-col items-center justify-center gap-4 text-gray-400">
-                          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-sm">
-                            <Package
-                              size={34}
-                            />
-                          </div>
-
-                          <span className="text-sm font-medium">
-                            Chưa có hình ảnh
-                          </span>
-                        </div>
-                      )}
-
-                      {isEditingProduct && (
-                        <label className="absolute inset-x-4 bottom-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-950/85 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-950">
-                          <ImagePlus
-                            size={18}
-                          />
-
-                          Chọn ảnh đại diện
-
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={
-                              handleProductImageChange
-                            }
-                            disabled={updating || updatingAddress}
-                            className="hidden"
-                          />
-                        </label>
-                      )}
-                    </div>
+                    <ProductImagePicker
+                      variant="overlay"
+                      imageUrl={currentProductImage}
+                      selectedFile={productImageFile}
+                      editable={isEditingProduct}
+                      disabled={updating || updatingAddress}
+                      onChange={handleProductImageChange}
+                      alt={order.productName || "Sản phẩm"}
+                    />
 
                     {/* Product information */}
                     <div className="flex min-w-0 flex-col p-6 sm:p-7">
@@ -1622,84 +1414,14 @@ const ServiceOrderDetailModal = ({
 
                   {isEditingProduct && (
                     <div className="mt-6">
-                      <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 px-5 py-7 text-center transition hover:border-brand/40 hover:bg-brand-light/30">
-                        <Paperclip
-                          size={28}
-                          className="text-brand"
-                        />
-
-                        <span className="mt-2 text-sm font-semibold text-gray-800">
-                          Chọn file đính kèm
-                        </span>
-
-                        <span className="mt-1 text-xs text-gray-500">
-                          Nhận mọi định dạng,
-                          tối đa 50MB mỗi file
-                        </span>
-
-                        <input
-                          type="file"
-                          multiple
-                          onChange={
-                            handleAttachmentChange
-                          }
-                          disabled={updating || updatingAddress}
-                          className="hidden"
-                        />
-                      </label>
-
-                      {attachmentFiles.length >
-                        0 && (
-                        <div className="mt-4 space-y-2">
-                          {attachmentFiles.map(
-                            (file, index) => (
-                              <div
-                                key={[
-                                  file.name,
-                                  file.size,
-                                  file.lastModified,
-                                ].join("-")}
-                                className="flex items-center gap-3 rounded-xl border border-gray-100 px-3 py-2.5"
-                              >
-                                <FileText
-                                  size={17}
-                                  className="shrink-0 text-brand"
-                                />
-
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-medium text-gray-700">
-                                    {
-                                      file.name
-                                    }
-                                  </p>
-
-                                  <p className="text-xs text-gray-400">
-                                    {formatFileSize(
-                                      file.size
-                                    )}
-                                  </p>
-                                </div>
-
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleRemoveSelectedFile(
-                                      index
-                                    )
-                                  }
-                                  disabled={updating || updatingAddress}
-                                  title="Bỏ file"
-                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-600"
-                                >
-                                  <Trash2
-                                    size={15}
-                                  />
-                                </button>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      )}
+                      <AttachmentPicker
+                        files={attachmentFiles}
+                        disabled={
+                          updating || updatingAddress
+                        }
+                        onChange={handleAttachmentChange}
+                        onRemove={removeAttachment}
+                      />
                     </div>
                   )}
 
@@ -2383,6 +2105,4 @@ const ServiceOrderDetailModal = ({
   );
 };
 
-export default memo(
-  ServiceOrderDetailModal
-);
+export default memo(ServiceOrderDetailModal);

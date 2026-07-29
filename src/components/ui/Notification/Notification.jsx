@@ -35,7 +35,7 @@ const Notification = ({type = "success",message,description, onClose, visible}) 
   const Icon = config.icon;
 
   return (
-    <div className={`notification ${visible ? "show" : ""} bg-white border ${config.borderClass} rounded-2xl px-6 py-4 flex items-center gap-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)]`}
+    <div className={`notification ${visible ? "show" : ""} bg-surface border ${config.borderClass} rounded-2xl px-6 py-4 flex items-center gap-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)]`}
     >
       <div className={`w-8 h-8 rounded-full ${config.wrapClass} flex items-center justify-center shrink-0`}>
         <Icon className={`w-4 h-4 ${config.iconClass}`} />
@@ -48,7 +48,7 @@ const Notification = ({type = "success",message,description, onClose, visible}) 
           {description ?? defaults.msg}
         </div>
       </div>
-      <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center shrink-0 transition-opacity ease-linear hover:opacity-70">
+      <button onClick={onClose} className="w-8 h-8 rounded-full bg-surface-muted text-gray-600 flex items-center justify-center shrink-0 transition-opacity ease-linear hover:opacity-70">
         <X className="w-6 h-6" />
       </button>
     </div>

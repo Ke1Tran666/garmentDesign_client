@@ -5,7 +5,7 @@ export const SectionCard = ({ title, desc, active, highlight, children }) => {
       <div>
         <div className="flex w-fit flex-col">
           <div className="flex items-center gap-3">
-            <h4 className="text-sm font-semibold text-gray-900">
+            <h4 className="text-sm font-semibold text-text-strong">
               {title}
             </h4>
 
@@ -18,7 +18,7 @@ export const SectionCard = ({ title, desc, active, highlight, children }) => {
                     ? "bg-yellow-100 text-yellow-700"
                     : active === "banned"
                     ? "bg-red-100 text-red-700"
-                    : "bg-gray-100 text-gray-600"
+                    : "bg-surface-muted text-text-muted"
                 }`}
               >
                 {active}
@@ -33,7 +33,7 @@ export const SectionCard = ({ title, desc, active, highlight, children }) => {
           />
         </div>
 
-        <p className="mt-2 max-w-52 text-sm leading-5 text-gray-500">
+        <p className="mt-2 max-w-52 text-sm leading-5 text-text-muted">
           {desc}
         </p>
       </div>

@@ -25,7 +25,7 @@ const ConfirmModal = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-2xl"
+        className="relative w-full max-w-md rounded-xl bg-surface p-6 shadow-2xl"
       >
         <button
           type="button"
@@ -34,19 +34,19 @@ const ConfirmModal = ({
           className="
             absolute right-4 top-4
             flex h-9 w-9 items-center justify-center
-            rounded-full text-gray-500 transition
-            hover:bg-gray-100 hover:text-gray-800
+            rounded-full text-text-muted transition
+            hover:bg-surface-muted hover:text-text-default
             disabled:cursor-not-allowed disabled:opacity-60
           "
         >
           <X size={20} />
         </button>
 
-        <h3 className="pr-10 text-lg font-bold text-gray-900">
+        <h3 className="pr-10 text-lg font-bold text-text-strong">
           {title}
         </h3>
 
-        <div className="mt-3 text-sm leading-6 text-gray-600">
+        <div className="mt-3 text-sm leading-6 text-text-muted">
           {children}
         </div>
 

@@ -122,7 +122,7 @@ const Card = ({ children, className = "" }) => {
   return (
     <div
       className={`
-        h-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm
+        h-full rounded-2xl border border-border bg-surface p-5 shadow-sm
         ${className}
       `}
     >
@@ -406,12 +406,12 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-gray-900">Tổng file</p>
+              <p className="font-semibold text-text-strong">Tổng file</p>
               <FileText className="text-brand" size={22} />
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900">{totalFiles}</h2>
-            <p className="mt-1 text-sm text-gray-500">File đang quản lý</p>
+            <h2 className="text-3xl font-bold text-text-strong">{totalFiles}</h2>
+            <p className="mt-1 text-sm text-text-muted">File đang quản lý</p>
           </Card>
         );
 
@@ -419,11 +419,11 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-gray-900">Đơn hàng tháng này</p>
+              <p className="font-semibold text-text-strong">Đơn hàng tháng này</p>
               <PackageCheck className="text-brand" size={22} />
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-3xl font-bold text-text-strong">
               {currentMonthOrders}
             </h2>
 
@@ -442,15 +442,15 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-gray-900">Task hoàn thành</p>
+              <p className="font-semibold text-text-strong">Task hoàn thành</p>
               <CheckCircle2 className="text-brand" size={22} />
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-3xl font-bold text-text-strong">
               {completedPercent}%
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-text-muted">
               Tiến độ xử lý đơn hàng
             </p>
           </Card>
@@ -460,8 +460,8 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Thống kê file</h2>
-              <MoreVertical size={18} className="text-gray-400" />
+              <h2 className="font-semibold text-text-strong">Thống kê file</h2>
+              <MoreVertical size={18} className="text-text-subtle" />
             </div>
 
             {fileStats.length > 0 ? (
@@ -472,7 +472,7 @@ const DashboardPage = () => {
                 height={320}
               />
             ) : (
-              <div className="flex h-80 items-center justify-center text-sm text-gray-500">
+              <div className="flex h-80 items-center justify-center text-sm text-text-muted">
                 Chưa có file
               </div>
             )}
@@ -484,11 +484,11 @@ const DashboardPage = () => {
           <Card>
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <h2 className="font-semibold text-gray-900">
+                <h2 className="font-semibold text-text-strong">
                   Thống kê đơn hàng theo tháng
                 </h2>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-text-muted">
                   Số lượng đơn hàng mỗi tháng
                 </p>
               </div>
@@ -509,13 +509,13 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <h2 className="font-semibold text-gray-900">Task đơn hàng</h2>
+              <h2 className="font-semibold text-text-strong">Task đơn hàng</h2>
 
               <div
-                className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2"
+                className="flex items-center gap-2 rounded-xl border border-border px-3 py-2"
                 onPointerDown={(e) => e.stopPropagation()}
               >
-                <Search size={18} className="text-gray-400" />
+                <Search size={18} className="text-text-subtle" />
 
                 <input
                   type="text"
@@ -530,7 +530,7 @@ const DashboardPage = () => {
             <div className="overflow-x-auto" onPointerDown={(e) => e.stopPropagation()}>
               <table className="w-full min-w-200 text-left">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50 text-sm text-gray-500">
+                  <tr className="border-b border-border-subtle bg-surface-subtle text-sm text-text-muted">
                     <th className="px-4 py-3">Mã đơn</th>
                     <th className="px-4 py-3">Khách hàng</th>
                     <th className="px-4 py-3">Dịch vụ</th>
@@ -546,29 +546,29 @@ const DashboardPage = () => {
                     filteredTasks.map((task) => (
                       <tr
                         key={task.id}
-                        className="border-b border-gray-100 text-sm transition hover:bg-gray-50"
+                        className="border-b border-border-subtle text-sm transition hover:bg-surface-subtle"
                       >
-                        <td className="px-4 py-4 font-semibold text-gray-900">
+                        <td className="px-4 py-4 font-semibold text-text-strong">
                           {task.id}
                         </td>
 
-                        <td className="px-4 py-4 text-gray-700">
+                        <td className="px-4 py-4 text-text-default">
                           {task.customer}
                         </td>
 
-                        <td className="px-4 py-4 text-gray-700">
+                        <td className="px-4 py-4 text-text-default">
                           {task.service}
                         </td>
 
-                        <td className="px-4 py-4 text-gray-700">
+                        <td className="px-4 py-4 text-text-default">
                           <div className="flex items-center gap-2">
-                            <Clock size={16} className="text-gray-400" />
+                            <Clock size={16} className="text-text-subtle" />
                             {task.deadline}
                           </div>
                         </td>
 
                         <td className="px-4 py-4">
-                          <div className="h-2 w-32 rounded-full bg-gray-100">
+                          <div className="h-2 w-32 rounded-full bg-surface-muted">
                             <div
                               className="h-2 rounded-full bg-brand"
                               style={{ width: `${task.progress}%` }}
@@ -583,7 +583,7 @@ const DashboardPage = () => {
                         </td>
 
                         <td className="px-4 py-4">
-                          <button className="rounded-lg border border-gray-200 p-2 hover:bg-gray-50">
+                          <button className="rounded-lg border border-border p-2 hover:bg-surface-subtle">
                             <MoreVertical size={18} />
                           </button>
                         </td>
@@ -593,7 +593,7 @@ const DashboardPage = () => {
                     <tr>
                       <td
                         colSpan={7}
-                        className="px-4 py-8 text-center text-sm text-gray-500"
+                        className="px-4 py-8 text-center text-sm text-text-muted"
                       >
                         Chưa có đơn hàng
                       </td>
@@ -613,7 +613,7 @@ const DashboardPage = () => {
   if (loading) {
     return (
       <div className="flex min-h-100 items-center justify-center">
-        <p className="text-sm text-gray-500">Đang tải dashboard...</p>
+        <p className="text-sm text-text-muted">Đang tải dashboard...</p>
       </div>
     );
   }
@@ -623,7 +623,7 @@ const DashboardPage = () => {
       <div className="mb-6 flex items-center justify-end gap-3">
         <button
           onClick={handleResetLayout}
-          className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
+          className="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-semibold text-text-default shadow-sm hover:bg-surface-subtle"
         >
           Reset layout
         </button>

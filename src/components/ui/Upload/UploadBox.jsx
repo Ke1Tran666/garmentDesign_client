@@ -15,7 +15,7 @@ const UploadBox = ({
   return (
     <div 
       className={`
-        overflow-hidden rounded-xl border border-gray-200 ${className}
+        overflow-hidden rounded-xl border border-border ${className}
       `}
     >
       <div className="grid grid-cols-1 md:grid-cols-[1fr_220px]">
@@ -25,12 +25,12 @@ const UploadBox = ({
             ${
               isAvatar
                 ? "bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] bg-size-[18px_18px]"
-                : "bg-gray-50"
+                : "bg-surface-subtle"
             }
           `}
         >
           {isAvatar && (
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-gray-200 bg-white">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-border bg-surface">
               <img
                 src={preview || fallback}
                 alt="image"
@@ -56,10 +56,10 @@ const UploadBox = ({
           )}
         </div>
 
-        <div className="grid border-t border-gray-200 md:border-l md:border-t-0">
+        <div className="grid border-t border-border md:border-l md:border-t-0">
           <label
             htmlFor="upload-box-input"
-            className="flex cursor-pointer items-center justify-center border-b border-gray-200 text-sm font-semibold text-brand transition hover:bg-gray-50"
+            className="flex cursor-pointer items-center justify-center border-b border-border text-sm font-semibold text-brand transition hover:bg-surface-subtle"
           >
             {uploadText}
           </label>

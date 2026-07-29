@@ -23,7 +23,7 @@ import { authStorage } from "@/lib/authStorage";
 
 const statusClassName = {
   Active: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-  Inactive: "bg-gray-100 text-gray-600 ring-1 ring-gray-200",
+  Inactive: "bg-surface-muted text-text-muted ring-1 ring-gray-200",
 };
 
 const addressFields = [
@@ -563,20 +563,20 @@ const AddressPage = () => {
       > 
         <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700">
+            <p className="text-sm font-medium text-text-default">
               Tổng số địa chỉ: {addresses.length}
             </p>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-text-muted">
               Hiển thị {filteredAddresses.length} kết quả
             </p>
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 sm:w-80">
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border px-3 py-2 sm:w-80">
               <Search
                 size={18}
-                className="shrink-0 text-gray-400"
+                className="shrink-0 text-text-subtle"
               />
 
               <input
@@ -654,7 +654,7 @@ const AddressPage = () => {
           renderRow={(item) => (
             <tr
               key={item.addressId}
-              className="text-sm transition hover:bg-gray-50"
+              className="text-sm transition hover:bg-surface-subtle"
             >
               <td className="px-4 py-4">
                 <span
@@ -668,15 +668,15 @@ const AddressPage = () => {
                 </span>
               </td>
 
-              <td className="px-4 py-4 font-semibold text-gray-900">
+              <td className="px-4 py-4 font-semibold text-text-strong">
                 {item.companyName || "Chưa có"}
               </td>
 
-              <td className="px-4 py-4 leading-6 text-gray-700">
+              <td className="px-4 py-4 leading-6 text-text-default">
                 {item.address || "Chưa có"}
               </td>
 
-              <td className="px-4 py-4 leading-6 text-gray-700">
+              <td className="px-4 py-4 leading-6 text-text-default">
                 {item.note || "Không có ghi chú"}
               </td>
 
@@ -698,7 +698,7 @@ const AddressPage = () => {
                       actionMenu.open &&
                       actionMenu.address?.addressId === item.addressId
                         ? "border-brand bg-brand-light text-brand"
-                        : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                        : "border-border text-text-muted hover:bg-surface-subtle"
                     }
                   `}
                 >
@@ -742,7 +742,7 @@ const AddressPage = () => {
           {isDeleteConfirm ? (
             <>
               Bạn có chắc muốn xóa {" "}
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-text-strong">
                 {activeConfirm?.companyName} - {activeConfirm?.address}
               </span>{" "}
               không?
@@ -750,7 +750,7 @@ const AddressPage = () => {
           ) : (
             <>
               Bạn có chắc muốn chọn{" "}
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-text-strong">
                 {activeConfirm?.companyName} - {activeConfirm?.address}
               </span>{" "}
               làm địa chỉ mặc định không?

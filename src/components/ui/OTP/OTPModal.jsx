@@ -43,13 +43,13 @@ const OTPModal = ({
       onMouseDown={handleClose}
     >
       <div
-        className="w-full max-w-md animate-slide-up rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl"
+        className="w-full max-w-md animate-slide-up rounded-3xl border border-border bg-surface p-6 shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-            <p className="mt-1 text-sm text-gray-500">{desc}</p>
+            <h2 className="text-lg font-bold text-text-strong">{title}</h2>
+            <p className="mt-1 text-sm text-text-muted">{desc}</p>
 
             {target && (
               <p className="mt-2 text-sm font-semibold text-brand">
@@ -61,7 +61,7 @@ const OTPModal = ({
             <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+                className="rounded-full p-2 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
             >
                 <X size={18} />
             </button>
@@ -88,7 +88,7 @@ const OTPModal = ({
                     otpInputRef.current?.focus();
                   });
                 }}
-                className="text-sm font-medium text-gray-500 transition hover:text-brand"
+                className="text-sm font-medium text-text-muted transition hover:text-brand"
             >
             Gửi lại mã
             </button>
@@ -96,7 +96,7 @@ const OTPModal = ({
             <button
                 type="button"
                 onClick={handleClose}
-                className="text-sm font-medium text-gray-500 transition hover:text-gray-900"
+                className="text-sm font-medium text-text-muted transition hover:text-text-strong"
             >
                 Hủy
             </button>

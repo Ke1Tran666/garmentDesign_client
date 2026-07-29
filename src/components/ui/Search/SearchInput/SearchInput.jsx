@@ -20,7 +20,7 @@ const SearchInput = ({
           pointer-events-none
           absolute left-4 top-1/2
           -translate-y-1/2
-          text-gray-400
+          text-text-subtle
         "
       />
 
@@ -34,12 +34,12 @@ const SearchInput = ({
         placeholder={placeholder}
         className="
           h-11 w-full rounded-lg
-          border border-gray-300
-          bg-white pl-11 pr-4
-          text-sm text-gray-700
+          border border-input
+          bg-surface pl-11 pr-4
+          text-sm text-text-default
           outline-none transition
 
-          placeholder:text-gray-400
+          placeholder:text-text-subtle
 
           focus:border-brand
           focus:ring-4

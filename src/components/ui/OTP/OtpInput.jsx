@@ -12,7 +12,7 @@ const variantClasses = {
     focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
   `,
   light: `
-    border-gray-300 bg-white text-gray-900
+    border-input bg-surface text-text-strong
     focus:border-brand
     focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]
   `,

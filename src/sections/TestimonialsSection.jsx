@@ -44,7 +44,7 @@ const TestimonialsSection = () => (
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {testimonials.map(({ text, name, initials, role, stars: count, delay }) => (
-          <div key={name} className="card-hover rounded-2xl bg-white border border-border/60 p-7 reveal" style={{ transitionDelay: `${delay}ms` }}>
+          <div key={name} className="card-hover rounded-2xl bg-surface border border-border/60 p-7 reveal" style={{ transitionDelay: `${delay}ms` }}>
             <div className="flex gap-1 mb-5">{stars(count)}</div>
             <p className="text-sm text-muted1 leading-relaxed mb-6">"{text}"</p>
             <div className="flex items-center gap-3">

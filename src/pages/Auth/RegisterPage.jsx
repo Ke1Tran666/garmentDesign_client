@@ -163,7 +163,7 @@ const RegisterPage = () => {
                               absolute left-0 top-[calc(100%+10px)] z-50
                               w-full overflow-hidden rounded-2xl
                               border border-white/15
-                              bg-white backdrop-blur-xl
+                              bg-surface backdrop-blur-xl
                               shadow-[0_10px_40px_rgba(0,0,0,0.25)]
                           "
                       >
@@ -181,10 +181,10 @@ const RegisterPage = () => {
                                   }}
                                   className={`
                                       flex w-full items-center px-4 py-3
-                                      text-left text-sm text-gray-800
+                                      text-left text-sm text-text-default
                                       transition-all duration-200
-                                      hover:bg-gray-100
-                                      ${gender === item.value ? "bg-gray-100" : ""}
+                                      hover:bg-surface-muted
+                                      ${gender === item.value ? "bg-surface-muted" : ""}
                                   `}
                               >
                                   {item.label}

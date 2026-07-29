@@ -31,7 +31,7 @@ const products = {
 };
 
 const ProductCard = ({ img, name, service }) => (
-  <div className="card-hover rounded-2xl overflow-hidden bg-white border border-border/60 group">
+  <div className="card-hover rounded-2xl overflow-hidden bg-surface border border-border/60 group">
     <div className="img-hover aspect-4/5 overflow-hidden">
       <img
         src={`https://picsum.photos/seed/${img}/600/750.jpg`}

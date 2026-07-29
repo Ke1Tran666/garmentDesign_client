@@ -20,7 +20,7 @@ const ProductImagePicker = ({
    */
   if (variant === "overlay") {
     return (
-      <div className="relative min-h-72 overflow-hidden bg-gray-100">
+      <div className="relative min-h-72 overflow-hidden bg-surface-muted">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -30,8 +30,8 @@ const ProductImagePicker = ({
             className="h-full min-h-72 w-full object-cover"
           />
         ) : (
-          <div className="flex h-full min-h-72 flex-col items-center justify-center gap-4 text-gray-400">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white shadow-sm">
+          <div className="flex h-full min-h-72 flex-col items-center justify-center gap-4 text-text-subtle">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-surface shadow-sm">
               <Package size={34} />
             </div>
 
@@ -70,7 +70,7 @@ const ProductImagePicker = ({
    * Dùng trong ServiceOrderCreateModal.
    */
   return imageUrl ? (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-surface-muted">
       <img
         src={imageUrl}
         alt={alt}
@@ -85,7 +85,7 @@ const ProductImagePicker = ({
             {selectedFile?.name}
           </p>
 
-          <p className="mt-0.5 text-[11px] text-gray-300">
+          <p className="mt-0.5 text-[11px] text-text-subtle">
             {formatFileSize(
               selectedFile?.size,
             )}
@@ -107,21 +107,21 @@ const ProductImagePicker = ({
     </div>
   ) : (
     <label
-      className={`flex h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 text-center transition ${
+      className={`flex h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-input bg-surface-subtle text-center transition ${
         disabled
           ? "cursor-not-allowed opacity-60"
           : "cursor-pointer hover:border-brand hover:bg-brand-light"
       }`}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand shadow-sm">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface text-brand shadow-sm">
         <ImagePlus size={22} />
       </div>
 
-      <p className="mt-3 text-sm font-semibold text-gray-700">
+      <p className="mt-3 text-sm font-semibold text-text-default">
         Chọn ảnh đại diện
       </p>
 
-      <p className="mt-1 text-xs text-gray-400">
+      <p className="mt-1 text-xs text-text-subtle">
         JPG, PNG, WEBP...
       </p>
 

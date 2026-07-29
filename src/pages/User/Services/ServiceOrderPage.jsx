@@ -65,7 +65,7 @@ const getStatusClass = (status) => {
     return "bg-blue-50 text-blue-600";
   }
 
-  return "bg-gray-100 text-gray-600";
+  return "bg-surface-muted text-text-muted";
 };
 
 const formatDate = (dateValue) => {
@@ -511,20 +511,20 @@ const ServiceOrderPage = () => {
     >
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-medium text-text-default">
             Tổng số đơn hàng: {orders.length}
           </p>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-text-muted">
             Hiển thị {filteredOrders.length} kết quả
           </p>
         </div>
 
         <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 sm:w-80">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border px-3 py-2 sm:w-80">
             <Search
               size={18}
-              className="shrink-0 text-gray-400"
+              className="shrink-0 text-text-subtle"
             />
 
             <input
@@ -566,25 +566,25 @@ const ServiceOrderPage = () => {
         renderRow={(order) => (
           <tr
             key={order.id}
-            className="text-sm transition hover:bg-gray-50"
+            className="text-sm transition hover:bg-surface-subtle"
           >
-            <td className="px-4 py-4 font-semibold text-gray-900">
+            <td className="px-4 py-4 font-semibold text-text-strong">
               {order.orderCode}
             </td>
 
-            <td className="px-4 py-4 text-gray-700">
+            <td className="px-4 py-4 text-text-default">
               {order.customer}
             </td>
 
-            <td className="px-4 py-4 text-gray-700">
+            <td className="px-4 py-4 text-text-default">
               {order.serviceName}
             </td>
 
-            <td className="px-4 py-4 text-gray-700">
+            <td className="px-4 py-4 text-text-default">
               <div className="flex items-center gap-2">
                 <Clock
                   size={16}
-                  className="shrink-0 text-gray-400"
+                  className="shrink-0 text-text-subtle"
                 />
 
                 {order.deadline}
@@ -593,7 +593,7 @@ const ServiceOrderPage = () => {
 
             <td className="px-4 py-4">
               <div className="flex items-center gap-3">
-                <div className="h-2 w-28 overflow-hidden rounded-full bg-gray-100">
+                <div className="h-2 w-28 overflow-hidden rounded-full bg-surface-muted">
                   <div
                     className="h-full rounded-full bg-brand transition-all"
                     style={{
@@ -602,7 +602,7 @@ const ServiceOrderPage = () => {
                   />
                 </div>
 
-                <span className="min-w-9 text-xs font-medium text-gray-500">
+                <span className="min-w-9 text-xs font-medium text-text-muted">
                   {order.progress}%
                 </span>
               </div>
@@ -638,7 +638,7 @@ const ServiceOrderPage = () => {
                     actionMenu.open &&
                     actionMenu.order?.id === order.id
                       ? "border-brand bg-brand-light text-brand"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                      : "border-border text-text-muted hover:bg-surface-subtle"
                   }
                 `}
               >
@@ -694,13 +694,13 @@ const ServiceOrderPage = () => {
           <>
             <p>
               Bạn có chắc muốn hủy đơn hàng{" "}
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-text-strong">
                 {removingOrder?.orderCode}
               </span>
               ?
             </p>
 
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-text-muted">
               Đơn hàng đã có nhân viên tiếp
               nhận nên dữ liệu vẫn được giữ
               lại và trạng thái sẽ chuyển
@@ -712,7 +712,7 @@ const ServiceOrderPage = () => {
             <p>
               Bạn có chắc muốn xóa vĩnh viễn
               đơn hàng{" "}
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-text-strong">
                 {removingOrder?.orderCode}
               </span>
               ?

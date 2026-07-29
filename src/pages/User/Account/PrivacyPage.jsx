@@ -167,7 +167,7 @@ const PrivacyPage = () => {
       >
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-text-muted">
               Export your profile, addresses, and other account-related data.
             </p>
           </div>

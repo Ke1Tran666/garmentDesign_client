@@ -23,7 +23,7 @@ const FormModal = ({
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl"
+        className="relative w-full max-w-lg rounded-xl bg-surface p-6 shadow-2xl"
       >
         <button
         type="button"
@@ -32,14 +32,14 @@ const FormModal = ({
         className="
             absolute right-4 top-4
             flex h-9 w-9 items-center justify-center
-            rounded-full text-gray-500 transition
-            hover:bg-gray-100 hover:text-gray-800
+            rounded-full text-text-muted transition
+            hover:bg-surface-muted hover:text-text-default
             disabled:cursor-not-allowed disabled:opacity-60
         "
         >
         <X size={20} />
         </button>
-        <h3 className="text-lg font-bold text-gray-900">
+        <h3 className="text-lg font-bold text-text-strong">
           {title}
         </h3>
 
@@ -53,7 +53,7 @@ const FormModal = ({
                 onChange={onChange}
                 placeholder={field.placeholder}
                 rows={field.rows || 4}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                className="w-full rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
               />
             ) : (
               <input
@@ -63,7 +63,7 @@ const FormModal = ({
                 value={form[field.name] || ""}
                 onChange={onChange}
                 placeholder={field.placeholder}
-                className="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                className="h-11 w-full rounded-lg border border-input px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
               />
             )
           )}

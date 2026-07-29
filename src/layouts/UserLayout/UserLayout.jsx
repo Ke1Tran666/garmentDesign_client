@@ -253,7 +253,7 @@ const UserLayout = ({ title = "My Account" }) => {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen w-full overflow-hidden bg-zinc-50">
+    <div className="mx-auto flex min-h-screen w-full overflow-hidden bg-surface-subtle">
       <aside className="flex w-72 flex-col px-6 py-8">
         <Logo />
 
@@ -320,9 +320,9 @@ const UserLayout = ({ title = "My Account" }) => {
                 className={`flex items-center justify-center rounded-full transition-all duration-300 hover:-translate-y-1 hover:scale-105 ${
                   isActive
                     ? `h-12 w-12 ${
-                        group.btn.dark ? "text-gray-700" : "text-white"
+                        group.btn.dark ? "text-text-default" : "text-white"
                       }`
-                    : "h-10 w-10 bg-white text-gray-400 shadow-[0_4px_12px_rgba(15,23,42,0.08)] hover:bg-gray-50"
+                    : "h-10 w-10 bg-surface text-text-subtle shadow-[0_4px_12px_rgba(15,23,42,0.08)] hover:bg-surface-subtle"
                 }`}
               >
                 <BtnIcon size={isActive ? 18 : 16} />
@@ -344,20 +344,20 @@ const UserLayout = ({ title = "My Account" }) => {
         </p>
       </aside>
 
-      <main className="m-2 flex-1 rounded-xl bg-white p-8">
+      <main className="m-2 flex-1 rounded-xl bg-surface p-8">
         <div className="mb-4 flex items-center justify-between">
-          <div className="mb-4 flex items-center gap-2 text-sm text-gray-400">
+          <div className="mb-4 flex items-center gap-2 text-sm text-text-subtle">
             <span>Home</span>
 
             <ChevronRight size={14} />
 
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-text-default">
               {currentGroup.label}
             </span>
 
             <ChevronRight size={14} />
 
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-text-default">
               {currentItem?.label}
             </span>
           </div>
@@ -391,7 +391,7 @@ const UserLayout = ({ title = "My Account" }) => {
                 className="
                   flex items-center gap-3
                   rounded-xl px-2 py-1
-                  hover:bg-gray-50
+                  hover:bg-surface-subtle
                   transition
                 "
               >
@@ -401,7 +401,7 @@ const UserLayout = ({ title = "My Account" }) => {
                   className="h-10 w-10 rounded-xl object-cover"
                 />
 
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-text-default">
                   {user?.fullName || "Guest"}
                 </span>
 
@@ -417,8 +417,8 @@ const UserLayout = ({ title = "My Account" }) => {
                 <div
                   className="
                     absolute right-0 top-full mt-2
-                    w-48 rounded-xl border border-gray-200
-                    bg-white p-2 shadow-lg z-50
+                    w-48 rounded-xl border border-border
+                    bg-surface p-2 shadow-lg z-50
                   "
                 >
                   <button
@@ -429,8 +429,8 @@ const UserLayout = ({ title = "My Account" }) => {
                     className="
                       flex w-full items-center gap-3
                       rounded-lg px-3 py-2
-                      text-sm text-gray-700
-                      hover:bg-gray-100
+                      text-sm text-text-default
+                      hover:bg-surface-muted
                     "
                   >
                     <User size={16} />
@@ -457,7 +457,7 @@ const UserLayout = ({ title = "My Account" }) => {
 
         <header className="flex items-center justify-between border-b-3 border-zinc-50 py-6">
           <div className="flex flex-col justify-center gap-2">
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2 className="text-3xl font-bold text-text-strong">
               {currentItem?.label || title}
             </h2>
 
@@ -488,8 +488,8 @@ const SidebarItem = ({ icon, label, active, onClick }) => {
       style={active ? { color: BRAND } : {}}
       className={`mb-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
         active
-          ? "bg-white shadow-sm"
-          : "text-gray-500 hover:bg-white hover:text-gray-700"
+          ? "bg-surface shadow-sm"
+          : "text-text-muted hover:bg-surface hover:text-text-default"
       }`}
     >
       {icon}

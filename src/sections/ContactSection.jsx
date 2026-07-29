@@ -56,7 +56,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
     <form
       id="contactForm"
       onSubmit={onSubmit}
-      className="rounded-2xl bg-white border border-border/60 p-8 md:p-10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] space-y-6"
+      className="rounded-2xl bg-surface border border-border/60 p-8 md:p-10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] space-y-6"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>

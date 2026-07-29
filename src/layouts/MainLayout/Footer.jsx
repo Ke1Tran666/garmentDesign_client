@@ -66,7 +66,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="relative py-16 px-4 bg-white">
+        <footer className="relative py-16 px-4 bg-surface">
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border to-transparent"></div>
 
         <div className="max-w-6xl mx-auto">

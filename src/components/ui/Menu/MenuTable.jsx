@@ -52,7 +52,7 @@ const MenuTable = ({
       role="menu"
       className="
         fixed z-50 overflow-hidden rounded-xl
-        border border-gray-200 bg-white
+        border border-border bg-surface
         py-1 shadow-xl
       "
       style={{
@@ -71,7 +71,7 @@ const MenuTable = ({
           return (
             <div
               key={item.id || `divider-${index}`}
-              className="my-1 border-t border-gray-100"
+              className="my-1 border-t border-border-subtle"
             />
           );
         }
@@ -97,7 +97,7 @@ const MenuTable = ({
               ${
                 item.danger
                   ? "text-red-600 hover:bg-red-50"
-                  : "text-gray-700 hover:bg-gray-50"
+                  : "text-text-default hover:bg-surface-subtle"
               }
             `}
           >

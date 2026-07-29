@@ -17,7 +17,7 @@ const DataTable = ({
         colSpan={columns.length}
         className={`
           px-4 py-10 text-center text-sm
-          ${isError ? "text-red-500" : "text-gray-500"}
+          ${isError ? "text-red-500" : "text-text-muted"}
         `}
       >
         {message}
@@ -28,7 +28,7 @@ const DataTable = ({
   return (
     <div
       className={`
-        overflow-x-auto rounded-xl border border-gray-100
+        overflow-x-auto rounded-xl border border-border-subtle
         ${containerClassName}
       `}
     >
@@ -49,7 +49,7 @@ const DataTable = ({
         )}
 
         <thead>
-          <tr className="border-b border-gray-100 bg-gray-50 text-sm text-gray-500">
+          <tr className="border-b border-border-subtle bg-surface-subtle text-sm text-text-muted">
             {columns.map((column) => (
               <th
                 key={column.key}

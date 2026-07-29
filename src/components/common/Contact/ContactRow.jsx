@@ -13,7 +13,7 @@ const ProviderBadge = ({ provider }) => {
     <span
       className={`
         rounded-full px-4 py-1.5 text-xs font-semibold
-        ${styles[provider] || "bg-gray-100 text-gray-600"}
+        ${styles[provider] || "bg-surface-muted text-text-muted"}
       `}
     >
       {provider
@@ -33,7 +33,7 @@ const ActionButton = ({ icon: Icon, danger = false, onClick }) => {
         ${
           danger
             ? "border-red-200 text-red-500 hover:bg-red-50"
-            : "border-gray-200 text-gray-500 hover:bg-gray-50"
+            : "border-border text-text-muted hover:bg-surface-subtle"
         }
       `}
     >
@@ -83,8 +83,8 @@ const SettingMenu = ({ badgeStatus, onVerify, onRemove }) => {
           className="
             absolute right-0 top-12 z-50
             w-40 overflow-hidden
-            rounded-xl border! border-gray-200!
-            bg-white shadow-lg
+            rounded-xl border! border-border!
+            bg-surface shadow-lg
           "
         >
           {linked ? (
@@ -115,7 +115,7 @@ const SettingMenu = ({ badgeStatus, onVerify, onRemove }) => {
                 flex w-full items-center gap-2
                 px-4 py-3 text-left text-sm
                 text-brand
-                hover:bg-gray-50
+                hover:bg-surface-subtle
               "
             >
               <ShieldCheck size={16} />
@@ -159,8 +159,8 @@ export const ContactRow = ({
           h-11 min-w-55 flex-1 rounded-lg border px-3 text-sm outline-none transition
           ${
             !editable || isLocked
-              ? "border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
-              : "border-gray-300 bg-white text-gray-800 focus:border-brand focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]"
+              ? "border-input bg-surface-muted text-text-muted cursor-not-allowed"
+              : "border-input bg-surface text-text-default focus:border-brand focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]"
           }
         `}
       />

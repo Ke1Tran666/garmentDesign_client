@@ -8,7 +8,7 @@ const RadioGroup = ({
   return (
     <div>
       {label && (
-        <p className="mb-3 text-sm font-semibold text-gray-700">
+        <p className="mb-3 text-sm font-semibold text-text-default">
           {label}
         </p>
       )}
@@ -17,7 +17,7 @@ const RadioGroup = ({
         {options.map((option) => (
           <label
             key={option.value}
-            className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-brand hover:bg-gray-50"
+            className="flex cursor-pointer items-center gap-2 rounded-lg border border-input bg-surface px-4 py-2.5 text-sm font-medium text-text-default transition hover:border-brand hover:bg-surface-subtle"
           >
             <input
               type="radio"

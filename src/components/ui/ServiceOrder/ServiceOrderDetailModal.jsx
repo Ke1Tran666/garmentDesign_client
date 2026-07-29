@@ -150,11 +150,11 @@ const InfoItem = ({
       fullWidth ? "sm:col-span-2" : ""
     }
   >
-    <dt className="text-xs font-medium uppercase tracking-wide text-gray-400">
+    <dt className="text-xs font-medium uppercase tracking-wide text-text-subtle">
       {label}
     </dt>
 
-    <dd className="mt-1.5 wrap-break-word text-sm font-medium leading-6 text-gray-800">
+    <dd className="mt-1.5 wrap-break-word text-sm font-medium leading-6 text-text-default">
       {hasValue(value)
         ? value
         : EMPTY_VALUE}
@@ -166,7 +166,7 @@ const CardHeader = ({
   icon: Icon,
   title,
   description,
-  iconClassName = "bg-gray-100 text-gray-600",
+  iconClassName = "bg-surface-muted text-text-muted",
   action,
 }) => (
   <div className="flex items-start justify-between gap-4">
@@ -178,12 +178,12 @@ const CardHeader = ({
       </div>
 
       <div className="min-w-0">
-        <h4 className="font-bold text-gray-950">
+        <h4 className="font-bold text-text-strong">
           {title}
         </h4>
 
         {description && (
-          <p className="mt-0.5 text-xs text-gray-500">
+          <p className="mt-0.5 text-xs text-text-muted">
             {description}
           </p>
         )}
@@ -997,10 +997,10 @@ const ServiceOrderDetailModal = ({
         onClick={(event) =>
           event.stopPropagation()
         }
-        className="flex max-h-[96vh] w-[96vw] max-w-360 flex-col overflow-hidden rounded-3xl bg-gray-50 shadow-xl animate-in zoom-in-95 slide-in-from-bottom-2 duration-200 ease-out"
+        className="flex max-h-[96vh] w-[96vw] max-w-360 flex-col overflow-hidden rounded-3xl bg-surface-subtle shadow-xl animate-in zoom-in-95 slide-in-from-bottom-2 duration-200 ease-out"
       >
         {/* Header */}
-        <header className="relative shrink-0 overflow-hidden border-b border-gray-100 bg-white">
+        <header className="relative shrink-0 overflow-hidden border-b border-border-subtle bg-surface">
           <div className="absolute inset-x-0 top-0 h-1 bg-brand" />
 
           <div className="relative flex items-start justify-between gap-5 px-5 pb-5 pt-6 sm:px-7">
@@ -1030,16 +1030,16 @@ const ServiceOrderDetailModal = ({
                 <div className="mt-2.5 flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-5">
                   <h2
                     id="service-order-title"
-                    className="shrink-0 text-xl font-bold tracking-tight text-gray-950 sm:text-2xl"
+                    className="shrink-0 text-xl font-bold tracking-tight text-text-strong sm:text-2xl"
                   >
                     {title}
                   </h2>
 
-                  <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-gray-500">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-text-muted">
                     <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                       <CalendarDays
                         size={15}
-                        className="shrink-0 text-gray-400"
+                        className="shrink-0 text-text-subtle"
                       />
 
                       Tạo ngày{" "}
@@ -1053,7 +1053,7 @@ const ServiceOrderDetailModal = ({
 
                     <span className="truncate">
                       Khách hàng:{" "}
-                      <span className="font-semibold text-gray-700">
+                      <span className="font-semibold text-text-default">
                         {user.fullName ||
                           "Chưa xác định"}
                       </span>
@@ -1065,7 +1065,7 @@ const ServiceOrderDetailModal = ({
 
                         <span className="hidden truncate xl:block">
                           Dịch vụ:{" "}
-                          <span className="font-semibold text-gray-700">
+                          <span className="font-semibold text-text-default">
                             {
                               service.serviceName
                             }
@@ -1083,7 +1083,7 @@ const ServiceOrderDetailModal = ({
               onClick={handleRequestClose}
               disabled={updating || updatingAddress}
               aria-label="Đóng chi tiết đơn hàng"
-              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X
                 size={19}
@@ -1105,10 +1105,10 @@ const ServiceOrderDetailModal = ({
               >
                 {/* Product */}
                 <section
-                  className={`overflow-hidden rounded-3xl border bg-white shadow-sm transition ${
+                  className={`overflow-hidden rounded-3xl border bg-surface shadow-sm transition ${
                     isEditingProduct
                       ? "border-brand/30 ring-4 ring-brand/5"
-                      : "border-gray-100"
+                      : "border-border-subtle"
                   }`}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]">
@@ -1136,7 +1136,7 @@ const ServiceOrderDetailModal = ({
                             <div className="mt-3">
                               <label
                                 htmlFor="productName"
-                                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
+                                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
                               >
                                 Tên sản phẩm
                               </label>
@@ -1153,19 +1153,19 @@ const ServiceOrderDetailModal = ({
                                 }
                                 disabled={updating || updatingAddress}
                                 autoFocus
-                                className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-base font-semibold text-gray-900 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                                className="h-11 w-full rounded-xl border border-border px-3.5 text-base font-semibold text-text-strong outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                               />
                             </div>
                           ) : (
-                            <h3 className="mt-3 text-2xl font-bold leading-tight text-gray-950">
+                            <h3 className="mt-3 text-2xl font-bold leading-tight text-text-strong">
                               {order.productName ||
                                 "Chưa có tên sản phẩm"}
                             </h3>
                           )}
 
-                          <p className="mt-2 text-sm text-gray-500">
+                          <p className="mt-2 text-sm text-text-muted">
                             Mã đơn hàng{" "}
-                            <span className="font-semibold text-gray-800">
+                            <span className="font-semibold text-text-default">
                               {orderCode}
                             </span>
                           </p>
@@ -1198,7 +1198,7 @@ const ServiceOrderDetailModal = ({
                                     ? "Hãy hoàn tất chỉnh sửa địa chỉ trước"
                                     : "Chỉnh sửa đơn hàng"
                                 }
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-brand/30 hover:bg-brand-light hover:text-brand disabled:cursor-not-allowed disabled:opacity-40"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-brand/30 hover:bg-brand-light hover:text-brand disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 <Pencil size={17} />
                               </button>
@@ -1233,7 +1233,7 @@ const ServiceOrderDetailModal = ({
                                 }
                                 disabled={updating || updatingAddress}
                                 title="Hủy chỉnh sửa"
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                               >
                                 <X size={17} />
                               </button>
@@ -1242,16 +1242,16 @@ const ServiceOrderDetailModal = ({
                         </div>
                       </div>
 
-                      <div className="my-6 h-px bg-gray-100" />
+                      <div className="my-6 h-px bg-surface-muted" />
 
                       {isEditingProduct ? (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle">
                               Mã dịch vụ
                             </label>
 
-                            <div className="flex h-11 items-center rounded-xl bg-gray-100 px-3.5 text-sm font-medium text-gray-500">
+                            <div className="flex h-11 items-center rounded-xl bg-surface-muted px-3.5 text-sm font-medium text-text-muted">
                               {service.serviceCode ||
                                 EMPTY_VALUE}
                             </div>
@@ -1260,7 +1260,7 @@ const ServiceOrderDetailModal = ({
                           <div>
                             <label
                               htmlFor="unitType"
-                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
                             >
                               Đơn vị tính
                             </label>
@@ -1276,14 +1276,14 @@ const ServiceOrderDetailModal = ({
                                 handleEditFormChange
                               }
                               disabled={updating || updatingAddress}
-                              className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                             />
                           </div>
 
                           <div>
                             <label
                               htmlFor="quantity"
-                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
                             >
                               Số lượng
                             </label>
@@ -1301,16 +1301,16 @@ const ServiceOrderDetailModal = ({
                                 handleEditFormChange
                               }
                               disabled={updating || updatingAddress}
-                              className="h-11 w-full rounded-xl border border-gray-200 px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                             />
                           </div>
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle">
                               Ngày tạo
                             </label>
 
-                            <div className="flex h-11 items-center rounded-xl bg-gray-100 px-3.5 text-sm font-medium text-gray-500">
+                            <div className="flex h-11 items-center rounded-xl bg-surface-muted px-3.5 text-sm font-medium text-text-muted">
                               {formatDate(
                                 order.createdAt
                               )}
@@ -1320,7 +1320,7 @@ const ServiceOrderDetailModal = ({
                           <div className="sm:col-span-2">
                             <label
                               htmlFor="customerRequest"
-                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
                             >
                               Yêu cầu khách hàng
                             </label>
@@ -1336,7 +1336,7 @@ const ServiceOrderDetailModal = ({
                                 handleEditFormChange
                               }
                               disabled={updating || updatingAddress}
-                              className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                              className="w-full resize-none rounded-xl border border-border px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                             />
                           </div>
                         </div>
@@ -1376,7 +1376,7 @@ const ServiceOrderDetailModal = ({
                                 Yêu cầu của khách hàng
                               </p>
 
-                              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
+                              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-text-default">
                                 {order.customerRequest ||
                                   EMPTY_VALUE}
                               </p>
@@ -1399,10 +1399,10 @@ const ServiceOrderDetailModal = ({
 
                 {/* Files */}
                 <section
-                  className={`rounded-3xl border bg-white p-6 shadow-sm transition ${
+                  className={`rounded-3xl border bg-surface p-6 shadow-sm transition ${
                     isEditingProduct
                       ? "border-brand/20"
-                      : "border-gray-100"
+                      : "border-border-subtle"
                   }`}
                 >
                   <CardHeader
@@ -1449,11 +1449,11 @@ const ServiceOrderDetailModal = ({
                           return (
                             <div
                               key={file.fileId}
-                              className="group flex min-w-0 items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3 transition hover:border-brand/20 hover:bg-brand-light/30"
+                              className="group flex min-w-0 items-center gap-3 rounded-2xl border border-border-subtle bg-surface-subtle p-3 transition hover:border-brand/20 hover:bg-brand-light/30"
                             >
                               {/* File icon */}
                               <div
-                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ${
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface shadow-sm ${
                                   isImage
                                     ? "text-violet-600"
                                     : "text-brand"
@@ -1469,7 +1469,7 @@ const ServiceOrderDetailModal = ({
                               {/* File information */}
                               <div className="min-w-0 flex-1">
                                 <div className="flex min-w-0 items-center gap-2">
-                                  <p className="truncate text-sm font-semibold text-gray-700">
+                                  <p className="truncate text-sm font-semibold text-text-default">
                                     {file.fileName}
                                   </p>
 
@@ -1480,7 +1480,7 @@ const ServiceOrderDetailModal = ({
                                   )}
                                 </div>
 
-                                <p className="mt-0.5 text-xs text-gray-400">
+                                <p className="mt-0.5 text-xs text-text-subtle">
                                   {file.isProductImage
                                     ? "Ảnh chính của đơn hàng"
                                     : formatDate(
@@ -1508,7 +1508,7 @@ const ServiceOrderDetailModal = ({
                                       ? `Xem ${file.fileName}`
                                       : `Tải ${file.fileName}`
                                   }
-                                  className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-brand-light hover:text-brand"
+                                  className="flex h-9 w-9 items-center justify-center rounded-lg text-text-subtle transition hover:bg-brand-light hover:text-brand"
                                 >
                                   <Download size={17} />
                                 </a>
@@ -1524,7 +1524,7 @@ const ServiceOrderDetailModal = ({
                                     }
                                     title="Xóa file"
                                     aria-label={`Xóa ${file.fileName}`}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-text-subtle transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                                   >
                                     {isDeleting ? (
                                       <LoaderCircle
@@ -1542,13 +1542,13 @@ const ServiceOrderDetailModal = ({
                         })}
                       </div>
                     ) : (
-                      <div className="rounded-2xl bg-gray-50 px-5 py-7 text-center">
+                      <div className="rounded-2xl bg-surface-subtle px-5 py-7 text-center">
                         <FileText
                           size={26}
-                          className="mx-auto text-gray-300"
+                          className="mx-auto text-text-subtle"
                         />
 
-                        <p className="mt-2 text-sm text-gray-500">
+                        <p className="mt-2 text-sm text-text-muted">
                           Chưa có file đính kèm
                         </p>
                       </div>
@@ -1558,7 +1558,7 @@ const ServiceOrderDetailModal = ({
               </form>
 
               {/* Service */}
-              <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+              <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
                 <CardHeader
                   icon={FileText}
                   title="Thông tin dịch vụ"
@@ -1585,22 +1585,22 @@ const ServiceOrderDetailModal = ({
                   />
                 </dl>
 
-                <div className="my-6 h-px bg-gray-100" />
+                <div className="my-6 h-px bg-surface-muted" />
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-text-subtle">
                       Mô tả dịch vụ
                     </p>
 
-                    <p className="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
+                    <p className="mt-2 whitespace-pre-line text-sm leading-6 text-text-default">
                       {service.description ||
                         EMPTY_VALUE}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-text-subtle">
                       Tags
                     </p>
 
@@ -1609,14 +1609,14 @@ const ServiceOrderDetailModal = ({
                         {tags.map((tag) => (
                           <span
                             key={tag}
-                            className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600"
+                            className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-text-muted"
                           >
                             {tag}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-text-muted">
                         {EMPTY_VALUE}
                       </p>
                     )}
@@ -1626,7 +1626,7 @@ const ServiceOrderDetailModal = ({
 
               {/* Customer and address */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
                   <CardHeader
                     icon={User}
                     title="Khách hàng"
@@ -1668,10 +1668,10 @@ const ServiceOrderDetailModal = ({
                 </section>
 
                 <section
-                  className={`rounded-3xl border bg-white p-6 shadow-sm transition ${
+                  className={`rounded-3xl border bg-surface p-6 shadow-sm transition ${
                     isEditingAddress
                       ? "border-orange-200 ring-4 ring-orange-50"
-                      : "border-gray-100"
+                      : "border-border-subtle"
                   }`}
                 >
                   <CardHeader
@@ -1719,7 +1719,7 @@ const ServiceOrderDetailModal = ({
                             disabled={updatingAddress}
                             aria-label="Hủy chỉnh sửa địa chỉ"
                             title="Hủy chỉnh sửa"
-                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <X size={16} />
                           </button>
@@ -1746,7 +1746,7 @@ const ServiceOrderDetailModal = ({
                   {isEditingAddress ? (
                     <div className="mt-6">
                       {addressesLoading ? (
-                        <div className="flex items-center justify-center gap-2 rounded-2xl bg-gray-50 px-4 py-8 text-sm text-gray-500">
+                        <div className="flex items-center justify-center gap-2 rounded-2xl bg-surface-subtle px-4 py-8 text-sm text-text-muted">
                           <LoaderCircle
                             size={18}
                             className="animate-spin"
@@ -1759,17 +1759,17 @@ const ServiceOrderDetailModal = ({
                           {addressState.error}
                         </div>
                       ) : userAddresses.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-5 py-8 text-center">
+                        <div className="rounded-2xl border border-dashed border-border bg-surface-subtle px-5 py-8 text-center">
                           <MapPin
                             size={26}
-                            className="mx-auto text-gray-300"
+                            className="mx-auto text-text-subtle"
                           />
 
-                          <p className="mt-2 text-sm font-medium text-gray-600">
+                          <p className="mt-2 text-sm font-medium text-text-muted">
                             Bạn chưa có địa chỉ nào
                           </p>
 
-                          <p className="mt-1 text-xs text-gray-400">
+                          <p className="mt-1 text-xs text-text-subtle">
                             Vui lòng thêm địa chỉ tại
                             trang quản lý địa chỉ.
                           </p>
@@ -1804,7 +1804,7 @@ const ServiceOrderDetailModal = ({
                                 className={`relative flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
                                   isSelected
                                     ? "border-orange-400 bg-orange-50/70 ring-4 ring-orange-100/60"
-                                    : "border-gray-100 bg-gray-50 hover:border-orange-200 hover:bg-orange-50/30"
+                                    : "border-border-subtle bg-surface-subtle hover:border-orange-200 hover:bg-orange-50/30"
                                 }`}
                               >
                                 <input
@@ -1827,7 +1827,7 @@ const ServiceOrderDetailModal = ({
 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <p className="font-semibold text-gray-900">
+                                    <p className="font-semibold text-text-strong">
                                       {item.companyName ||
                                         "Địa chỉ cá nhân"}
                                     </p>
@@ -1852,13 +1852,13 @@ const ServiceOrderDetailModal = ({
                                       )}
                                   </div>
 
-                                  <p className="mt-1 text-sm leading-6 text-gray-600">
+                                  <p className="mt-1 text-sm leading-6 text-text-muted">
                                     {item.address ||
                                       EMPTY_VALUE}
                                   </p>
 
                                   {item.note && (
-                                    <p className="mt-1 text-xs text-gray-400">
+                                    <p className="mt-1 text-xs text-text-subtle">
                                       Ghi chú: {item.note}
                                     </p>
                                   )}
@@ -1875,7 +1875,7 @@ const ServiceOrderDetailModal = ({
                         </div>
                       )}
 
-                      <p className="mt-4 text-xs leading-5 text-gray-400">
+                      <p className="mt-4 text-xs leading-5 text-text-subtle">
                         Địa chỉ này chỉ áp dụng cho đơn
                         hàng hiện tại, không thay đổi địa
                         chỉ mặc định của tài khoản.
@@ -1910,7 +1910,7 @@ const ServiceOrderDetailModal = ({
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-text-subtle">
                         Tổng thanh toán
                       </p>
 
@@ -1921,7 +1921,7 @@ const ServiceOrderDetailModal = ({
                       </p>
                     </div>
 
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface/10">
                       <CreditCard size={23} />
                     </div>
                   </div>
@@ -1930,7 +1930,7 @@ const ServiceOrderDetailModal = ({
 
                   <dl className="space-y-4">
                     <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-gray-400">
+                      <dt className="text-sm text-text-subtle">
                         Đơn giá
                       </dt>
 
@@ -1942,7 +1942,7 @@ const ServiceOrderDetailModal = ({
                     </div>
 
                     <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-gray-400">
+                      <dt className="text-sm text-text-subtle">
                         Số lượng
                       </dt>
 
@@ -1956,7 +1956,7 @@ const ServiceOrderDetailModal = ({
                     </div>
 
                     <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-gray-400">
+                      <dt className="text-sm text-text-subtle">
                         Giảm giá
                       </dt>
 
@@ -1970,7 +1970,7 @@ const ServiceOrderDetailModal = ({
                 </div>
 
                 <div className="flex justify-between bg-white/5 px-6 py-4">
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-text-subtle">
                     Thành tiền sau giảm giá
                   </span>
 
@@ -1983,7 +1983,7 @@ const ServiceOrderDetailModal = ({
               </section>
 
               {/* Timeline */}
-              <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+              <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
                 <CardHeader
                   icon={CalendarDays}
                   title="Thời gian thực hiện"
@@ -1995,15 +1995,15 @@ const ServiceOrderDetailModal = ({
                   <div className="absolute bottom-3 left-2 top-3 w-px bg-gray-200" />
 
                   <div className="relative">
-                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-blue-200 bg-white">
+                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-blue-200 bg-surface">
                       <span className="h-2 w-2 rounded-full bg-blue-500" />
                     </span>
 
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-text-subtle">
                       Ngày tiếp nhận
                     </p>
 
-                    <p className="mt-1 font-bold text-gray-900">
+                    <p className="mt-1 font-bold text-text-strong">
                       {formatDate(
                         order.receivedDate
                       )}
@@ -2011,15 +2011,15 @@ const ServiceOrderDetailModal = ({
                   </div>
 
                   <div className="relative">
-                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-emerald-200 bg-white">
+                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-emerald-200 bg-surface">
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     </span>
 
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-text-subtle">
                       Ngày hoàn thành
                     </p>
 
-                    <p className="mt-1 font-bold text-gray-900">
+                    <p className="mt-1 font-bold text-text-strong">
                       {formatDate(
                         order.completedDate
                       )}
@@ -2029,7 +2029,7 @@ const ServiceOrderDetailModal = ({
               </section>
 
               {/* System */}
-              <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+              <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
                 <CardHeader
                   icon={Building2}
                   title="Thông tin hệ thống"
@@ -2049,7 +2049,7 @@ const ServiceOrderDetailModal = ({
                     />
                   </dl>
 
-                  <div className="my-5 h-px bg-gray-100" />
+                  <div className="my-5 h-px bg-surface-muted" />
 
                   <dl className="grid grid-cols-2 gap-6">
                     <InfoItem
@@ -2075,8 +2075,8 @@ const ServiceOrderDetailModal = ({
         </div>
 
         {/* Footer */}
-        <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-gray-100 bg-white px-5 py-4 sm:px-7">
-          <p className="hidden text-xs text-gray-400 sm:block">
+        <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-border-subtle bg-surface px-5 py-4 sm:px-7">
+          <p className="hidden text-xs text-text-subtle sm:block">
             {isEditingProduct
               ? "Bạn đang chỉnh sửa thông tin đơn hàng"
               : isEditingAddress

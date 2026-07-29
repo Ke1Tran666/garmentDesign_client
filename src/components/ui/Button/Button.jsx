@@ -45,12 +45,12 @@ export const ButtonIconText = ({
       onClick={onClick}
       className={`
         inline-flex items-center gap-2
-        rounded-lg border! border-gray-300!
-        bg-white px-4 py-2
-        text-sm font-semibold text-gray-700
+        rounded-lg border! border-input!
+        bg-surface px-4 py-2
+        text-sm font-semibold text-text-default
         transition-all duration-300 ease-out
         animate-slideInRight
-        hover:border-brand hover:bg-gray-50 hover:text-brand
+        hover:border-brand hover:bg-surface-subtle hover:text-brand
         ${className}
       `}
     >

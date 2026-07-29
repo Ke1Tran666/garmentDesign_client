@@ -140,7 +140,7 @@ const SecurityPage = () => {
                 Default
               </HandleButton>
             </div>
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-text-muted">
                <div className="text-sm">
                 <div className="flex gap-1 items-center">
                   <Info size={18}/>
@@ -167,10 +167,10 @@ const SecurityPage = () => {
             {/* Email Authentication */}
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-gray-800">
+                <h4 className="font-semibold text-text-default">
                   Email Authentication
                 </h4>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-text-muted">
                   Receive verification codes via your registered email address.
                 </p>
               </div>
@@ -184,10 +184,10 @@ const SecurityPage = () => {
             {/* SMS Authentication */}
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-gray-800">
+                <h4 className="font-semibold text-text-default">
                   SMS Authentication
                 </h4>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-text-muted">
                   Receive verification codes via your phone number.
                 </p>
               </div>
@@ -201,10 +201,10 @@ const SecurityPage = () => {
             {/* Authenticator App */}
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-gray-800">
+                <h4 className="font-semibold text-text-default">
                   Authenticator App
                 </h4>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-text-muted">
                   Use Google Authenticator or Microsoft Authenticator to generate verification codes.
                 </p>
               </div>
@@ -218,7 +218,7 @@ const SecurityPage = () => {
           </div>
 
           <div className="my-5">
-            <div className="text-sm text-gray-500 flex items-center gap-2">
+            <div className="text-sm text-text-muted flex items-center gap-2">
               <div className="flex gap-1 items-center">
                   <Info size={18}/>
                   <span className="font-semibold">Lưu ý:</span>{" "}
@@ -249,10 +249,10 @@ const InputPassword = ({
       placeholder={placeholder || label}
       containerClassName="mb-5"
       className="
-        border-gray-300! text-gray-500! focus:border-brand!  placeholder:text-transparent!
+        border-input! text-text-muted! focus:border-brand!  placeholder:text-transparent!
         "
-      labelClassName="text-gray-500! peer-focus:text-brand!"
-      buttonClassName="text-gray-500!"
+      labelClassName="text-text-muted! peer-focus:text-brand!"
+      buttonClassName="text-text-muted!"
     />
   )
 }

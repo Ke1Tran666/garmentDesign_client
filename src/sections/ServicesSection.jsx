@@ -32,7 +32,7 @@ const ServiceCard = ({ service, delay, className = "" }) => {
 
   return (
     <div
-      className={`card-hover rounded-2xl bg-white border border-border/60 p-8 group reveal ${className}`}
+      className={`card-hover rounded-2xl bg-surface border border-border/60 p-8 group reveal ${className}`}
       style={{ transitionDelay: delay }}
     >
       <div className="flex items-start gap-5">

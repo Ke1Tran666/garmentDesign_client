@@ -107,8 +107,8 @@ const FloatingButtons = () => {
                         }}
                         className={`
                             absolute top-2 right-2
-                            border border-gray-200
-                            bg-white! text-dark!
+                            border border-border
+                            bg-surface! text-dark!
                             hover:bg-dark! hover:text-white!
                             ${menuOpen
                             ? "opacity-100 scale-100 pointer-events-auto"

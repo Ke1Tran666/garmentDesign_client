@@ -7,18 +7,18 @@ const SelectedFileItem = ({
   disabled,
   onRemove,
 }) => (
-  <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3">
+  <div className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface p-3">
     <FileText
       size={17}
       className="shrink-0 text-brand"
     />
 
     <div className="min-w-0 flex-1">
-      <p className="truncate text-sm font-medium text-gray-700">
+      <p className="truncate text-sm font-medium text-text-default">
         {file.name}
       </p>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-text-subtle">
         {formatFileSize(file.size)}
       </p>
     </div>
@@ -28,7 +28,7 @@ const SelectedFileItem = ({
       onClick={() => onRemove(file)}
       disabled={disabled}
       aria-label={`Xóa ${file.name}`}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-text-subtle hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
     >
       <Trash2 size={15} />
     </button>

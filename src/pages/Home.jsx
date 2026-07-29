@@ -58,19 +58,19 @@ const Home = () => {
                 {/* Stats */}
                 <div className="relative z-10 max-w-4xl mx-auto w-full animate-fiu delay-4" style={{ marginTop: 10 }}>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.03)]">
-                        <div className="bg-white p-5 text-center">
+                        <div className="bg-surface p-5 text-center">
                             <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="3000">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Thiết kế</div>
                         </div>
-                        <div className="bg-white p-5 text-center">
+                        <div className="bg-surface p-5 text-center">
                             <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="500">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Khách hàng</div>
                         </div>
-                        <div className="bg-white p-5 text-center">
+                        <div className="bg-surface p-5 text-center">
                             <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="8">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Năm kinh nghiệm</div>
                         </div>
-                        <div className="bg-white p-5 text-center">
+                        <div className="bg-surface p-5 text-center">
                             <div className="font-heading text-2xl md:text-3xl font-medium text-brand counter" data-target="99">0</div>
                             <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">% Hài lòng</div>
                         </div>
@@ -270,7 +270,7 @@ const Home = () => {
                                 Gửi yêu cầu ngay hôm nay — nhận báo giá chi tiết trong vòng 2 giờ làm việc.
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-                                <a href="#contact" className="btn-shine bg-white text-brand-dark font-heading font-medium text-base px-10 py-4 rounded-full tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center gap-2">
+                                <a href="#contact" className="btn-shine bg-surface text-brand-dark font-heading font-medium text-base px-10 py-4 rounded-full tracking-wide transition-all duration-300 hover:scale-105 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex items-center gap-2">
                                     Đặt lịch tư vấn
                                     <Calendar className="w-4 h-4"/>
                                 </a>

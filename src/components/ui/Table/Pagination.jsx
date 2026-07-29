@@ -34,11 +34,11 @@ const Pagination = ({
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-text-muted">
         {hasItemSummary ? (
           <>
             Hiển thị{" "}
-            <span className="font-semibold text-gray-700">
+            <span className="font-semibold text-text-default">
               {showingStart}-{showingEnd}
             </span>{" "}
             trong số {totalItems} bản ghi
@@ -46,7 +46,7 @@ const Pagination = ({
         ) : (
           <>
             Trang{" "}
-            <span className="font-semibold text-gray-700">
+            <span className="font-semibold text-text-default">
               {currentPage}
             </span>{" "}
             / {totalPages}
@@ -60,9 +60,9 @@ const Pagination = ({
           onClick={() => changePage(currentPage - 1)}
           disabled={currentPage <= 1}
           className="
-            rounded-xl border border-gray-200
-            px-4 py-2 text-sm font-semibold text-gray-600
-            transition hover:bg-gray-50
+            rounded-xl border border-border
+            px-4 py-2 text-sm font-semibold text-text-muted
+            transition hover:bg-surface-subtle
             disabled:cursor-not-allowed disabled:opacity-40
           "
         >
@@ -81,7 +81,7 @@ const Pagination = ({
                 className="flex items-center gap-1"
               >
                 {hasGap && (
-                  <span className="px-1 text-gray-400">
+                  <span className="px-1 text-text-subtle">
                     ...
                   </span>
                 )}
@@ -98,7 +98,7 @@ const Pagination = ({
                     ${
                       pageNumber === currentPage
                         ? "bg-brand! text-white"
-                        : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                        : "border border-border text-text-muted hover:bg-surface-subtle"
                     }
                   `}
                 >
@@ -114,9 +114,9 @@ const Pagination = ({
           onClick={() => changePage(currentPage + 1)}
           disabled={currentPage >= totalPages}
           className="
-            rounded-xl border border-gray-200
-            px-4 py-2 text-sm font-semibold text-gray-600
-            transition hover:bg-gray-50
+            rounded-xl border border-border
+            px-4 py-2 text-sm font-semibold text-text-muted
+            transition hover:bg-surface-subtle
             disabled:cursor-not-allowed disabled:opacity-40
           "
         >

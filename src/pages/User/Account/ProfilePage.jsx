@@ -158,7 +158,7 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="px-6 py-6 text-sm font-medium text-gray-500">
+      <div className="px-6 py-6 text-sm font-medium text-text-muted">
         Đang tải thông tin người dùng...
       </div>
     );
@@ -518,7 +518,7 @@ const ProfilePage = () => {
       <div className="flex justify-end gap-3">
         <HandleButton
           onClick={handleResetProfile}
-          className={`bg-[#F5F5F5]! text-gray-600!`}
+          className={`bg-[#F5F5F5]! text-text-muted!`}
         >
           Default
         </HandleButton>
@@ -656,18 +656,18 @@ const Input = ({
       placeholder={placeholder || label}
       containerClassName="w-full"
       className={`
-        border-gray-300!
+        border-input!
         ${
           readOnly
-            ? "bg-gray-100! text-gray-500! cursor-not-allowed!"
-            : "bg-white! text-gray-800!"
+            ? "bg-surface-muted! text-text-muted! cursor-not-allowed!"
+            : "bg-surface! text-text-default!"
         }
         placeholder:text-transparent!
         focus:border-brand!
         focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]!
       `}
       labelClassName={`
-        text-gray-500!
+        text-text-muted!
         peer-focus:text-brand!
         ${hasValue ? "top-2! translate-y-0! text-xs! text-brand!" : ""}
       `}
@@ -678,7 +678,7 @@ const Input = ({
 const BirthdayField = ({ birthday, setBirthday, birthdayResetKey }) => {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-gray-700">
+      <label className="mb-2 block text-sm font-semibold text-text-default">
         Birthday
       </label>
 
@@ -687,21 +687,21 @@ const BirthdayField = ({ birthday, setBirthday, birthdayResetKey }) => {
         value={birthday}
         onChange={setBirthday}
         inputClassName="
-          border-gray-300!
-          bg-white!
-          text-gray-700!
-          placeholder:text-gray-400!
+          border-input!
+          bg-surface!
+          text-text-default!
+          placeholder:text-text-subtle!
           focus:border-brand!
           focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]!
         "
         calendarButtonClassName="
-          border-gray-300!
-          bg-white!
-          text-gray-600!
+          border-input!
+          bg-surface!
+          text-text-muted!
           hover:border-brand!
-          hover:bg-gray-50!
+          hover:bg-surface-subtle!
         "
-        popupClassName="border-gray-200! translate-y-24!"
+        popupClassName="border-border! translate-y-24!"
       />
     </div>
   );

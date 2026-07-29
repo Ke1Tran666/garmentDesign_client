@@ -43,7 +43,7 @@ const AddressOption = memo(({address,selected,disabled,onSelect}) => {
         className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 ${
           selected
             ? "border-brand bg-brand-light ring-2 ring-brand/10"
-            : "border-gray-100 bg-gray-50 hover:border-brand/30"
+            : "border-border-subtle bg-surface-subtle hover:border-brand/30"
         } ${
           disabled
             ? "cursor-not-allowed opacity-60"
@@ -63,17 +63,17 @@ const AddressOption = memo(({address,selected,disabled,onSelect}) => {
         />
 
         <div className="min-w-0">
-          <p className="font-semibold text-gray-900">
+          <p className="font-semibold text-text-strong">
             {address.companyName ||
               "Địa chỉ cá nhân"}
           </p>
 
-          <p className="mt-1 text-sm leading-6 text-gray-600">
+          <p className="mt-1 text-sm leading-6 text-text-muted">
             {address.address}
           </p>
 
           {address.note && (
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-text-subtle">
               Ghi chú: {address.note}
             </p>
           )}
@@ -563,9 +563,9 @@ const ServiceOrderCreateModal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-service-order-title"
-        className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-xl"
+        className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-surface shadow-xl"
       >
-        <header className="relative shrink-0 border-b border-gray-100 px-6 pb-5 pt-6 sm:px-8">
+        <header className="relative shrink-0 border-b border-border-subtle px-6 pb-5 pt-6 sm:px-8">
           <div className="absolute inset-x-0 top-0 h-1 bg-brand" />
 
           <div className="flex items-start justify-between gap-5">
@@ -577,12 +577,12 @@ const ServiceOrderCreateModal = ({
               <div className="min-w-0">
                 <h2
                   id="create-service-order-title"
-                  className="text-xl font-bold text-gray-950"
+                  className="text-xl font-bold text-text-strong"
                 >
                   Thêm đơn hàng dịch vụ
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-text-muted">
                   Chọn dịch vụ và địa chỉ
                   đã thêm trước đó
                 </p>
@@ -594,7 +594,7 @@ const ServiceOrderCreateModal = ({
               onClick={handleClose}
               disabled={submitting}
               aria-label="Đóng form tạo đơn"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X size={19} />
             </button>
@@ -607,7 +607,7 @@ const ServiceOrderCreateModal = ({
         >
           <div className="overflow-y-auto px-6 py-6 sm:px-8">
             {optionsLoading ? (
-              <div className="flex min-h-72 items-center justify-center gap-3 text-sm text-gray-500">
+              <div className="flex min-h-72 items-center justify-center gap-3 text-sm text-text-muted">
                 <LoaderCircle
                   size={20}
                   className="animate-spin text-brand"
@@ -630,7 +630,7 @@ const ServiceOrderCreateModal = ({
                   <div>
                     <label
                       htmlFor="serviceId"
-                      className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                      className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
                     >
                       Dịch vụ
                     </label>
@@ -641,7 +641,7 @@ const ServiceOrderCreateModal = ({
                       value={form.serviceId}
                       onChange={handleChange}
                       disabled={ submitting || Boolean(createdOrder)}
-                      className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm text-gray-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                      className="h-12 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-text-default outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                     >
                       <option value="">
                         Chọn dịch vụ
@@ -667,12 +667,12 @@ const ServiceOrderCreateModal = ({
                   <div>
                     <label
                       htmlFor="quantity"
-                      className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                      className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
                     >
                       Số lượng
                     </label>
 
-                    <div className="flex overflow-hidden rounded-xl border border-gray-200 focus-within:border-brand focus-within:ring-4 focus-within:ring-brand/10">
+                    <div className="flex overflow-hidden rounded-xl border border-border focus-within:border-brand focus-within:ring-4 focus-within:ring-brand/10">
                       <input
                         id="quantity"
                         type="number"
@@ -683,10 +683,10 @@ const ServiceOrderCreateModal = ({
                         onChange={handleChange}
                         disabled={ submitting || Boolean(createdOrder)}
                         placeholder="Nhập số lượng"
-                        className="h-12 min-w-0 flex-1 px-3.5 text-sm text-gray-800 outline-none disabled:bg-gray-50"
+                        className="h-12 min-w-0 flex-1 px-3.5 text-sm text-text-default outline-none disabled:bg-surface-subtle"
                       />
 
-                      <span className="flex items-center border-l border-gray-200 bg-gray-50 px-3 text-xs font-semibold text-gray-500">
+                      <span className="flex items-center border-l border-border bg-surface-subtle px-3 text-xs font-semibold text-text-muted">
                         {selectedService
                           ?.unitType ||
                           "Đơn vị"}
@@ -698,7 +698,7 @@ const ServiceOrderCreateModal = ({
                 <div>
                   <label
                     htmlFor="productName"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
                   >
                     Tên sản phẩm
                   </label>
@@ -711,33 +711,33 @@ const ServiceOrderCreateModal = ({
                     onChange={handleChange}
                     disabled={ submitting || Boolean(createdOrder)}
                     placeholder="Ví dụ: Áo thun local brand"
-                    className="h-12 w-full rounded-xl border border-gray-200 px-3.5 text-sm text-gray-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                    className="h-12 w-full rounded-xl border border-border px-3.5 text-sm text-text-default outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                   />
                 </div>
 
                 <div>
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                       Địa chỉ nhận hàng
                     </label>
 
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-text-subtle">
                       Chỉ chọn địa chỉ đã có
                     </span>
                   </div>
 
                   {addresses.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-5 py-8 text-center">
+                    <div className="rounded-2xl border border-dashed border-border bg-surface-subtle px-5 py-8 text-center">
                       <MapPin
                         size={27}
-                        className="mx-auto text-gray-300"
+                        className="mx-auto text-text-subtle"
                       />
 
-                      <p className="mt-2 text-sm font-semibold text-gray-600">
+                      <p className="mt-2 text-sm font-semibold text-text-muted">
                         Bạn chưa có địa chỉ
                       </p>
 
-                      <p className="mt-1 text-xs text-gray-400">
+                      <p className="mt-1 text-xs text-text-subtle">
                         Hãy thêm địa chỉ tại
                         trang quản lý tài khoản.
                       </p>
@@ -772,7 +772,7 @@ const ServiceOrderCreateModal = ({
                 <div>
                   <label
                     htmlFor="customerRequest"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500"
+                    className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
                   >
                     Yêu cầu của khách hàng
                   </label>
@@ -787,7 +787,7 @@ const ServiceOrderCreateModal = ({
                     onChange={handleChange}
                     disabled={ submitting || Boolean(createdOrder)}
                     placeholder="Nhập kích thước, màu sắc, kiểu in hoặc yêu cầu khác..."
-                    className="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-3 text-sm leading-6 text-gray-800 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-gray-50"
+                    className="w-full resize-none rounded-xl border border-border px-3.5 py-3 text-sm leading-6 text-text-default outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                   />
                 </div>
 
@@ -795,11 +795,11 @@ const ServiceOrderCreateModal = ({
                   {/* Ảnh đại diện */}
                   <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                         Ảnh đại diện sản phẩm
                       </label>
 
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-text-subtle">
                         Tối đa 50MB
                       </span>
                     </div>
@@ -816,11 +816,11 @@ const ServiceOrderCreateModal = ({
                   {/* File bổ sung */}
                   <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
                         File khách hàng
                       </label>
 
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-text-subtle">
                         Có thể chọn nhiều file
                       </span>
                     </div>
@@ -851,7 +851,7 @@ const ServiceOrderCreateModal = ({
                   <div className="rounded-2xl bg-gray-950 p-5 text-white">
                     <div className="flex items-start justify-between gap-5">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
                           Đơn giá
                         </p>
 
@@ -859,7 +859,7 @@ const ServiceOrderCreateModal = ({
                           {formatCurrency(
                             selectedService.basePrice
                           )}
-                          <span className="ml-1 text-xs font-normal text-gray-400">
+                          <span className="ml-1 text-xs font-normal text-text-subtle">
                             /{" "}
                             {selectedService.unitType ||
                               "đơn vị"}
@@ -868,7 +868,7 @@ const ServiceOrderCreateModal = ({
                       </div>
 
                       <div className="text-right">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
                           Tạm tính
                         </p>
 
@@ -896,12 +896,12 @@ const ServiceOrderCreateModal = ({
             )}
           </div>
 
-          <footer className="flex shrink-0 justify-end gap-3 border-t border-gray-100 bg-white px-6 py-4 sm:px-8">
+          <footer className="flex shrink-0 justify-end gap-3 border-t border-border-subtle bg-surface px-6 py-4 sm:px-8">
             <button
               type="button"
               onClick={handleClose}
               disabled={submitting}
-              className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl border border-border px-5 py-2.5 text-sm font-semibold text-text-muted transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
             >
               Hủy
             </button>

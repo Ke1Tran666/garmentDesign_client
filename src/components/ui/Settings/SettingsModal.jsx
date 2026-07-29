@@ -60,7 +60,7 @@ const SettingsModal = ({ open, onClose }) => {
                 className="
                     relative w-full sm:w-[90vw] sm:max-w-4xl
                     h-[92dvh] sm:h-[80vh] sm:max-h-150
-                    bg-white rounded-t-3xl sm:rounded-3xl
+                    bg-surface rounded-t-3xl sm:rounded-3xl
                     shadow-2xl overflow-hidden
                     flex flex-col sm:flex-row
                 "
@@ -68,23 +68,23 @@ const SettingsModal = ({ open, onClose }) => {
                 {/* Close */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-surface-muted transition-colors"
                     aria-label="Close settings"
                 >
                     <X size={20} />
                 </button>
 
                 {/* Sidebar — desktop */}
-                <div className="hidden sm:flex flex-col w-60 border-r border-gray-200 bg-gray-50 p-5 shrink-0">
+                <div className="hidden sm:flex flex-col w-60 border-r border-border bg-surface-subtle p-5 shrink-0">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10">
                             <SettingsIcon className="h-5 w-5 text-brand" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-gray-900 leading-tight">
+                            <h2 className="text-lg font-bold text-text-strong leading-tight">
                                 Settings
                             </h2>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-text-muted">
                                 Manage your preferences
                             </p>
                         </div>
@@ -117,7 +117,7 @@ const SettingsModal = ({ open, onClose }) => {
                 </div>
 
                 {/* Tab bar — mobile (bottom nav) */}
-                <div className="sm:hidden shrink-0 bg-white/95 pb-safe-bottom border-t-2 border-gray-200">
+                <div className="sm:hidden shrink-0 bg-white/95 pb-safe-bottom border-t-2 border-border">
                     <div className="flex items-center justify-center px-2 pt-2 pb-3">
                         {tabs.map((tab) => {
                             const isActive = activeTab === tab.key;
@@ -129,7 +129,7 @@ const SettingsModal = ({ open, onClose }) => {
                                         flex flex-col items-center gap-1
                                         flex-1 py-1 px-1
                                         transition-all rounded-xl
-                                        ${isActive ? "text-brand" : "text-gray-400"}
+                                        ${isActive ? "text-brand" : "text-text-subtle"}
                                     `}
                                 >
                                     <span className={`
@@ -141,7 +141,7 @@ const SettingsModal = ({ open, onClose }) => {
                                     </span>
                                     <span className={`
                                         text-[10px] font-medium tracking-wide
-                                        ${isActive ? "text-brand" : "text-gray-500"}
+                                        ${isActive ? "text-brand" : "text-text-muted"}
                                     `}>
                                         {tab.label}
                                     </span>
@@ -169,7 +169,7 @@ const SidebarItem = ({ icon, label, active, onClick }) => (
             transition-all text-sm
             ${active
                 ? "bg-brand! text-white"
-                : "text-gray-700 hover:bg-gray-100"
+                : "text-text-default hover:bg-surface-muted"
             }
         `}
     >
@@ -179,12 +179,12 @@ const SidebarItem = ({ icon, label, active, onClick }) => (
 );
 
 const SettingItem = ({ title, description }) => (
-    <div className="py-4 sm:py-5 border-b border-gray-200 flex items-center justify-between gap-4">
+    <div className="py-4 sm:py-5 border-b border-border flex items-center justify-between gap-4">
         <div className="min-w-0">
             <h3 className="font-semibold text-base sm:text-lg leading-snug">
                 {title}
             </h3>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-text-muted mt-0.5">
                 {description}
             </p>
         </div>
@@ -200,7 +200,7 @@ const SettingItem = ({ title, description }) => (
                     after:absolute
                     after:left-0.5 after:top-0.5
                     after:h-5 after:w-5
-                    after:rounded-full after:bg-white
+                    after:rounded-full after:bg-surface
                     after:transition-all
                     peer-checked:after:translate-x-5
                 "

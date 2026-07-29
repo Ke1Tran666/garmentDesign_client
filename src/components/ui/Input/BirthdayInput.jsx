@@ -288,21 +288,21 @@ const BirthdayInput = ({
           className={`
             absolute right-0 bottom-0 z-50
             w-full overflow-hidden rounded-2xl border-2 border-[#e5d84c]
-            bg-white text-black shadow-2xl
+            bg-surface text-black shadow-2xl
             ${popupClassName}
           `}
         >
           <div
             className={`
               flex items-center justify-between gap-3
-              bg-gray-100 px-4 py-4
+              bg-surface-muted px-4 py-4
               ${popupHeaderClassName}
             `}
           >
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="text-3xl text-gray-700"
+              className="text-3xl text-text-default"
             >
               ‹
             </button>
@@ -314,7 +314,7 @@ const BirthdayInput = ({
                   onChange={(e) => setCurrentMonth(Number(e.target.value))}
                   className="
                     h-11 w-full appearance-none rounded-lg
-                    border border-gray-300 bg-white
+                    border border-input bg-surface
                     px-3 pr-10 text-sm font-semibold leading-none
                     outline-none
                   "
@@ -326,7 +326,7 @@ const BirthdayInput = ({
                   ))}
                 </select>
 
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               </div>
 
               <div className="relative w-full">
@@ -335,7 +335,7 @@ const BirthdayInput = ({
                   onChange={(e) => setCurrentYear(Number(e.target.value))}
                   className="
                     h-11 w-full appearance-none rounded-lg
-                    border border-gray-300 bg-white
+                    border border-input bg-surface
                     px-3 pr-10 text-sm font-semibold leading-none
                     outline-none
                   "
@@ -347,20 +347,20 @@ const BirthdayInput = ({
                   ))}
                 </select>
 
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
               </div>
             </div>
 
             <button
               type="button"
               onClick={handleNextMonth}
-              className="text-3xl text-gray-700"
+              className="text-3xl text-text-default"
             >
               ›
             </button>
           </div>
 
-          <div className="grid grid-cols-7 px-4 pt-4 text-center text-sm font-bold text-gray-700">
+          <div className="grid grid-cols-7 px-4 pt-4 text-center text-sm font-bold text-text-default">
             {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
               <div key={day}>{day}</div>
             ))}
@@ -387,8 +387,8 @@ const BirthdayInput = ({
                       isSelected
                         ? selectedDateClassName
                         : isCurrentMonth
-                          ? "text-gray-800 hover:bg-gray-100"
-                          : "text-gray-300"
+                          ? "text-text-default hover:bg-surface-muted"
+                          : "text-text-subtle"
                     }
                   `}
                 >

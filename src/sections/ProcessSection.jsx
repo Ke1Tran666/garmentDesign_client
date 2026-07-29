@@ -28,7 +28,7 @@ const PROCESS = [
 
 const ProcessCard = ({number,title, description,delay}) =>(
     <div className="reveal text-center" style={{transitionDelay:delay}}>
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white border-2 border-brand/20 shadow-[0_4px_20px_rgba(1,146,245,0.1)] mb-6">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface border-2 border-brand/20 shadow-[0_4px_20px_rgba(1,146,245,0.1)] mb-6">
             <span className="font-heading text-xl font-500 text-brand">{number}</span>
         </div>
         <h3 className="font-heading font-500 text-lg text-dark mb-2">{title}</h3>

@@ -13,11 +13,11 @@ export const SectionCard = ({ title, desc, active, highlight, children }) => {
               <span
                 className={`rounded-full px-3 py-1 text-xs font-semibold ${
                   active === "active"
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-success-soft text-success"
                     : active === "pending"
-                    ? "bg-yellow-100 text-yellow-700"
+                    ? "bg-warning-soft text-warning"
                     : active === "banned"
-                    ? "bg-red-100 text-red-700"
+                    ? "bg-danger-soft text-danger"
                     : "bg-surface-muted text-text-muted"
                 }`}
               >

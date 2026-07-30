@@ -21,7 +21,7 @@ const serviceMeta = {
 };
 
 const ServicesTag = ({ label }) => (
-  <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-subtle">
+  <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-text-subtle">
     {label}
   </span>
 );
@@ -42,7 +42,7 @@ const ServiceCard = ({ service, delay, className = "" }) => {
 
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-heading font-medium text-xl text-dark">
+            <h3 className="font-heading font-medium text-xl text-text-strong">
               {service.serviceName}
             </h3>
 
@@ -51,7 +51,7 @@ const ServiceCard = ({ service, delay, className = "" }) => {
             </span>
           </div>
 
-          <p className="text-sm text-muted1 leading-relaxed mb-4">
+          <p className="text-sm text-text-muted leading-relaxed mb-4">
             {service.description || "Chưa có mô tả dịch vụ."}
           </p>
 
@@ -123,15 +123,15 @@ const ServicesSection = () => {
           </span>
 
           <h2
-            className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-dark reveal"
+            className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-text-strong reveal"
             style={{ transitionDelay: "100ms" }}
           >
             {loading ? "Đang tải" : activeServices.length} dịch vụ
-            <span className="text-muted1"> cốt lõi</span>
+            <span className="text-text-muted"> cốt lõi</span>
           </h2>
 
           <p
-            className="text-muted1! font-body font-300 mt-4 max-w-lg mx-auto reveal"
+            className="text-text-muted! font-body font-300 mt-4 max-w-lg mx-auto reveal"
             style={{ transitionDelay: "200ms" }}
           >
             Đầy đủ công đoạn kỹ thuật cho ngành may mặc — từ bản vẽ đến con số sản xuất.
@@ -139,7 +139,7 @@ const ServicesSection = () => {
         </div>
 
         {loading ? (
-          <p className="text-center text-muted1">Đang tải dịch vụ...</p>
+          <p className="text-center text-text-muted">Đang tải dịch vụ...</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {activeServices.map((service, index) => {

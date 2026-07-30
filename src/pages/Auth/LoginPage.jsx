@@ -32,7 +32,7 @@ const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
         hover:bg-white/20 hover:border-white/30
       "
     >
-      <Icon className="h-5 w-5 shrink-0 text-[#80d0ff]" />
+      <Icon className="h-5 w-5 shrink-0 text-auth-accent" />
       {children}
     </button>
   );
@@ -250,7 +250,7 @@ const LoginPage = () => {
                   <div className="flex justify-end mb-2">
                     <Link
                       to="/forgot-password"
-                      className="text-sm text-[#80d0ff] hover:text-white transition"
+                      className="text-sm text-auth-accent hover:text-white transition"
                     >
                       Quên mật khẩu?
                     </Link>
@@ -270,7 +270,7 @@ const LoginPage = () => {
               <div className="mb-5">
                 <p className="mb-4 text-center text-sm text-white/60">
                   Mã OTP đã gửi đến{" "}
-                  <span className="font-medium text-[#80d0ff]">{phone}</span>
+                  <span className="font-medium text-auth-accent">{phone}</span>
                 </p>
 
                 <OtpInput
@@ -286,7 +286,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={resetPhoneLogin}
-                    className="text-xs text-[#80d0ff] transition hover:text-white"
+                    className="text-xs text-auth-accent transition hover:text-white"
                   >
                     Đổi số điện thoại
                   </button>
@@ -375,7 +375,7 @@ const LoginPage = () => {
           Chưa có tài khoản?{" "}
           <Link
             to="/register"
-            className="font-medium text-[#80d0ff] hover:text-white"
+            className="font-medium text-auth-accent hover:text-white"
           >
             Đăng ký miễn phí
           </Link>

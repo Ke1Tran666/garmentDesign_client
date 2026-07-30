@@ -200,7 +200,7 @@ const BirthdayInput = ({
             bg-transparent px-4 text-center text-sm text-white
             outline-none transition-all duration-300
             placeholder:text-white/45
-            focus:border-[#80d0ff]
+            focus:border-auth-accent
             focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
             ${inputClassName}
           `}
@@ -232,7 +232,7 @@ const BirthdayInput = ({
             bg-transparent px-4 text-center text-sm text-white
             outline-none transition-all duration-300
             placeholder:text-white/45
-            focus:border-[#80d0ff]
+            focus:border-auth-accent
             focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
             ${inputClassName}
           `}
@@ -255,7 +255,7 @@ const BirthdayInput = ({
             bg-transparent px-4 text-center text-sm text-white
             outline-none transition-all duration-300
             placeholder:text-white/45
-            focus:border-[#80d0ff]
+            focus:border-auth-accent
             focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
             ${inputClassName}
           `}
@@ -288,7 +288,7 @@ const BirthdayInput = ({
           className={`
             absolute right-0 bottom-0 z-50
             w-full overflow-hidden rounded-2xl border-2 border-[#e5d84c]
-            bg-surface text-black shadow-2xl
+            bg-surface text-text-strong shadow-2xl
             ${popupClassName}
           `}
         >

@@ -106,8 +106,8 @@ const getStatusStyle = (status) => {
   ) {
     return {
       badge:
-        "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-      dot: "bg-emerald-500",
+        "bg-success-soft text-success ring-success-border",
+      dot: "bg-success",
     };
   }
 
@@ -117,8 +117,8 @@ const getStatusStyle = (status) => {
   ) {
     return {
       badge:
-        "bg-red-50 text-red-700 ring-red-600/20",
-      dot: "bg-red-500",
+        "bg-danger-soft text-danger ring-danger-border",
+      dot: "bg-danger",
     };
   }
 
@@ -128,15 +128,15 @@ const getStatusStyle = (status) => {
   ) {
     return {
       badge:
-        "bg-amber-50 text-amber-700 ring-amber-600/20",
-      dot: "bg-amber-500",
+        "bg-warning-soft text-warning ring-warning-border",
+      dot: "bg-warning",
     };
   }
 
   return {
     badge:
-      "bg-blue-50 text-blue-700 ring-blue-600/20",
-    dot: "bg-blue-500",
+      "bg-info-soft text-info ring-info-border",
+    dot: "bg-info",
   };
 };
 
@@ -1083,7 +1083,7 @@ const ServiceOrderDetailModal = ({
               onClick={handleRequestClose}
               disabled={updating || updatingAddress}
               aria-label="Đóng chi tiết đơn hàng"
-              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-text-muted shadow-sm transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X
                 size={19}
@@ -1233,7 +1233,7 @@ const ServiceOrderDetailModal = ({
                                 }
                                 disabled={updating || updatingAddress}
                                 title="Hủy chỉnh sửa"
-                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:opacity-50"
                               >
                                 <X size={17} />
                               </button>
@@ -1388,7 +1388,7 @@ const ServiceOrderDetailModal = ({
                       {updateError && (
                         <div
                           role="alert"
-                          className="mt-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
+                          className="mt-5 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger"
                         >
                           {updateError}
                         </div>
@@ -1429,7 +1429,7 @@ const ServiceOrderDetailModal = ({
                     {fileError && (
                       <div
                         role="alert"
-                        className="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
+                        className="mb-4 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger"
                       >
                         {fileError}
                       </div>
@@ -1524,7 +1524,7 @@ const ServiceOrderDetailModal = ({
                                     }
                                     title="Xóa file"
                                     aria-label={`Xóa ${file.fileName}`}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-text-subtle transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-text-subtle transition hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                                   >
                                     {isDeleting ? (
                                       <LoaderCircle
@@ -1631,7 +1631,7 @@ const ServiceOrderDetailModal = ({
                     icon={User}
                     title="Khách hàng"
                     description="Người đặt dịch vụ"
-                    iconClassName="bg-blue-50 text-blue-600"
+                    iconClassName="bg-info-soft text-info"
                   />
 
                   <dl className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -1719,7 +1719,7 @@ const ServiceOrderDetailModal = ({
                             disabled={updatingAddress}
                             aria-label="Hủy chỉnh sửa địa chỉ"
                             title="Hủy chỉnh sửa"
-                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <X size={16} />
                           </button>
@@ -1755,7 +1755,7 @@ const ServiceOrderDetailModal = ({
                           Đang tải danh sách địa chỉ...
                         </div>
                       ) : addressState.error ? (
-                        <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                        <div className="rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger">
                           {addressState.error}
                         </div>
                       ) : userAddresses.length === 0 ? (
@@ -1839,14 +1839,14 @@ const ServiceOrderDetailModal = ({
                                     )}
 
                                     {isDefault && (
-                                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                                      <span className="rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">
                                         Mặc định
                                       </span>
                                     )}
 
                                     {isSelected &&
                                       !isCurrentAddress && (
-                                        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600">
+                                        <span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-info">
                                           Đang chọn
                                         </span>
                                       )}
@@ -1870,7 +1870,7 @@ const ServiceOrderDetailModal = ({
                       )}
 
                       {addressError && (
-                        <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                        <div className="mt-4 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger">
                           {addressError}
                         </div>
                       )}
@@ -1960,10 +1960,8 @@ const ServiceOrderDetailModal = ({
                         Giảm giá
                       </dt>
 
-                      <dd className="text-sm font-semibold text-emerald-400">
-                        {formatCurrency(
-                          order.discountAmount
-                        )}
+                      <dd className="text-sm font-semibold text-success">
+                        {formatCurrency(order.discountAmount)}
                       </dd>
                     </div>
                   </dl>
@@ -1975,9 +1973,7 @@ const ServiceOrderDetailModal = ({
                   </span>
 
                   <span className="text-sm font-bold">
-                    {formatCurrency(
-                      order.totalPrice
-                    )}
+                    {formatCurrency(order.totalPrice)}
                   </span>
                 </div>
               </section>
@@ -1988,15 +1984,15 @@ const ServiceOrderDetailModal = ({
                   icon={CalendarDays}
                   title="Thời gian thực hiện"
                   description="Tiến trình đơn hàng"
-                  iconClassName="bg-blue-50 text-blue-600"
+                  iconClassName="bg-info-soft text-info"
                 />
 
                 <div className="relative mt-7 space-y-8 pl-9">
-                  <div className="absolute bottom-3 left-2 top-3 w-px bg-gray-200" />
+                  <div className="absolute bottom-3 left-2 top-3 w-px bg-border" />
 
                   <div className="relative">
-                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-blue-200 bg-surface">
-                      <span className="h-2 w-2 rounded-full bg-blue-500" />
+                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-info-border bg-surface">
+                      <span className="h-2 w-2 rounded-full bg-info" />
                     </span>
 
                     <p className="text-xs text-text-subtle">
@@ -2004,15 +2000,13 @@ const ServiceOrderDetailModal = ({
                     </p>
 
                     <p className="mt-1 font-bold text-text-strong">
-                      {formatDate(
-                        order.receivedDate
-                      )}
+                      {formatDate(order.receivedDate)}
                     </p>
                   </div>
 
                   <div className="relative">
-                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-emerald-200 bg-surface">
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-success-border bg-surface">
+                      <span className="h-2 w-2 rounded-full bg-success" />
                     </span>
 
                     <p className="text-xs text-text-subtle">

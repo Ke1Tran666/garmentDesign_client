@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Logo = ({
   to = "/",
-  textColor = "text-text-primary",
+  textColor = "text-text-strong",
   className = "",
 }) => {
   return (

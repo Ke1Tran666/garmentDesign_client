@@ -22,8 +22,8 @@ import { userApi } from "@/api/userApi";
 import { authStorage } from "@/lib/authStorage";
 
 const statusClassName = {
-  Active: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-  Inactive: "bg-surface-muted text-text-muted ring-1 ring-gray-200",
+  Active: "bg-success-soft text-success ring-1 ring-success-border",
+  Inactive: "bg-surface-muted text-text-muted ring-1 ring-border",
 };
 
 const addressFields = [

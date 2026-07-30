@@ -135,7 +135,7 @@ const SecurityPage = () => {
               </HandleButton>
               <HandleButton 
                 onClick={handleResetPasswordForm}
-                className={`border! border-red-600! text-red-600!`}
+                className={`border! border-danger! text-danger!`}
               >
                 Default
               </HandleButton>

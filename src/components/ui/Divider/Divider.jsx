@@ -4,7 +4,7 @@ export const Divider = ({
 }) => {
   return (
     <div
-      className={`my-7 h-px w-full bg-gray-200 ${className}`}
+      className={`my-7 h-px w-full bg-border ${className}`}
     />
   );
 };

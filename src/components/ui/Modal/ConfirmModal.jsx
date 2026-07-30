@@ -15,7 +15,7 @@ const ConfirmModal = ({
 
   const confirmClassName =
     confirmVariant === "danger"
-      ? "bg-red-600! hover:bg-red-700"
+      ? "bg-danger! hover:bg-danger/90!"
       : "bg-brand! hover:opacity-90";
 
   return (

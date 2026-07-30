@@ -31,22 +31,22 @@ const ProcessCard = ({number,title, description,delay}) =>(
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface border-2 border-brand/20 shadow-[0_4px_20px_rgba(1,146,245,0.1)] mb-6">
             <span className="font-heading text-xl font-500 text-brand">{number}</span>
         </div>
-        <h3 className="font-heading font-500 text-lg text-dark mb-2">{title}</h3>
-        <p className="text-sm text-subtle leading-relaxed">{description}</p>
+        <h3 className="font-heading font-500 text-lg text-text-strong mb-2">{title}</h3>
+        <p className="text-sm text-text-subtle leading-relaxed">{description}</p>
     </div>
 )
 
 const ProcessSection = () => {
   return (
     <>
-        <section id="process" className="relative py-24 md:py-32 px-4 bg-card-bg/50">
+        <section id="process" className="relative py-24 md:py-32 px-4 bg-surface-subtle/50">
             <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border to-transparent">
             </div>
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
                     <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium reveal">Quy trình</span>
-                    <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-dark reveal" style={{transitionDelay:"100ms"}}>
-                        4 bước <span className="text-muted1">đơn giản</span>
+                    <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-text-strong reveal" style={{transitionDelay:"100ms"}}>
+                        4 bước <span className="text-text-muted">đơn giản</span>
                     </h2>
                 </div>
 

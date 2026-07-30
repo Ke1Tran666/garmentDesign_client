@@ -54,15 +54,15 @@ const getStatusClass = (status) => {
   const text = String(status || "").toLowerCase();
 
   if (text.includes("hủy") || text === "inactive") {
-    return "bg-red-50 text-red-600";
+    return "bg-danger-soft text-danger";
   }
 
   if (text === "pending") {
-    return "bg-amber-50 text-amber-600";
+    return "bg-warning-soft text-warning";
   }
 
   if (text === "active") {
-    return "bg-blue-50 text-blue-600";
+    return "bg-info-soft text-info";
   }
 
   return "bg-surface-muted text-text-muted";
@@ -718,7 +718,7 @@ const ServiceOrderPage = () => {
               ?
             </p>
 
-            <p className="mt-2 text-xs text-red-500">
+            <p className="mt-2 text-xs text-danger">
               Đơn chưa có nhân viên tiếp nhận.
               Đơn hàng, ảnh đại diện và toàn bộ
               file bổ sung sẽ bị xóa vĩnh viễn.
@@ -727,7 +727,7 @@ const ServiceOrderPage = () => {
         )}
 
         {removeError && (
-          <div className="mt-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2.5 text-sm text-red-600">
+          <div className="mt-4 rounded-lg border border-danger-border bg-danger-soft px-3 py-2.5 text-sm text-danger">
             {removeError}
           </div>
         )}

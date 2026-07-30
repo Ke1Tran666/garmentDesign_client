@@ -191,7 +191,7 @@ const PrivacyPage = () => {
       >
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-danger">
               This action cannot be undone.
             </p>
           </div>
@@ -201,7 +201,7 @@ const PrivacyPage = () => {
             icon={Trash2}
             onClick={handleDeleteAccount}
             disabled={deleting}
-            className="bg-red-600! disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-danger! disabled:cursor-not-allowed disabled:opacity-50"
           >
             Delete Account
           </HandleButtonIcon>

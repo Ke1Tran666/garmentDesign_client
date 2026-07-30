@@ -166,7 +166,7 @@ const ProfilePage = () => {
 
   if (error) {
     return (
-      <div className="px-6 py-6 text-sm font-medium text-red-500">
+      <div className="px-6 py-6 text-sm font-medium text-danger">
         {error}
       </div>
     );
@@ -518,7 +518,7 @@ const ProfilePage = () => {
       <div className="flex justify-end gap-3">
         <HandleButton
           onClick={handleResetProfile}
-          className={`bg-[#F5F5F5]! text-text-muted!`}
+          className={`bg-surface-muted! text-text-muted!`}
         >
           Default
         </HandleButton>

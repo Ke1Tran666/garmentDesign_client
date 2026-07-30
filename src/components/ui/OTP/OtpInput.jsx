@@ -8,7 +8,7 @@ import {
 const variantClasses = {
   dark: `
     border-white/25 bg-white/10 text-white
-    focus:border-[#80d0ff]
+    focus:border-auth-accent
     focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
   `,
   light: `

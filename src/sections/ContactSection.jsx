@@ -32,7 +32,7 @@ const CONTACT_INFO = [
 ];
 
 const inputCls =
-  "w-full bg-card-bg border border-border rounded-xl px-4 py-3 text-sm font-body text-dark placeholder-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all";
+  "w-full bg-surface-subtle border border-border rounded-xl px-4 py-3 text-sm font-body text-text-strong placeholder:text-text-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all";
 
 const ContactInfo = ({ icon: Icon, label, value, delay }) => {
   return (
@@ -44,8 +44,8 @@ const ContactInfo = ({ icon: Icon, label, value, delay }) => {
         <Icon className="w-5 h-5 text-brand" />
       </div>
       <div>
-        <div className="text-sm font-heading font-medium text-dark">{label}</div>
-        <div className="text-xs text-subtle">{value}</div>
+        <div className="text-sm font-heading font-medium text-text-strong">{label}</div>
+        <div className="text-xs text-text-subtle">{value}</div>
       </div>
     </div>
   );
@@ -60,7 +60,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
-          <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
+          <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
             Họ tên *
           </label>
           <input
@@ -73,7 +73,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
         </div>
 
         <div>
-          <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
+          <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
             Số điện thoại *
           </label>
           <input
@@ -87,7 +87,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
       </div>
 
       <div>
-        <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
+        <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
           Email *
         </label>
         <input
@@ -100,14 +100,14 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
       </div>
 
       <div>
-        <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
+        <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
           Dịch vụ cần *
         </label>
 
         <select
           name="serviceCode"
           required
-          className={`${inputCls} appearance-none cursor-pointer text-muted1`}
+          className={`${inputCls} appearance-none cursor-pointer text-text-muted`}
           defaultValue=""
           disabled={loadingServices || submitting}
         >
@@ -124,7 +124,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
       </div>
 
       <div>
-        <label className="text-xs font-mono tracking-wider uppercase text-subtle mb-2 block">
+        <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
           Mô tả yêu cầu
         </label>
         <textarea
@@ -245,7 +245,7 @@ const ContactSection = () => {
   };
 
   return (
-    <section id="contact" className="relative py-24 md:py-32 px-4 bg-card-bg/50">
+    <section id="contact" className="relative py-24 md:py-32 px-4 bg-surface-subtle/50">
       <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
 
       <div className="max-w-6xl mx-auto">
@@ -256,16 +256,16 @@ const ContactSection = () => {
             </span>
 
             <h2
-              className="font-heading text-3xl md:text-4xl font-medium tracking-tight mt-4 text-dark reveal"
+              className="font-heading text-3xl md:text-4xl font-medium tracking-tight mt-4 text-text-strong reveal"
               style={{ transitionDelay: "100ms" }}
             >
               Kết nối với
               <br />
-              <span className="text-muted1">HoaTran maymac</span>
+              <span className="text-text-muted">HoaTran maymac</span>
             </h2>
 
             <p
-              className="text-muted1 font-body font-300 mt-4 text-sm leading-relaxed reveal"
+              className="text-text-muted font-body font-300 mt-4 text-sm leading-relaxed reveal"
               style={{ transitionDelay: "200ms" }}
             >
               Gửi form hoặc liên hệ trực tiếp. Chúng tôi phản hồi trong vòng 2 giờ trong giờ hành chính.

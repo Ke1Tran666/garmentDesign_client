@@ -4,8 +4,8 @@ import { useState } from "react";
 
 const ProviderBadge = ({ provider }) => {
   const styles = {
-    local: "bg-blue-100 text-blue-700",
-    google: "bg-red-100 text-red-700",
+    local: "bg-info-soft text-info",
+    google: "bg-danger-soft text-danger",
     phone: "bg-purple-100 text-purple-700",
   };
 
@@ -32,7 +32,7 @@ const ActionButton = ({ icon: Icon, danger = false, onClick }) => {
         flex h-10 w-10 items-center justify-center rounded-lg border transition
         ${
           danger
-            ? "border-red-200 text-red-500 hover:bg-red-50"
+            ? "border-danger-border text-danger hover:bg-danger-soft"
             : "border-border text-text-muted hover:bg-surface-subtle"
         }
       `}
@@ -51,7 +51,7 @@ export const EmptyContact = ({
 }) => {
   return (
     <div>
-      <p className="mb-3 text-sm text-red-500">{message}</p>
+      <p className="mb-3 text-sm text-danger">{message}</p>
 
       <div className="overflow-visible">
         {!showForm ? (
@@ -97,8 +97,8 @@ const SettingMenu = ({ badgeStatus, onVerify, onRemove }) => {
               className="
                 flex w-full items-center gap-2
                 px-4 py-3 text-left text-sm
-                text-red-500
-                hover:bg-red-50
+                text-danger
+                hover:bg-danger-soft
               "
             >
               <Unlink size={16} />

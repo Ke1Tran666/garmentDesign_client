@@ -17,7 +17,7 @@ const DataTable = ({
         colSpan={columns.length}
         className={`
           px-4 py-10 text-center text-sm
-          ${isError ? "text-red-500" : "text-text-muted"}
+          ${isError ? "text-danger" : "text-text-muted"}
         `}
       >
         {message}
@@ -64,7 +64,7 @@ const DataTable = ({
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border-subtle">
           {loading
             ? renderStateRow(loadingText)
             : error

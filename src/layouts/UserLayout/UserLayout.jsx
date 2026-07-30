@@ -258,7 +258,7 @@ const UserLayout = ({ title = "My Account" }) => {
         <Logo />
 
         <div className="mb-10 mt-10 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold text-[#101828]">
+          <h2 className="text-xl font-semibold text-text-strong">
             {getGreeting()}
           </h2>
 
@@ -266,7 +266,7 @@ const UserLayout = ({ title = "My Account" }) => {
             {user?.fullName || user?.userCode || "Guest"}
           </h3>
 
-          <p className="mt-3 text-sm text-[#667085]">
+          <p className="mt-3 text-sm text-text-muted">
             {new Date().toLocaleDateString("vi-VN", {
               weekday: "short",
               day: "2-digit",
@@ -376,7 +376,7 @@ const UserLayout = ({ title = "My Account" }) => {
             >
               <span
                 className="
-                  absolute right-2 top-2 h-2.5 w-2.5 animate-pulse rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/50
+                  absolute right-2 top-2 h-2.5 w-2.5 animate-pulse rounded-full bg-warning shadow-lg shadow-warning/50
                 "
               />
             </ButtonIcon>
@@ -442,8 +442,8 @@ const UserLayout = ({ title = "My Account" }) => {
                     className="
                       flex w-full items-center gap-3
                       rounded-lg px-3 py-2
-                      text-sm text-red-600
-                      hover:bg-red-50
+                      text-sm text-danger
+                      hover:bg-danger-soft
                     "
                   >
                     <Lock size={16} />
@@ -455,13 +455,13 @@ const UserLayout = ({ title = "My Account" }) => {
           </div>
         </div>
 
-        <header className="flex items-center justify-between border-b-3 border-zinc-50 py-6">
+        <header className="flex items-center justify-between border-b-3 border-border-subtle py-6">
           <div className="flex flex-col justify-center gap-2">
             <h2 className="text-3xl font-bold text-text-strong">
               {currentItem?.label || title}
             </h2>
 
-            <p className="text-m text-[#667085]">
+            <p className="text-m text-text-muted">
               {currentItem?.text}
             </p>
           </div>

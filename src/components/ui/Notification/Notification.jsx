@@ -4,22 +4,22 @@ import '../../../css/notification.css'
 const TYPES = {
   success: {
     icon: CircleCheck,
-    iconClass: "text-brand",
-    wrapClass: "bg-brand/10",
-    borderClass: "border-brand/20",
+    iconClass: "text-success",
+    wrapClass: "bg-success-soft",
+    borderClass: "border-success-border",
   },
   error: {
     icon: XCircle,
-    iconClass: "text-red-500",
-    wrapClass: "bg-red-500/10",
-    borderClass: "border-red-500/20",
+    iconClass: "text-danger",
+    wrapClass: "bg-danger-soft",
+    borderClass: "border-danger-border",
   },
   warning: {
     icon: CircleAlert,
-    iconClass: "text-amber-500",
-    wrapClass: "bg-amber-500/10",
-    borderClass: "border-amber-500/20",
-  },
+    iconClass: "text-warning",
+    wrapClass: "bg-warning-soft",
+    borderClass: "border-warning-border",
+  }
 };
 
 const DEFAULT_MESSAGES = {
@@ -41,14 +41,14 @@ const Notification = ({type = "success",message,description, onClose, visible}) 
         <Icon className={`w-4 h-4 ${config.iconClass}`} />
       </div>
       <div className="flex-1">
-        <div className="text-sm font-heading font-500 text-dark">
+        <div className="text-sm font-heading font-500 text-text-strong">
           {message ?? defaults.title}
         </div>
-        <div className="text-xs text-subtle">
+        <div className="text-xs text-text-subtle">
           {description ?? defaults.msg}
         </div>
       </div>
-      <button onClick={onClose} className="w-8 h-8 rounded-full bg-surface-muted text-gray-600 flex items-center justify-center shrink-0 transition-opacity ease-linear hover:opacity-70">
+      <button onClick={onClose} className="w-8 h-8 rounded-full bg-surface-muted text-text-muted flex items-center justify-center shrink-0 transition-opacity ease-linear hover:opacity-70">
         <X className="w-6 h-6" />
       </button>
     </div>

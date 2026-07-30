@@ -24,7 +24,7 @@ const FloatingInput = ({
           text-sm text-white outline-none
           transition-all duration-300
           placeholder:text-transparent
-          focus:border-[#80d0ff]
+          focus:border-auth-accent
           focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
           ${className}
         `}
@@ -37,9 +37,9 @@ const FloatingInput = ({
           -translate-y-1/2 text-sm text-white/55
           transition-all duration-300
           peer-valid:top-2 peer-valid:translate-y-0
-          peer-valid:text-xs peer-valid:text-[#80d0ff]
+          peer-valid:text-xs peer-valid:text-auth-accent
           peer-focus:top-2 peer-focus:translate-y-0
-          peer-focus:text-xs peer-focus:text-[#80d0ff]
+          peer-focus:text-xs peer-focus:text-auth-accent
           ${labelClassName}
         `}
       >

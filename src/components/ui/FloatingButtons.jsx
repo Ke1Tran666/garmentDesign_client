@@ -108,8 +108,8 @@ const FloatingButtons = () => {
                         className={`
                             absolute top-2 right-2
                             border border-border
-                            bg-surface! text-dark!
-                            hover:bg-dark! hover:text-white!
+                            bg-surface! text-text-strong!
+                            hover:bg-foreground! hover:text-white!
                             ${menuOpen
                             ? "opacity-100 scale-100 pointer-events-auto"
                             : "opacity-0 scale-50 pointer-events-none"}
@@ -124,8 +124,7 @@ const FloatingButtons = () => {
                             onClick={handleLogout}
                             className={`
                                 absolute bottom-2 left-2
-                                bg-red-500! text-white!
-                                hover:bg-red-600!
+                                  bg-danger! text-white! hover:bg-danger/90!
                                 ${menuOpen
                                 ? "opacity-100 scale-100 pointer-events-auto"
                                 : "opacity-0 scale-50 pointer-events-none"}
@@ -138,7 +137,7 @@ const FloatingButtons = () => {
                         className={`
                             absolute bottom-14 -right-1
                             px-3 py-1 rounded-md
-                            bg-dark! text-white! text-xs font-medium
+                            bg-foreground! text-white! text-xs font-medium
                             whitespace-nowrap shadow-lg
                             pointer-events-none
                             transition-all duration-300
@@ -158,7 +157,7 @@ const FloatingButtons = () => {
                         onClick={handleMainButtonClick}
                         className="
                             absolute bottom-0 right-0 h-12 w-12
-                            bg-dark! text-white
+                            bg-foreground! text-white
                         "
                     />
                 </div>
@@ -171,7 +170,7 @@ const FloatingButtons = () => {
                             : "w-0 opacity-0 translate-x-5 pointer-events-none"
                     }`}
                 >
-                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-dark">
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-text-strong">
                         {scrollPercent}%
                     </div>
                     <ButtonIcon

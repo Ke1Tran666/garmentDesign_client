@@ -36,7 +36,7 @@ const AuthBackground = () => {
           absolute bottom-[10%] right-[8%]
           h-20 w-45
           rounded-[60%_40%_50%_60%/40%_60%_40%_60%]
-          bg-[#80d0ff] opacity-25
+          bg-auth-accent opacity-25
           animate-[float2_9s_ease-in-out_infinite]
         "
       />

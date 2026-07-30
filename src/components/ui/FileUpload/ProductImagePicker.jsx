@@ -98,7 +98,7 @@ const ProductImagePicker = ({
             onClick={onRemove}
             disabled={disabled}
             aria-label="Xóa ảnh đã chọn"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-red-500 disabled:opacity-50"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-danger disabled:opacity-50"
           >
             <Trash2 size={15} />
           </button>

@@ -135,7 +135,7 @@ const RegisterPage = () => {
                           text-left text-sm text-white
                           outline-none transition-all duration-300
                           hover:border-white/40!
-                          focus:border-[#80d0ff]!
+                          focus:border-auth-accent!
                           focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
                       "
                   >
@@ -216,7 +216,7 @@ const RegisterPage = () => {
           Đã có tài khoản?{" "}
           <Link
             to="/login"
-            className="font-medium text-[#80d0ff] hover:text-white"
+            className="font-medium text-auth-accent hover:text-white"
           >
             Đăng nhập
           </Link>

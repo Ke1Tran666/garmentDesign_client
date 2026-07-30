@@ -75,7 +75,7 @@ const UploadBox = ({
           <button
             type="button"
             onClick={onDelete}
-            className="text-sm font-semibold text-red-500 transition hover:bg-red-50"
+            className="text-sm font-semibold text-danger transition hover:bg-danger-soft"
           >
             {deleteText}
           </button>

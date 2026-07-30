@@ -42,8 +42,8 @@ const ProductCard = ({ img, name, service }) => (
     <div className="p-5">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-heading font-medium text-base text-dark">{name}</h3>
-          <p className="text-xs text-subtle mt-1">{service}</p>
+          <h3 className="font-heading font-medium text-base text-text-strong">{name}</h3>
+          <p className="text-xs text-text-subtle mt-1">{service}</p>
         </div>
         <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:text-brand group-hover:bg-brand-50 transition-all duration-300 shrink-0 mt-0.5">
           <ArrowUpRight className="w-3.5 h-3.5" />
@@ -73,7 +73,7 @@ const ProductsSection = () => {
   };
 
   return (
-    <section id="products" className="relative py-24 md:py-32 px-4 bg-card-bg/50">
+    <section id="products" className="relative py-24 md:py-32 px-4 bg-surface-subtle/50">
       <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
 
       <div className="max-w-6xl mx-auto relative z-10">
@@ -81,10 +81,10 @@ const ProductsSection = () => {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 reveal">
           <div>
             <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium">Sản phẩm</span>
-            <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-dark">
+            <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-text-strong">
               Sản phẩm của chúng tôi
             </h2>
-            <p className="text-muted1 font-light mt-3 max-w-lg">
+            <p className="text-text-muted font-light mt-3 max-w-lg">
               Những sản phẩm thực tế chúng tôi đã hoàn thành cho khách hàng trên khắp Việt Nam.
             </p>
           </div>
@@ -101,7 +101,7 @@ const ProductsSection = () => {
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={`tab-btn text-sm font-heading px-5 py-2 rounded-full border transition-all duration-300 hover:border-brand/30 
-                ${activeTab === tab.id ? "active border-brand text-brand" : "border-border text-muted1"}`}
+                ${activeTab === tab.id ? "active border-brand text-brand" : "border-border text-text-muted"}`}
             >
               {tab.label}
             </button>

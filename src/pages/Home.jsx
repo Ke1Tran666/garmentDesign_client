@@ -30,14 +30,14 @@ const Home = () => {
 
                 {/* Content */}
                 <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto pt-32">
-                    <h1 className="font-heading font-medium tracking-tighter leading-[0.9] animate-fiu delay-1" style={{ fontSize: "clamp(2.8rem, 8vw, 6.5vw)", color: "#111827" }}>
+                    <h1 className="font-heading font-medium tracking-tighter leading-[0.9] animate-fiu delay-1" style={{ fontSize: "clamp(2.8rem, 8vw, 6.5vw)" }}>
                         Giải pháp thiết kế
                         <br />
                         <span className="text-brand">may mặc</span> chuyên nghiệp
                         <br />
                         cho mọi thương hiệu
                     </h1>
-                    <p className="mt-8 text-muted1 font-light text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
+                    <p className="mt-8 text-text-muted font-light text-base md:text-lg max-w-2xl leading-relaxed animate-fiu delay-2">
                         Từ in sơ đồ, in rập, thiết kế đến tính định mức — HoaTran maymac cung cấp trọn gói giải pháp kỹ thuật
                         giúp tối ưu quy trình sản xuất thời trang của bạn.
                     </p>
@@ -46,7 +46,7 @@ const Home = () => {
                             Khám phá dịch vụ
                             <ArrowRight className="w-4 h-4" />
                         </a>
-                        <a href="#" className="flex items-center gap-2.5 text-muted1 hover:text-dark text-base transition-colors duration-300 group">
+                        <a href="#" className="flex items-center gap-2.5 text-text-muted hover:text-text-strong text-base transition-colors duration-300 group">
                             <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 transition-all duration-300">
                                 <Play className="w-4 h-4 ml-0.5 group-hover:animate-play-ud" />
                             </span>
@@ -59,26 +59,26 @@ const Home = () => {
                 <div className="relative z-10 max-w-4xl mx-auto w-full animate-fiu delay-4" style={{ marginTop: 10 }}>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.03)]">
                         <div className="bg-surface p-5 text-center">
-                            <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="3000">0</div>
-                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Thiết kế</div>
+                            <div className="font-heading text-2xl md:text-3xl font-medium text-text-strong counter" data-target="3000">0</div>
+                            <div className="text-xs text-text-subtle mt-1 font-mono tracking-wider uppercase">Thiết kế</div>
                         </div>
                         <div className="bg-surface p-5 text-center">
-                            <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="500">0</div>
-                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Khách hàng</div>
+                            <div className="font-heading text-2xl md:text-3xl font-medium text-text-strong counter" data-target="500">0</div>
+                            <div className="text-xs text-text-subtle mt-1 font-mono tracking-wider uppercase">Khách hàng</div>
                         </div>
                         <div className="bg-surface p-5 text-center">
-                            <div className="font-heading text-2xl md:text-3xl font-medium text-dark counter" data-target="8">0</div>
-                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">Năm kinh nghiệm</div>
+                            <div className="font-heading text-2xl md:text-3xl font-medium text-text-strong counter" data-target="8">0</div>
+                            <div className="text-xs text-text-subtle mt-1 font-mono tracking-wider uppercase">Năm kinh nghiệm</div>
                         </div>
                         <div className="bg-surface p-5 text-center">
                             <div className="font-heading text-2xl md:text-3xl font-medium text-brand counter" data-target="99">0</div>
-                            <div className="text-xs text-subtle mt-1 font-mono tracking-wider uppercase">% Hài lòng</div>
+                            <div className="text-xs text-text-subtle mt-1 font-mono tracking-wider uppercase">% Hài lòng</div>
                         </div>
                     </div>
                 </div>
 
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 scroll-hint" style={{ zIndex: 10 }}>
-                    <ChevronDown className="w-5 h-5 text-subtle" />
+                    <ChevronDown className="w-5 h-5 text-text-subtle" />
                 </div>
             </section>
 
@@ -108,11 +108,11 @@ const Home = () => {
                             </div>
 
                             <div>
-                                <div className="text-sm font-medium font-heading text-dark">
+                                <div className="text-sm font-medium font-heading text-text-strong">
                                 Đội ngũ kỹ thuật
                                 </div>
 
-                                <div className="text-xs text-muted1">
+                                <div className="text-xs text-text-muted">
                                 15+ chuyên viên lành nghề
                                 </div>
                             </div>
@@ -131,19 +131,19 @@ const Home = () => {
                         </div>
 
                         <h2
-                        className="mt-4 text-3xl leading-tight tracking-tight md:text-5xl font-heading font-medium text-dark reveal"
+                        className="mt-4 text-3xl leading-tight tracking-tight md:text-5xl font-heading font-medium text-text-strong reveal"
                         style={{ transitionDelay: "100ms" }}
                         >
                         Đơn vị tiên phong về
                         <br />
-                        <span className="text-muted1">
+                        <span className="text-text-muted">
                             kỹ thuật may mặc
                         </span>{" "}
                         tại Việt Nam
                         </h2>
 
                         <p
-                        className="mt-6 text-base leading-relaxed md:text-lg text-muted1 font-light reveal"
+                        className="mt-6 text-base leading-relaxed md:text-lg text-text-muted font-light reveal"
                         style={{ transitionDelay: "200ms" }}
                         >
                         HoaTran maymac chuyên cung cấp các dịch vụ kỹ thuật thời trang bao gồm
@@ -163,12 +163,12 @@ const Home = () => {
                                 <Zap className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-medium font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-text-strong">
                                 Nhanh chóng
                             </span>
                             </div>
 
-                            <p className="text-xs leading-relaxed text-subtle">
+                            <p className="text-xs leading-relaxed text-text-subtle">
                             Xử lý đơn trong 24–48h, đáp ứng tiến độ sản xuất khắt khe.
                             </p>
                         </div>
@@ -182,12 +182,12 @@ const Home = () => {
                                 <Target className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-medium font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-text-strong">
                                 Chính xác
                             </span>
                             </div>
 
-                            <p className="text-xs leading-relaxed text-subtle">
+                            <p className="text-xs leading-relaxed text-text-subtle">
                             Sai số rập cắt &lt; 2mm, định mức chênh lệch &lt; 3%.
                             </p>
                         </div>
@@ -201,12 +201,12 @@ const Home = () => {
                                 <FileCheck className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-medium font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-text-strong">
                                 Chuẩn format
                             </span>
                             </div>
 
-                            <p className="text-xs leading-relaxed text-subtle">
+                            <p className="text-xs leading-relaxed text-text-subtle">
                             Sơ đồ, rập đúng chuẩn xuất khẩu, tương thích mọi phần mềm CAD.
                             </p>
                         </div>
@@ -220,12 +220,12 @@ const Home = () => {
                                 <Headphones className="w-4 h-4 text-brand" />
                             </div>
 
-                            <span className="text-sm font-medium font-heading text-dark">
+                            <span className="text-sm font-medium font-heading text-text-strong">
                                 Hỗ trợ 1:1
                             </span>
                             </div>
 
-                            <p className="text-xs leading-relaxed text-subtle">
+                            <p className="text-xs leading-relaxed text-text-subtle">
                             Kỹ sư trực tiếp tư vấn, chỉnh sửa đến khi khách hàng hài lòng.
                             </p>
                         </div>

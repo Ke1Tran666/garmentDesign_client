@@ -28,7 +28,7 @@ const SelectedFileItem = ({
       onClick={() => onRemove(file)}
       disabled={disabled}
       aria-label={`Xóa ${file.name}`}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-text-subtle hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-text-subtle hover:bg-danger-soft hover:text-danger disabled:opacity-50"
     >
       <Trash2 size={15} />
     </button>

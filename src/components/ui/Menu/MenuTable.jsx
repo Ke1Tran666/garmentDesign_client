@@ -96,7 +96,7 @@ const MenuTable = ({
               disabled:opacity-50
               ${
                 item.danger
-                  ? "text-red-600 hover:bg-red-50"
+                  ? "text-danger hover:bg-danger-soft"
                   : "text-text-default hover:bg-surface-subtle"
               }
             `}

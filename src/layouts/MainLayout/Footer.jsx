@@ -72,9 +72,9 @@ const Footer = () => {
         <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
             <div className="md:col-span-4">
-                <Logo textColor="text-dark" />
+                <Logo textColor="text-text-strong" />
 
-                <p className="text-sm text-subtle mt-4 leading-relaxed max-w-xs">
+                <p className="text-sm text-text-subtle mt-4 leading-relaxed max-w-xs">
                 Đơn vị hàng đầu về dịch vụ kỹ thuật may mặc: in sơ đồ, in rập,
                 thiết kế và tính định mức cho ngành thời trang Việt Nam.
                 </p>
@@ -84,7 +84,7 @@ const Footer = () => {
                     <a
                     key={i}
                     href={href}
-                    className="w-9 h-9 rounded-xl border border-border flex items-center justify-center text-subtle hover:text-brand hover:border-brand/30 hover:bg-brand-50 transition-all duration-300"
+                    className="w-9 h-9 rounded-xl border border-border flex items-center justify-center text-text-subtle hover:text-brand hover:border-brand/30 hover:bg-brand-50 transition-all duration-300"
                     >
                     <Icon className="w-4 h-4" />
                     </a>
@@ -93,7 +93,7 @@ const Footer = () => {
             </div>
 
             <div className="md:col-span-2">
-                <h4 className="text-xs font-mono tracking-widest uppercase text-subtle mb-4 font-500">
+                <h4 className="text-xs font-mono tracking-widest uppercase text-text-subtle mb-4 font-500">
                 Dịch vụ
                 </h4>
 
@@ -101,7 +101,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#services"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     In Sơ Đồ
                     </a>
@@ -109,7 +109,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#services"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     In Rập
                     </a>
@@ -117,7 +117,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#services"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     Thiết Kế
                     </a>
@@ -125,7 +125,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#services"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     Tính Định Mức
                     </a>
@@ -134,7 +134,7 @@ const Footer = () => {
             </div>
 
             <div className="md:col-span-2">
-                <h4 className="text-xs font-mono tracking-widest uppercase text-subtle mb-4 font-500">
+                <h4 className="text-xs font-mono tracking-widest uppercase text-text-subtle mb-4 font-500">
                 Về chúng tôi
                 </h4>
 
@@ -142,7 +142,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#about"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     Câu chuyện
                     </a>
@@ -150,7 +150,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#process"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     Quy trình
                     </a>
@@ -158,7 +158,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#testimonials"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     Đánh giá
                     </a>
@@ -166,7 +166,7 @@ const Footer = () => {
                 <li>
                     <a
                     href="#"
-                    className="text-sm text-muted1 hover:text-brand transition-colors duration-300"
+                    className="text-sm text-text-muted hover:text-brand transition-colors duration-300"
                     >
                     Tuyển dụng
                     </a>
@@ -175,11 +175,11 @@ const Footer = () => {
             </div>
 
             <div className="md:col-span-4">
-                <h4 className="text-xs font-mono tracking-widest uppercase text-subtle mb-4 font-500">
+                <h4 className="text-xs font-mono tracking-widest uppercase text-text-subtle mb-4 font-500">
                 Nhận tin cập nhật
                 </h4>
 
-                <p className="text-sm text-subtle mb-4">
+                <p className="text-sm text-text-subtle mb-4">
                 Nhận tin tức mới nhất về kỹ thuật may mặc, dịch vụ thiết kế và
                 các ưu đãi đặc biệt từ HoaTran maymac.
                 </p>
@@ -194,7 +194,7 @@ const Footer = () => {
                     name="email"
                     placeholder="Email của bạn"
                     required
-                    className="flex-1 bg-card-bg border border-border rounded-xl px-4 py-2.5 text-sm font-body text-dark placeholder-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all"
+                    className="flex-1 bg-surface-subtle border border-border rounded-xl px-4 py-2.5 text-sm font-body text-text-strong placeholder-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all"
                 />
 
                 <button
@@ -208,20 +208,20 @@ const Footer = () => {
             </div>
 
             <div className="mt-16 pt-8 border-t border-border/60 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-xs text-subtle">
+            <div className="text-xs text-text-subtle">
                 © 2025 HoaTran maymac. All rights reserved.
             </div>
 
             <div className="flex gap-6">
                 <a
                 href="#"
-                className="text-xs text-subtle hover:text-muted1 transition-colors"
+                className="text-xs text-text-subtle hover:text-text-muted transition-colors"
                 >
                 Chính sách bảo mật
                 </a>
                 <a
                 href="#"
-                className="text-xs text-subtle hover:text-muted1 transition-colors"
+                className="text-xs text-text-subtle hover:text-text-muted transition-colors"
                 >
                 Điều khoản sử dụng
                 </a>

@@ -594,7 +594,7 @@ const ServiceOrderCreateModal = ({
               onClick={handleClose}
               disabled={submitting}
               aria-label="Đóng form tạo đơn"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X size={19} />
             </button>
@@ -616,7 +616,7 @@ const ServiceOrderCreateModal = ({
                 Đang tải dữ liệu...
               </div>
             ) : optionState.error ? (
-              <div className="flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
+              <div className="flex items-start gap-3 rounded-2xl border border-danger-border bg-danger-soft p-4 text-sm text-danger">
                 <AlertCircle
                   size={19}
                   className="mt-0.5 shrink-0"
@@ -835,7 +835,7 @@ const ServiceOrderCreateModal = ({
                 </div>
 
                 {createdOrder && (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-700">
+                  <div className="rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm leading-6 text-warning">
                     Đơn hàng{" "}
                     <span className="font-bold">
                       ORD-
@@ -883,7 +883,7 @@ const ServiceOrderCreateModal = ({
                 )}
 
                 {submitError && (
-                  <div className="flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  <div className="flex items-start gap-3 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger">
                     <AlertCircle
                       size={18}
                       className="mt-0.5 shrink-0"

@@ -338,12 +338,12 @@ const DashboardPage = () => {
         show: false,
       },
     },
-    colors: ["#0192F5"],
+    colors: ["var(--chart-1)"],
     dataLabels: {
       enabled: false,
     },
     grid: {
-      borderColor: "#f1f5f9",
+      borderColor: "var(--border-subtle)",
     },
     plotOptions: {
       bar: {
@@ -355,7 +355,7 @@ const DashboardPage = () => {
       categories: monthlyOrders.map((item) => item.month),
       labels: {
         style: {
-          colors: "#6b7280",
+          colors: "var(--text-muted)",
           fontSize: "12px",
         },
       },
@@ -363,7 +363,7 @@ const DashboardPage = () => {
     yaxis: {
       labels: {
         style: {
-          colors: "#6b7280",
+          colors: "var(--text-muted)",
           fontSize: "12px",
         },
       },
@@ -429,7 +429,7 @@ const DashboardPage = () => {
 
             <p
               className={`mt-1 text-sm ${
-                orderPercent >= 0 ? "text-emerald-500" : "text-red-500"
+                orderPercent >= 0 ? "text-success" : "text-danger"
               }`}
             >
               {orderPercent >= 0 ? "+" : ""}

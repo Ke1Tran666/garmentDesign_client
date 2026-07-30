@@ -34,7 +34,7 @@ const ForgotPasswordSteps = ({ currentStep }) => {
                     flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300
                     ${
                       active || done
-                        ? "border-[#80d0ff] bg-[#80d0ff] text-[#0038a0]"
+                        ? "border-auth-accent bg-auth-accent text-auth-accent-foreground"
                         : "border-white/35 bg-white/10 text-white/60"
                     }
                   `}
@@ -45,7 +45,7 @@ const ForgotPasswordSteps = ({ currentStep }) => {
                 <span
                   className={`
                     mt-2 text-center text-[11px] leading-4 transition-all duration-300
-                    ${active ? "text-[#80d0ff]" : "text-white/50"}
+                    ${active ? "text-auth-accent" : "text-white/50"}
                   `}
                 >
                   {label}
@@ -56,7 +56,7 @@ const ForgotPasswordSteps = ({ currentStep }) => {
                 <div
                   className={`
                     mt-3 h-px flex-1 transition-all duration-300
-                    ${done ? "bg-[#80d0ff]" : "bg-white/25"}
+                    ${done ? "bg-auth-accent" : "bg-white/25"}
                   `}
                 />
               )}
@@ -229,7 +229,7 @@ const ForgotPasswordPage = () => {
               <div className="mb-5">
                 <p className="mb-4 text-center text-sm text-white/60">
                   Mã OTP đã gửi đến{" "}
-                  <span className="font-medium text-[#80d0ff]">
+                  <span className="font-medium text-auth-accent">
                     {email}
                   </span>
                 </p>
@@ -250,7 +250,7 @@ const ForgotPasswordPage = () => {
                       setStep(1);
                       setOtp(createEmptyOtp());
                     }}
-                    className="text-xs text-[#80d0ff] transition hover:text-white"
+                    className="text-xs text-auth-accent transition hover:text-white"
                   >
                     Đổi email
                   </button>
@@ -309,7 +309,7 @@ const ForgotPasswordPage = () => {
             )}
 
             {step === 4 && (
-              <div className="mb-5 rounded-2xl border border-[#80d0ff]/30 bg-white/10 p-5 text-center">
+              <div className="mb-5 rounded-2xl border border-auth-accent/30 bg-white/10 p-5 text-center">
                 <h2 className="mb-2 text-lg font-semibold text-white">
                   Đổi mật khẩu thành công
                 </h2>
@@ -343,7 +343,7 @@ const ForgotPasswordPage = () => {
           Đã nhớ mật khẩu?{" "}
           <Link
             to="/login"
-            className="font-medium text-[#80d0ff] hover:text-white"
+            className="font-medium text-auth-accent hover:text-white"
           >
             Quay lại đăng nhập
           </Link>

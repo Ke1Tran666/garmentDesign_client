@@ -194,7 +194,7 @@ const Footer = () => {
                     name="email"
                     placeholder="Email của bạn"
                     required
-                    className="flex-1 bg-surface-subtle border border-border rounded-xl px-4 py-2.5 text-sm font-body text-text-strong placeholder-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all"
+                    className="flex-1 bg-surface-subtle border border-border rounded-xl px-4 py-2.5 text-sm font-body text-text-strong placeholder:text-text-subtle/60 focus:outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/10 transition-all"
                 />
 
                 <button

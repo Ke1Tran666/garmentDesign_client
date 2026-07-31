@@ -1,0 +1,119 @@
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+
+@keyframes play-ud {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-20deg);
+    }
+
+    75% {
+        transform: rotate(20deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+@keyframes float1 {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(5deg);
+    }
+}
+
+@keyframes float2 {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(15px) rotate(-4deg);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(32px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes formSwitch {
+    from {
+        opacity: 0;
+        filter: blur(4px);
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeText {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}

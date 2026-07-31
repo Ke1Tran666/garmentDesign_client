@@ -43,24 +43,87 @@ const defaultDashboardItems = [
   { id: "task-table", size: "full" },
 ];
 
-const getProgressByStatus = (status) => {
-  const text = String(status || "").toLowerCase();
+const isCancelledOrder = (order) =>
+  String(order?.status || "").toLowerCase() === "inactive" &&
+  Boolean(order?.deletedAt);
 
-  if (text.includes("hoàn") || text.includes("complete")) return 100;
-  if (text.includes("chờ") || text.includes("pending")) return 35;
-  if (text.includes("hủy") || text.includes("cancel")) return 0;
+const getOrderStatus = (order) => {
+  const status = String(
+    order?.status || "pending",
+  ).toLowerCase();
 
-  return 65;
+  if (isCancelledOrder(order)) {
+    return {
+      code: "inactive",
+      label: "Đã hủy đơn hàng",
+      progress: 0,
+      className: "bg-danger-soft text-danger",
+    };
+  }
+
+  if (status === "pending") {
+    return {
+      code: "pending",
+      label: "Chờ tiếp nhận",
+      progress: 35,
+      className: "bg-warning-soft text-warning",
+    };
+  }
+
+  if (status === "active") {
+    return {
+      code: "active",
+      label: "Đang xử lý",
+      progress: 65,
+      className: "bg-info-soft text-info",
+    };
+  }
+
+  return {
+    code: status,
+    label: "Không xác định",
+    progress: 0,
+    className: "bg-surface-muted text-text-muted",
+  };
 };
 
-const mapOrderToTask = (order) => ({
-  id: `ORD-${order.serviceOrderId}`,
-  customer: order.user?.fullName || "Không rõ",
-  service: order.service?.serviceName || "Không rõ dịch vụ",
-  deadline: order.completedDate || order.receivedDate || "Chưa có",
-  status: order.status || "Đang xử lý",
-  progress: getProgressByStatus(order.status),
-});
+const formatDate = (value) => {
+  if (!value) return "Chưa có";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Chưa có";
+  }
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+};
+
+const mapOrderToTask = (order) => {
+  const status = getOrderStatus(order);
+
+  return {
+    id: `ORD-${order.serviceOrderId}`,
+    orderId: order.serviceOrderId,
+    customer:
+      order.user?.fullName || "Không rõ",
+    service:
+      order.service?.serviceName ||
+      "Không rõ dịch vụ",
+    deadline: formatDate(
+      order.completedDate ||
+        order.receivedDate,
+    ),
+    status: status.label,
+    databaseStatus: status.code,
+    statusClassName: status.className,
+    progress: status.progress,
+  };
+};
 
 const getSizeClass = (size) => {
   switch (size) {
@@ -131,10 +194,43 @@ const Card = ({ children, className = "" }) => {
   );
 };
 
+const getFileCategory = (file) => {
+  const type = String(
+    file?.fileType || "",
+  ).toLowerCase();
+
+  if (type.startsWith("image/")) {
+    return "Ảnh bổ sung";
+  }
+
+  if (type.includes("pdf")) {
+    return "PDF";
+  }
+
+  if (
+    type.includes("word") ||
+    type.includes("document")
+  ) {
+    return "Word";
+  }
+
+  if (
+    type.includes("excel") ||
+    type.includes("spreadsheet")
+  ) {
+    return "Excel";
+  }
+
+  return "File khác";
+};
+
 const DashboardPage = () => {
   const [orders, setOrders] = useState([]);
   const [files, setFiles] = useState([]);
-  const [taskOrder, setTaskOrder] = useState([]);
+  const taskOrder = useMemo(
+    () => orders.map(mapOrderToTask),
+    [orders],
+  );
   const [loading, setLoading] = useState(true);
   const [searchValue, setSearchValue] = useState("");
   const [dashboardItems, setDashboardItems] = useState(() => {
@@ -168,96 +264,154 @@ const DashboardPage = () => {
   );
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const idUser = authStorage.getUserId();
+    let active = true;
 
-        if (!idUser) {
+    const fetchDashboardData = async () => {
+      const idUser = authStorage.getUserId();
+
+      if (!idUser) {
+        if (active) {
           setOrders([]);
           setFiles([]);
-          setTaskOrder([]);
-          return;
+          setLoading(false);
         }
 
-        const [orderData, fileData] =
-          await Promise.all([
+        return;
+      }
+
+      try {
+        const [orderResult, fileResult] =
+          await Promise.allSettled([
             serviceOrderApi.getByUser(idUser),
-            serviceOrderFileApi.getAll()
+            serviceOrderFileApi.getByUser(idUser),
           ]);
 
-        const orderList = orderData || [];
+        if (!active) return;
 
-        setOrders(orderList);
-        setFiles(fileData || []);
-        setTaskOrder(orderList.map(mapOrderToTask));
-      } catch (error) {
-        console.error("Lỗi tải dashboard:", error);
+        setOrders(
+          orderResult.status === "fulfilled" &&
+            Array.isArray(orderResult.value)
+            ? orderResult.value
+            : [],
+        );
+
+        setFiles(
+          fileResult.status === "fulfilled" &&
+            Array.isArray(fileResult.value)
+            ? fileResult.value
+            : [],
+        );
+
+        if (orderResult.status === "rejected") {
+          console.error(
+            "Không thể tải đơn hàng:",
+            orderResult.reason,
+          );
+        }
+
+        if (fileResult.status === "rejected") {
+          console.error(
+            "Không thể tải file:",
+            fileResult.reason,
+          );
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     fetchDashboardData();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
     localStorage.setItem("dashboard-layout", JSON.stringify(dashboardItems));
   }, [dashboardItems]);
 
-  const userOrderIds = useMemo(
-    () => orders.map((item) => item.serviceOrderId),
-    [orders]
-  );
-
-  const userFiles = useMemo(
+  const productImageCount = useMemo(
     () =>
-      files.filter((file) =>
-        userOrderIds.includes(file.serviceOrder?.serviceOrderId)
+      orders.reduce(
+        (total, order) =>
+          total + (order.productImage ? 1 : 0),
+        0,
       ),
-    [files, userOrderIds]
+    [orders],
   );
 
   const fileStats = useMemo(() => {
-    const grouped = userFiles.reduce((result, file) => {
-      const type = file.fileType || "Khác";
+    const grouped = {};
 
-      if (!result[type]) {
-        result[type] = {
-          label: type,
-          value: 0,
-        };
-      }
+    if (productImageCount > 0) {
+      grouped["Ảnh đại diện"] =
+        productImageCount;
+    }
 
-      result[type].value += 1;
-      return result;
-    }, {});
+    files.forEach((file) => {
+      const category =
+        getFileCategory(file);
 
-    return Object.values(grouped).map((item, index) => ({
-      ...item,
-      color: fileColors[index % fileColors.length],
-    }));
-  }, [userFiles]);
+      grouped[category] =
+        (grouped[category] || 0) + 1;
+    });
+
+    return Object.entries(grouped).map(
+      ([label, value], index) => ({
+        label,
+        value,
+        color:
+          fileColors[
+            index % fileColors.length
+          ],
+      }),
+    );
+  }, [files, productImageCount]);
+
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+
+  const getOrderCreatedDate = (order) => {
+    const value =
+      order.createdAt ||
+      order.receivedDate;
+
+    if (!value) return null;
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime())
+      ? null
+      : date;
+  };
 
   const monthlyOrders = useMemo(() => {
-    const result = monthLabels.map((month) => ({
-      month,
-      orders: 0,
-    }));
+    const result = monthLabels.map(
+      (month) => ({
+        month,
+        orders: 0,
+      }),
+    );
 
     orders.forEach((order) => {
-      const dateValue = order.createdAt || order.receivedDate;
-      if (!dateValue) return;
+      const date =
+        getOrderCreatedDate(order);
 
-      const date = new Date(dateValue);
-      const monthIndex = date.getMonth();
-
-      if (monthIndex >= 0 && monthIndex < 12) {
-        result[monthIndex].orders += 1;
+      if (
+        !date ||
+        date.getFullYear() !== currentYear
+      ) {
+        return;
       }
+
+      result[date.getMonth()].orders += 1;
     });
 
     return result;
-  }, [orders]);
+  }, [orders, currentYear]);
 
   const filteredTasks = useMemo(() => {
     const keyword = searchValue.trim().toLowerCase();
@@ -272,29 +426,67 @@ const DashboardPage = () => {
     );
   }, [taskOrder, searchValue]);
 
-  const totalFiles = userFiles.length;
+  const totalFiles = files.length + productImageCount;
 
-  const currentMonth = new Date().getMonth();
-  const currentMonthOrders = monthlyOrders[currentMonth]?.orders || 0;
-  const previousMonthOrders =
-    monthlyOrders[currentMonth - 1 < 0 ? 11 : currentMonth - 1]?.orders || 0;
+  const currentMonth = currentDate.getMonth();
 
-  const orderPercent =
-    previousMonthOrders === 0
-      ? currentMonthOrders > 0
-        ? 100
-        : 0
-      : Math.round(
-          ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) *
-            100
-        );
+  const previousMonthDate = new Date(
+    currentYear,
+    currentMonth - 1,
+    1,
+  );
 
-  const completedTasks = taskOrder.filter((task) => task.progress === 100).length;
+  const countOrdersByMonth = (orderList,year,month) =>
+    orderList.reduce((total, order) => {
+      const date =
+        getOrderCreatedDate(order);
 
-  const completedPercent =
-    taskOrder.length === 0
+      if (
+        date &&
+        date.getFullYear() === year &&
+        date.getMonth() === month
+      ) {
+        return total + 1;
+      }
+
+      return total;
+    }, 0);
+
+  const activeOrders = useMemo(() => orders.filter(
+        (order) =>
+          String(order.status).toLowerCase() ===
+            "active" &&
+          !order.deletedAt,
+      ).length,
+    [orders],
+  );
+
+  const activePercent = orders.length === 0
       ? 0
-      : Math.round((completedTasks / taskOrder.length) * 100);
+      : Math.round((activeOrders / orders.length) * 100);
+
+  const currentMonthOrders = countOrdersByMonth(
+      orders,
+      currentYear,
+      currentMonth,
+    );
+
+  const previousMonthOrders = countOrdersByMonth(
+      orders,
+      previousMonthDate.getFullYear(),
+      previousMonthDate.getMonth(),
+    );
+
+  const orderPercent = previousMonthOrders === 0 
+        ? currentMonthOrders > 0
+        ? 100 
+        : 0 
+        : Math.round(
+          ((currentMonthOrders -
+            previousMonthOrders) /
+            previousMonthOrders) *
+            100,
+        );
 
   const fileChartOptions = {
     chart: {
@@ -442,16 +634,22 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-text-strong">Task hoàn thành</p>
-              <CheckCircle2 className="text-brand" size={22} />
+              <p className="font-semibold text-text-strong">
+                Đơn đang xử lý
+              </p>
+
+              <CheckCircle2
+                className="text-brand"
+                size={22}
+              />
             </div>
 
             <h2 className="text-3xl font-bold text-text-strong">
-              {completedPercent}%
+              {activeOrders}
             </h2>
 
             <p className="mt-1 text-sm text-text-muted">
-              Tiến độ xử lý đơn hàng
+              Chiếm {activePercent}% tổng số đơn hàng
             </p>
           </Card>
         );
@@ -577,7 +775,8 @@ const DashboardPage = () => {
                         </td>
 
                         <td className="px-4 py-4">
-                          <span className="rounded-full bg-brand-light px-3 py-1 text-xs font-semibold text-brand">
+                          <span 
+                            className={` inline-flex rounded-full px-3 py-1 text-xs font-semibold ${task.statusClassName}`}>
                             {task.status}
                           </span>
                         </td>

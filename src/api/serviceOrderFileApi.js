@@ -39,4 +39,13 @@ export const serviceOrderFileApi = {
 
     return response.data;
   },
+  
+  async getByUser(userId, config = {}) {
+    const response = await httpClient.get(
+      `/service-order-files/user/${userId}`,
+      config,
+    );
+
+    return response.data;
+  },
 };

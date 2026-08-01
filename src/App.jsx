@@ -11,6 +11,7 @@ import AuthLayout from "./layouts/AuthLayout/AuthLayout";
 
 import DashboardPage from "./pages/User/Main/DashboardPage";
 import ServiceOrderPage from "./pages/User/Services/ServiceOrderPage";
+import ServiceReviewPage from "./pages/User/Services/ServiceReviewPage";
 import ProfilePage from "./pages/User/Account/ProfilePage";
 import AddressPage from "./pages/User/Account/AddressPage";
 import SecurityPage from "./pages/User/Account/SecurityPage";
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="dashboard" element={<DashboardPage />}/>
 
           <Route path="service-order" element={<ServiceOrderPage />}/>
+          <Route path="service-reviews" element={<ServiceReviewPage />}/>
 
           <Route path="profile" element={<ProfilePage />}/>
           <Route path="address" element={<AddressPage />}/>

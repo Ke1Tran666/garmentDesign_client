@@ -87,8 +87,8 @@ const GROUPS = [
       },
       {
         icon: Star,
-        label: "Đánh giá dịch vụ",
-        text: "Đánh giá đơn hàng sau khi hoàn tất",
+        label: "Service Reviews",
+        text: "",
         path: "/user/service-reviews",
       },
     ],

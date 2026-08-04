@@ -460,8 +460,14 @@ const UserLayout = ({ title = "My Account" }) => {
                     setActiveItem(index);
 
                     if (item.path) {
-                      navigate(item.path);
-                    }
+                        navigate(item.path);
+                      } else {
+                        navigate("/not-found", {
+                          state: {
+                            feature: item.label,
+                          },
+                        });
+                      }
                   }}
                 />
               );
@@ -828,7 +834,7 @@ const SidebarItem = ({icon, label, active, collapsed = false, onClick}) => {
       className={`
         relative mb-0
         flex min-h-14 min-w-17 flex-1
-        flex-col items-center justify-center gap-1
+        flex-col items-center gap-1
         rounded-xl px-2 py-1
         text-[11px] font-medium
         transition-all duration-200

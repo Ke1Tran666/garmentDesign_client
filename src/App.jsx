@@ -18,6 +18,7 @@ import SecurityPage from "./pages/User/Account/SecurityPage";
 import PrivacyPage from "./pages/User/Account/PrivacyPage";
 
 import { NotificationProvider } from "./components/ui/Notification/NotificationContext";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const App = () => {
   return (
@@ -44,6 +45,10 @@ const App = () => {
           <Route path="security" element={<SecurityPage />}/>
           <Route path="privacy" element={<PrivacyPage />}/>
         </Route>
+
+        <Route path="/not-found" element={<NotFoundPage />}/>
+
+        <Route path="*" element={<NotFoundPage />}/>
       </Routes>
     </NotificationProvider>
   );

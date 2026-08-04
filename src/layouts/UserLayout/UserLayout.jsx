@@ -4,7 +4,6 @@ import {
   User,
   LayoutDashboard,
   ClipboardList,
-  FileText,
   BarChart2,
   ChevronDown,
   Shield,
@@ -26,6 +25,7 @@ import {
   PanelLeftOpen,
   PanelLeftClose,
   Menu,
+  ChevronLeft,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
@@ -68,8 +68,13 @@ const GROUPS = [
         text: "Personal Information",
         path: "/user/profile", 
       },
-      { icon: FileText, label: "Reports" },
       { icon: BarChart2, label: "Clinic Overview" },
+      {
+        icon: Star,
+        label: "Service Reviews",
+        text: "",
+        path: "/user/service-reviews",
+      },
     ],
     defaultItem: 0,
   },
@@ -80,7 +85,7 @@ const GROUPS = [
       shadow: "rgba(124,58,237,0.35)",
       dark: false,
     },
-    label: "Dịch vụ",
+    label: "Service",
     items: [
       { 
         icon: ClipboardList, 
@@ -161,6 +166,7 @@ const UserLayout = ({ title = "My Account" }) => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [user, setUser] = useState(null);
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
+  const [isNotificationExpanded, setIsNotificationExpanded] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -573,23 +579,89 @@ const UserLayout = ({ title = "My Account" }) => {
           </div>
 
           <div className="flex items-center justify-center gap-4">
-            <ButtonIcon
-              icon={Bell}
-              sizeIcon={22}
-              className="
-                relative
-                bg-linear-to-br from-indigo-500 to-brand shadow-lg
-                hover:from-indigo-600 hover:to-brand hover:shadow-xl
-                active:scale-95
-              "
-              classNameIcon="text-white"
+            <div
+              className={`
+                fixed right-0
+                bottom-[calc(5.25rem+env(safe-area-inset-bottom))]
+                z-40
+
+                flex items-center gap-2
+                rounded-l-full border border-r-0 border-border
+                bg-surface p-2 pl-1
+                shadow-lg
+
+                transition-transform duration-300 ease-in-out
+
+                ${
+                  isNotificationExpanded
+                    ? "translate-x-0"
+                    : "translate-x-[calc(100%-3rem)]"
+                }
+
+                md:static md:translate-x-0
+                md:border-0 md:bg-transparent
+                md:p-0 md:shadow-none
+              `}
             >
-              <span
+              {/* Nút kéo ra/thu vào — chỉ hiện trên mobile */}
+              <button
+                type="button"
+                aria-label={
+                  isNotificationExpanded
+                    ? "Thu nút thông báo"
+                    : "Mở nút thông báo"
+                }
+                aria-expanded={isNotificationExpanded}
+                onClick={() => {
+                  setIsNotificationExpanded((current) => !current);
+                }}
                 className="
-                  absolute right-2 top-2 h-2.5 w-2.5 animate-pulse rounded-full bg-warning shadow-lg shadow-warning/50
+                  flex h-10 w-10 shrink-0
+                  items-center justify-center
+                  rounded-full
+                  text-text-muted
+                  transition-colors
+                  hover:bg-surface-muted
+                  hover:text-brand
+                  md:hidden
                 "
-              />
-            </ButtonIcon>
+              >
+                <ChevronLeft
+                  size={20}
+                  className={`
+                    transition-transform duration-300
+
+                    ${isNotificationExpanded ? "rotate-180" : ""}
+                  `}
+                />
+              </button>
+
+              {/* Nút thông báo */}
+              <ButtonIcon
+                icon={Bell}
+                sizeIcon={22}
+                aria-label="Xem thông báo"
+                className="
+                  relative shrink-0
+                  bg-linear-to-br from-indigo-500 to-brand
+                  shadow-lg
+                  hover:from-indigo-600 hover:to-brand
+                  hover:shadow-xl
+                  active:scale-95
+                "
+                classNameIcon="text-white"
+              >
+                <span
+                  className="
+                    absolute right-2 top-2
+                    h-2.5 w-2.5
+                    animate-pulse rounded-full
+                    bg-warning
+                    shadow-lg shadow-warning/50
+                  "
+                />
+              </ButtonIcon>
+            </div>
 
             <div className="relative">
               <button
@@ -611,7 +683,7 @@ const UserLayout = ({ title = "My Account" }) => {
                   className="h-10 w-10 rounded-xl object-cover"
                 />
 
-                <span className="font-semibold text-text-default">
+                <span className="hidden font-semibold text-text-default md:inline">
                   {user?.fullName || "Guest"}
                 </span>
 

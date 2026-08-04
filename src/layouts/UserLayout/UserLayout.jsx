@@ -4,7 +4,6 @@ import {
   User,
   LayoutDashboard,
   ClipboardList,
-  BarChart2,
   ChevronDown,
   Shield,
   Lock,
@@ -69,7 +68,6 @@ const GROUPS = [
         text: "Personal Information",
         path: "/user/profile", 
       },
-      { icon: BarChart2, label: "Clinic Overview" },
       {
         icon: Star,
         label: "Service Reviews",
@@ -258,14 +256,23 @@ const UserLayout = ({ title = "My Account" }) => {
   }, [openUserMenu]);
 
   const handleGroupChange = (gIndex) => {
-    const defaultItem = GROUPS[gIndex].defaultItem;
-    const defaultPath = GROUPS[gIndex].items[defaultItem]?.path;
+    const selectedGroup = GROUPS[gIndex];
+    const defaultItem = selectedGroup.defaultItem;
+    const defaultPath =
+      selectedGroup.items[defaultItem]?.path;
 
     setActiveGroup(gIndex);
     setActiveItem(defaultItem);
+    setOpenMobileMenu(false);
 
     if (defaultPath) {
       navigate(defaultPath);
+    } else {
+      navigate("/not-found", {
+        state: {
+          feature: selectedGroup.label,
+        },
+      });
     }
   };
 

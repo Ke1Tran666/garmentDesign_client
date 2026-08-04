@@ -25,6 +25,7 @@ import {
   Globe,
   PanelLeftOpen,
   PanelLeftClose,
+  Menu,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
@@ -159,6 +160,7 @@ const UserLayout = ({ title = "My Account" }) => {
   const [activeItem, setActiveItem] = useState(0);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [user, setUser] = useState(null);
+  const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -270,104 +272,206 @@ const UserLayout = ({ title = "My Account" }) => {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen w-full bg-surface-subtle">
+    <div
+      className="
+        mx-auto flex min-h-screen w-full bg-surface-subtle
+        pb-[calc(4.75rem+env(safe-area-inset-bottom))]
+        md:pb-0
+      "
+    >
       <aside
         id="user-sidebar"
         className={`
-          sticky top-0 flex h-screen shrink-0 flex-col border-r border-border-subtle bg-surface-subtle py-8 
+          fixed inset-x-0 bottom-0 z-50
+          flex h-auto w-full shrink-0 flex-col
+          border-t border-border
+          bg-surface-overlay px-2 pt-2
+          pb-[calc(0.5rem+env(safe-area-inset-bottom))]
+          shadow-[0_-8px_30px_rgb(15_23_42/0.10)]
+          backdrop-blur-xl
+
+          md:sticky md:inset-auto md:top-0
+          md:h-screen md:border-r md:border-t-0
+          md:border-border-subtle md:bg-surface-subtle
+          md:py-8 md:shadow-none md:backdrop-blur-none
+
           transition-[width,padding] duration-300 ease-in-out
-          ${isAsideCollapsed ? "w-20 px-3" : "w-72 px-6"}
+
+          ${isAsideCollapsed ? "md:w-20 md:px-3" : "md:w-72 md:px-6"}
         `}
       >
-        <div className="shrink-0">
+        <div className="hidden shrink-0 md:block">
           <Logo className={isAsideCollapsed ? "[&>span]:hidden" : ""}
           />
         </div>
 
-        {isAsideCollapsed ? (
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/user/profile")
-            }
-            title={user?.fullName || user?.userCode || "Guest"}
-            className="
-              mx-auto mb-7 mt-8 flex h-11 w-11 items-center justify-center
-              overflow-hidden rounded-2xl border-2 border-surface bg-surface 
-              shadow-sm transition hover:scale-105
-            "
-          >
-            <img
-              src={user?.avatar || defaultAvatar}
-              alt={user?.fullName || "User"}
-              className="h-full w-full object-cover"
-            />
-          </button>
-        ) : (
-          <div className="mb-10 mt-10 flex flex-col items-center justify-center">
-            <h2 className="text-xl font-semibold text-text-strong">
-              {getGreeting()}
-            </h2>
+        <div className="hidden md:contents">
+          {!isAsideCollapsed && (
+            <div className="mb-10 mt-10 flex flex-col items-center justify-center">
+              <h2 className="text-xl font-semibold text-text-strong">
+                {getGreeting()}
+              </h2>
 
-            <h3 className="mt-2 text-base font-semibold text-brand">
-              {user?.fullName || user?.userCode || "Guest"}
-            </h3>
+              <h3 className="mt-2 text-base font-semibold text-brand">
+                {user?.fullName || user?.userCode || "Guest"}
+              </h3>
 
-            <p className="mt-3 text-sm text-text-muted">
-              {new Date().toLocaleDateString(
-                "vi-VN",
-                {
+              <p className="mt-3 text-sm text-text-muted">
+                {new Date().toLocaleDateString("vi-VN", {
                   weekday: "short",
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric",
-                },
-              )}
-            </p>
+                })}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {openMobileMenu && (
+          <div
+            className="
+              absolute bottom-full left-3 right-3 mb-3
+              grid grid-cols-2 gap-2
+              rounded-2xl border border-border
+              bg-surface p-3 shadow-xl
+              md:hidden
+            "
+          >
+            {GROUPS.map((group, gIndex) => {
+              const Icon = group.btn.icon;
+              const isActive = displayGroupIndex === gIndex;
+
+              return (
+                <button
+                  key={group.label}
+                  type="button"
+                  onClick={() => {
+                    handleGroupChange(gIndex);
+                    setOpenMobileMenu(false);
+                  }}
+                  className={`
+                    flex min-w-0 items-center gap-3
+                    rounded-xl px-3 py-3
+                    text-left text-sm font-medium
+                    transition-colors
+
+                    ${
+                      isActive
+                        ? "bg-brand-soft text-brand"
+                        : "text-text-muted hover:bg-surface-muted"
+                    }
+                  `}
+                >
+                  <span
+                    className="
+                      flex h-9 w-9 shrink-0
+                      items-center justify-center
+                      rounded-full
+                    "
+                    style={{
+                      backgroundColor: isActive
+                        ? group.btn.bg
+                        : "var(--color-surface-muted)",
+                      color:
+                        isActive && !group.btn.dark
+                          ? "#ffffff"
+                          : "var(--color-text-default)",
+                    }}
+                  >
+                    <Icon size={17} />
+                  </span>
+
+                  <span className="truncate">
+                    {group.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
-
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <div
+          className="
+            w-full overflow-x-auto overflow-y-hidden
+            md:min-h-0 md:flex-1
+            md:overflow-y-auto md:overflow-x-hidden
+          "
+        >
           <nav
             className={`
-              space-y-1
-              ${isAsideCollapsed ? "mt-2" : "mt-4"}
+              flex w-full items-stretch gap-1
+              md:block md:space-y-1
+
+              ${isAsideCollapsed ? "md:mt-2" : "md:mt-4"}
             `}
           >
             {currentGroup.items.map((item, index) => {
-                const Icon = item.icon;
+              const Icon = item.icon;
 
-                return (
-                  <SidebarItem
-                    key={item.label}
-                    icon={<Icon size={19} />}
-                    label={item.label}
-                    active={displayItemIndex === index}
-                    collapsed={isAsideCollapsed}
-                    onClick={() => {
-                      setActiveGroup(displayGroupIndex);
+              return (
+                <SidebarItem
+                  key={item.label}
+                  icon={<Icon size={19} />}
+                  label={item.label}
+                  active={displayItemIndex === index}
+                  collapsed={isAsideCollapsed}
+                  onClick={() => {
+                    setOpenMobileMenu(false);
+                    setActiveGroup(displayGroupIndex);
+                    setActiveItem(index);
 
-                      setActiveItem(index);
+                    if (item.path) {
+                      navigate(item.path);
+                    }
+                  }}
+                />
+              );
+            })}
 
-                      if (item.path) {
-                        navigate(item.path);
-                      }
-                    }}
-                  />
-                );
-              },
-            )}
+            <button
+              type="button"
+              aria-label="Mở menu"
+              aria-expanded={openMobileMenu}
+              onClick={() => {
+                setOpenMobileMenu((current) => !current);
+              }}
+              className={`
+                relative flex min-h-14 min-w-17 flex-1
+                flex-col items-center justify-center gap-1
+                rounded-xl px-2 py-1
+                text-[11px] font-medium
+                transition-colors md:hidden
+
+                ${
+                  openMobileMenu
+                    ? `
+                        text-brand
+                        after:absolute after:-top-2
+                        after:left-1/2 after:h-1 after:w-10
+                        after:-translate-x-1/2
+                        after:rounded-full after:bg-brand
+                      `
+                    : "text-text-muted"
+                }
+              `}
+            >
+              <Menu size={20} />
+
+              <span>Menu</span>
+            </button>
           </nav>
         </div>
 
+        {/* Danh sách nút nhóm */}
         <div
           className={`
-            mt-4 flex shrink-0 items-center justify-center gap-3
+            mt-4 hidden shrink-0 items-center
+            justify-center gap-3 md:flex
+
             ${isAsideCollapsed ? "flex-col" : "flex-row"}
           `}
         >
-          {GROUPS.map(
-            (group, gIndex) => {
+          {GROUPS.map((group, gIndex) => {
               const isActive = displayGroupIndex === gIndex;
 
               const BtnIcon = group.btn.icon;
@@ -409,13 +513,17 @@ const UserLayout = ({ title = "My Account" }) => {
           )}
         </div>
 
+        {/* Tên nhóm */}
         {!isAsideCollapsed && (
           <p
-            className="mt-3 shrink-0 text-center text-sm font-medium transition-all duration-300"
+            className="
+              mt-3 hidden shrink-0 text-center text-sm font-medium
+              transition-all duration-300 md:block
+              "
             style={{
               color:
                 currentGroup.btn.bg === 
-                  "#ffffff" ? "#64748b" : currentGroup.btn.bg,
+                  "#ffffff" ? "#64748b" : currentGroup.btn.bg
             }}
           >
             {currentGroup.label}
@@ -430,11 +538,12 @@ const UserLayout = ({ title = "My Account" }) => {
           aria-expanded={!isAsideCollapsed}
           title={isAsideCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
           className="
-            absolute -right-3 bottom-8 z-20 flex h-7 w-7
-            items-center justify-center rounded-full
-            border border-border bg-surface
-            text-text-muted shadow-md transition
-            hover:border-brand hover:text-brand
+            absolute -right-3 bottom-8 z-20
+            hidden h-7 w-7 items-center justify-center
+            rounded-full border border-border
+            bg-surface text-text-muted shadow-md
+            transition hover:border-brand hover:text-brand
+            md:flex
           "
         >
           {isAsideCollapsed ? (
@@ -588,23 +697,55 @@ const SidebarItem = ({icon, label, active, collapsed = false, onClick}) => {
       onClick={onClick}
       title={collapsed ? label : undefined}
       aria-label={label}
-      style={active ? { color: BRAND } : {}}
       className={`
-        mb-2 flex w-full items-center rounded-2xl text-sm font-medium
+        relative mb-0
+        flex min-h-14 min-w-17 flex-1
+        flex-col items-center justify-center gap-1
+        rounded-xl px-2 py-1
+        text-[11px] font-medium
         transition-all duration-200
-        ${collapsed ? "h-11 justify-center px-0" : "gap-3 px-4 py-3"}
-        ${active ? "bg-surface shadow-sm" : "text-text-muted hover:bg-surface hover:text-text-default"}
+
+        md:mb-2 md:min-h-0 md:min-w-0
+        md:w-full md:flex-none md:flex-row
+        md:text-sm
+
+        ${
+          collapsed
+            ? "md:h-11 md:justify-center md:gap-0 md:px-0"
+            : "md:gap-3 md:px-4 md:py-3"
+        }
+
+        ${
+          active
+            ? `
+                text-brand
+                after:absolute after:-top-2
+                after:left-1/2 after:h-1 after:w-10
+                after:-translate-x-1/2
+                after:rounded-full after:bg-brand
+                md:bg-surface md:shadow-sm
+                md:after:hidden
+              `
+            : `
+                text-text-muted
+                hover:bg-surface
+                hover:text-text-default
+              `
+        }
       `}
     >
       <span className="flex shrink-0 items-center justify-center">
         {icon}
       </span>
 
-      {!collapsed && (
-        <span className="truncate">
-          {label}
-        </span>
-      )}
+      <span
+        className={`
+          max-w-full truncate
+          ${collapsed ? "md:hidden" : ""}
+        `}
+      >
+        {label}
+      </span>
     </button>
   );
 };

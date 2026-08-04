@@ -4,8 +4,6 @@ import {
   User,
   LayoutDashboard,
   ClipboardList,
-  FileText,
-  BarChart2,
   ChevronDown,
   Shield,
   Lock,
@@ -23,6 +21,11 @@ import {
   Monitor,
   Settings2,
   Globe,
+  PanelLeftOpen,
+  PanelLeftClose,
+  Menu,
+  ChevronLeft,
+  House,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
@@ -65,8 +68,12 @@ const GROUPS = [
         text: "Personal Information",
         path: "/user/profile", 
       },
-      { icon: FileText, label: "Reports" },
-      { icon: BarChart2, label: "Clinic Overview" },
+      {
+        icon: Star,
+        label: "Service Reviews",
+        text: "",
+        path: "/user/service-reviews",
+      },
     ],
     defaultItem: 0,
   },
@@ -77,7 +84,7 @@ const GROUPS = [
       shadow: "rgba(124,58,237,0.35)",
       dark: false,
     },
-    label: "Dịch vụ",
+    label: "Service",
     items: [
       { 
         icon: ClipboardList, 
@@ -157,6 +164,8 @@ const UserLayout = ({ title = "My Account" }) => {
   const [activeItem, setActiveItem] = useState(0);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [user, setUser] = useState(null);
+  const [openMobileMenu, setOpenMobileMenu] = useState(false);
+  const [isNotificationExpanded, setIsNotificationExpanded] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -167,6 +176,14 @@ const UserLayout = ({ title = "My Account" }) => {
     authStorage.clear();
     navigate("/");
   };
+
+  const [isAsideCollapsed,setIsAsideCollapsed] = useState(() => {
+    return (
+      localStorage.getItem(
+        "user-aside-collapsed",
+      ) === "true"
+    );
+  });
 
   const findActiveRoute = () => {
     const currentGroupItemIndex = GROUPS[activeGroup].items.findIndex(
@@ -197,6 +214,14 @@ const UserLayout = ({ title = "My Account" }) => {
 
   const currentGroup = GROUPS[displayGroupIndex];
   const currentItem = currentGroup.items[displayItemIndex];
+  const CurrentGroupIcon = currentGroup.btn.icon;
+
+  useEffect(() => {
+    localStorage.setItem(
+      "user-aside-collapsed",
+      String(isAsideCollapsed),
+    );
+  }, [isAsideCollapsed]);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -231,14 +256,23 @@ const UserLayout = ({ title = "My Account" }) => {
   }, [openUserMenu]);
 
   const handleGroupChange = (gIndex) => {
-    const defaultItem = GROUPS[gIndex].defaultItem;
-    const defaultPath = GROUPS[gIndex].items[defaultItem]?.path;
+    const selectedGroup = GROUPS[gIndex];
+    const defaultItem = selectedGroup.defaultItem;
+    const defaultPath =
+      selectedGroup.items[defaultItem]?.path;
 
     setActiveGroup(gIndex);
     setActiveItem(defaultItem);
+    setOpenMobileMenu(false);
 
     if (defaultPath) {
       navigate(defaultPath);
+    } else {
+      navigate("/not-found", {
+        state: {
+          feature: selectedGroup.label,
+        },
+      });
     }
   };
 
@@ -253,105 +287,356 @@ const UserLayout = ({ title = "My Account" }) => {
   };
 
   return (
-    <div className="mx-auto flex min-h-screen w-full overflow-hidden bg-surface-subtle">
-      <aside className="flex w-72 flex-col px-6 py-8">
-        <Logo />
+    <div
+      className="
+        mx-auto flex min-h-screen w-full bg-surface-subtle
+        pb-[calc(4.75rem+env(safe-area-inset-bottom))]
+        md:pb-0
+      "
+    >
+      <aside
+        id="user-sidebar"
+        className={`
+          fixed inset-x-0 bottom-0 z-50
+          flex h-auto w-full shrink-0 flex-col
+          border-t border-border
+          bg-surface-overlay px-2 pt-2
+          pb-[calc(0.5rem+env(safe-area-inset-bottom))]
+          shadow-[0_-8px_30px_rgb(15_23_42/0.10)]
+          backdrop-blur-xl
 
-        <div className="mb-10 mt-10 flex flex-col items-center justify-center">
-          <h2 className="text-xl font-semibold text-text-strong">
-            {getGreeting()}
-          </h2>
+          md:sticky md:inset-auto md:top-0
+          md:h-screen md:border-r md:border-t-0
+          md:border-border-subtle md:bg-surface-subtle
+          md:py-8 md:shadow-none md:backdrop-blur-none
 
-          <h3 className="mt-2 text-base font-semibold text-[#1570EF]">
-            {user?.fullName || user?.userCode || "Guest"}
-          </h3>
+          transition-[width,padding] duration-300 ease-in-out
 
-          <p className="mt-3 text-sm text-text-muted">
-            {new Date().toLocaleDateString("vi-VN", {
-              weekday: "short",
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })}
-          </p>
+          ${isAsideCollapsed ? "md:w-20 md:px-3" : "md:w-72 md:px-6"}
+        `}
+      >
+        <div className="hidden shrink-0 md:block">
+          <Logo className={isAsideCollapsed ? "[&>span]:hidden" : ""}
+          />
         </div>
 
-        <nav className="mt-4 space-y-1">
-          {currentGroup.items.map((item, index) => {
-            const Icon = item.icon;
+        <div className="hidden md:contents">
+          {!isAsideCollapsed && (
+            <div className="mb-10 mt-10 flex flex-col items-center justify-center">
+              <h2 className="text-xl font-semibold text-text-strong">
+                {getGreeting()}
+              </h2>
 
-            return (
-              <SidebarItem
-                key={item.label}
-                icon={<Icon size={18} />}
-                label={item.label}
-                active={displayItemIndex === index}
-                onClick={() => {
-                  setActiveGroup(displayGroupIndex);
-                  setActiveItem(index);
+              <h3 className="mt-2 text-base font-semibold text-brand">
+                {user?.fullName || user?.userCode || "Guest"}
+              </h3>
 
-                  if (item.path) {
-                    navigate(item.path);
-                  }
-                }}
-              />
-            );
-          })}
-        </nav>
+              <p className="mt-3 text-sm text-text-muted">
+                {new Date().toLocaleDateString("vi-VN", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+          )}
+        </div>
 
-        <div className="mt-3 flex items-center justify-center gap-3">
-          {GROUPS.map((group, gIndex) => {
-            const isActive = displayGroupIndex === gIndex;
-            const BtnIcon = group.btn.icon;
-
-            return (
-              <button
-                key={group.label}
-                type="button"
-                onClick={() => handleGroupChange(gIndex)}
-                style={
-                  isActive
-                    ? {
-                        backgroundColor: group.btn.bg,
-                        boxShadow: `0 10px 25px ${group.btn.shadow}`,
-                      }
-                    : {}
-                }
-                className={`flex items-center justify-center rounded-full transition-all duration-300 hover:-translate-y-1 hover:scale-105 ${
-                  isActive
-                    ? `h-12 w-12 ${
-                        group.btn.dark ? "text-text-default" : "text-white"
-                      }`
-                    : "h-10 w-10 bg-surface text-text-subtle shadow-[0_4px_12px_rgba(15,23,42,0.08)] hover:bg-surface-subtle"
-                }`}
+        {openMobileMenu && (
+          <div
+            className="
+              absolute bottom-full left-3 right-3 mb-3
+              grid grid-cols-2 gap-2
+              rounded-2xl border border-border
+              bg-surface p-3 shadow-xl
+              md:hidden
+            "
+          >
+            {/* Chuyển về trang chủ */}
+            <button
+              type="button"
+              onClick={() => {
+                setOpenMobileMenu(false);
+                navigate("/");
+              }}
+              className="
+                flex min-w-0 items-center gap-3 rounded-xl px-3 py-3
+                text-left text-sm font-medium text-text-muted
+                transition-colors
+                hover:bg-surface-muted hover:text-brand
+              "
+            >
+              <span
+                className="
+                  flex h-9 w-9 shrink-0 items-center justify-center
+                  rounded-full bg-surface-muted
+                "
               >
-                <BtnIcon size={isActive ? 18 : 16} />
-              </button>
-            );
-          })}
+                <House
+                  size={17}
+                  aria-hidden="true"
+                />
+              </span>
+
+              <span className="truncate">
+                Trang chủ
+              </span>
+            </button>
+
+            {GROUPS.map((group, gIndex) => {
+              const Icon = group.btn.icon;
+              const isActive = displayGroupIndex === gIndex;
+
+              return (
+                <button
+                  key={group.label}
+                  type="button"
+                  onClick={() => {
+                    handleGroupChange(gIndex);
+                    setOpenMobileMenu(false);
+                  }}
+                  className={`
+                    flex min-w-0 items-center gap-3
+                    rounded-xl px-3 py-3
+                    text-left text-sm font-medium
+                    transition-colors
+
+                    ${
+                      isActive
+                        ? "bg-brand-soft text-brand"
+                        : "text-text-muted hover:bg-surface-muted"
+                    }
+                  `}
+                >
+                  <span
+                    className="
+                      flex h-9 w-9 shrink-0
+                      items-center justify-center
+                      rounded-full
+                    "
+                    style={{
+                      backgroundColor: isActive
+                        ? group.btn.bg
+                        : "var(--color-surface-muted)",
+                      color:
+                        isActive && !group.btn.dark
+                          ? "#ffffff"
+                          : "var(--color-text-default)",
+                    }}
+                  >
+                    <Icon size={17} />
+                  </span>
+
+                  <span className="truncate">
+                    {group.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <div
+          className="
+            w-full overflow-x-auto overflow-y-hidden
+            md:min-h-0 md:flex-1
+            md:overflow-y-auto md:overflow-x-hidden
+          "
+        >
+          <nav
+            className={`
+              flex w-full items-stretch gap-1
+              md:block md:space-y-1
+
+              ${isAsideCollapsed ? "md:mt-2" : "md:mt-4"}
+            `}
+          >
+            {currentGroup.items.map((item, index) => {
+              const Icon = item.icon;
+
+              return (
+                <SidebarItem
+                  key={item.label}
+                  icon={<Icon size={19} />}
+                  label={item.label}
+                  active={displayItemIndex === index}
+                  collapsed={isAsideCollapsed}
+                  onClick={() => {
+                    setOpenMobileMenu(false);
+                    setActiveGroup(displayGroupIndex);
+                    setActiveItem(index);
+
+                    if (item.path) {
+                        navigate(item.path);
+                      } else {
+                        navigate("/not-found", {
+                          state: {
+                            feature: item.label,
+                          },
+                        });
+                      }
+                  }}
+                />
+              );
+            })}
+
+            <button
+              type="button"
+              aria-label="Mở menu"
+              aria-expanded={openMobileMenu}
+              onClick={() => {
+                setOpenMobileMenu((current) => !current);
+              }}
+              className={`
+                relative flex min-h-14 min-w-17 flex-1
+                flex-col items-center justify-center gap-1
+                rounded-xl px-2 py-1
+                text-[11px] font-medium
+                transition-colors md:hidden
+
+                ${
+                  openMobileMenu
+                    ? `
+                        text-brand
+                        after:absolute after:-top-2
+                        after:left-1/2 after:h-1 after:w-10
+                        after:-translate-x-1/2
+                        after:rounded-full after:bg-brand
+                      `
+                    : "text-text-muted"
+                }
+              `}
+            >
+              <Menu size={20} />
+
+              <span>Menu</span>
+            </button>
+          </nav>
         </div>
 
-        <p
-          className="mt-3 text-center text-sm font-medium transition-all duration-300"
-          style={{
-            color:
-              currentGroup.btn.bg === "#ffffff"
-                ? "#64748b"
-                : currentGroup.btn.bg,
-          }}
+        {/* Danh sách nút nhóm */}
+        <div
+          className={`
+            mt-4 hidden shrink-0 items-center
+            justify-center gap-3 md:flex
+
+            ${isAsideCollapsed ? "flex-col" : "flex-row"}
+          `}
         >
-          {currentGroup.label}
-        </p>
+          {GROUPS.map((group, gIndex) => {
+              const isActive = displayGroupIndex === gIndex;
+
+              const BtnIcon = group.btn.icon;
+
+              return (
+                <button
+                  key={group.label}
+                  type="button"
+                  title={group.label}
+                  aria-label={group.label}
+                  onClick={() =>
+                    handleGroupChange(gIndex)
+                  }
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor:
+                            group.btn.bg,
+                          boxShadow:
+                            `0 10px 25px ${group.btn.shadow}`,
+                        }
+                      : {}
+                  }
+                  className={`
+                    flex items-center justify-center rounded-full transition-all
+                    duration-300 hover:-translate-y-0.5 hover:scale-105
+                    ${isActive 
+                      ? `h-11 w-11 ${group.btn.dark ? "text-text-default" : "text-white"}`
+                      : `
+                          h-9 w-9 bg-surface text-text-subtle shadow-sm hover:bg-surface-muted
+                        `
+                    }
+                  `}
+                >
+                  <BtnIcon size={isActive ? 18 : 16}/>
+                </button>
+              );
+            },
+          )}
+        </div>
+
+        {/* Tên nhóm */}
+        {!isAsideCollapsed && (
+          <p
+            className="
+              mt-3 hidden shrink-0 text-center text-sm font-medium
+              transition-all duration-300 md:block
+              "
+            style={{
+              color:
+                currentGroup.btn.bg === 
+                  "#ffffff" ? "#64748b" : currentGroup.btn.bg
+            }}
+          >
+            {currentGroup.label}
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={() =>setIsAsideCollapsed((current) => !current)}
+          aria-label={isAsideCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
+          aria-controls="user-sidebar"
+          aria-expanded={!isAsideCollapsed}
+          title={isAsideCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
+          className="
+            absolute -right-3 bottom-8 z-20
+            hidden h-7 w-7 items-center justify-center
+            rounded-full border border-border
+            bg-surface text-text-muted shadow-md
+            transition hover:border-brand hover:text-brand
+            md:flex
+          "
+        >
+          {isAsideCollapsed ? (
+            <PanelLeftOpen size={15} />
+          ) : (
+            <PanelLeftClose size={15} />
+          )}
+        </button>
       </aside>
 
-      <main className="m-2 flex-1 rounded-xl bg-surface p-8">
+      <main className="m-2 min-w-0 flex-1 rounded-xl bg-surface p-4 transition-all duration-300 md:p-8">
         <div className="mb-4 flex items-center justify-between">
           <div className="mb-4 flex items-center gap-2 text-sm text-text-subtle">
-            <span>Home</span>
+            <span
+              className="inline-flex items-center md:hidden"
+              aria-label="Home"
+            >
+              <House
+                size={17}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span className="hidden md:inline">
+              Home
+            </span>
 
             <ChevronRight size={14} />
 
-            <span className="font-medium text-text-default">
+            <span
+              className="
+                inline-flex items-center
+                text-text-default
+                md:hidden
+              "
+              aria-label={currentGroup.label}
+            >
+              <CurrentGroupIcon size={17} aria-hidden="true"/>
+            </span>
+
+            <span className="hidden font-medium text-text-default md:inline">
               {currentGroup.label}
             </span>
 
@@ -363,23 +648,89 @@ const UserLayout = ({ title = "My Account" }) => {
           </div>
 
           <div className="flex items-center justify-center gap-4">
-            <ButtonIcon
-              icon={Bell}
-              sizeIcon={22}
-              className="
-                relative
-                bg-linear-to-br from-indigo-500 to-brand shadow-lg
-                hover:from-indigo-600 hover:to-brand hover:shadow-xl
-                active:scale-95
-              "
-              classNameIcon="text-white"
+            <div
+              className={`
+                fixed right-0
+                bottom-[calc(5.25rem+env(safe-area-inset-bottom))]
+                z-40
+
+                flex items-center gap-2
+                rounded-l-full border border-r-0 border-border
+                bg-surface p-2 pl-1
+                shadow-lg
+
+                transition-transform duration-300 ease-in-out
+
+                ${
+                  isNotificationExpanded
+                    ? "translate-x-0"
+                    : "translate-x-[calc(100%-3rem)]"
+                }
+
+                md:static md:translate-x-0
+                md:border-0 md:bg-transparent
+                md:p-0 md:shadow-none
+              `}
             >
-              <span
+              {/* Nút kéo ra/thu vào — chỉ hiện trên mobile */}
+              <button
+                type="button"
+                aria-label={
+                  isNotificationExpanded
+                    ? "Thu nút thông báo"
+                    : "Mở nút thông báo"
+                }
+                aria-expanded={isNotificationExpanded}
+                onClick={() => {
+                  setIsNotificationExpanded((current) => !current);
+                }}
                 className="
-                  absolute right-2 top-2 h-2.5 w-2.5 animate-pulse rounded-full bg-warning shadow-lg shadow-warning/50
+                  flex h-10 w-10 shrink-0
+                  items-center justify-center
+                  rounded-full
+                  text-text-muted
+                  transition-colors
+                  hover:bg-surface-muted
+                  hover:text-brand
+                  md:hidden
                 "
-              />
-            </ButtonIcon>
+              >
+                <ChevronLeft
+                  size={20}
+                  className={`
+                    transition-transform duration-300
+
+                    ${isNotificationExpanded ? "rotate-180" : ""}
+                  `}
+                />
+              </button>
+
+              {/* Nút thông báo */}
+              <ButtonIcon
+                icon={Bell}
+                sizeIcon={22}
+                aria-label="Xem thông báo"
+                className="
+                  relative shrink-0
+                  bg-linear-to-br from-indigo-500 to-brand
+                  shadow-lg
+                  hover:from-indigo-600 hover:to-brand
+                  hover:shadow-xl
+                  active:scale-95
+                "
+                classNameIcon="text-white"
+              >
+                <span
+                  className="
+                    absolute right-2 top-2
+                    h-2.5 w-2.5
+                    animate-pulse rounded-full
+                    bg-warning
+                    shadow-lg shadow-warning/50
+                  "
+                />
+              </ButtonIcon>
+            </div>
 
             <div className="relative">
               <button
@@ -401,7 +752,7 @@ const UserLayout = ({ title = "My Account" }) => {
                   className="h-10 w-10 rounded-xl object-cover"
                 />
 
-                <span className="font-semibold text-text-default">
+                <span className="hidden font-semibold text-text-default md:inline">
                   {user?.fullName || "Guest"}
                 </span>
 
@@ -480,20 +831,62 @@ const UserLayout = ({ title = "My Account" }) => {
   );
 };
 
-const SidebarItem = ({ icon, label, active, onClick }) => {
+const SidebarItem = ({icon, label, active, collapsed = false, onClick}) => {
   return (
     <button
       type="button"
       onClick={onClick}
-      style={active ? { color: BRAND } : {}}
-      className={`mb-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
-        active
-          ? "bg-surface shadow-sm"
-          : "text-text-muted hover:bg-surface hover:text-text-default"
-      }`}
+      title={collapsed ? label : undefined}
+      aria-label={label}
+      className={`
+        relative mb-0
+        flex min-h-14 min-w-17 flex-1
+        flex-col items-center gap-1
+        rounded-xl px-2 py-1
+        text-[11px] font-medium
+        transition-all duration-200
+
+        md:mb-2 md:min-h-0 md:min-w-0
+        md:w-full md:flex-none md:flex-row
+        md:text-sm
+
+        ${
+          collapsed
+            ? "md:h-11 md:justify-center md:gap-0 md:px-0"
+            : "md:gap-3 md:px-4 md:py-3"
+        }
+
+        ${
+          active
+            ? `
+                text-brand
+                after:absolute after:-top-2
+                after:left-1/2 after:h-1 after:w-10
+                after:-translate-x-1/2
+                after:rounded-full after:bg-brand
+                md:bg-surface md:shadow-sm
+                md:after:hidden
+              `
+            : `
+                text-text-muted
+                hover:bg-surface
+                hover:text-text-default
+              `
+        }
+      `}
     >
-      {icon}
-      {label}
+      <span className="flex shrink-0 items-center justify-center">
+        {icon}
+      </span>
+
+      <span
+        className={`
+          max-w-full truncate
+          ${collapsed ? "md:hidden" : ""}
+        `}
+      >
+        {label}
+      </span>
     </button>
   );
 };

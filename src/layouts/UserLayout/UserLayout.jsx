@@ -26,6 +26,7 @@ import {
   PanelLeftClose,
   Menu,
   ChevronLeft,
+  House,
 } from "lucide-react";
 
 import Logo from "../../components/common/Logo/Logo";
@@ -215,6 +216,7 @@ const UserLayout = ({ title = "My Account" }) => {
 
   const currentGroup = GROUPS[displayGroupIndex];
   const currentItem = currentGroup.items[displayItemIndex];
+  const CurrentGroupIcon = currentGroup.btn.icon;
 
   useEffect(() => {
     localStorage.setItem(
@@ -344,6 +346,37 @@ const UserLayout = ({ title = "My Account" }) => {
               md:hidden
             "
           >
+            {/* Chuyển về trang chủ */}
+            <button
+              type="button"
+              onClick={() => {
+                setOpenMobileMenu(false);
+                navigate("/");
+              }}
+              className="
+                flex min-w-0 items-center gap-3 rounded-xl px-3 py-3
+                text-left text-sm font-medium text-text-muted
+                transition-colors
+                hover:bg-surface-muted hover:text-brand
+              "
+            >
+              <span
+                className="
+                  flex h-9 w-9 shrink-0 items-center justify-center
+                  rounded-full bg-surface-muted
+                "
+              >
+                <House
+                  size={17}
+                  aria-hidden="true"
+                />
+              </span>
+
+              <span className="truncate">
+                Trang chủ
+              </span>
+            </button>
+
             {GROUPS.map((group, gIndex) => {
               const Icon = group.btn.icon;
               const isActive = displayGroupIndex === gIndex;
@@ -563,11 +596,34 @@ const UserLayout = ({ title = "My Account" }) => {
       <main className="m-2 min-w-0 flex-1 rounded-xl bg-surface p-4 transition-all duration-300 md:p-8">
         <div className="mb-4 flex items-center justify-between">
           <div className="mb-4 flex items-center gap-2 text-sm text-text-subtle">
-            <span>Home</span>
+            <span
+              className="inline-flex items-center md:hidden"
+              aria-label="Home"
+            >
+              <House
+                size={17}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span className="hidden md:inline">
+              Home
+            </span>
 
             <ChevronRight size={14} />
 
-            <span className="font-medium text-text-default">
+            <span
+              className="
+                inline-flex items-center
+                text-text-default
+                md:hidden
+              "
+              aria-label={currentGroup.label}
+            >
+              <CurrentGroupIcon size={17} aria-hidden="true"/>
+            </span>
+
+            <span className="hidden font-medium text-text-default md:inline">
               {currentGroup.label}
             </span>
 

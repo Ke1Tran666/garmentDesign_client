@@ -18,4 +18,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/test/setup.js",
   },
+  server: {
+    host: true,
+    allowedHosts: true,
+  },
 })

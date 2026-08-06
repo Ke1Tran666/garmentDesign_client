@@ -36,17 +36,13 @@ import { ButtonIcon } from "@/components/ui/Button/Button";
 import GooeySearchBar from "@/components/ui/Search/GooeyInput/GooeySearchBar";
 import { authStorage } from "@/lib/authStorage";
 import { userApi } from "@/api/userApi";
-
-const BRAND = "var(--color-brand)";
-const BRAND_SHADOW = "rgba(1,146,245,0.35)";
+import { LAYOUT_GROUP_THEME } from "@/lib/layoutTheme";
 
 const GROUPS = [
   {
     btn: {
       icon: ChevronDown,
-      bg: "#202124",
-      shadow: "rgba(0,0,0,0.25)",
-      dark: false,
+      ...LAYOUT_GROUP_THEME.main,
     },
     label: "Main",
     items: [
@@ -80,9 +76,7 @@ const GROUPS = [
   {
     btn: {
       icon: ShoppingBag,
-      bg: "#7C3AED",
-      shadow: "rgba(124,58,237,0.35)",
-      dark: false,
+      ...LAYOUT_GROUP_THEME.management,
     },
     label: "Service",
     items: [
@@ -104,9 +98,7 @@ const GROUPS = [
   {
     btn: {
       icon: CircleDot,
-      bg: BRAND,
-      shadow: BRAND_SHADOW,
-      dark: false,
+      ...LAYOUT_GROUP_THEME.brand,
     },
     label: "Account",
     items: [
@@ -140,9 +132,7 @@ const GROUPS = [
   {
     btn: {
       icon: Settings,
-      bg: "#ffffff",
-      shadow: "rgba(15,23,42,0.08)",
-      dark: true,
+      ...LAYOUT_GROUP_THEME.surface,
     },
     label: "Settings",
     items: [
@@ -302,7 +292,7 @@ const UserLayout = ({ title = "My Account" }) => {
           border-t border-border
           bg-surface-overlay px-2 pt-2
           pb-[calc(0.5rem+env(safe-area-inset-bottom))]
-          shadow-[0_-8px_30px_rgb(15_23_42/0.10)]
+          shadow-(--layout-mobile-navigation-shadow)
           backdrop-blur-xl
 
           md:sticky md:inset-auto md:top-0
@@ -419,10 +409,9 @@ const UserLayout = ({ title = "My Account" }) => {
                       backgroundColor: isActive
                         ? group.btn.bg
                         : "var(--color-surface-muted)",
-                      color:
-                        isActive && !group.btn.dark
-                          ? "#ffffff"
-                          : "var(--color-text-default)",
+                    color: isActive
+                      ? group.btn.foreground
+                      : "var(--color-text-default)",
                     }}
                   >
                     <Icon size={17} />
@@ -540,20 +529,23 @@ const UserLayout = ({ title = "My Account" }) => {
                   style={
                     isActive
                       ? {
-                          backgroundColor:
-                            group.btn.bg,
-                          boxShadow:
-                            `0 10px 25px ${group.btn.shadow}`,
+                          backgroundColor: group.btn.bg,
+                          boxShadow: `0 10px 25px ${group.btn.shadow}`,
+                          color: group.btn.foreground,
                         }
-                      : {}
+                      : undefined
                   }
                   className={`
-                    flex items-center justify-center rounded-full transition-all
-                    duration-300 hover:-translate-y-0.5 hover:scale-105
-                    ${isActive 
-                      ? `h-11 w-11 ${group.btn.dark ? "text-text-default" : "text-white"}`
-                      : `
-                          h-9 w-9 bg-surface text-text-subtle shadow-sm hover:bg-surface-muted
+                    flex items-center justify-center rounded-full 
+                    transition-all duration-300
+                    hover:-translate-y-0.5 hover:scale-105
+
+                    ${
+                      isActive
+                        ? "h-11 w-11"
+                        : `
+                          h-9 w-9 bg-surface text-text-subtle
+                          shadow-sm hover:bg-surface-muted
                         `
                     }
                   `}
@@ -573,9 +565,7 @@ const UserLayout = ({ title = "My Account" }) => {
               transition-all duration-300 md:block
               "
             style={{
-              color:
-                currentGroup.btn.bg === 
-                  "#ffffff" ? "#64748b" : currentGroup.btn.bg
+              color: currentGroup.btn.labelColor,
             }}
           >
             {currentGroup.label}

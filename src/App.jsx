@@ -19,6 +19,8 @@ import PrivacyPage from "./pages/User/Account/PrivacyPage";
 
 import { NotificationProvider } from "./components/ui/Notification/NotificationContext";
 import NotFoundPage from "./pages/NotFoundPage";
+import AdminLayout from "./layouts/AdminLayout/AdminLayout";
+import AdminDashboardPage from "./pages/Admin/Dashboard/AdminDashboardPage";
 
 const App = () => {
   return (
@@ -44,6 +46,12 @@ const App = () => {
           <Route path="address" element={<AddressPage />}/>
           <Route path="security" element={<SecurityPage />}/>
           <Route path="privacy" element={<PrivacyPage />}/>
+        </Route>
+
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={ <Navigate to="dashboard" replace/>}/>
+
+          <Route path="dashboard" element={<AdminDashboardPage />}/>
         </Route>
 
         <Route path="/not-found" element={<NotFoundPage />}/>

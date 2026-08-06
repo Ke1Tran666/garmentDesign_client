@@ -117,6 +117,30 @@
 
     /* Layout */
     --radius: 0.625rem;
+
+    /* Shared portal layout */
+    --layout-group-main-bg: #202124;
+    --layout-group-main-foreground: #ffffff;
+    --layout-group-main-label: #202124;
+    --layout-group-main-shadow: rgb(0 0 0 / 25%);
+
+    --layout-group-management-bg: #7c3aed;
+    --layout-group-management-foreground: #ffffff;
+    --layout-group-management-label: #7c3aed;
+    --layout-group-management-shadow: rgb(124 58 237 / 35%);
+
+    --layout-group-brand-bg: var(--brand);
+    --layout-group-brand-foreground: var(--sidebar-primary-foreground);
+    --layout-group-brand-label: var(--brand);
+    --layout-group-brand-shadow: rgb(1 146 245 / 35%);
+
+    --layout-group-surface-bg: var(--surface);
+    --layout-group-surface-foreground: var(--text-default);
+    --layout-group-surface-label: var(--text-muted);
+    --layout-group-surface-shadow: rgb(15 23 42 / 8%);
+
+    --layout-mobile-navigation-shadow:
+        0 -8px 30px rgb(15 23 42 / 10%);
 }
 
 .dark {
@@ -197,6 +221,24 @@
     --sidebar-accent-foreground: var(--brand-hover);
     --sidebar-border: var(--border);
     --sidebar-ring: var(--ring);
+
+    /* Shared portal layout */
+    --layout-group-main-bg: #202124;
+    --layout-group-main-foreground: #ffffff;
+    --layout-group-main-label: var(--text-default);
+    --layout-group-main-shadow: rgb(0 0 0 / 45%);
+
+    --layout-group-management-bg: #8b5cf6;
+    --layout-group-management-foreground: #ffffff;
+    --layout-group-management-label: #a78bfa;
+    --layout-group-management-shadow: rgb(139 92 246 / 35%);
+
+    --layout-group-brand-shadow: rgb(56 189 248 / 35%);
+
+    --layout-group-surface-shadow: rgb(0 0 0 / 25%);
+
+    --layout-mobile-navigation-shadow:
+        0 -8px 30px rgb(0 0 0 / 30%);
 }
 
 /* =========================================

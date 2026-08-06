@@ -51,6 +51,19 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
 
+  // component login
+  const completeLogin = ( data, message) => {
+    authStorage.save(data);
+
+    showNotification(
+      "success",
+      "Đăng nhập thành công",
+      message,
+    );
+
+    setTimeout(() => {window.location.href = "/"}, 1000);
+  };
+
   // Xử lý đăng nhập Google
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -61,17 +74,7 @@ const LoginPage = () => {
           tokenResponse.access_token,
         );
 
-        authStorage.save(data);
-
-        showNotification(
-          "success",
-          "Đăng nhập thành công",
-          "Đăng nhập Google thành công"
-        );
-
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+        completeLogin( data, "Đăng nhập Google thành công");
       } catch (err) {
         showNotification(
           "error",
@@ -110,17 +113,7 @@ const LoginPage = () => {
           password,
         });
 
-        authStorage.save(data);
-
-        showNotification(
-          "success",
-          "Đăng nhập thành công",
-          "Chào mừng bạn quay trở lại"
-        );
-
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+        completeLogin( data, "Chào mừng bạn quay trở lại");
 
         return;
       }
@@ -167,17 +160,7 @@ const LoginPage = () => {
           otp: otpCode,
         });
 
-        authStorage.save(data);
-
-        showNotification(
-          "success",
-          "Đăng nhập thành công",
-          "Xác thực OTP thành công"
-        );
-
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+        completeLogin( data, "Xác thực OTP thành công");
       }
 
     } catch (err) {

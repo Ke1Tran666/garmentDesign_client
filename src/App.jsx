@@ -19,6 +19,9 @@ import PrivacyPage from "./pages/User/Account/PrivacyPage";
 
 import { NotificationProvider } from "./components/ui/Notification/NotificationContext";
 import NotFoundPage from "./pages/NotFoundPage";
+import AdminLayout from "./layouts/AdminLayout/AdminLayout";
+import AdminDashboardPage from "./pages/Admin/Dashboard/AdminDashboardPage";
+import RoleProtectedRoute from "./components/auth/RoleProtectedRoute";
 
 const App = () => {
   return (
@@ -32,7 +35,14 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPasswordPage />}/>
         </Route>
 
-        <Route path="/user" element={<UserLayout />}>
+        <Route 
+          path="/user" 
+          element={
+            <RoleProtectedRoute allowedRoles={["user"]}>
+              <UserLayout />
+            </RoleProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="profile" replace/>}/>
 
           <Route path="dashboard" element={<DashboardPage />}/>
@@ -44,6 +54,19 @@ const App = () => {
           <Route path="address" element={<AddressPage />}/>
           <Route path="security" element={<SecurityPage />}/>
           <Route path="privacy" element={<PrivacyPage />}/>
+        </Route>
+
+        <Route 
+          path="/admin" 
+          element={
+            <RoleProtectedRoute allowedRoles={[ "admin", "staff"]}>
+              <AdminLayout />
+            </RoleProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace/>}/>
+
+          <Route path="dashboard" element={<AdminDashboardPage />}/>
         </Route>
 
         <Route path="/not-found" element={<NotFoundPage />}/>

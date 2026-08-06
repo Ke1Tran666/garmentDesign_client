@@ -3,6 +3,7 @@ import { ArrowUp, LogIn, User, Settings, LogOut } from "lucide-react";
 import SettingsModal from "./Settings/SettingsModal";
 import { ButtonIcon } from "./Button/Button";
 import { authStorage } from "@/lib/authStorage";
+import { getAccountPathByRole } from "@/lib/authRole";
 
 const FloatingButtons = () => {
     const [showScrollTop, setShowScrollTop] = useState(false);
@@ -14,13 +15,16 @@ const FloatingButtons = () => {
     // local database
     const token = authStorage.getToken();
     const idUser = authStorage.getUserId();
-    const isLoggedIn = Boolean(token && idUser);
+    const role = authStorage.getRole();
+
+    const isLoggedIn = Boolean( token && idUser);
+
+    const accountPath = isLoggedIn ? getAccountPathByRole(role) : "/login";
 
     // Detect thiết bị có touch (mobile/tablet) hay không
-    const isTouchDevice = () =>
-        window.matchMedia("(pointer: coarse)").matches;
+    const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;
 
-    // ─── Scroll tracking ───────────────────────────────────────────────────────
+    // Scroll tracking
     useEffect(() => {
         const handleScroll = () => {
             const scrollTop = window.scrollY;
@@ -69,17 +73,21 @@ const FloatingButtons = () => {
 
     const handleMainButtonClick = () => {
         if (isTouchDevice()) {
-            // Mobile: lần 1 mở menu, lần 2 navigate
+            // Mobile: lần đầu mở menu,
+            // lần thứ hai mới chuyển trang.
             if (!menuOpen) {
-                setMenuOpen(true);
-            } else {
-                setMenuOpen(false);
-                window.location.href = isLoggedIn ? "/user" : "/login";
+            setMenuOpen(true);
+            return;
             }
-        } else {
-            // Desktop: click navigate luôn (menu đã mở bằng hover)
-            window.location.href = isLoggedIn ? "/user" : "/login";
+
+            setMenuOpen(false);
+            window.location.href = accountPath;
+
+            return;
         }
+
+    // Desktop: nhấn nút sẽ chuyển trang.
+    window.location.href = accountPath;
     };
 
     const handleLogout = () => {

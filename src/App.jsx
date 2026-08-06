@@ -21,7 +21,6 @@ import { NotificationProvider } from "./components/ui/Notification/NotificationC
 import NotFoundPage from "./pages/NotFoundPage";
 import AdminLayout from "./layouts/AdminLayout/AdminLayout";
 import AdminDashboardPage from "./pages/Admin/Dashboard/AdminDashboardPage";
-import RoleProtectedRoute from "./components/auth/RoleProtectedRoute";
 
 const App = () => {
   return (
@@ -56,15 +55,8 @@ const App = () => {
           <Route path="privacy" element={<PrivacyPage />}/>
         </Route>
 
-        <Route 
-          path="/admin" 
-          element={
-            <RoleProtectedRoute allowedRoles={[ "admin", "staff"]}>
-              <AdminLayout />
-            </RoleProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" replace/>}/>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={ <Navigate to="dashboard" replace/>}/>
 
           <Route path="dashboard" element={<AdminDashboardPage />}/>
         </Route>

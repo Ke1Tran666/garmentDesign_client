@@ -9,7 +9,6 @@ import DataTable from "@/components/ui/Table/DataTable";
 import Pagination from "@/components/ui/Table/Pagination";
 
 import { serviceOrderApi } from "@/api/serviceOrderApi";
-import { authStorage } from "@/lib/authStorage";
 
 const hasEmployeeReceiver = (order) => {
   const createdBy = String(order?.createdBy || "").trim();
@@ -189,18 +188,7 @@ const ServiceOrderPage = () => {
         setLoading(true);
         setErrorMessage("");
 
-        const idUser = authStorage.getUserId();
-
-        if (!idUser) {
-          setOrders([]);
-          setErrorMessage(
-            "Không tìm thấy thông tin người dùng.",
-          );
-          return;
-        }
-
-        const orderData =
-          await serviceOrderApi.getByUser(idUser);
+        const orderData = await serviceOrderApi.getMine();
 
         setOrders((orderData || []).map(mapOrderToTable));
       } catch (error) {
@@ -324,20 +312,11 @@ const ServiceOrderPage = () => {
   const handleConfirmRemove = async () => {
     if (!removingOrder || removing) {return;}
 
-    const idUser = authStorage.getUserId();
-
-    if (!idUser) {
-      setRemoveError(
-        "Không tìm thấy thông tin người dùng."
-      );
-      return;
-    }
-
     try {
       setRemoving(true);
       setRemoveError("");
 
-      const result = await serviceOrderApi.removeForUser(removingOrder.serviceOrderId,idUser);
+      const result = await serviceOrderApi.remove(removingOrder.serviceOrderId);
 
       if (result.action === "DELETED") {
         setOrders(

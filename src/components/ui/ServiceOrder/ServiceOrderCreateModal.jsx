@@ -4,10 +4,10 @@ import { serviceApi } from "@/api/serviceApi";
 import { addressApi } from "@/api/addressApi";
 import { serviceOrderApi } from "@/api/serviceOrderApi";
 import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
-import { authStorage } from "@/lib/authStorage";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import ProductImagePicker from "@/components/ui/FileUpload/ProductImagePicker";
 import AttachmentPicker from "@/components/ui/FileUpload/AttachmentPicker";
+import { useAuth } from "@/components/auth/useAuth";
 
 const initialForm = {
   serviceId: "",
@@ -122,7 +122,8 @@ const ServiceOrderCreateModal = ({
     onError: setSubmitError,
   });
 
-  const currentUserId = authStorage.getUserId();
+  const { user } = useAuth();
+  const currentUserId = user?.idUser;
 
   const optionsLoading =
     Boolean(open && currentUserId) &&
@@ -193,12 +194,9 @@ const ServiceOrderCreateModal = ({
           serviceApi.getAll({
             signal: controller.signal,
           }),
-          addressApi.getByUser(
-            currentUserId,
-            {
-              signal: controller.signal,
-            },
-          ),
+          addressApi.getMine({
+            signal: controller.signal,
+          })
         ]);
 
         const availableServices = (
@@ -442,35 +440,15 @@ const ServiceOrderCreateModal = ({
           form.quantity
         );
 
-        const unitPrice = Number(
-          selectedService.basePrice || 0
-        );
-
-        const totalPrice =
-          unitPrice * orderQuantity;
-
-        const createResponse =
-          await serviceOrderApi.create({
-              user: {
-                idUser: currentUserId,
-              },
-              service: {
-                serviceId,
-              },
-              address: {
-                addressId,
-              },
-              productName:
-                form.productName.trim(),
-              unitType:
-                selectedService.unitType ||
-                "",
-              quantity: orderQuantity,
-              unitPrice,
-              discountAmount: 0,
-              totalPrice,
-              status: "pending",
-            });
+        const createResponse = await serviceOrderApi.create({
+            serviceId,
+            addressId,
+            productName:
+              form.productName.trim(),
+            customerRequest:
+              form.customerRequest.trim(),
+            quantity: orderQuantity,
+          });
 
         orderResult = createResponse;
 
@@ -500,10 +478,8 @@ const ServiceOrderCreateModal = ({
         );
 
         try {
-          const uploadResult =
-            await serviceOrderFileApi.upload(
+          const uploadResult = await serviceOrderFileApi.upload(
               orderId,
-              currentUserId,
               uploadData,
             );
 

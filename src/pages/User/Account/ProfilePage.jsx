@@ -102,14 +102,7 @@ const ProfilePage = () => {
         setLoading(true);
         setError("");
 
-        const idUser = authStorage.getUserId();
-
-        if (!idUser) {
-          setError("Không tìm thấy idUser. Vui lòng đăng nhập lại.");
-          return;
-        }
-
-        const data = await userApi.getMe(idUser);
+        const data = await userApi.getMe();
         const userData = data?.user;
 
         setProfile(data);
@@ -281,25 +274,23 @@ const ProfilePage = () => {
   const handleSaveProfile = async () => {
     try {
 
-      const idUser = authStorage.getUserId();
-
       const payload = {
         fullName,
         gender,
         birthday,
       };
 
-      await userApi.update(idUser, payload)
+      await userApi.update(payload);
 
       if (avatarDeleted) {
-        await userApi.removeAvatar(idUser);
+        await userApi.removeAvatar();
       }
       else if (avatarFile) {
         const formData = new FormData();
 
         formData.append("file", avatarFile);
 
-        await userApi.uploadAvatar(idUser, formData);
+        await userApi.uploadAvatar(formData);
       }
 
       await reloadProfile();

@@ -1,9 +1,9 @@
 import httpClient from "./httpClient";
 
 export const serviceOrderFileApi = {
-  async getAll(config = {}) {
+  async getMine(config = {}) {
     const response = await httpClient.get(
-      "/service-order-files",
+      "/service-order-files/me",
       config,
     );
 
@@ -12,38 +12,25 @@ export const serviceOrderFileApi = {
 
   async getByOrder(orderId, config = {}) {
     const response = await httpClient.get(
-      `/service-order-files/order/${orderId}`,
+      `/service-order-files/me/orders/${orderId}`,
       config,
     );
 
     return response.data;
   },
 
-  async upload(
-    orderId,
-    userId,
-    formData,
-  ) {
+  async upload(orderId, formData) {
     const response = await httpClient.post(
-      `/service-order-files/order/${orderId}/user/${userId}`,
+      `/service-order-files/me/orders/${orderId}`,
       formData,
     );
 
     return response.data;
   },
 
-  async remove(fileId, userId) {
+  async remove(fileId) {
     const response = await httpClient.delete(
-      `/service-order-files/${fileId}/user/${userId}`,
-    );
-
-    return response.data;
-  },
-  
-  async getByUser(userId, config = {}) {
-    const response = await httpClient.get(
-      `/service-order-files/user/${userId}`,
-      config,
+      `/service-order-files/me/${fileId}`,
     );
 
     return response.data;

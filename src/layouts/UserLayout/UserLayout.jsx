@@ -216,11 +216,8 @@ const UserLayout = ({ title = "My Account" }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const idUser = authStorage.getUserId();
 
-        if (!idUser) return;
-
-        const data = await userApi.getMe(idUser);
+        const data = await userApi.getMe();
 
         setUser(data?.user);
       } catch (error) {

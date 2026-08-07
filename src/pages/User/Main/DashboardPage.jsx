@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
 import { serviceOrderApi } from "@/api/serviceOrderApi";
-import { authStorage } from "@/lib/authStorage";
 
 const monthLabels = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -267,23 +266,11 @@ const DashboardPage = () => {
     let active = true;
 
     const fetchDashboardData = async () => {
-      const idUser = authStorage.getUserId();
-
-      if (!idUser) {
-        if (active) {
-          setOrders([]);
-          setFiles([]);
-          setLoading(false);
-        }
-
-        return;
-      }
-
       try {
         const [orderResult, fileResult] =
           await Promise.allSettled([
-            serviceOrderApi.getByUser(idUser),
-            serviceOrderFileApi.getByUser(idUser),
+            serviceOrderApi.getMine(),
+            serviceOrderFileApi.getMine(),
           ]);
 
         if (!active) return;
@@ -311,7 +298,7 @@ const DashboardPage = () => {
 
         if (fileResult.status === "rejected") {
           console.error(
-            "Không thể tải file:",
+            "Không thể tải file đơn hàng:",
             fileResult.reason,
           );
         }

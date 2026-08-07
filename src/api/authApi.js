@@ -1,6 +1,29 @@
 import httpClient from "./httpClient";
 
 export const authApi = {
+
+  async csrf() {
+    const response = await httpClient.get("/auth/csrf");
+
+    return response.data;
+  },
+
+  async me() {
+    const response = await httpClient.get("/auth/me");
+
+    if (response.status === 204) {
+      return null;
+    }
+
+    return response.data;
+  },
+
+  async logout() {
+    const response = await httpClient.post("/auth/logout");
+
+    return response.data;
+  },
+
   async login(payload) {
     const response = await httpClient.post(
       "/auth/login",

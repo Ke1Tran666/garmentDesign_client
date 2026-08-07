@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import BirthdayInput from "@/components/ui/Input/BirthdayInput";
 import FloatingInput from "@/components/ui/Input/FloatingInput";
 import { useBeforeUnload, useOutletContext } from "react-router-dom";
-import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
+import { ContactRow } from "@/components/common/Contact/ContactRow";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import OTPModal from "@/components/ui/OTP/OTPModal";
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { HandleButton } from "@/components/ui/Button/Button";
 import { SectionCard } from "@/components/ui/Section/Section";
@@ -12,9 +11,7 @@ import { Divider } from "@/components/ui/Divider/Divider";
 import RadioGroup from "@/components/ui/RadioGroup/RadioGroup";
 import UploadBox from "@/components/ui/Upload/UploadBox";
 import { userApi } from "@/api/userApi";
-import { authProviderApi } from "@/api/authProviderApi";
-import { authStorage } from "@/lib/authStorage";
-import { authApi } from "@/api/authApi";
+import { useAuth } from "@/components/auth/useAuth";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -25,13 +22,10 @@ const ProfilePage = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showPhoneInput, setShowPhoneInput] = useState(false);
-  const [showEmailInput, setShowEmailInput] = useState(false);
-  const [newPhone, setNewPhone] = useState("");
-  const [newEmail, setNewEmail] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarDeleted, setAvatarDeleted] = useState(false);
+  const { refreshSession } = useAuth();
 
   const [originalProfile, setOriginalProfile] = useState(null);
   const { showNotification } = useNotification();
@@ -85,16 +79,6 @@ const ProfilePage = () => {
       "Thông tin cá nhân đã về trạng thái mặc định."
     );
   };
-
-  // OTP
-  const [otpModal, setOtpModal] = useState({
-    open: false,
-    type: "",
-    target: "",
-    mode: "",
-  });
-
-  const [otpLoading, setOtpLoading] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -165,94 +149,6 @@ const ProfilePage = () => {
     );
   }
 
-  // Gỡ liên kết
-  const handleRemoveProvider = async (item) => {
-    try {
-      if (authProviders.length <= 1) {
-        showNotification(
-          "error",
-          "Không thể gỡ bỏ",
-          "Tài khoản phải có ít nhất 1 phương thức đăng nhập để duy trì quyền truy cập."
-        );
-        return;
-      }
-
-      const confirmRemove = window.confirm(
-        `Bạn có chắc muốn hủy liên kết ${
-          item.email || item.phone
-        } không?`
-      );
-
-      if (!confirmRemove) return;
-
-      await authProviderApi.remove(item.id)
-
-      showNotification(
-        "success",
-        "Thành công",
-        "Đã hủy liên kết tài khoản."
-      );
-
-      await reloadProfile();
-    } catch (error) {
-      showNotification(
-        "error",
-        "Thất bại",
-        error.response?.data?.message ||
-          "Không thể hủy liên kết tài khoản."
-      );
-    }
-  };
-
-  // Mở OTP Modal
-  const openPhoneVerify = async (phone, mode = "existing") => {
-    try {
-      const targetPhone = phone.trim();
-
-      if (!targetPhone) {
-        showNotification("warning", "Thiếu số điện thoại", "Vui lòng nhập số điện thoại trước.");
-        return;
-      }
-
-      await authApi.sendPhoneOtp(targetPhone);
-
-      setOtpModal({
-        open: true,
-        type: "phone",
-        target: targetPhone,
-        mode,
-      });
-
-      showNotification("success", "Đã gửi OTP", "Mã OTP đã được gửi đến số điện thoại.");
-    } catch (error) {
-      showNotification("error", "Gửi OTP thất bại", error.response?.data?.message || "Không thể gửi OTP.");
-    }
-  };
-
-  const openEmailVerify = async (email, mode = "existing") => {
-    try {
-      const targetEmail = email.trim();
-
-      if (!targetEmail) {
-        showNotification("warning", "Thiếu email", "Vui lòng nhập email trước.");
-        return;
-      }
-
-      await authApi.sendEmailOtp(targetEmail);
-
-      setOtpModal({
-        open: true,
-        type: "email",
-        target: targetEmail,
-        mode,
-      });
-
-      showNotification("success", "Đã gửi OTP", "Mã OTP đã được gửi đến email.");
-    } catch (error) {
-      showNotification("error", "Gửi OTP thất bại", error.response?.data?.message || "Không thể gửi OTP.");
-    }
-  };
-
   // AVATAR
   const handleUploadAvatar = (e) => {
     const file = e.target.files?.[0];
@@ -294,6 +190,7 @@ const ProfilePage = () => {
       }
 
       await reloadProfile();
+      await refreshSession();
 
       setAvatarFile(null);
 
@@ -324,9 +221,7 @@ const ProfilePage = () => {
 
   // OTP
   const reloadProfile = async () => {
-    const idUser = authStorage.getUserId();
-
-    const data = await userApi.getMe(idUser);
+    const data = await userApi.getMe();
     const userData = data?.user;
 
     setProfile(data);
@@ -401,9 +296,14 @@ const ProfilePage = () => {
       {/* PHONE */}
       <SectionCard
         title="Link phone number"
-        desc="Link your phone number to verify your account for the best support."
+        desc="Manage phone numbers linked to your account."
         active={phoneSectionStatus}
-        highlight={isSearching(["phone", "number", "sdt", "số điện thoại"])}
+        highlight={isSearching([
+          "phone",
+          "number",
+          "sdt",
+          "số điện thoại",
+        ])}
       >
         <div className="space-y-3">
           {phones.length > 0 ? (
@@ -413,39 +313,18 @@ const ProfilePage = () => {
                 value={item.phone}
                 provider={item.provider}
                 showProvider
-                isLocked={item.provider === "phone"}
+                isLocked
                 badgeText={getPhoneStatus(item)}
                 badgeStatus={getPhoneStatus(item)}
-                showSetting
-                canDelete={item.provider !== "phone"}
-                onRemove={() => handleRemoveProvider(item)}
-                onVerify={() => openPhoneVerify(item.phone)}
+                showSetting={false}
+                canDelete={false}
               />
             ))
           ) : (
-            <EmptyContact
-              message="Chưa liên kết số điện thoại."
-              buttonText="Add phone number"
-              showForm={showPhoneInput}
-              onAdd={() => setShowPhoneInput(true)}
-            >
-            <ContactRow
-              value={newPhone}
-              editable
-              inputType="tel"
-              placeholder="Nhập số điện thoại"
-              badgeText="inactive"
-              badgeStatus="inactive"
-              showSetting
-              canDelete
-              onChange={(e) => setNewPhone(e.target.value)}
-              onVerify={() => openPhoneVerify(newPhone, "new")}
-              onDelete={() => {
-                setNewPhone("");
-                setShowPhoneInput(false);
-              }}
-            />
-            </EmptyContact>
+            <p className="text-sm text-text-muted">
+              Chưa liên kết số điện thoại.
+              Chức năng liên kết đang được hoàn thiện.
+            </p>
           )}
         </div>
       </SectionCard>
@@ -457,7 +336,13 @@ const ProfilePage = () => {
         title="Associated email"
         desc="Manage email accounts linked to your profile."
         active={emailSectionStatus}
-        highlight={isSearching(["email", "mail", "gmail", "google", "local"])}
+        highlight={isSearching([
+          "email",
+          "mail",
+          "gmail",
+          "google",
+          "local",
+        ])}
       >
         <div className="space-y-3">
           {emails.length > 0 ? (
@@ -467,39 +352,18 @@ const ProfilePage = () => {
                 value={item.email}
                 provider={item.provider}
                 showProvider
-                isLocked={item.provider === "local" || item.provider === "google"}
+                isLocked
                 badgeText={getEmailStatus(item)}
                 badgeStatus={getEmailStatus(item)}
-                showSetting
-                canDelete={item.provider === "local" && !item.emailVerifiedAt}
-                onRemove={() => handleRemoveProvider(item)}
-                onVerify={() => openEmailVerify(item.email)}
+                showSetting={false}
+                canDelete={false}
               />
             ))
           ) : (
-            <EmptyContact
-              message="Chưa liên kết email."
-              buttonText="Add Email"
-              showForm={showEmailInput}
-              onAdd={() => setShowEmailInput(true)}
-            >
-              <ContactRow
-                value={newEmail}
-                editable
-                inputType="email"
-                placeholder="Nhập email"
-                badgeText="inactive"
-                badgeStatus="inactive"
-                showSetting
-                canDelete
-                onChange={(e) => setNewEmail(e.target.value)}
-                onVerify={() => openEmailVerify(newEmail, "new")}
-                onDelete={() => {
-                  setNewEmail("");
-                  setShowEmailInput(false);
-                }}
-              />
-            </EmptyContact>
+            <p className="text-sm text-text-muted">
+              Chưa liên kết email.
+              Chức năng liên kết đang được hoàn thiện.
+            </p>
           )}
         </div>
       </SectionCard>
@@ -521,108 +385,6 @@ const ProfilePage = () => {
           Save changes
         </HandleButton>
       </div>
-      
-      <OTPModal
-        open={otpModal.open}
-        target={otpModal.target}
-        loading={otpLoading}
-        title={
-          otpModal.type === "phone"
-            ? "Xác thực số điện thoại"
-            : "Xác thực email"
-        }
-        desc={
-          otpModal.type === "phone"
-            ? "Nhập mã OTP 6 số đã gửi đến số điện thoại của bạn."
-            : "Nhập mã OTP 6 số đã gửi đến email của bạn."
-        }
-        onClose={() =>
-          setOtpModal({
-            open: false,
-            type: "",
-            target: "",
-            mode: "",
-          })
-        }
-        onVerify={async (otpCode) => {
-          try {
-            if (!otpCode) {
-              showNotification("warning", "OTP chưa hợp lệ", "Vui lòng nhập đủ 6 số OTP.");
-              return;
-            }
-
-            setOtpLoading(true);
-
-            const idUser = authStorage.getUserId();
-
-            if (otpModal.type === "phone") {
-              await authApi.verifyPhoneOtp({
-                idUser,
-                phone: otpModal.target,
-                otp: otpCode,
-                mode: otpModal.mode,
-              });
-            }
-
-            if (otpModal.type === "email") {
-              await authApi.verifyEmailOtp({
-                idUser,
-                email: otpModal.target,
-                otp: otpCode,
-                mode: otpModal.mode,
-              });
-            }
-
-            showNotification(
-              "success",
-              "Xác thực thành công",
-              otpModal.type === "phone"
-                ? "Số điện thoại đã được xác thực."
-                : "Email đã được xác thực."
-            );
-
-            setOtpModal({
-              open: false,
-              type: "",
-              target: "",
-              mode: "",
-            });
-
-            await reloadProfile();
-          } catch (error) {
-            showNotification(
-              "error",
-              "OTP không đúng",
-              error.response?.data?.message || "Mã OTP không hợp lệ hoặc đã hết hạn."
-            );
-          } finally {
-            setOtpLoading(false);
-          }
-        }}
-        onResend={async () => {
-          try {
-            if (otpModal.type === "phone") {
-              await authApi.sendPhoneOtp(
-                otpModal.target,
-              );
-            }
-
-            if (otpModal.type === "email") {
-              await authApi.sendEmailOtp(
-                otpModal.target,
-              );
-            }
-
-            showNotification("success", "Đã gửi lại OTP", "Vui lòng kiểm tra mã mới.");
-          } catch (error) {
-            showNotification(
-              "error",
-              "Gửi lại OTP thất bại",
-              error.response?.data?.message || "Vui lòng thử lại."
-            );
-          }
-        }}
-      />
     </>
   );
 };

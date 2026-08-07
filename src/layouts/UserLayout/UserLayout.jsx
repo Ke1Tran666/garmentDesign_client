@@ -34,9 +34,8 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { ButtonIcon } from "@/components/ui/Button/Button";
 import GooeySearchBar from "@/components/ui/Search/GooeyInput/GooeySearchBar";
-import { authStorage } from "@/lib/authStorage";
-import { userApi } from "@/api/userApi";
 import { LAYOUT_GROUP_THEME } from "@/lib/layoutTheme";
+import { useAuth } from "@/components/auth/useAuth";
 
 const GROUPS = [
   {
@@ -153,18 +152,25 @@ const UserLayout = ({ title = "My Account" }) => {
   const [activeGroup, setActiveGroup] = useState(2);
   const [activeItem, setActiveItem] = useState(0);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [user, setUser] = useState(null);
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const [isNotificationExpanded, setIsNotificationExpanded] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   
   const [openUserMenu, setOpenUserMenu] = useState(false);
 
-  const handleLogout = () => {
-    authStorage.clear();
-    navigate("/");
+  const handleLogout = async () => {
+    setOpenUserMenu(false);
+
+    try {
+      await logout();
+    } finally {
+      navigate("/login", {
+        replace: true,
+      });
+    }
   };
 
   const [isAsideCollapsed,setIsAsideCollapsed] = useState(() => {
@@ -212,21 +218,6 @@ const UserLayout = ({ title = "My Account" }) => {
       String(isAsideCollapsed),
     );
   }, [isAsideCollapsed]);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-
-        const data = await userApi.getMe();
-
-        setUser(data?.user);
-      } catch (error) {
-        console.error("Không thể tải thông tin user:", error);
-      }
-    };
-
-    loadUser();
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = () => {

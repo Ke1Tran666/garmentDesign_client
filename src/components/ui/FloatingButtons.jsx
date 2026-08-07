@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ArrowUp, LogIn, User, Settings, LogOut } from "lucide-react";
 import SettingsModal from "./Settings/SettingsModal";
 import { ButtonIcon } from "./Button/Button";
-import { authStorage } from "@/lib/authStorage";
+import { useAuth } from "@/components/auth/useAuth";
 import { getAccountPathByRole } from "@/lib/authRole";
 
 const FloatingButtons = () => {
@@ -12,14 +13,14 @@ const FloatingButtons = () => {
     const [openSettings, setOpenSettings] = useState(false);
 
     const menuRef = useRef(null);
-    // local database
-    const token = authStorage.getToken();
-    const idUser = authStorage.getUserId();
-    const role = authStorage.getRole();
 
-    const isLoggedIn = Boolean( token && idUser);
+    const navigate = useNavigate();
 
-    const accountPath = isLoggedIn ? getAccountPathByRole(role) : "/login";
+    const { user, loading, logout } = useAuth();
+
+    const isLoggedIn = Boolean(user);
+
+    const accountPath = isLoggedIn ? getAccountPathByRole(user.role) : "/login";
 
     // Detect thiết bị có touch (mobile/tablet) hay không
     const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;
@@ -72,27 +73,40 @@ const FloatingButtons = () => {
     };
 
     const handleMainButtonClick = () => {
-        if (isTouchDevice()) {
-            // Mobile: lần đầu mở menu,
-            // lần thứ hai mới chuyển trang.
-            if (!menuOpen) {
-            setMenuOpen(true);
-            return;
-            }
+    if (loading) return;
 
-            setMenuOpen(false);
-            window.location.href = accountPath;
-
-            return;
+    if (isTouchDevice()) {
+        /*
+        * Mobile: lần đầu mở menu,
+        * lần thứ hai mới chuyển trang.
+        */
+        if (!menuOpen) {
+        setMenuOpen(true);
+        return;
         }
 
-    // Desktop: nhấn nút sẽ chuyển trang.
-    window.location.href = accountPath;
+        setMenuOpen(false);
+        navigate(accountPath);
+
+        return;
+    }
+
+    /*
+    * Desktop: nhấn nút chuyển trang.
+    */
+    navigate(accountPath);
     };
 
-    const handleLogout = () => {
-        authStorage.clear();
-        window.location.reload();
+    const handleLogout = async () => {
+    setMenuOpen(false);
+
+    try {
+        await logout();
+    } finally {
+        navigate("/", {
+        replace: true,
+        });
+    }
     };
 
     return (
@@ -154,13 +168,18 @@ const FloatingButtons = () => {
                                 : "opacity-0 translate-y-2"}
                         `}
                     >
-                        {isLoggedIn ? "Profile" : "Login"}
+                        {
+                        loading 
+                            ? "Checking..." 
+                            : isLoggedIn ? "Profile" : "Login"
+                        }
                     </div>
 
                     {/* MAIN BUTTON */}
                     <ButtonIcon
                         icon={isLoggedIn ? User : LogIn}
                         sizeIcon={20}
+                        disabled={loading}
                         onMouseEnter={handleMouseEnter}
                         onClick={handleMainButtonClick}
                         className="

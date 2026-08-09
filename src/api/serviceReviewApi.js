@@ -1,24 +1,18 @@
 import httpClient from "./httpClient";
 
 export const serviceReviewApi = {
-  async getReviewableOrders(
-    userId,
-    config = {},
-  ) {
+  async getReviewableOrders(config = {}) {
     const response = await httpClient.get(
-      `/service-reviews/user/${userId}/orders`,
+      "/service-reviews/me/orders",
       config,
     );
 
     return response.data;
   },
 
-  async getByUser(
-    userId,
-    config = {},
-  ) {
+  async getMine(config = {}) {
     const response = await httpClient.get(
-      `/service-reviews/user/${userId}`,
+      "/service-reviews/me",
       config,
     );
 
@@ -34,38 +28,27 @@ export const serviceReviewApi = {
     return response.data;
   },
 
-  async create(
-    orderId,
-    userId,
-    payload,
-  ) {
+  async create(orderId, payload) {
     const response = await httpClient.post(
-      `/service-reviews/order/${orderId}/user/${userId}`,
+      `/service-reviews/me/orders/${orderId}`,
       payload,
     );
 
     return response.data;
   },
 
-  async update(
-    reviewId,
-    userId,
-    payload,
-  ) {
+  async update(reviewId, payload) {
     const response = await httpClient.put(
-      `/service-reviews/${reviewId}/user/${userId}`,
+      `/service-reviews/me/${reviewId}`,
       payload,
     );
 
     return response.data;
   },
 
-  async remove(
-    reviewId,
-    userId,
-  ) {
+  async remove(reviewId) {
     await httpClient.delete(
-      `/service-reviews/${reviewId}/user/${userId}`,
+      `/service-reviews/me/${reviewId}`,
     );
   },
 };

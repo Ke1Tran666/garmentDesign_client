@@ -16,7 +16,6 @@ import {
   X,
 } from "lucide-react";
 import { BACKEND_URL } from "@/api/config";
-import { authStorage } from "@/lib/authStorage";
 import { userApi } from "@/api/userApi";
 import { addressApi } from "@/api/addressApi";
 import { serviceOrderFileApi } from "@/api/serviceOrderFileApi";
@@ -24,6 +23,7 @@ import { serviceOrderApi } from "@/api/serviceOrderApi";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import ProductImagePicker from "@/components/ui/FileUpload/ProductImagePicker";
 import AttachmentPicker from "@/components/ui/FileUpload/AttachmentPicker";
+import { useAuth } from "@/components/auth/useAuth";
 
 const EMPTY_VALUE = "Chưa có thông tin";
 
@@ -241,27 +241,19 @@ const ServiceOrderDetailModal = ({
 
   const [updating, setUpdating] = useState(false);
 
-
-
   const [addressState, setAddressState] = useState({
     idUser: null,
     items: [],
     error: "",
   });
 
-  const [isEditingAddress, setIsEditingAddress] =
-    useState(false);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [updatingAddress, setUpdatingAddress] = useState(false);
+  const [addressError, setAddressError] = useState("");
 
-  const [selectedAddressId, setSelectedAddressId] =
-    useState("");
-
-  const [updatingAddress, setUpdatingAddress] =
-    useState(false);
-
-  const [addressError, setAddressError] =
-    useState("");
-
-  const currentUserId = authStorage.getUserId();
+  const { user: authenticatedUser } = useAuth();
+  const currentUserId = authenticatedUser?.idUser;
 
   const userAddresses =
     addressState.idUser === currentUserId
@@ -290,12 +282,9 @@ const ServiceOrderDetailModal = ({
 
     const fetchUserAddresses = async () => {
       try {
-        const addresses = await addressApi.getByUser(
-          currentUserId,
-          {
+        const addresses = await addressApi.getMine({
             signal: controller.signal,
-          },
-        );
+          });
 
         if (controller.signal.aborted) return;
 
@@ -694,20 +683,11 @@ const ServiceOrderDetailModal = ({
 
     if (!confirmed) return;
 
-    const idUser = authStorage.getUserId();
-
-    if (!idUser) {
-      setFileError(
-        "Không tìm thấy thông tin người dùng."
-      );
-      return;
-    }
-
     try {
       setDeletingFileId(file.fileId);
       setFileError("");
 
-      await serviceOrderFileApi.remove(file.fileId,idUser);
+      await serviceOrderFileApi.remove(file.fileId);
 
       setFileState((previousState) => ({
         ...previousState,
@@ -773,15 +753,6 @@ const ServiceOrderDetailModal = ({
       return;
     }
 
-    const idUser =authStorage.getUserId();
-
-    if (!idUser) {
-      setUpdateError(
-        "Không tìm thấy thông tin người dùng."
-      );
-      return;
-    }
-
     if (!validateTotalSize()) {
       return;
     }
@@ -790,14 +761,8 @@ const ServiceOrderDetailModal = ({
       setUpdating(true);
       setUpdateError("");
 
-      /*
-       * Cập nhật thông tin đơn hàng trước.
-       * Endpoint này không cập nhật audit fields.
-       */
-      let updatedOrder =
-        await serviceOrderApi.updateForUser(
+      let updatedOrder = await serviceOrderApi.update(
           orderId,
-          idUser,
           {
             productName,
             unitType: unitTypeValue,
@@ -815,10 +780,8 @@ const ServiceOrderDetailModal = ({
         );
 
         try {
-          const uploadResult =
-            await serviceOrderFileApi.upload(
+          const uploadResult = await serviceOrderFileApi.upload(
               orderId,
-              idUser,
               uploadData,
             );
 
@@ -958,10 +921,8 @@ const ServiceOrderDetailModal = ({
       setUpdatingAddress(true);
       setAddressError("");
 
-      const updatedOrder =
-        await serviceOrderApi.updateAddress(
+      const updatedOrder = await serviceOrderApi.updateAddress(
           orderId,
-          currentUserId,
           addressId,
         );
 

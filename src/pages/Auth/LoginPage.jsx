@@ -3,7 +3,7 @@ import { FcGoogle } from "react-icons/fc";
 
 import '../../index.css'
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 
@@ -16,8 +16,9 @@ import BrandHeader from "@/components/common/Logo/BrandHeader";
 import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/components/ui/OTP/otp";
 
 import OtpInput from "@/components/ui/OTP/OtpInput";
-import { authStorage } from "@/lib/authStorage";
 import { authApi } from "@/api/authApi";
+import { getAccountPathByRole } from "@/lib/authRole";
+import { useAuth } from "@/components/auth/useAuth";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (
@@ -50,6 +51,35 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
+  const navigate = useNavigate();
+
+  const { refreshSession } = useAuth();
+
+  // component login
+  const completeLogin = async (message) => {
+    // Spring có thể đổi CSRF token sau login.
+    await authApi.csrf();
+
+    const currentUser = await refreshSession();
+
+    if (!currentUser) {
+      throw new Error("Không thể lấy phiên đăng nhập");
+    }
+
+    showNotification(
+      "success",
+      "Đăng nhập thành công",
+      message,
+    );
+
+    const destination = getAccountPathByRole(currentUser.role);
+
+    setTimeout(() => {
+      navigate(destination, {
+        replace: true,
+      });
+    }, 1000);
+  };
 
   // Xử lý đăng nhập Google
   const handleGoogleLogin = useGoogleLogin({
@@ -57,21 +87,9 @@ const LoginPage = () => {
       try {
         setLoading(true);
 
-        const data = await authApi.googleLogin(
-          tokenResponse.access_token,
-        );
+        await authApi.googleLogin(tokenResponse.access_token);
 
-        authStorage.save(data);
-
-        showNotification(
-          "success",
-          "Đăng nhập thành công",
-          "Đăng nhập Google thành công"
-        );
-
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+        await completeLogin("Đăng nhập Google thành công");
       } catch (err) {
         showNotification(
           "error",
@@ -105,22 +123,9 @@ const LoginPage = () => {
 
       // 1. Login bằng email + password
       if (loginType === "account") {
-        const data = await authApi.login({
-          email,
-          password,
-        });
+        await authApi.login({ email, password });
 
-        authStorage.save(data);
-
-        showNotification(
-          "success",
-          "Đăng nhập thành công",
-          "Chào mừng bạn quay trở lại"
-        );
-
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+        await completeLogin("Chào mừng bạn quay trở lại");
 
         return;
       }
@@ -162,22 +167,9 @@ const LoginPage = () => {
           return;
         }
 
-        const data = await authApi.verifyPhoneOtp({
-          phone,
-          otp: otpCode,
-        });
+        await authApi.verifyPhoneOtp({ phone, otp: otpCode });
 
-        authStorage.save(data);
-
-        showNotification(
-          "success",
-          "Đăng nhập thành công",
-          "Xác thực OTP thành công"
-        );
-
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+        await completeLogin("Xác thực OTP thành công");
       }
 
     } catch (err) {

@@ -7,7 +7,7 @@ import { Download, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 import { userApi } from "@/api/userApi";
-import { authStorage } from "@/lib/authStorage";
+import { useAuth } from "@/components/auth/useAuth";
 
 const PrivacyPage = () => {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ const PrivacyPage = () => {
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const { logout } = useAuth();
 
   const formatDateTime = (value) => {
     if (!value) return "";
@@ -37,17 +38,11 @@ const PrivacyPage = () => {
   };
 
   const handleDownloadData = async () => {
-    const idUser = authStorage.getUserId();
-
-    if (!idUser) {
-      alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
-      return;
-    }
 
     try {
       setExporting(true);
 
-      const exportData = await userApi.exportData(idUser);
+      const exportData = await userApi.exportData();
 
       const {
         user,
@@ -109,11 +104,13 @@ const PrivacyPage = () => {
         )
       );
 
+      const exportUserId = user?.idUser || "me";
+
       XLSX.utils.book_append_sheet(workbook, userSheet, "Profile");
       XLSX.utils.book_append_sheet(workbook, addressSheet, "Addresses");
       XLSX.utils.book_append_sheet(workbook, providerSheet, "Auth Providers");
 
-      XLSX.writeFile(workbook, `user-data-${idUser}.xlsx`);
+      XLSX.writeFile(workbook, `user-data-${exportUserId}.xlsx`);
     } catch (error) {
       console.error("Export user data error:", error);
       alert(
@@ -131,27 +128,32 @@ const PrivacyPage = () => {
   };
 
   const handleConfirmDeleteAccount = async () => {
-    const idUser = authStorage.getUserId();
-
-    if (!idUser) {
-      alert("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
-      return;
-    }
-
     try {
       setDeleting(true);
 
-      await userApi.deleteAccount(idUser);
-      authStorage.clear();
+      await userApi.deleteAccount();
+
+      /*
+      * Hủy session JSESSIONID ở Backend
+      * và xóa user trong AuthContext.
+      */
+      await logout();
 
       alert("Tài khoản đã được xóa.");
-      navigate("/login");
+
+      navigate("/login", {
+        replace: true,
+      });
     } catch (error) {
-      console.error("Delete account error:", error);
+      console.error(
+        "Delete account error:",
+        error,
+      );
+
       alert(
         error?.response?.data?.message ||
           error?.response?.data ||
-          "Xóa tài khoản thất bại"
+          "Xóa tài khoản thất bại",
       );
     } finally {
       setDeleting(false);

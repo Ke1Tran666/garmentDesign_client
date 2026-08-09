@@ -17,7 +17,6 @@ import {
 
 import { BACKEND_URL } from "@/api/config";
 import { serviceReviewApi } from "@/api/serviceReviewApi";
-import { authStorage } from "@/lib/authStorage";
 
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 import { SectionCard } from "@/components/ui/Section/Section";
@@ -191,10 +190,8 @@ const LoadingState = () => (
 const ServiceReviewPage = () => {
   const { showNotification } = useNotification();
 
-  const userId = authStorage.getUserId();
-
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(Boolean(userId));
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editingOrderId,setEditingOrderId] = useState(null);
@@ -211,30 +208,35 @@ const ServiceReviewPage = () => {
  const deferredSearchValue = useDeferredValue(searchValue);
 
   useEffect(() => {
-    if (!userId) {
-      return undefined;
-    }
-
     let active = true;
 
-    serviceReviewApi.getReviewableOrders(userId)
+    serviceReviewApi
+      .getReviewableOrders()
       .then((data) => {
         if (!active) return;
 
         setOrders(
-          Array.isArray(data)
-            ? data
-            : [],
+          Array.isArray(data) ? data : []
         );
-      }).catch((error) => {
+      })
+      .catch((error) => {
         if (!active) return;
+
+        console.error(
+          "Không thể tải danh sách đánh giá:",
+          error,
+        );
+
+        setOrders([]);
 
         showNotification(
           "error",
-          "Không thể tải đánh giá",
-          getErrorMessage(error),
+          "Không thể tải dữ liệu",
+          error.response?.data?.message ||
+            "Không thể tải danh sách đơn hàng có thể đánh giá.",
         );
-      }).finally(() => {
+      })
+      .finally(() => {
         if (active) {
           setLoading(false);
         }
@@ -243,7 +245,7 @@ const ServiceReviewPage = () => {
     return () => {
       active = false;
     };
-  }, [showNotification, userId]);
+  }, [showNotification]);
 
   useEffect(() => {
     if (!previewImage) {
@@ -408,13 +410,11 @@ const ServiceReviewPage = () => {
       const savedReview = order.review
         ? await serviceReviewApi.update(
             order.review.reviewId,
-            userId,
-            payload,
+            payload
           )
         : await serviceReviewApi.create(
             order.serviceOrderId,
-            userId,
-            payload,
+            payload
           );
 
       setOrders((currentOrders) =>
@@ -452,11 +452,9 @@ const ServiceReviewPage = () => {
   };
 
   const handleDelete = async () => {
-    const reviewId =
-      deleteTarget?.review?.reviewId;
+    const reviewId = deleteTarget?.review?.reviewId;
 
-    const orderId =
-      deleteTarget?.serviceOrderId;
+    const orderId = deleteTarget?.serviceOrderId;
 
     if (!reviewId || !orderId) {
       return;
@@ -465,10 +463,7 @@ const ServiceReviewPage = () => {
     try {
       setDeleting(true);
 
-      await serviceReviewApi.remove(
-        reviewId,
-        userId,
-      );
+      await serviceReviewApi.remove(reviewId);
 
       setOrders((currentOrders) =>
         currentOrders.map((order) =>

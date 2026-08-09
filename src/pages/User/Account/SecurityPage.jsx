@@ -6,16 +6,11 @@ import PasswordInput from "@/components/ui/Input/PasswordInput";
 import { SectionCard } from "@/components/ui/Section/Section";
 import Switch from "@/components/ui/Switch/Switch";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import { authStorage } from "@/lib/authStorage";
 import { userApi } from "@/api/userApi";
 const SecurityPage = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [email2FA, setEmail2FA] = useState(false);
-  const [sms2FA, setSms2FA] = useState(false);
-  const [app2FA, setApp2FA] = useState(false);
 
   const { showNotification } = useNotification();
 
@@ -64,9 +59,7 @@ const SecurityPage = () => {
     if (!validatePassword()) return;
 
     try {
-      const idUser = authStorage.getUserId();
-
-      await userApi.changePassword(idUser, {
+      await userApi.changePassword({
         oldPassword,
         newPassword,
       });
@@ -74,7 +67,7 @@ const SecurityPage = () => {
       showNotification(
         "success",
         "Thành công",
-        "Đổi mật khẩu thành công."
+        "Đổi mật khẩu thành công.",
       );
 
       setOldPassword("");
@@ -85,7 +78,7 @@ const SecurityPage = () => {
         "error",
         "Thất bại",
         error?.response?.data?.message ||
-          "Không thể đổi mật khẩu."
+          "Không thể đổi mật khẩu.",
       );
     }
   };
@@ -176,8 +169,8 @@ const SecurityPage = () => {
               </div>
 
               <Switch
-                checked={email2FA}
-                onCheckedChange={setEmail2FA}
+                checked={false}
+                disabled
               />
             </div>
 
@@ -193,8 +186,8 @@ const SecurityPage = () => {
               </div>
 
               <Switch
-                checked={sms2FA}
-                onCheckedChange={setSms2FA}
+                checked={false}
+                disabled
               />
             </div>
 
@@ -210,8 +203,8 @@ const SecurityPage = () => {
               </div>
 
               <Switch
-                checked={app2FA}
-                onCheckedChange={setApp2FA}
+                checked={false}
+                disabled
               />
             </div>
 

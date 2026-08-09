@@ -16,18 +16,16 @@ import {
   ShieldCheck,
   ShoppingBag,
   SlidersHorizontal,
-  User,
   Users,
 } from "lucide-react";
-import { Navigate, Outlet, useLocation, useNavigate} from "react-router-dom";
+import { Outlet, useLocation, useNavigate} from "react-router-dom";
 
 import Logo from "@/components/common/Logo/Logo";
 import { ButtonIcon } from "@/components/ui/Button/Button";
 import GooeySearchBar from "@/components/ui/Search/GooeyInput/GooeySearchBar";
 
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
-import { authStorage } from "@/lib/authStorage";
-import { userApi } from "@/api/userApi";
+import { useAuth } from "@/components/auth/useAuth";
 import { LAYOUT_GROUP_THEME } from "@/lib/layoutTheme";
 
 const ADMIN_GROUPS = [
@@ -181,38 +179,21 @@ const AdminLayout = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const {user: adminUser,logout} = useAuth();
 
-  const [activeGroup, setActiveGroup] =
-    useState(0);
+  const [activeGroup, setActiveGroup] = useState(0);
 
-  const [activeItem, setActiveItem] =
-    useState(0);
+  const [activeItem, setActiveItem] = useState(0);
 
-  const [searchKeyword, setSearchKeyword] =
-    useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
 
-  const [adminUser, setAdminUser] =
-    useState(null);
+  const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
-  const [
-    openMobileMenu,
-    setOpenMobileMenu,
-  ] = useState(false);
+  const [openUserMenu,setOpenUserMenu] = useState(false);
 
-  const [
-    openUserMenu,
-    setOpenUserMenu,
-  ] = useState(false);
+  const [isNotificationExpanded,setIsNotificationExpanded] = useState(false);
 
-  const [
-    isNotificationExpanded,
-    setIsNotificationExpanded,
-  ] = useState(false);
-
-  const [
-    isAsideCollapsed,
-    setIsAsideCollapsed,
-  ] = useState(() => {
+  const [isAsideCollapsed,setIsAsideCollapsed] = useState(() => {
     return (
       localStorage.getItem(
         "admin-aside-collapsed",
@@ -254,39 +235,6 @@ const AdminLayout = ({
   }, [isAsideCollapsed]);
 
   useEffect(() => {
-    let active = true;
-
-    const loadAdminUser = async () => {
-      const userId =
-        authStorage.getUserId();
-
-      if (!userId) return;
-
-      try {
-        const data =
-          await userApi.getMe(userId);
-
-        if (active) {
-          setAdminUser(
-            data?.user || null,
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Không thể tải thông tin admin:",
-          error,
-        );
-      }
-    };
-
-    loadAdminUser();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
     const handleClickOutside = () => {
       setOpenUserMenu(false);
     };
@@ -305,18 +253,6 @@ const AdminLayout = ({
       );
     };
   }, [openUserMenu]);
-
-  if (!authStorage.getToken()) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{
-          from: location.pathname,
-        }}
-      />
-    );
-  }
 
   const navigateToItem = (
     item,
@@ -360,12 +296,16 @@ const AdminLayout = ({
     );
   };
 
-  const handleLogout = () => {
-    authStorage.clear();
+  const handleLogout = async () => {
+    setOpenUserMenu(false);
 
-    navigate("/login", {
-      replace: true,
-    });
+    try {
+      await logout();
+    } finally {
+      navigate("/login", {
+        replace: true,
+      });
+    }
   };
 
   return (
@@ -1018,29 +958,6 @@ const AdminLayout = ({
                     shadow-lg
                   "
                 >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigate(
-                        "/user/profile",
-                      );
-
-                      setOpenUserMenu(
-                        false,
-                      );
-                    }}
-                    className="
-                      flex w-full
-                      items-center gap-3
-                      rounded-lg px-3 py-2
-                      text-sm
-                      text-text-default
-                      hover:bg-surface-muted
-                    "
-                  >
-                    <User size={16} />
-                    Hồ sơ cá nhân
-                  </button>
 
                   <button
                     type="button"

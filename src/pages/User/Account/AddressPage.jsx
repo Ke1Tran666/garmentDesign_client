@@ -19,7 +19,6 @@ import Pagination from "@/components/ui/Table/Pagination";
 import MenuTable from "@/components/ui/Menu/MenuTable";
 import { addressApi } from "@/api/addressApi";
 import { userApi } from "@/api/userApi";
-import { authStorage } from "@/lib/authStorage";
 
 const statusClassName = {
   Active: "bg-success-soft text-success ring-1 ring-success-border",
@@ -108,20 +107,10 @@ const AddressPage = () => {
         setLoading(true);
         setErrorMessage("");
 
-        const idUser = authStorage.getUserId();
-
-        if (!idUser) {
-          setAddresses([]);
-          setErrorMessage(
-            "Không tìm thấy thông tin người dùng.",
-          );
-          return;
-        }
-
         const [userData, addressData] =
           await Promise.all([
-            userApi.getMe(idUser),
-            addressApi.getByUser(idUser),
+            userApi.getMe(),
+            addressApi.getMine(),
           ]);
 
         setDefaultAddressId(
@@ -276,18 +265,7 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      const idUser = authStorage.getUserId();
-
-      if (!idUser) {
-        throw new Error(
-          "Không tìm thấy thông tin người dùng.",
-        );
-      }
-
-      await addressApi.setDefault(
-        idUser,
-        confirmDefaultAddress.addressId,
-      );
+      await addressApi.setDefault(confirmDefaultAddress.addressId);
 
       setDefaultAddressId(confirmDefaultAddress.addressId);
       setConfirmDefaultAddress(null);
@@ -356,20 +334,17 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      await addressApi.update(
-        editingAddress.addressId,
-        form,
-      );
+      const updatedAddress =
+        await addressApi.update(
+          editingAddress.addressId,
+          form,
+        );
 
-      setAddresses((prev) =>
-        prev.map((item) =>
-          item.addressId === editingAddress.addressId
-            ? {
-                ...item,
-                companyName: form.companyName,
-                address: form.address,
-                note: form.note,
-              }
+      setAddresses((current) =>
+        current.map((item) =>
+          item.addressId
+            === editingAddress.addressId
+            ? updatedAddress
             : item
         )
       );
@@ -394,45 +369,51 @@ const AddressPage = () => {
   };
 
   const handleConfirmDeleteAddress = async () => {
-    if (!deleteAddress) return;
-    if (deleteAddress.addressId === defaultAddressId) {
-      alert("Không thể xóa địa chỉ mặc định");
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-
-      await addressApi.remove(
-        deleteAddress.addressId,
-      );
-
-      setAddresses((prev) =>
-        prev.filter((item) => item.addressId !== deleteAddress.addressId)
-      );
-
-      if (deleteAddress.addressId === defaultAddressId) {
-        setDefaultAddressId(null);
+      if (!deleteAddress) {
+        return;
       }
 
-      setDeleteAddress(null);
+      if ( deleteAddress.addressId === defaultAddressId ) {
+        showNotification(
+          "error",
+          "Không thể xóa",
+          "Không thể xóa địa chỉ mặc định.",
+        );
 
-      showNotification(
-        "success",
-        "Thành công",
-        "Đã xóa địa chỉ."
-      );
-    } catch (error) {
-      showNotification(
-        "error",
-        "Thất bại",
-        error.response?.data?.message ||
-          "Không thể xóa địa chỉ."
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
+        return;
+      }
+
+      try {
+        setSubmitting(true);
+
+        await addressApi.remove(deleteAddress.addressId);
+
+        setAddresses((current) =>
+          current.filter(
+            (item) =>
+              item.addressId
+                !== deleteAddress.addressId,
+          )
+        );
+
+        setDeleteAddress(null);
+
+        showNotification(
+          "success",
+          "Thành công",
+          "Đã xóa địa chỉ.",
+        );
+      } catch (error) {
+        showNotification(
+          "error",
+          "Thất bại",
+          error.response?.data?.message
+            || "Không thể xóa địa chỉ.",
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    };
 
   const handleCreateAddress = async () => {
     if (!form.companyName.trim()) {
@@ -456,16 +437,7 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      const idUser = authStorage.getUserId();
-
-      if (!idUser) {
-        throw new Error(
-          "Không tìm thấy thông tin người dùng.",
-        );
-      }
-
-      const createdAddress =
-        await addressApi.create(idUser, form);
+      const createdAddress = await addressApi.create(form);
 
       setAddresses((prev) => [
         ...prev,

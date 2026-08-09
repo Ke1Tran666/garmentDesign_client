@@ -1,9 +1,9 @@
 import httpClient from "./httpClient";
 
 export const serviceOrderApi = {
-  async getByUser(userId, config = {}) {
+  async getMine(config = {}) {
     const response = await httpClient.get(
-      `/service-orders/user/${userId}`,
+      "/service-orders/me",
       config,
     );
 
@@ -12,41 +12,33 @@ export const serviceOrderApi = {
 
   async create(payload) {
     const response = await httpClient.post(
-      "/service-orders",
+      "/service-orders/me",
       payload,
     );
 
     return response.data;
   },
 
-  async removeForUser(orderId, userId) {
+  async remove(orderId) {
     const response = await httpClient.delete(
-      `/service-orders/${orderId}/user/${userId}`,
+      `/service-orders/me/${orderId}`,
     );
 
     return response.data;
   },
 
-  async updateForUser(
-    orderId,
-    userId,
-    payload,
-  ) {
+  async update(orderId, payload) {
     const response = await httpClient.patch(
-      `/service-orders/${orderId}/user/${userId}`,
+      `/service-orders/me/${orderId}`,
       payload,
     );
 
     return response.data;
   },
 
-  async updateAddress(
-    orderId,
-    userId,
-    addressId,
-  ) {
+  async updateAddress(orderId, addressId) {
     const response = await httpClient.patch(
-      `/service-orders/${orderId}/user/${userId}/address`,
+      `/service-orders/me/${orderId}/address`,
       {
         addressId,
       },

@@ -1,18 +1,18 @@
 import httpClient from "./httpClient";
 
 export const addressApi = {
-  async getByUser(userId, config = {}) {
+  async getMine(config = {}) {
     const response = await httpClient.get(
-      `/user-addresses/user/${userId}`,
+      "/user-addresses/me",
       config,
     );
 
     return response.data;
   },
 
-  async create(userId, payload) {
+  async create(payload) {
     const response = await httpClient.post(
-      `/user-addresses/user/${userId}`,
+      "/user-addresses/me",
       payload,
     );
 
@@ -21,7 +21,7 @@ export const addressApi = {
 
   async update(addressId, payload) {
     const response = await httpClient.put(
-      `/user-addresses/${addressId}`,
+      `/user-addresses/me/${addressId}`,
       payload,
     );
 
@@ -30,15 +30,15 @@ export const addressApi = {
 
   async remove(addressId) {
     const response = await httpClient.delete(
-      `/user-addresses/${addressId}`,
+      `/user-addresses/me/${addressId}`,
     );
 
     return response.data;
   },
 
-  async setDefault(userId, addressId) {
+  async setDefault(addressId) {
     const response = await httpClient.put(
-      `/user-addresses/user/${userId}/default/${addressId}`,
+      `/user-addresses/me/default/${addressId}`,
     );
 
     return response.data;

@@ -1,9 +1,9 @@
 import httpClient from "./httpClient";
 
 export const userApi = {
-  async getMe(userId, config = {}) {
+  async getMe(config = {}) {
     const response = await httpClient.get(
-      `/users/me/${userId}`,
+      "/users/me",
       config,
     );
 
@@ -19,52 +19,52 @@ export const userApi = {
     return response.data;
   },
 
-  async update(userId, payload) {
+  async update(payload) {
     const response = await httpClient.put(
-      `/users/${userId}`,
+      "/users/me",
       payload,
     );
 
     return response.data;
   },
 
-  async changePassword(userId, payload) {
+  async changePassword(payload) {
     const response = await httpClient.put(
-      `/users/me/${userId}/change-password`,
+      "/users/me/change-password",
       payload,
     );
 
     return response.data;
   },
 
-  async removeAvatar(userId) {
+  async removeAvatar() {
     const response = await httpClient.delete(
-      `/users/me/${userId}/avatar`,
+      "/users/me/avatar",
     );
 
     return response.data;
   },
 
-  async uploadAvatar(userId, formData) {
+  async uploadAvatar(formData) {
     const response = await httpClient.put(
-      `/users/me/${userId}/avatar`,
+      "/users/me/avatar",
       formData,
     );
 
     return response.data;
   },
 
-  async exportData(userId) {
+  async exportData() {
     const response = await httpClient.get(
-      `/users/me/${userId}/export-data`,
+      "/users/me/export-data",
     );
 
     return response.data;
   },
 
-  async deleteAccount(userId) {
+  async deleteAccount() {
     const response = await httpClient.delete(
-      `/users/me/${userId}/delete-account`,
+      "/users/me/delete-account",
     );
 
     return response.data;

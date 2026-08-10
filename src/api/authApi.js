@@ -162,18 +162,18 @@ export const authApi = {
   async resetPassword(payload) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/reset-password",
-        {
-          email:
-            payload.email
-              .trim()
-              .toLowerCase(),
-          newPassword:
-            payload.newPassword,
-        },
-      );
+    const response = await httpClient.post(
+      "/auth/reset-password",
+      {
+        email: payload.email
+          .trim()
+          .toLowerCase(),
+
+        newPassword: payload.newPassword,
+
+        resetToken: payload.resetToken,
+      },
+    );
 
     return response.data;
   },

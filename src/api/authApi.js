@@ -44,16 +44,16 @@ export const authApi = {
     return response.data;
   },
 
-  async googleLogin(accessToken) {
+  async googleLogin(credential) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/google-login",
-        {
-          accessToken,
-        },
+    if (!credential) {
+      throw new Error(
+        "Không nhận được Google ID token",
       );
+    }
+
+    const response = await httpClient.post("/auth/google-login",{credential});
 
     return response.data;
   },

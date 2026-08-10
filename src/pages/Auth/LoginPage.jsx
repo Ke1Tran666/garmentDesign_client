@@ -1,11 +1,10 @@
 import { ArrowRight, Mail, Phone } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
 
 import '../../index.css'
 
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 
 import { useNotification } from "../../components/ui/Notification/NotificationContext";
 
@@ -82,33 +81,48 @@ const LoginPage = () => {
   };
 
   // Xử lý đăng nhập Google
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        setLoading(true);
+  const handleGoogleSuccess = async (
+    credentialResponse,
+  ) => {
+    try {
+      setLoading(true);
 
-        await authApi.googleLogin(tokenResponse.access_token);
+      const credential =
+        credentialResponse?.credential;
 
-        await completeLogin("Đăng nhập Google thành công");
-      } catch (err) {
-        showNotification(
-          "error",
-          "Đăng nhập Google thất bại",
-          err.response?.data?.message || "Không thể đăng nhập bằng Google"
+      if (!credential) {
+        throw new Error(
+          "Google không trả về ID token",
         );
-      } finally {
-        setLoading(false);
       }
-    },
 
-    onError: () => {
+      await authApi.googleLogin(
+        credential,
+      );
+
+      await completeLogin(
+        "Đăng nhập Google thành công",
+      );
+    } catch (err) {
       showNotification(
         "error",
         "Đăng nhập Google thất bại",
-        "Bạn đã hủy hoặc Google không thể xác thực"
+        err.response?.data?.message ||
+          err.message ||
+          "Không thể đăng nhập bằng Google",
       );
-    },
-  });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    showNotification(
+      "error",
+      "Đăng nhập Google thất bại",
+      "Bạn đã hủy hoặc Google không thể xác thực",
+    );
+  };
 
   const resetPhoneLogin = () => {
     setLoginStep("input");
@@ -359,9 +373,25 @@ const LoginPage = () => {
         </SocialLoginButton>
         
         {/* BUTTON GOOGLE */}
-        <SocialLoginButton icon={FcGoogle} onClick={handleGoogleLogin}>
-          Đăng nhập với Google
-        </SocialLoginButton>
+        <div className="mb-3 flex w-full justify-center">
+          <div className="w-85 overflow-hidden rounded-xl">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              type="standard"
+              theme="outline"
+              size="large"
+              text="continue_with"
+              shape="rectangular"
+              logo_alignment="left"
+              width="340"
+              useOneTap={false}
+
+              use_fedcm_for_prompt={true}
+              use_fedcm_for_button={true}
+            />
+          </div>
+        </div>
 
         <p className="mt-5 text-center text-[13px] text-white/45">
           Chưa có tài khoản?{" "}

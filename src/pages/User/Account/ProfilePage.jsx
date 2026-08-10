@@ -12,6 +12,8 @@ import RadioGroup from "@/components/ui/RadioGroup/RadioGroup";
 import UploadBox from "@/components/ui/Upload/UploadBox";
 import { userApi } from "@/api/userApi";
 import { useAuth } from "@/components/auth/useAuth";
+import OTPModal from "@/components/ui/OTP/OTPModal";
+import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -31,6 +33,19 @@ const ProfilePage = () => {
   const { showNotification } = useNotification();
 
   const { searchKeyword = "" } = useOutletContext() || {};
+
+  const [emailOtpOpen, setEmailOtpOpen] = useState(false);
+  const [emailOtpLoading, setEmailOtpLoading] = useState(false);
+  const [emailOtpTarget, setEmailOtpTarget] = useState("");
+  const [emailOtpModalKey, setEmailOtpModalKey] = useState(0);
+
+  const [
+    emailVerificationToRemove, setEmailVerificationToRemove
+  ] = useState(null);
+
+  const [
+    removingEmailVerification, setRemovingEmailVerification
+  ] = useState(false);
 
   // snapshot
   const createProfileSnapshot = (data) => ({
@@ -233,6 +248,105 @@ const ProfilePage = () => {
     setAvatarPreview(userData?.avatar || "");
   };
 
+  const handleSendEmailOtp = async (email) => {
+    try {
+      setEmailOtpLoading(true);
+
+      const result =
+        await userApi.sendEmailVerificationOtp();
+
+      setEmailOtpTarget(email);
+      setEmailOtpOpen(true);
+
+      showNotification(
+        "success",
+        "Đã gửi OTP",
+        result?.message ||
+          "Mã OTP đã được gửi đến email của bạn.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Không thể gửi OTP",
+        error.response?.data?.message ||
+          "Không thể gửi mã xác thực.",
+      );
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async (otp) => {
+    if (!otp) {
+      showNotification(
+        "error",
+        "Thiếu mã OTP",
+        "Vui lòng nhập đầy đủ mã OTP.",
+      );
+
+      return;
+    }
+
+    try {
+      setEmailOtpLoading(true);
+
+      const result =
+        await userApi.verifyEmailVerificationOtp(otp);
+
+      setEmailOtpOpen(false);
+      setEmailOtpModalKey((value) => value + 1);
+
+      await reloadProfile();
+      await refreshSession();
+
+      showNotification(
+        "success",
+        "Xác thực thành công",
+        result?.message ||
+          "Email đã được xác thực.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Xác thực thất bại",
+        error.response?.data?.message ||
+          "Mã OTP không hợp lệ.",
+      );
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
+
+  const handleRemoveEmailVerification = async () => {
+    try {
+      setRemovingEmailVerification(true);
+
+      const result =
+        await userApi.removeEmailVerification();
+
+      setEmailVerificationToRemove(null);
+
+      await reloadProfile();
+      await refreshSession();
+
+      showNotification(
+        "success",
+        "Đã bỏ xác thực",
+        result?.message ||
+          "Email đã được chuyển về trạng thái chưa xác thực.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Không thể bỏ xác thực",
+        error.response?.data?.message ||
+          "Không thể bỏ xác thực email.",
+      );
+    } finally {
+      setRemovingEmailVerification(false);
+    }
+  };
+
   return (
     <>
       <SectionCard
@@ -355,8 +469,16 @@ const ProfilePage = () => {
                 isLocked
                 badgeText={getEmailStatus(item)}
                 badgeStatus={getEmailStatus(item)}
-                showSetting={false}
+                showSetting={
+                  item.provider?.toLowerCase() === "local"
+                }
                 canDelete={false}
+                onVerify={() =>
+                  handleSendEmailOtp(item.email)
+                }
+                onRemove={() =>
+                  setEmailVerificationToRemove(item)
+                }
               />
             ))
           ) : (
@@ -385,6 +507,46 @@ const ProfilePage = () => {
           Save changes
         </HandleButton>
       </div>
+
+      <OTPModal
+        key={emailOtpModalKey}
+        open={emailOtpOpen}
+        title="Xác thực email"
+        desc="Nhập mã OTP 6 số đã được gửi đến email của bạn. Mã có hiệu lực trong 3 phút."
+        target={emailOtpTarget}
+        loading={emailOtpLoading}
+        onClose={() => setEmailOtpOpen(false)}
+        onVerify={handleVerifyEmailOtp}
+        onResend={() =>
+          handleSendEmailOtp(emailOtpTarget)
+        }
+      />
+
+      <ConfirmModal
+        open={Boolean(emailVerificationToRemove)}
+        title="Bỏ xác thực email"
+        confirmText="Bỏ xác thực"
+        loadingText="Đang xử lý..."
+        confirmVariant="danger"
+        submitting={removingEmailVerification}
+        onClose={() => {
+          if (!removingEmailVerification) {
+            setEmailVerificationToRemove(null);
+          }
+        }}
+        onConfirm={handleRemoveEmailVerification}
+      >
+        Bạn có chắc chắn muốn bỏ xác thực email{" "}
+        <span className="font-semibold text-text-strong">
+          {emailVerificationToRemove?.email}
+        </span>
+        ?
+
+        <p className="mt-2 text-danger">
+          Một số tính năng có thể bị khóa và tài khoản có thể
+          chuyển về trạng thái pending.
+        </p>
+      </ConfirmModal>
     </>
   );
 };

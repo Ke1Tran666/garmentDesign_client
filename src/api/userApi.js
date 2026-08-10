@@ -69,4 +69,29 @@ export const userApi = {
 
     return response.data;
   },
+
+  async sendEmailVerificationOtp() {
+    const response = await httpClient.post(
+      "/auth/me/email/send-otp",
+    );
+
+    return response.data;
+  },
+
+  async verifyEmailVerificationOtp(otp) {
+    const response = await httpClient.post(
+      "/auth/me/email/verify-otp",
+      { otp },
+    );
+
+    return response.data;
+  },
+
+  async removeEmailVerification() {
+    const response = await httpClient.delete(
+      "/auth/me/email/verification",
+    );
+
+    return response.data;
+  },
 };

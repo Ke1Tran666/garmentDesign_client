@@ -132,18 +132,19 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    if (loading) return;
+
     try {
       setLoading(true);
 
       // 1. Login bằng email + password
       if (loginType === "account") {
-        await authApi.login({ email, password });
+        const result = await authApi.login({ email, password });
 
-        await completeLogin("Chào mừng bạn quay trở lại");
+        await completeLogin(result?.message || "Chào mừng bạn quay trở lại");
 
         return;
       }
-
       // 2. Bước nhập số điện thoại -> gửi OTP
       if (loginType === "phone" && loginStep === "input") {
         if (!phone.trim()) {
@@ -186,14 +187,28 @@ const LoginPage = () => {
         await completeLogin("Xác thực OTP thành công");
       }
 
-    } catch (err) {
+    } catch (error) {
+      let message = "Không thể đăng nhập. Vui lòng thử lại";
+
+      if (error.code === "ECONNABORTED") {
+        message =
+          "Máy chủ phản hồi quá lâu. Vui lòng thử lại";
+      } else if (!error.response) {
+        message =
+          error.message === "Không thể lấy phiên đăng nhập"
+            ? "Đăng nhập thành công nhưng không thể tải thông tin người dùng"
+            : "Không thể kết nối đến máy chủ";
+      } else if (error.response.data?.message) {
+        message = error.response.data.message;
+      } else if (error.message) {
+        message = error.message;
+      }
 
       showNotification(
         "error",
         "Đăng nhập thất bại",
-        err.response?.data?.message || "Thông tin đăng nhập không đúng"
+        message,
       );
-
     } finally {
       setLoading(false);
     }

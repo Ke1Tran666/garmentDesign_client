@@ -45,31 +45,45 @@ const RegisterPage = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
 
+    if (loading) {return}
+
     try {
       setLoading(true);
 
-      await authApi.register({
-        email,
+      const result = await authApi.register({
+        email: email.trim().toLowerCase(),
         password,
-        fullName,
-        gender,
-        birthday,
+        fullName: fullName.trim(),
+
+        // Hai trường này không bắt buộc.
+        gender: gender || null,
+        birthday: birthday || null,
       });
 
       showNotification(
         "success",
         "Đăng ký thành công",
-        "Tài khoản của bạn đã được tạo"
+        result?.message || "Tài khoản của bạn đã được tạo",
       );
 
       setTimeout(() => {
         window.location.href = "/login";
       }, 1000);
-    } catch (err) {
+    } catch (error) {
+      let message = "Không thể đăng ký. Vui lòng thử lại";
+
+      if (error.code === "ECONNABORTED") {
+        message = "Máy chủ phản hồi quá lâu. Vui lòng thử lại";
+      } else if (!error.response) {
+        message = "Không thể kết nối đến máy chủ";
+      } else if (error.response.data?.message) {
+        message = error.response.data.message;
+      }
+
       showNotification(
         "error",
         "Đăng ký thất bại",
-        err.response?.data?.message || "Vui lòng thử lại"
+        message,
       );
     } finally {
       setLoading(false);

@@ -35,11 +35,13 @@ export const authApi = {
   async login(payload) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/login",
-        payload,
-      );
+    const response = await httpClient.post(
+      "/auth/login",
+      {
+        email: payload.email.trim().toLowerCase(),
+        password: payload.password,
+      },
+    );
 
     return response.data;
   },

@@ -35,25 +35,27 @@ export const authApi = {
   async login(payload) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/login",
-        payload,
-      );
+    const response = await httpClient.post(
+      "/auth/login",
+      {
+        email: payload.email.trim().toLowerCase(),
+        password: payload.password,
+      },
+    );
 
     return response.data;
   },
 
-  async googleLogin(accessToken) {
+  async googleLogin(credential) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/google-login",
-        {
-          accessToken,
-        },
+    if (!credential) {
+      throw new Error(
+        "Không nhận được Google ID token",
       );
+    }
+
+    const response = await httpClient.post("/auth/google-login",{credential});
 
     return response.data;
   },
@@ -160,18 +162,18 @@ export const authApi = {
   async resetPassword(payload) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/reset-password",
-        {
-          email:
-            payload.email
-              .trim()
-              .toLowerCase(),
-          newPassword:
-            payload.newPassword,
-        },
-      );
+    const response = await httpClient.post(
+      "/auth/reset-password",
+      {
+        email: payload.email
+          .trim()
+          .toLowerCase(),
+
+        newPassword: payload.newPassword,
+
+        resetToken: payload.resetToken,
+      },
+    );
 
     return response.data;
   },

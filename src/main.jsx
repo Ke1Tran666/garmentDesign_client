@@ -9,11 +9,17 @@ import "./index.css";
 import App from "./App.jsx";
 import AuthProvider from "./components/auth/AuthProvider";
 
-createRoot(document.getElementById("root")).render(
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+if (!googleClientId) {
+  throw new Error( "VITE_GOOGLE_CLIENT_ID chưa được cấu hình");
+}
+
+createRoot(
+  document.getElementById("root"),
+).render(
   <StrictMode>
-    <GoogleOAuthProvider
-      clientId="295478383027-o1ifgrosf98kqto9jd25bi6fu8coeshj.apps.googleusercontent.com"
-    >
+    <GoogleOAuthProvider clientId={googleClientId}>
       <BrowserRouter>
         <AuthProvider>
           <App />

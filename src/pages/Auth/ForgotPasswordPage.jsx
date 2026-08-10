@@ -15,6 +15,21 @@ import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/components/ui/OTP/ot
 import OtpInput from "@/components/ui/OTP/OtpInput";
 import { authApi } from "@/api/authApi";
 
+const getErrorMessage = (
+  error,
+  fallback = "Vui lòng thử lại",
+) => {
+  if (error.code === "ECONNABORTED") {
+    return "Máy chủ phản hồi quá lâu. Vui lòng thử lại";
+  }
+
+  if (!error.response) {
+    return error.message || "Không thể kết nối đến máy chủ";
+  }
+
+  return error.response.data?.message || fallback;
+};
+
 const ForgotPasswordSteps = ({ currentStep }) => {
   const steps = ["Nhập Email", "Xác thực OTP", "Đổi mật khẩu", "Hoàn thành"];
 
@@ -79,9 +94,14 @@ const ForgotPasswordPage = () => {
 
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
+  const [resetToken, setResetToken] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (loading) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -96,12 +116,15 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await authApi.forgotPassword(email);
+        const result =
+          await authApi.forgotPassword(email);
+
+        setResetToken("");
 
         showNotification(
           "success",
           "Đã gửi OTP",
-          "Vui lòng kiểm tra email của bạn"
+          result?.message || "Vui lòng kiểm tra email của bạn",
         );
 
         setStep(2);
@@ -121,15 +144,24 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await authApi.verifyForgotOtp({
-          email,
-          otp: otpCode,
-        });
+        const result = await authApi.verifyForgotOtp({ email, otp: otpCode });
+
+        if (!result?.resetToken) {
+          throw new Error(
+            "Không nhận được phiên đổi mật khẩu",
+          );
+        }
+
+        /*
+        * Chỉ giữ token trong React state.
+        * Không lưu localStorage hoặc sessionStorage.
+        */
+        setResetToken(result.resetToken);
 
         showNotification(
           "success",
           "Xác thực thành công",
-          "Vui lòng đổi mật khẩu mới"
+          result?.message || "Vui lòng đổi mật khẩu mới",
         );
 
         setStep(3);
@@ -155,15 +187,41 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        await authApi.resetPassword({
-          email,
-          newPassword,
-        });
+        if (newPassword.length < 8) {
+          showNotification(
+            "warning",
+            "Mật khẩu chưa hợp lệ",
+            "Mật khẩu phải có ít nhất 8 ký tự",
+          );
+
+          return;
+        }
+
+        if (!resetToken) {
+          showNotification(
+            "error",
+            "Phiên đã hết hạn",
+            "Vui lòng xác thực OTP lại",
+          );
+
+          setStep(2);
+          return;
+        }
+
+        const result =
+          await authApi.resetPassword({
+            email,
+            newPassword,
+            resetToken,
+          });
+
+        setResetToken("");
 
         showNotification(
           "success",
           "Đổi mật khẩu thành công",
-          "Bạn sẽ được chuyển về trang đăng nhập"
+          result?.message
+            || "Bạn sẽ được chuyển về trang đăng nhập",
         );
 
         setStep(4);
@@ -172,11 +230,14 @@ const ForgotPasswordPage = () => {
           window.location.href = "/login";
         }, 6000);
       }
-    } catch (err) {
+    } catch (error) {
       showNotification(
         "error",
         "Thao tác thất bại",
-        err.response?.data?.message || "Vui lòng thử lại"
+        getErrorMessage(
+          error,
+          "Không thể thực hiện yêu cầu",
+        ),
       );
     } finally {
       setLoading(false);
@@ -249,6 +310,9 @@ const ForgotPasswordPage = () => {
                     onClick={() => {
                       setStep(1);
                       setOtp(createEmptyOtp());
+                      setResetToken("");
+                      setNewPassword("");
+                      setConfirmPassword("");
                     }}
                     className="text-xs text-auth-accent transition hover:text-white"
                   >
@@ -267,16 +331,20 @@ const ForgotPasswordPage = () => {
                           "Vui lòng kiểm tra email"
                         );
 
+                        setResetToken("");
                         setOtp(createEmptyOtp());
 
                         requestAnimationFrame(() => {
                           otpInputRef.current?.focus();
                         });
-                      } catch (err) {
+                      } catch (error) {
                         showNotification(
                           "error",
                           "Gửi lại OTP thất bại",
-                          err.response?.data?.message || "Vui lòng thử lại"
+                          getErrorMessage(
+                            error,
+                            "Không thể gửi lại OTP",
+                          ),
                         );
                       }
                     }}

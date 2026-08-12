@@ -12,6 +12,8 @@ import RadioGroup from "@/components/ui/RadioGroup/RadioGroup";
 import UploadBox from "@/components/ui/Upload/UploadBox";
 import { userApi } from "@/api/userApi";
 import { useAuth } from "@/components/auth/useAuth";
+import OTPModal from "@/components/ui/OTP/OTPModal";
+import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
@@ -31,6 +33,19 @@ const ProfilePage = () => {
   const { showNotification } = useNotification();
 
   const { searchKeyword = "" } = useOutletContext() || {};
+
+  const [emailOtpOpen, setEmailOtpOpen] = useState(false);
+  const [emailOtpLoading, setEmailOtpLoading] = useState(false);
+  const [emailOtpTarget, setEmailOtpTarget] = useState("");
+  const [emailOtpModalKey, setEmailOtpModalKey] = useState(0);
+
+  const [
+    emailVerificationToRemove, setEmailVerificationToRemove
+  ] = useState(null);
+
+  const [
+    removingEmailVerification, setRemovingEmailVerification
+  ] = useState(false);
 
   // snapshot
   const createProfileSnapshot = (data) => ({
@@ -70,7 +85,9 @@ const ProfilePage = () => {
     setGender(originalProfile.gender);
     setBirthday(originalProfile.birthday);
     setBirthdayResetKey((prev) => prev + 1);  
+
     setAvatarFile(null);
+    setAvatarDeleted(false);
     setAvatarPreview(originalProfile.avatar || "");
 
     showNotification(
@@ -150,14 +167,49 @@ const ProfilePage = () => {
   }
 
   // AVATAR
-  const handleUploadAvatar = (e) => {
-    const file = e.target.files?.[0];
+  const handleUploadAvatar = (event) => {
+    const file = event.target.files?.[0];
 
     if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      showNotification(
+        "error",
+        "Ảnh không hợp lệ",
+        "Chỉ chấp nhận ảnh JPEG hoặc PNG.",
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      showNotification(
+        "error",
+        "Ảnh quá lớn",
+        "Ảnh đại diện không được vượt quá 5 MB.",
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (avatarPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
 
     setAvatarDeleted(false);
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
+
+    event.target.value = "";
   };
 
   const handleDeleteAvatar = () => {
@@ -166,12 +218,69 @@ const ProfilePage = () => {
     setAvatarPreview(defaultAvatar);
   };
 
+  const validateProfile = () => {
+    if (!fullName.trim()) {
+      showNotification(
+        "error",
+        "Thiếu thông tin",
+        "Vui lòng nhập họ và tên.",
+      );
+
+      return false;
+    }
+
+    if (!birthday) {
+      showNotification(
+        "error",
+        "Thiếu thông tin",
+        "Vui lòng nhập ngày sinh.",
+      );
+
+      return false;
+    }
+
+    const selectedBirthday = new Date(
+      `${birthday}T00:00:00`,
+    );
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (
+      Number.isNaN(selectedBirthday.getTime()) ||
+      selectedBirthday >= today
+    ) {
+      showNotification(
+        "error",
+        "Ngày sinh không hợp lệ",
+        "Ngày sinh phải nhỏ hơn ngày hiện tại.",
+      );
+
+      return false;
+    }
+
+    if (!["Male", "Female", "Unknown"].includes(gender)) {
+      showNotification(
+        "error",
+        "Giới tính không hợp lệ",
+        "Vui lòng chọn giới tính hợp lệ.",
+      );
+
+      return false;
+    }
+
+    return true;
+  };
+
   // HANDLE SAVE PROFILE
   const handleSaveProfile = async () => {
-    try {
+    if (!validateProfile()) {
+      return;
+    }
 
+    try {
       const payload = {
-        fullName,
+        fullName: fullName.trim(),
         gender,
         birthday,
       };
@@ -180,8 +289,7 @@ const ProfilePage = () => {
 
       if (avatarDeleted) {
         await userApi.removeAvatar();
-      }
-      else if (avatarFile) {
+      } else if (avatarFile) {
         const formData = new FormData();
 
         formData.append("file", avatarFile);
@@ -193,20 +301,19 @@ const ProfilePage = () => {
       await refreshSession();
 
       setAvatarFile(null);
+      setAvatarDeleted(false);
 
       showNotification(
         "success",
         "Thành công",
-        "Thông tin cá nhân đã được cập nhật."
+        "Thông tin cá nhân đã được cập nhật.",
       );
-
     } catch (error) {
-
       showNotification(
         "error",
         "Thất bại",
         error.response?.data?.message ||
-        "Không thể cập nhật thông tin."
+          "Không thể cập nhật thông tin.",
       );
     }
   };
@@ -231,6 +338,105 @@ const ProfilePage = () => {
     setGender(userData?.gender || "Unknown");
     setBirthday(userData?.birthday || "");
     setAvatarPreview(userData?.avatar || "");
+  };
+
+  const handleSendEmailOtp = async (email) => {
+    try {
+      setEmailOtpLoading(true);
+
+      const result =
+        await userApi.sendEmailVerificationOtp();
+
+      setEmailOtpTarget(email);
+      setEmailOtpOpen(true);
+
+      showNotification(
+        "success",
+        "Đã gửi OTP",
+        result?.message ||
+          "Mã OTP đã được gửi đến email của bạn.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Không thể gửi OTP",
+        error.response?.data?.message ||
+          "Không thể gửi mã xác thực.",
+      );
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async (otp) => {
+    if (!otp) {
+      showNotification(
+        "error",
+        "Thiếu mã OTP",
+        "Vui lòng nhập đầy đủ mã OTP.",
+      );
+
+      return;
+    }
+
+    try {
+      setEmailOtpLoading(true);
+
+      const result =
+        await userApi.verifyEmailVerificationOtp(otp);
+
+      setEmailOtpOpen(false);
+      setEmailOtpModalKey((value) => value + 1);
+
+      await reloadProfile();
+      await refreshSession();
+
+      showNotification(
+        "success",
+        "Xác thực thành công",
+        result?.message ||
+          "Email đã được xác thực.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Xác thực thất bại",
+        error.response?.data?.message ||
+          "Mã OTP không hợp lệ.",
+      );
+    } finally {
+      setEmailOtpLoading(false);
+    }
+  };
+
+  const handleRemoveEmailVerification = async () => {
+    try {
+      setRemovingEmailVerification(true);
+
+      const result =
+        await userApi.removeEmailVerification();
+
+      setEmailVerificationToRemove(null);
+
+      await reloadProfile();
+      await refreshSession();
+
+      showNotification(
+        "success",
+        "Đã bỏ xác thực",
+        result?.message ||
+          "Email đã được chuyển về trạng thái chưa xác thực.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Không thể bỏ xác thực",
+        error.response?.data?.message ||
+          "Không thể bỏ xác thực email.",
+      );
+    } finally {
+      setRemovingEmailVerification(false);
+    }
   };
 
   return (
@@ -283,11 +489,12 @@ const ProfilePage = () => {
           variant="avatar"
           preview={avatarPreview || user?.avatar}
           fallback={defaultAvatar}
+          accept="image/jpeg,image/png"
           uploadText="Upload picture"
           deleteText="Delete picture"
           onUpload={handleUploadAvatar}
           onDelete={handleDeleteAvatar}
-          className={`mt-4`}
+          className="mt-4"
         />
       </SectionCard>
 
@@ -355,8 +562,16 @@ const ProfilePage = () => {
                 isLocked
                 badgeText={getEmailStatus(item)}
                 badgeStatus={getEmailStatus(item)}
-                showSetting={false}
+                showSetting={
+                  item.provider?.toLowerCase() === "local"
+                }
                 canDelete={false}
+                onVerify={() =>
+                  handleSendEmailOtp(item.email)
+                }
+                onRemove={() =>
+                  setEmailVerificationToRemove(item)
+                }
               />
             ))
           ) : (
@@ -385,6 +600,46 @@ const ProfilePage = () => {
           Save changes
         </HandleButton>
       </div>
+
+      <OTPModal
+        key={emailOtpModalKey}
+        open={emailOtpOpen}
+        title="Xác thực email"
+        desc="Nhập mã OTP 6 số đã được gửi đến email của bạn. Mã có hiệu lực trong 3 phút."
+        target={emailOtpTarget}
+        loading={emailOtpLoading}
+        onClose={() => setEmailOtpOpen(false)}
+        onVerify={handleVerifyEmailOtp}
+        onResend={() =>
+          handleSendEmailOtp(emailOtpTarget)
+        }
+      />
+
+      <ConfirmModal
+        open={Boolean(emailVerificationToRemove)}
+        title="Bỏ xác thực email"
+        confirmText="Bỏ xác thực"
+        loadingText="Đang xử lý..."
+        confirmVariant="danger"
+        submitting={removingEmailVerification}
+        onClose={() => {
+          if (!removingEmailVerification) {
+            setEmailVerificationToRemove(null);
+          }
+        }}
+        onConfirm={handleRemoveEmailVerification}
+      >
+        Bạn có chắc chắn muốn bỏ xác thực email{" "}
+        <span className="font-semibold text-text-strong">
+          {emailVerificationToRemove?.email}
+        </span>
+        ?
+
+        <p className="mt-2 text-danger">
+          Nếu tài khoản không còn email hoặc số điện thoại nào
+          được xác thực, tài khoản sẽ chuyển về trạng thái pending.
+        </p>
+      </ConfirmModal>
     </>
   );
 };

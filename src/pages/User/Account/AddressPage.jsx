@@ -19,6 +19,7 @@ import Pagination from "@/components/ui/Table/Pagination";
 import MenuTable from "@/components/ui/Menu/MenuTable";
 import { addressApi } from "@/api/addressApi";
 import { userApi } from "@/api/userApi";
+import { useAuth } from "@/components/auth/useAuth";
 
 const statusClassName = {
   Active: "bg-success-soft text-success ring-1 ring-success-border",
@@ -100,6 +101,8 @@ const AddressPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [errorMessage, setErrorMessage] = useState("");
+
+  const { refreshSession } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -388,6 +391,8 @@ const AddressPage = () => {
 
         await addressApi.remove(deleteAddress.addressId);
 
+        await refreshSession();
+
         setAddresses((current) =>
           current.filter(
             (item) =>
@@ -438,6 +443,8 @@ const AddressPage = () => {
       setSubmitting(true);
 
       const createdAddress = await addressApi.create(form);
+
+      await refreshSession();
 
       setAddresses((prev) => [
         ...prev,

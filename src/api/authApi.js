@@ -98,32 +98,6 @@ export const authApi = {
     return response.data;
   },
 
-  async sendEmailOtp(email) {
-    await ensureCsrf();
-
-    const response =
-      await httpClient.post(
-        "/auth/send-email-otp",
-        {
-          email,
-        },
-      );
-
-    return response.data;
-  },
-
-  async verifyEmailOtp(payload) {
-    await ensureCsrf();
-
-    const response =
-      await httpClient.post(
-        "/auth/verify-email-otp",
-        payload,
-      );
-
-    return response.data;
-  },
-
   async forgotPassword(email) {
     await ensureCsrf();
 

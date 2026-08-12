@@ -102,7 +102,7 @@ const SettingMenu = ({ badgeStatus, onVerify, onRemove }) => {
               "
             >
               <Unlink size={16} />
-              Gỡ bỏ
+              Bỏ xác thực
             </button>
           ) : (
             <button
@@ -159,7 +159,7 @@ export const ContactRow = ({
           h-11 min-w-55 flex-1 rounded-lg border px-3 text-sm outline-none transition
           ${
             !editable || isLocked
-              ? "border-input bg-surface-muted text-text-muted cursor-not-allowed"
+              ? "border-input bg-surface-muted text-text-muted cursor-text select-text"
               : "border-input bg-surface text-text-default focus:border-brand focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]"
           }
         `}

@@ -1,9 +1,13 @@
 {
-    "$schema": "https://openapi.vercel.sh/vercel.json",
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://garment-design-api-ke1tran-adaydkb2b9eqawa2.southeastasia-01.azurewebsites.net/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

@@ -85,7 +85,9 @@ const ProfilePage = () => {
     setGender(originalProfile.gender);
     setBirthday(originalProfile.birthday);
     setBirthdayResetKey((prev) => prev + 1);  
+
     setAvatarFile(null);
+    setAvatarDeleted(false);
     setAvatarPreview(originalProfile.avatar || "");
 
     showNotification(
@@ -165,14 +167,49 @@ const ProfilePage = () => {
   }
 
   // AVATAR
-  const handleUploadAvatar = (e) => {
-    const file = e.target.files?.[0];
+  const handleUploadAvatar = (event) => {
+    const file = event.target.files?.[0];
 
     if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      showNotification(
+        "error",
+        "Ảnh không hợp lệ",
+        "Chỉ chấp nhận ảnh JPEG hoặc PNG.",
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      showNotification(
+        "error",
+        "Ảnh quá lớn",
+        "Ảnh đại diện không được vượt quá 5 MB.",
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (avatarPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
 
     setAvatarDeleted(false);
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
+
+    event.target.value = "";
   };
 
   const handleDeleteAvatar = () => {
@@ -181,12 +218,69 @@ const ProfilePage = () => {
     setAvatarPreview(defaultAvatar);
   };
 
+  const validateProfile = () => {
+    if (!fullName.trim()) {
+      showNotification(
+        "error",
+        "Thiếu thông tin",
+        "Vui lòng nhập họ và tên.",
+      );
+
+      return false;
+    }
+
+    if (!birthday) {
+      showNotification(
+        "error",
+        "Thiếu thông tin",
+        "Vui lòng nhập ngày sinh.",
+      );
+
+      return false;
+    }
+
+    const selectedBirthday = new Date(
+      `${birthday}T00:00:00`,
+    );
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (
+      Number.isNaN(selectedBirthday.getTime()) ||
+      selectedBirthday >= today
+    ) {
+      showNotification(
+        "error",
+        "Ngày sinh không hợp lệ",
+        "Ngày sinh phải nhỏ hơn ngày hiện tại.",
+      );
+
+      return false;
+    }
+
+    if (!["Male", "Female", "Unknown"].includes(gender)) {
+      showNotification(
+        "error",
+        "Giới tính không hợp lệ",
+        "Vui lòng chọn giới tính hợp lệ.",
+      );
+
+      return false;
+    }
+
+    return true;
+  };
+
   // HANDLE SAVE PROFILE
   const handleSaveProfile = async () => {
-    try {
+    if (!validateProfile()) {
+      return;
+    }
 
+    try {
       const payload = {
-        fullName,
+        fullName: fullName.trim(),
         gender,
         birthday,
       };
@@ -195,8 +289,7 @@ const ProfilePage = () => {
 
       if (avatarDeleted) {
         await userApi.removeAvatar();
-      }
-      else if (avatarFile) {
+      } else if (avatarFile) {
         const formData = new FormData();
 
         formData.append("file", avatarFile);
@@ -208,20 +301,19 @@ const ProfilePage = () => {
       await refreshSession();
 
       setAvatarFile(null);
+      setAvatarDeleted(false);
 
       showNotification(
         "success",
         "Thành công",
-        "Thông tin cá nhân đã được cập nhật."
+        "Thông tin cá nhân đã được cập nhật.",
       );
-
     } catch (error) {
-
       showNotification(
         "error",
         "Thất bại",
         error.response?.data?.message ||
-        "Không thể cập nhật thông tin."
+          "Không thể cập nhật thông tin.",
       );
     }
   };
@@ -397,11 +489,12 @@ const ProfilePage = () => {
           variant="avatar"
           preview={avatarPreview || user?.avatar}
           fallback={defaultAvatar}
+          accept="image/jpeg,image/png"
           uploadText="Upload picture"
           deleteText="Delete picture"
           onUpload={handleUploadAvatar}
           onDelete={handleDeleteAvatar}
-          className={`mt-4`}
+          className="mt-4"
         />
       </SectionCard>
 
@@ -543,8 +636,8 @@ const ProfilePage = () => {
         ?
 
         <p className="mt-2 text-danger">
-          Một số tính năng có thể bị khóa và tài khoản có thể
-          chuyển về trạng thái pending.
+          Nếu tài khoản không còn email hoặc số điện thoại nào
+          được xác thực, tài khoản sẽ chuyển về trạng thái pending.
         </p>
       </ConfirmModal>
     </>

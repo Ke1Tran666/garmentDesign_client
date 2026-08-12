@@ -1,6 +1,6 @@
 // Backend URL
 export const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+  import.meta.env.VITE_BACKEND_URL || "http://localhost:8082";
 
 // API Base URL
 export const BASE_URL_API = `${BACKEND_URL}/api`;

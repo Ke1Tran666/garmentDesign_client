@@ -67,18 +67,44 @@ const BirthdayInput = ({
 
   const updateBirthday = useCallback(
     (day, month, year) => {
-      if (!day || !month || !year || String(year).length !== 4) {
+      if (
+        !day ||
+        !month ||
+        !year ||
+        String(year).length !== 4
+      ) {
+        onChange("");
         return;
       }
 
-      const formattedBirthday = `${year}-${String(month).padStart(
-        2,
-        "0"
-      )}-${String(day).padStart(2, "0")}`;
+      const numericDay = Number(day);
+      const numericMonth = Number(month);
+      const numericYear = Number(year);
+
+      const selectedDate = new Date(
+        numericYear,
+        numericMonth - 1,
+        numericDay,
+      );
+
+      const validDate =
+        selectedDate.getFullYear() === numericYear &&
+        selectedDate.getMonth() === numericMonth - 1 &&
+        selectedDate.getDate() === numericDay;
+
+      if (!validDate) {
+        onChange("");
+        return;
+      }
+
+      const formattedBirthday =
+        `${numericYear}-` +
+        `${String(numericMonth).padStart(2, "0")}-` +
+        `${String(numericDay).padStart(2, "0")}`;
 
       onChange(formattedBirthday);
     },
-    [onChange]
+    [onChange],
   );
 
   useEffect(() => {

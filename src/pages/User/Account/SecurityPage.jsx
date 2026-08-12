@@ -7,12 +7,19 @@ import { SectionCard } from "@/components/ui/Section/Section";
 import Switch from "@/components/ui/Switch/Switch";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import { userApi } from "@/api/userApi";
+import { useAuth } from "@/components/auth/useAuth";
 const SecurityPage = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const { showNotification } = useNotification();
+  const { user } = useAuth();
+
+  const isActive =
+    String(user?.status || "")
+      .trim()
+      .toLowerCase() === "active";
 
   // Xác thực mật khẩu
   const validatePassword = () => {
@@ -56,6 +63,16 @@ const SecurityPage = () => {
   };
 
   const handleChangePassword = async () => {
+    if (!isActive) {
+      showNotification(
+        "error",
+        "Tài khoản chưa kích hoạt",
+        "Bạn cần xác thực email hoặc số điện thoại " +
+        "và thêm ít nhất một địa chỉ.",
+      );
+
+      return;
+    }
     if (!validatePassword()) return;
 
     try {
@@ -83,7 +100,7 @@ const SecurityPage = () => {
     }
   };
 
-  const canSubmit = oldPassword && newPassword && confirmPassword;
+  const canSubmit = isActive && oldPassword && newPassword && confirmPassword;
 
   const handleResetPasswordForm = () => {
     setOldPassword("");
@@ -96,6 +113,7 @@ const SecurityPage = () => {
         <SectionCard
             title="Change password"
             desc="Change user password."
+            active={user?.status}
         >
           <div className="grid grid-cols-2 gap-x-3">
             {/* INPUT */}
@@ -147,6 +165,12 @@ const SecurityPage = () => {
               </div>
             </div>
           </div>
+          {!isActive && (
+            <div className="mb-5 rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning">
+              Bạn cần xác thực email hoặc số điện thoại và thêm ít nhất
+              một địa chỉ trước khi sử dụng tính năng đổi mật khẩu.
+            </div>
+          )}
         </SectionCard>
 
         <Divider/>

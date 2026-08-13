@@ -94,4 +94,12 @@ export const userApi = {
 
     return response.data;
   },
+
+  async deletePhone(providerId) {
+    const response = await httpClient.delete(
+      `/users/me/phone/${providerId}`,
+    );
+
+    return response.data;
+  },
 };

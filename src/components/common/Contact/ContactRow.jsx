@@ -1,5 +1,5 @@
 import { ButtonIconText} from "@/components/ui/Button/Button";
-import { Settings, Trash2, ShieldCheck, Unlink, Plus } from "lucide-react";
+import { Settings, Trash2, ShieldCheck, Unlink, Plus, Pencil, LockKeyhole } from "lucide-react";
 import { useState } from "react";
 
 const ProviderBadge = ({ provider }) => {
@@ -66,7 +66,16 @@ export const EmptyContact = ({
   );
 };
 
-const SettingMenu = ({ badgeStatus, onVerify, onRemove }) => {
+const SettingMenu = ({
+  badgeStatus,
+  onVerify,
+  onRemove,
+  onEdit,
+  onDelete,
+  showDelete = false,
+  verificationDisabled = false,
+  verificationDisabledText = "Sắp ra mắt",
+}) => {
   const [open, setOpen] = useState(false);
 
   const linked = badgeStatus === "active";
@@ -82,12 +91,45 @@ const SettingMenu = ({ badgeStatus, onVerify, onRemove }) => {
         <div
           className="
             absolute right-0 top-12 z-50
-            w-40 overflow-hidden
+            w-44 overflow-hidden
             rounded-xl border! border-border!
             bg-surface shadow-lg
           "
         >
-          {linked ? (
+          {onEdit && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onEdit();
+              }}
+              className="
+                flex w-full items-center gap-2
+                px-4 py-3 text-left text-sm
+                text-brand
+                hover:bg-surface-subtle
+              "
+            >
+              <Pencil size={16} />
+              Cập nhật
+            </button>
+          )}
+
+          {verificationDisabled ? (
+            <button
+              type="button"
+              disabled
+              className="
+                flex w-full cursor-not-allowed
+                items-center gap-2 px-4 py-3
+                text-left text-sm text-text-muted
+                opacity-60
+              "
+            >
+              <LockKeyhole size={16} />
+              {verificationDisabledText}
+            </button>
+          ) : linked ? (
             <button
               type="button"
               onClick={() => {
@@ -122,6 +164,28 @@ const SettingMenu = ({ badgeStatus, onVerify, onRemove }) => {
               Xác thực
             </button>
           )}
+          {showDelete && onDelete && (
+            <>
+              <div className="border-t border-border" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onDelete();
+                }}
+                className="
+                  flex w-full items-center gap-2
+                  px-4 py-3 text-left text-sm
+                  text-danger transition
+                  hover:bg-danger-soft
+                "
+              >
+                <Trash2 size={16} />
+                Xóa số điện thoại
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -139,10 +203,14 @@ export const ContactRow = ({
   badgeStatus = "inactive",
   showSetting = true,
   canDelete = true,
+  showDeleteInSetting = false,
   onChange,
   onDelete,
   onVerify,
   onRemove,
+  onEdit,
+  verificationDisabled = false,
+  verificationDisabledText = "Sắp ra mắt",
 }) => {
 
   return (
@@ -170,11 +238,20 @@ export const ContactRow = ({
           badgeStatus={badgeStatus}
           onVerify={onVerify}
           onRemove={onRemove}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          showDelete={showDeleteInSetting}
+          verificationDisabled={verificationDisabled}
+          verificationDisabledText={verificationDisabledText}
         />
       )}
 
-      {canDelete && (
-        <ActionButton icon={Trash2} danger onClick={onDelete} />
+      {canDelete && !showDeleteInSetting && (
+        <ActionButton
+          icon={Trash2}
+          danger
+          onClick={onDelete}
+        />
       )}
     </div>
   );

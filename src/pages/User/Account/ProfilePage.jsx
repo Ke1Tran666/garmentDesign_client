@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import BirthdayInput from "@/components/ui/Input/BirthdayInput";
 import FloatingInput from "@/components/ui/Input/FloatingInput";
 import { useBeforeUnload, useOutletContext } from "react-router-dom";
-import { ContactRow } from "@/components/common/Contact/ContactRow";
+import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { HandleButton } from "@/components/ui/Button/Button";
@@ -15,11 +15,27 @@ import { useAuth } from "@/components/auth/useAuth";
 import OTPModal from "@/components/ui/OTP/OTPModal";
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 
+const getProfilePhone = (data) => {
+  const provider = (
+    data?.authProviders || []
+  ).find(
+    (item) =>
+      item.provider?.toLowerCase() ===
+      "phone",
+  );
+
+  return provider?.phone || "";
+};
+
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [birthday, setBirthday] = useState("");
   const [fullName, setFullName] = useState("");
   const [gender, setGender] = useState("Unknown");
+  const [phone, setPhone] = useState("");
+  const [phoneEditing, setPhoneEditing] = useState(false);
+  const [phoneToDelete, setPhoneToDelete] = useState(null);
+  const [deletingPhone, setDeletingPhone] = useState(false);
   const [birthdayResetKey, setBirthdayResetKey] = useState(0);
 
   const [loading, setLoading] = useState(true);
@@ -53,17 +69,20 @@ const ProfilePage = () => {
     gender: data?.user?.gender || "Unknown",
     birthday: data?.user?.birthday || "",
     avatar: data?.user?.avatar || "",
+    phone: getProfilePhone(data),
   });
 
   const isDirty =
-  originalProfile &&
-  (
-    fullName !== originalProfile.fullName ||
-    gender !== originalProfile.gender ||
-    birthday !== originalProfile.birthday ||
-    avatarFile !== null ||
-    avatarPreview !== (originalProfile.avatar || "")
-  );
+    originalProfile &&
+    (
+      fullName !== originalProfile.fullName ||
+      gender !== originalProfile.gender ||
+      birthday !== originalProfile.birthday ||
+      phone !== originalProfile.phone ||
+      avatarFile !== null ||
+      avatarPreview !==
+        (originalProfile.avatar || "")
+    );
 
   useBeforeUnload(
     (event) => {
@@ -85,6 +104,8 @@ const ProfilePage = () => {
     setGender(originalProfile.gender);
     setBirthday(originalProfile.birthday);
     setBirthdayResetKey((prev) => prev + 1);  
+    setPhone(originalProfile.phone || "");
+    setPhoneEditing(false);
 
     setAvatarFile(null);
     setAvatarDeleted(false);
@@ -112,6 +133,7 @@ const ProfilePage = () => {
         setFullName(userData?.fullName || "");
         setGender(userData?.gender || "Unknown");
         setBirthday(userData?.birthday || "");
+        setPhone(getProfilePhone(data));
         setAvatarPreview(userData?.avatar || "");
       } catch (err) {
         setError(
@@ -130,6 +152,7 @@ const ProfilePage = () => {
   const authProviders = profile?.authProviders || [];
   const emails = authProviders.filter((item) => item.email);
   const phones = authProviders.filter((item) => item.phone);
+  const phoneProvider = phones.length > 0 ? phones[0] : null;
 
   const phoneSectionStatus = phones.some((item) => item.phoneVerifiedAt)
   ? "active"
@@ -269,6 +292,25 @@ const ProfilePage = () => {
       return false;
     }
 
+    const normalizedPhone = phone
+      .trim()
+      .replace(/[\s.-]/g, "");
+
+    if (
+      normalizedPhone &&
+      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(
+        normalizedPhone,
+      )
+    ) {
+      showNotification(
+        "error",
+        "Số điện thoại không hợp lệ",
+        "Vui lòng nhập số điện thoại Việt Nam hợp lệ.",
+      );
+
+      return false;
+    }
+
     return true;
   };
 
@@ -283,6 +325,7 @@ const ProfilePage = () => {
         fullName: fullName.trim(),
         gender,
         birthday,
+        phone: phone.trim(),
       };
 
       await userApi.update(payload);
@@ -302,6 +345,7 @@ const ProfilePage = () => {
 
       setAvatarFile(null);
       setAvatarDeleted(false);
+      setPhoneEditing(false);
 
       showNotification(
         "success",
@@ -337,6 +381,7 @@ const ProfilePage = () => {
     setFullName(userData?.fullName || "");
     setGender(userData?.gender || "Unknown");
     setBirthday(userData?.birthday || "");
+    setPhone(getProfilePhone(data));
     setAvatarPreview(userData?.avatar || "");
   };
 
@@ -439,6 +484,43 @@ const ProfilePage = () => {
     }
   };
 
+  const handleDeletePhone = async () => {
+    if (!phoneToDelete?.id) {
+      return;
+    }
+
+    try {
+      setDeletingPhone(true);
+
+      const result = await userApi.deletePhone(
+        phoneToDelete.id,
+      );
+
+      setPhoneToDelete(null);
+      setPhone("");
+      setPhoneEditing(false);
+
+      await reloadProfile();
+      await refreshSession();
+
+      showNotification(
+        "success",
+        "Xóa số điện thoại thành công",
+        result?.message ||
+          "Số điện thoại đã được xóa.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Không thể xóa số điện thoại",
+        error.response?.data?.message ||
+          "Vui lòng thử lại.",
+      );
+    } finally {
+      setDeletingPhone(false);
+    }
+  };
+
   return (
     <>
       <SectionCard
@@ -512,28 +594,94 @@ const ProfilePage = () => {
           "số điện thoại",
         ])}
       >
-        <div className="space-y-3">
-          {phones.length > 0 ? (
-            phones.map((item) => (
-              <ContactRow
-                key={item.id}
-                value={item.phone}
-                provider={item.provider}
-                showProvider
-                isLocked
-                badgeText={getPhoneStatus(item)}
-                badgeStatus={getPhoneStatus(item)}
-                showSetting={false}
-                canDelete={false}
-              />
-            ))
-          ) : (
-            <p className="text-sm text-text-muted">
-              Chưa liên kết số điện thoại.
-              Chức năng liên kết đang được hoàn thiện.
-            </p>
-          )}
-        </div>
+        {phoneProvider ? (
+          <div className="space-y-3">
+            <ContactRow
+              value={phone}
+              provider={phoneProvider.provider}
+              showProvider
+              editable={phoneEditing}
+              isLocked={!phoneEditing}
+              inputType="tel"
+              placeholder="Nhập số điện thoại"
+              badgeStatus={getPhoneStatus(
+                phoneProvider,
+              )}
+              onChange={(event) =>
+                setPhone(event.target.value)
+              }
+              onEdit={() => {
+                setPhone(phoneProvider.phone || "");
+                setPhoneEditing(true);
+              }}
+              canDelete={false}
+              showDeleteInSetting
+              onDelete={() =>
+                setPhoneToDelete(phoneProvider)
+              }
+              verificationDisabled
+              verificationDisabledText="Xác thực sắp ra mắt"
+            />
+
+            {phoneEditing && (
+              <p className="text-xs text-text-muted">
+                Số điện thoại mới sẽ được lưu ở trạng
+                thái chưa xác thực. Nhấn Save changes
+                để hoàn tất.
+              </p>
+            )}
+          </div>
+        ) : (
+          <EmptyContact
+            message="Chưa liên kết số điện thoại."
+            buttonText="Thêm số điện thoại"
+            showForm={phoneEditing}
+            onAdd={() => {
+              setPhone("");
+              setPhoneEditing(true);
+            }}
+          >
+            <ContactRow
+              value={phone}
+              provider="phone"
+              showProvider
+              editable
+              inputType="tel"
+              placeholder="Nhập số điện thoại"
+              badgeStatus="inactive"
+              showSetting
+              canDelete={false}
+              onChange={(event) =>
+                setPhone(event.target.value)
+              }
+              verificationDisabled
+              verificationDisabledText="Xác thực sắp ra mắt"
+            />
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setPhone("");
+                  setPhoneEditing(false);
+                }}
+                className="
+                  rounded-lg border border-input
+                  px-4 py-2 text-sm font-semibold
+                  text-text-muted transition
+                  hover:bg-surface-subtle
+                "
+              >
+                Hủy
+              </button>
+
+              <p className="text-xs text-text-muted">
+                Nhấn Save changes bên dưới để lưu số
+                điện thoại.
+              </p>
+            </div>
+          </EmptyContact>
+        )}
       </SectionCard>
 
       <Divider />
@@ -638,6 +786,34 @@ const ProfilePage = () => {
         <p className="mt-2 text-danger">
           Nếu tài khoản không còn email hoặc số điện thoại nào
           được xác thực, tài khoản sẽ chuyển về trạng thái pending.
+        </p>
+      </ConfirmModal>
+
+      <ConfirmModal
+        open={Boolean(phoneToDelete)}
+        title="Xóa số điện thoại"
+        confirmText="Xóa số điện thoại"
+        loadingText="Đang xóa..."
+        confirmVariant="danger"
+        submitting={deletingPhone}
+        onClose={() => {
+          if (!deletingPhone) {
+            setPhoneToDelete(null);
+          }
+        }}
+        onConfirm={handleDeletePhone}
+      >
+        Bạn có chắc chắn muốn xóa số điện thoại{" "}
+
+        <span className="font-semibold text-text-strong">
+          {phoneToDelete?.phone}
+        </span>
+        ?
+
+        <p className="mt-2 text-danger">
+          {phoneToDelete?.phoneVerifiedAt
+            ? "Số đã xác thực sẽ được gỡ khỏi tài khoản và lưu lại trong lịch sử."
+            : "Số chưa xác thực sẽ bị xóa hoàn toàn khỏi hệ thống."}
         </p>
       </ConfirmModal>
     </>

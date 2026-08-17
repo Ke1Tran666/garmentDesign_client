@@ -265,24 +265,29 @@ const AddressPage = () => {
   const handleConfirmSetDefault = async () => {
     if (!confirmDefaultAddress) return;
 
+    const selectedAddressId = confirmDefaultAddress.addressId;
+
     try {
       setSubmitting(true);
 
-      await addressApi.setDefault(confirmDefaultAddress.addressId);
+      await addressApi.setDefault(selectedAddressId);
 
-      setDefaultAddressId(confirmDefaultAddress.addressId);
+      setDefaultAddressId(selectedAddressId);
       setConfirmDefaultAddress(null);
+
+      await refreshSession();
+
       showNotification(
         "success",
         "Thành công",
-        "Đã cập nhật địa chỉ mặc định."
+        "Đã cập nhật địa chỉ mặc định.",
       );
     } catch (error) {
       showNotification(
         "error",
         "Thất bại",
         error.response?.data?.message ||
-          "Lỗi cập nhật địa chỉ mặc định."
+          "Lỗi cập nhật địa chỉ mặc định.",
       );
     } finally {
       setSubmitting(false);
@@ -372,53 +377,47 @@ const AddressPage = () => {
   };
 
   const handleConfirmDeleteAddress = async () => {
-      if (!deleteAddress) {
-        return;
-      }
+    if (!deleteAddress) return;
 
-      if ( deleteAddress.addressId === defaultAddressId ) {
-        showNotification(
-          "error",
-          "Không thể xóa",
-          "Không thể xóa địa chỉ mặc định.",
-        );
+    const deletedAddressId = deleteAddress.addressId;
+    const deletedWasDefault =
+      deletedAddressId === defaultAddressId;
 
-        return;
-      }
+    try {
+      setSubmitting(true);
 
-      try {
-        setSubmitting(true);
+      await addressApi.remove(deletedAddressId);
 
-        await addressApi.remove(deleteAddress.addressId);
+      setAddresses((current) =>
+        current.filter(
+          (item) => item.addressId !== deletedAddressId,
+        ),
+      );
 
-        await refreshSession();
+      if (deletedWasDefault) setDefaultAddressId(null);
 
-        setAddresses((current) =>
-          current.filter(
-            (item) =>
-              item.addressId
-                !== deleteAddress.addressId,
-          )
-        );
+      setDeleteAddress(null);
 
-        setDeleteAddress(null);
+      await refreshSession();
 
-        showNotification(
-          "success",
-          "Thành công",
-          "Đã xóa địa chỉ.",
-        );
-      } catch (error) {
-        showNotification(
-          "error",
-          "Thất bại",
-          error.response?.data?.message
-            || "Không thể xóa địa chỉ.",
-        );
-      } finally {
-        setSubmitting(false);
-      }
-    };
+      showNotification(
+        "success",
+        "Thành công",
+        deletedWasDefault
+          ? "Đã xóa địa chỉ mặc định."
+          : "Đã xóa địa chỉ.",
+      );
+    } catch (error) {
+      showNotification(
+        "error",
+        "Thất bại",
+        error.response?.data?.message ||
+          "Không thể xóa địa chỉ.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleCreateAddress = async () => {
     if (!form.companyName.trim()) {
@@ -508,8 +507,6 @@ const AddressPage = () => {
       label: "Xóa địa chỉ",
       icon: Trash2,
       danger: true,
-      disabled:
-        selectedAddress?.addressId === defaultAddressId,
       onClick: () => {
         if (selectedAddress) {
           setDeleteAddress(selectedAddress);

@@ -84,7 +84,7 @@ const SecurityPage = () => {
       showNotification(
         "success",
         "Thành công",
-        "Đổi mật khẩu thành công.",
+        "Đổi mật khẩu thành công. Các thiết bị khác đã được đăng xuất."
       );
 
       setOldPassword("");

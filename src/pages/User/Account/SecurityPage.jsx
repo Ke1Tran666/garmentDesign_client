@@ -84,7 +84,7 @@ const SecurityPage = () => {
       showNotification(
         "success",
         "Thành công",
-        "Đổi mật khẩu thành công.",
+        "Đổi mật khẩu thành công. Các thiết bị khác đã được đăng xuất."
       );
 
       setOldPassword("");
@@ -121,17 +121,20 @@ const SecurityPage = () => {
               label="Mật Khẩu hiện tại"
               value={oldPassword || ""}
               onChange={(e)=> setOldPassword(e.target.value)}
+              autoComplete="current-password"
             />
             <InputPassword
               label="Mật Khẩu mới"
               value={newPassword || ""}
               onChange={(e)=> setNewPassword(e.target.value)}
+              autoComplete="new-password"
             />
           </div>
             <InputPassword
               label="Xác nhận mật khẩu"
               value={confirmPassword || ""}
               onChange={(e)=> setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
             />
           
           <div className="flex justify-between items-center">
@@ -157,11 +160,13 @@ const SecurityPage = () => {
                   <Info size={18}/>
                   <p className="font-semibold">Lưu ý</p>
                 </div>
-                <ul className="mt-1 list-disc pl-4 space-y-1">
-                  <li>Mật khẩu phải có tối thiểu 8 ký tự.</li>
-                  <li>Nên bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</li>
-                  <li>Không sử dụng mật khẩu đã dùng trước đó.</li>
-                </ul>
+                  <ul className="mt-1 list-disc space-y-1 pl-4">
+                    <li>Mật khẩu phải có tối thiểu 8 ký tự.</li>
+                    <li>
+                      Nên bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+                    </li>
+                    <li>Mật khẩu mới phải khác mật khẩu hiện tại.</li>
+                  </ul>
               </div>
             </div>
           </div>
@@ -180,15 +185,25 @@ const SecurityPage = () => {
           desc="Add an extra layer of security to your account."
         >
           <div className="space-y-5">
-
             {/* Email Authentication */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h4 className="font-semibold text-text-default">
-                  Email Authentication
-                </h4>
-                <p className="text-sm text-text-muted">
-                  Receive verification codes via your registered email address.
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="font-semibold text-text-default">
+                    Email Authentication
+                  </h4>
+
+                  <span className="
+                    inline-flex rounded-full border border-warning-border
+                    bg-warning-soft px-2.5 py-1
+                    text-xs font-semibold text-warning
+                  ">
+                    Sắp ra mắt
+                  </span>
+                </div>
+
+                <p className="mt-1 text-sm text-text-muted">
+                  Nhận mã xác thực qua địa chỉ email đã đăng ký.
                 </p>
               </div>
 
@@ -199,13 +214,24 @@ const SecurityPage = () => {
             </div>
 
             {/* SMS Authentication */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h4 className="font-semibold text-text-default">
-                  SMS Authentication
-                </h4>
-                <p className="text-sm text-text-muted">
-                  Receive verification codes via your phone number.
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="font-semibold text-text-default">
+                    SMS Authentication
+                  </h4>
+
+                  <span className="
+                    inline-flex rounded-full border border-warning-border
+                    bg-warning-soft px-2.5 py-1
+                    text-xs font-semibold text-warning
+                  ">
+                    Sắp ra mắt
+                  </span>
+                </div>
+
+                <p className="mt-1 text-sm text-text-muted">
+                  Nhận mã xác thực qua số điện thoại đã đăng ký.
                 </p>
               </div>
 
@@ -216,13 +242,25 @@ const SecurityPage = () => {
             </div>
 
             {/* Authenticator App */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h4 className="font-semibold text-text-default">
-                  Authenticator App
-                </h4>
-                <p className="text-sm text-text-muted">
-                  Use Google Authenticator or Microsoft Authenticator to generate verification codes.
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="font-semibold text-text-default">
+                    Authenticator App
+                  </h4>
+
+                  <span className="
+                    inline-flex rounded-full border border-warning-border
+                    bg-warning-soft px-2.5 py-1
+                    text-xs font-semibold text-warning
+                  ">
+                    Sắp ra mắt
+                  </span>
+                </div>
+
+                <p className="mt-1 text-sm text-text-muted">
+                  Sử dụng Google Authenticator hoặc Microsoft Authenticator
+                  để tạo mã xác thực.
                 </p>
               </div>
 
@@ -231,18 +269,25 @@ const SecurityPage = () => {
                 disabled
               />
             </div>
-
           </div>
 
           <div className="my-5">
-            <div className="text-sm text-text-muted flex items-center gap-2">
-              <div className="flex gap-1 items-center">
-                  <Info size={18}/>
-                  <span className="font-semibold">Lưu ý:</span>{" "}
+            <div className="
+              flex items-start gap-2 text-sm text-text-muted
+            ">
+              <Info
+                size={18}
+                className="mt-0.5 shrink-0"
+              />
+
+              <div>
+                <span className="font-semibold">
+                  Lưu ý:
+                </span>{" "}
+
+                Các phương thức xác thực hai lớp đang được phát triển
+                và hiện chưa thể kích hoạt.
               </div>
-              <p>
-                Sau khi thay đổi mật khẩu, bạn có thể bật xác thực hai lớp để tăng cường bảo mật cho tài khoản.
-              </p>
             </div>
           </div>
         </SectionCard>
@@ -257,6 +302,7 @@ const InputPassword = ({
   value,
   onChange,
   placeholder,
+  autoComplete,
 })=>{
   return(
     <PasswordInput 
@@ -264,6 +310,7 @@ const InputPassword = ({
       value={value || ""}
       onChange={onChange}
       placeholder={placeholder || label}
+      autoComplete={autoComplete}
       containerClassName="mb-5"
       className="
         border-input! text-text-muted! focus:border-brand!  placeholder:text-transparent!

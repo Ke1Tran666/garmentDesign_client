@@ -15,7 +15,7 @@ const PrivacyPage = () => {
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const { logout } = useAuth();
+  const { setUser } = useAuth();
 
   const formatDateTime = (value) => {
     if (!value) return "";
@@ -29,16 +29,16 @@ const PrivacyPage = () => {
     return date.toLocaleString("vi-VN");
   };
 
-  const safeSheetData = (rows) => {
-    if (!Array.isArray(rows) || rows.length === 0) {
-      return [{}];
-    }
-
-    return rows;
+  const createSheet = (rows, headers) => {
+    return XLSX.utils.json_to_sheet(
+      Array.isArray(rows) ? rows : [],
+      {
+        header: headers,
+      },
+    );
   };
 
   const handleDownloadData = async () => {
-
     try {
       setExporting(true);
 
@@ -48,75 +48,188 @@ const PrivacyPage = () => {
         user,
         addresses = [],
         authProviders = [],
-        defaultAddress,
       } = exportData;
+
+      if (!user) {
+        throw new Error(
+          "Dữ liệu người dùng không hợp lệ",
+        );
+      }
+
+      const userRows = [
+        {
+          "ID User": user.idUser ?? "",
+          "User Code": user.userCode ?? "",
+          "Full Name": user.fullName ?? "",
+          Avatar: user.avatar ?? "",
+          Gender: user.gender ?? "",
+          Birthday: user.birthday ?? "",
+          "Role ID": user.roleId ?? "",
+          "Role Name": user.roleName ?? "",
+          "Default Address ID":
+            user.defaultAddressId ?? "",
+          Status: user.status ?? "",
+          "Last Login": formatDateTime(
+            user.lastLogin,
+          ),
+          "Created At": formatDateTime(
+            user.createdAt,
+          ),
+          "Updated At": formatDateTime(
+            user.updatedAt,
+          ),
+          "Deleted At": formatDateTime(
+            user.deletedAt,
+          ),
+        },
+      ];
+
+      const addressRows = addresses.map(
+        (address) => ({
+          "Address ID": address.addressId ?? "",
+          "ID User": address.idUser ?? "",
+          "Company Name":
+            address.companyName ?? "",
+          Address: address.address ?? "",
+          Note: address.note ?? "",
+          "Is Default": address.isDefault
+            ? "Yes"
+            : "No",
+          "Created At": formatDateTime(
+            address.createdAt,
+          ),
+          "Updated At": formatDateTime(
+            address.updatedAt,
+          ),
+          "Deleted At": formatDateTime(
+            address.deletedAt,
+          ),
+        }),
+      );
+
+      const providerRows = authProviders.map(
+        (provider) => ({
+          "Provider ID": provider.id ?? "",
+          "ID User": provider.idUser ?? "",
+          Provider: provider.provider ?? "",
+          Email: provider.email ?? "",
+          Phone: provider.phone ?? "",
+          "External Provider ID":
+            provider.providerId ?? "",
+          "Email Verified At": formatDateTime(
+            provider.emailVerifiedAt,
+          ),
+          "Phone Verified At": formatDateTime(
+            provider.phoneVerifiedAt,
+          ),
+          "Created At": formatDateTime(
+            provider.createdAt,
+          ),
+          "Updated At": formatDateTime(
+            provider.updatedAt,
+          ),
+          "Deleted At": formatDateTime(
+            provider.deletedAt,
+          ),
+        }),
+      );
+
+      const userHeaders = [
+        "ID User",
+        "User Code",
+        "Full Name",
+        "Avatar",
+        "Gender",
+        "Birthday",
+        "Role ID",
+        "Role Name",
+        "Default Address ID",
+        "Status",
+        "Last Login",
+        "Created At",
+        "Updated At",
+        "Deleted At",
+      ];
+
+      const addressHeaders = [
+        "Address ID",
+        "ID User",
+        "Company Name",
+        "Address",
+        "Note",
+        "Is Default",
+        "Created At",
+        "Updated At",
+        "Deleted At",
+      ];
+
+      const providerHeaders = [
+        "Provider ID",
+        "ID User",
+        "Provider",
+        "Email",
+        "Phone",
+        "External Provider ID",
+        "Email Verified At",
+        "Phone Verified At",
+        "Created At",
+        "Updated At",
+        "Deleted At",
+      ];
 
       const workbook = XLSX.utils.book_new();
 
-      const userSheet = XLSX.utils.json_to_sheet([
-        {
-          "ID User": user?.idUser || "",
-          "User Code": user?.userCode || "",
-          "Full Name": user?.fullName || "",
-          Gender: user?.gender || "",
-          Birthday: user?.birthday || "",
-          Status: user?.status || "",
-          Avatar: user?.avatar || "",
-          "Default Address ID": defaultAddress?.addressId || user?.defaultAddress?.addressId || "",
-          "Created At": formatDateTime(user?.createdAt),
-          "Updated At": formatDateTime(user?.updatedAt),
-        },
-      ]);
-
-      const addressSheet = XLSX.utils.json_to_sheet(
-        safeSheetData(
-          addresses.map((address) => ({
-            "Address ID": address?.addressId || "",
-            "Company Name": address?.companyName || "",
-            Address: address?.address || "",
-            Ward: address?.ward || "",
-            District: address?.district || "",
-            Province: address?.province || "",
-            Phone: address?.phone || "",
-            "Is Default":
-              defaultAddress?.addressId === address?.addressId ||
-              user?.defaultAddress?.addressId === address?.addressId
-                ? "Yes"
-                : "No",
-            "Created At": formatDateTime(address?.createdAt),
-            "Updated At": formatDateTime(address?.updatedAt),
-          }))
-        )
+      const userSheet = createSheet(
+        userRows,
+        userHeaders,
       );
 
-      const providerSheet = XLSX.utils.json_to_sheet(
-        safeSheetData(
-          authProviders.map((provider) => ({
-            "Provider ID": provider?.idAuthProvider || provider?.authProviderId || "",
-            Provider: provider?.provider || "",
-            Email: provider?.email || "",
-            Phone: provider?.phone || "",
-            "Email Verified At": formatDateTime(provider?.emailVerifiedAt),
-            "Phone Verified At": formatDateTime(provider?.phoneVerifiedAt),
-            "Created At": formatDateTime(provider?.createdAt),
-            "Updated At": formatDateTime(provider?.updatedAt),
-          }))
-        )
+      const addressSheet = createSheet(
+        addressRows,
+        addressHeaders,
       );
 
-      const exportUserId = user?.idUser || "me";
+      const providerSheet = createSheet(
+        providerRows,
+        providerHeaders,
+      );
 
-      XLSX.utils.book_append_sheet(workbook, userSheet, "Profile");
-      XLSX.utils.book_append_sheet(workbook, addressSheet, "Addresses");
-      XLSX.utils.book_append_sheet(workbook, providerSheet, "Auth Providers");
+      XLSX.utils.book_append_sheet(
+        workbook,
+        userSheet,
+        "User Information",
+      );
 
-      XLSX.writeFile(workbook, `user-data-${exportUserId}.xlsx`);
+      XLSX.utils.book_append_sheet(
+        workbook,
+        addressSheet,
+        "Addresses",
+      );
+
+      XLSX.utils.book_append_sheet(
+        workbook,
+        providerSheet,
+        "Auth Providers",
+      );
+
+      const exportUserCode =
+        user.userCode || user.idUser || "me";
+
+      XLSX.writeFile(
+        workbook,
+        `user-data-${exportUserCode}.xlsx`,
+      );
     } catch (error) {
-      console.error("Export user data error:", error);
+      console.error(
+        "Export user data error:",
+        error,
+      );
+
       alert(
         error?.response?.data?.message ||
           error?.response?.data ||
-          "Xuất dữ liệu người dùng thất bại"
+          error?.message ||
+          "Xuất dữ liệu người dùng thất bại",
       );
     } finally {
       setExporting(false);
@@ -133,13 +246,11 @@ const PrivacyPage = () => {
 
       await userApi.deleteAccount();
 
-      /*
-      * Hủy session JSESSIONID ở Backend
-      * và xóa user trong AuthContext.
-      */
-      await logout();
+      setUser(null);
 
-      alert("Tài khoản đã được xóa.");
+      alert(
+        "Tài khoản đã được đóng. Bạn có thể liên hệ hỗ trợ nếu muốn khôi phục.",
+      );
 
       navigate("/login", {
         replace: true,
@@ -189,12 +300,12 @@ const PrivacyPage = () => {
 
       <SectionCard
         title="Delete Account"
-        desc="Permanently remove your account and all associated data."
+        desc="Deactivate your account and sign out from all devices."
       >
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm text-danger">
-              This action cannot be undone.
+              Contact support if you want to restore your account.
             </p>
           </div>
 
@@ -212,16 +323,16 @@ const PrivacyPage = () => {
 
       <ConfirmModal
         open={openDeleteModal}
-        title="Xóa tài khoản vĩnh viễn"
+        title="Xóa tài khoản"
         confirmText="Xóa tài khoản"
-        loadingText="Đang xóa..."
+        loadingText="Đang xử lý..."
         confirmVariant="danger"
         submitting={deleting}
         onClose={() => setOpenDeleteModal(false)}
         onConfirm={handleConfirmDeleteAccount}
       >
-        Bạn có chắc chắn muốn xóa tài khoản này không? Hành động này sẽ xóa
-        vĩnh viễn tài khoản và không thể hoàn tác.
+        Bạn có chắc chắn muốn xóa tài khoản không? Bạn sẽ bị đăng xuất trên tất
+        cả thiết bị. Nếu muốn mở lại tài khoản, vui lòng liên hệ bộ phận hỗ trợ.
       </ConfirmModal>
     </>
   );

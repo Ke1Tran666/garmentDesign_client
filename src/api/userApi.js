@@ -102,4 +102,17 @@ export const userApi = {
 
     return response.data;
   },
+  async getAll(config = {}) {
+    const response = await httpClient.get("/users", config);
+    return response.data;
+  },
+
+  async create(payload) {
+    const response = await httpClient.post("/users", payload);
+    return response.data;
+  },
+
+  async remove(userId) {
+    await httpClient.delete(`/users/${userId}`);
+  },
 };

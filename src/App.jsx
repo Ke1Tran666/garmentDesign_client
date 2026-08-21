@@ -22,6 +22,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import AdminLayout from "./layouts/AdminLayout/AdminLayout";
 import AdminDashboardPage from "./pages/Admin/Dashboard/AdminDashboardPage";
 import RoleProtectedRoute from "./components/auth/RoleProtectedRoute";
+import UserManagementPage from "./pages/Admin/Users/UserManagementPage";
 
 const App = () => {
   return (
@@ -67,6 +68,7 @@ const App = () => {
           <Route index element={ <Navigate to="dashboard" replace/>}/>
 
           <Route path="dashboard" element={<AdminDashboardPage />}/>
+          <Route path="users" element={<UserManagementPage />} />
         </Route>
 
         <Route path="/not-found" element={<NotFoundPage />}/>

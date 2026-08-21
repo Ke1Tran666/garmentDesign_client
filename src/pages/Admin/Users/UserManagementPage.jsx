@@ -1,0 +1,644 @@
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  Eye,
+  MoreVertical,
+  Search,
+  Trash2,
+  UserRound,
+  X,
+} from "lucide-react";
+import { useOutletContext } from "react-router-dom";
+
+import defaultAvatar from "@/assets/images/avatar-default.jpg";
+import { userApi } from "@/api/userApi";
+import { normalizeRole } from "@/lib/authRole";
+
+import DataTable from "@/components/ui/Table/DataTable";
+import Pagination from "@/components/ui/Table/Pagination";
+import MenuTable from "@/components/ui/Menu/MenuTable";
+import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
+import { useNotification } from "@/components/ui/Notification/NotificationContext";
+
+const PAGE_SIZE = 15;
+
+const COLUMNS = [
+  { key: "user", title: "Người dùng" },
+  { key: "userCode", title: "Mã người dùng" },
+  { key: "role", title: "Vai trò" },
+  { key: "status", title: "Trạng thái" },
+  { key: "createdAt", title: "Ngày tạo" },
+  {
+    key: "action",
+    title: "Thao tác",
+    className: "text-center",
+  },
+];
+
+const initialMenu = {
+  open: false,
+  x: 0,
+  y: 0,
+  user: null,
+};
+
+const formatDate = (value) => {
+  if (!value) return "Chưa có";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+};
+
+const getRoleName = (user) =>
+  user?.role?.nameRole || "Chưa phân quyền";
+
+const getStatusInfo = (user) => {
+  if (user?.deletedAt) {
+    return {
+      label: "Đã xóa",
+      className: "bg-danger-soft text-danger",
+    };
+  }
+
+  const status = String(user?.status || "").toLowerCase();
+
+  if (status === "active") {
+    return {
+      label: "Hoạt động",
+      className: "bg-success-soft text-success",
+    };
+  }
+
+  if (status === "pending") {
+    return {
+      label: "Chờ hoàn thiện",
+      className: "bg-warning-soft text-warning",
+    };
+  }
+
+  if (status === "banned" || status === "inactive") {
+    return {
+      label: "Đã khóa",
+      className: "bg-danger-soft text-danger",
+    };
+  }
+
+  return {
+    label: status || "Không xác định",
+    className: "bg-surface-muted text-text-muted",
+  };
+};
+
+const UserDetailModal = ({ user, open, onClose }) => {
+  if (!open || !user) return null;
+
+  const status = getStatusInfo(user);
+
+  const detailItems = [
+    ["ID", user.idUser],
+    ["Mã người dùng", user.userCode],
+    ["Họ và tên", user.fullName],
+    ["Giới tính", user.gender],
+    ["Ngày sinh", formatDate(user.birthday)],
+    ["Vai trò", getRoleName(user)],
+    ["Đăng nhập gần nhất", formatDate(user.lastLogin)],
+    ["Ngày tạo", formatDate(user.createdAt)],
+    ["Ngày cập nhật", formatDate(user.updatedAt)],
+  ];
+
+  return (
+    <div
+      className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-surface p-6 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          aria-label="Đóng"
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-text-muted transition hover:bg-surface-muted"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="flex items-center gap-4 pr-12">
+          <img
+            src={user.avatar || defaultAvatar}
+            alt={user.fullName || "Người dùng"}
+            className="h-16 w-16 rounded-2xl object-cover"
+          />
+
+          <div className="min-w-0">
+            <h2 className="truncate text-xl font-bold text-text-strong">
+              {user.fullName || "Chưa cập nhật tên"}
+            </h2>
+
+            <p className="mt-1 text-sm text-text-muted">
+              {user.userCode || user.idUser}
+            </p>
+
+            <span
+              className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
+            >
+              {status.label}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {detailItems.map(([label, value]) => (
+            <div
+              key={label}
+              className="rounded-xl border border-border-subtle bg-surface-subtle p-4"
+            >
+              <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
+                {label}
+              </p>
+
+              <p className="mt-1 wrap-break-words text-sm font-semibold text-text-default">
+                {value || "Chưa có"}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UserManagementPage = () => {
+  const { adminUser, searchKeyword = "" } = useOutletContext();
+  const { showNotification } = useNotification();
+
+  const isAdmin = normalizeRole(adminUser?.role) === "admin";
+
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [localSearch, setLocalSearch] = useState("");
+  const deferredSearch = useDeferredValue(
+    localSearch || searchKeyword,
+  );
+
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [menu, setMenu] = useState(initialMenu);
+
+  const [removingUser, setRemovingUser] = useState(null);
+  const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    userApi
+      .getAll()
+      .then((data) => {
+        if (!active) return;
+
+        setUsers(Array.isArray(data) ? data : []);
+        setErrorMessage("");
+      })
+      .catch((error) => {
+        console.error("Không thể tải người dùng:", error);
+
+        if (!active) return;
+
+        setUsers([]);
+        setErrorMessage(
+          error.response?.data?.message ||
+            "Không thể tải danh sách người dùng.",
+        );
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const availableRoles = useMemo(() => {
+    return Array.from(
+      new Set(
+        users
+          .map((user) => getRoleName(user))
+          .filter(Boolean),
+      ),
+    );
+  }, [users]);
+
+  const filteredUsers = useMemo(() => {
+    const keyword = deferredSearch.trim().toLowerCase();
+
+    return users.filter((user) => {
+      const role = getRoleName(user);
+      const status = getStatusInfo(user);
+
+      const matchesKeyword =
+        !keyword ||
+        [
+          user.idUser,
+          user.userCode,
+          user.fullName,
+          role,
+          status.label,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(keyword);
+
+      const matchesRole =
+        roleFilter === "all" ||
+        normalizeRole(role) === normalizeRole(roleFilter);
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "deleted"
+          ? Boolean(user.deletedAt)
+          : !user.deletedAt &&
+            String(user.status || "").toLowerCase() ===
+              statusFilter);
+
+      return matchesKeyword && matchesRole && matchesStatus;
+    });
+  }, [
+    users,
+    deferredSearch,
+    roleFilter,
+    statusFilter,
+  ]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredUsers.length / PAGE_SIZE),
+  );
+
+  const safeCurrentPage = Math.min(
+    currentPage,
+    totalPages,
+  );
+
+  const visibleUsers = useMemo(() => {
+    const start =
+      (safeCurrentPage - 1) * PAGE_SIZE;
+
+    return filteredUsers.slice(
+      start,
+      start + PAGE_SIZE,
+    );
+  }, [filteredUsers, safeCurrentPage]);
+
+  const openActionMenu = (event, user) => {
+    event.stopPropagation();
+
+    const rect =
+      event.currentTarget.getBoundingClientRect();
+
+    const width = 176;
+
+    setMenu({
+      open: true,
+      user,
+      x: Math.min(
+        rect.right - width,
+        window.innerWidth - width - 12,
+      ),
+      y: Math.min(
+        rect.bottom + 6,
+        window.innerHeight - 150,
+      ),
+    });
+  };
+
+  const openDetail = async (user) => {
+    try {
+      const detail = await userApi.getById(user.idUser);
+
+      setSelectedUser(detail);
+      setDetailOpen(true);
+    } catch (error) {
+      showNotification(
+        "error",
+        "Không thể xem người dùng",
+        error.response?.data?.message ||
+          "Không thể tải thông tin người dùng.",
+      );
+    }
+  };
+
+  const confirmRemove = async () => {
+    if (!removingUser) return;
+
+    try {
+      setRemoving(true);
+      setRemoveError("");
+
+      await userApi.remove(removingUser.idUser);
+
+      setUsers((current) =>
+        current.map((user) =>
+          user.idUser === removingUser.idUser
+            ? {
+                ...user,
+                status: "delete",
+                deletedAt: new Date().toISOString(),
+              }
+            : user,
+        ),
+      );
+
+      setRemovingUser(null);
+
+      showNotification(
+        "success",
+        "Đã xóa người dùng",
+        "Tài khoản đã bị vô hiệu hóa và các phiên đăng nhập đã kết thúc.",
+      );
+    } catch (error) {
+      setRemoveError(
+        error.response?.data?.message ||
+          "Không thể xóa người dùng.",
+      );
+    } finally {
+      setRemoving(false);
+    }
+  };
+
+  const showingStart =
+    filteredUsers.length === 0
+      ? 0
+      : (safeCurrentPage - 1) * PAGE_SIZE + 1;
+
+  const showingEnd = Math.min(
+    safeCurrentPage * PAGE_SIZE,
+    filteredUsers.length,
+  );
+
+  return (
+    <>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-text-strong">
+              Quản lý người dùng
+            </h1>
+
+            <p className="mt-1 text-sm text-text-muted">
+              Xem và quản lý tài khoản trong hệ thống.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-xl bg-info-soft px-4 py-2 text-sm font-medium text-info">
+            <UserRound size={18} />
+            {filteredUsers.length} người dùng
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border-subtle bg-surface p-5 shadow-sm">
+          <div className="grid gap-3 md:grid-cols-[1fr_180px_180px]">
+            <label className="relative">
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
+
+              <input
+                value={localSearch}
+                onChange={(event) => {
+                  setLocalSearch(event.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Tìm theo tên, mã hoặc vai trò..."
+                className="h-11 w-full rounded-xl border border-input bg-surface pl-10 pr-4 text-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10"
+              />
+            </label>
+
+            <select
+              value={roleFilter}
+              onChange={(event) => {
+                setRoleFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-11 rounded-xl border border-input bg-surface px-3 text-sm outline-none focus:border-brand"
+            >
+              <option value="all">Tất cả vai trò</option>
+
+              {availableRoles.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-11 rounded-xl border border-input bg-surface px-3 text-sm outline-none focus:border-brand"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="pending">Chờ hoàn thiện</option>
+              <option value="inactive">Đã khóa</option>
+              <option value="deleted">Đã xóa</option>
+            </select>
+          </div>
+
+          <div className="mt-5">
+            <DataTable
+              columns={COLUMNS}
+              data={visibleUsers}
+              loading={loading}
+              error={errorMessage}
+              emptyText="Không tìm thấy người dùng"
+              minWidth="min-w-225"
+              renderRow={(user) => {
+                const status = getStatusInfo(user);
+                const isCurrentUser =
+                  user.idUser === adminUser?.idUser;
+
+                return (
+                  <tr
+                    key={user.idUser}
+                    className="transition hover:bg-surface-subtle"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={user.avatar || defaultAvatar}
+                          alt={user.fullName || "Người dùng"}
+                          className="h-10 w-10 rounded-xl object-cover"
+                        />
+
+                        <div className="min-w-0">
+                          <p className="max-w-55 truncate text-sm font-semibold text-text-default">
+                            {user.fullName ||
+                              "Chưa cập nhật tên"}
+                          </p>
+
+                          <p className="text-xs text-text-muted">
+                            {user.idUser}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-text-muted">
+                      {user.userCode || "Chưa có"}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-info-soft px-3 py-1 text-xs font-semibold text-info">
+                        {getRoleName(user)}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
+                      >
+                        {status.label}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-sm text-text-muted">
+                      {formatDate(user.createdAt)}
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        aria-label="Mở thao tác"
+                        onClick={(event) =>
+                          openActionMenu(event, user)
+                        }
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-muted hover:text-text-default"
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+
+                      {isCurrentUser && (
+                        <span className="sr-only">
+                          Tài khoản hiện tại
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              }}
+            />
+          </div>
+
+          <div className="mt-5">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              showingStart={showingStart}
+              showingEnd={showingEnd}
+              totalItems={filteredUsers.length}
+              showOnSinglePage
+            />
+          </div>
+        </div>
+      </div>
+
+      <MenuTable
+        open={menu.open}
+        position={{ x: menu.x, y: menu.y }}
+        onClose={() => setMenu(initialMenu)}
+        items={[
+          {
+            id: "detail",
+            label: "Xem chi tiết",
+            icon: Eye,
+            onClick: () => openDetail(menu.user),
+          },
+          {
+            id: "divider",
+            type: "divider",
+            hidden: !isAdmin,
+          },
+          {
+            id: "delete",
+            label: "Xóa tài khoản",
+            icon: Trash2,
+            danger: true,
+            hidden: !isAdmin,
+            disabled:
+              menu.user?.deletedAt ||
+              menu.user?.idUser === adminUser?.idUser,
+            onClick: () => {
+              setRemoveError("");
+              setRemovingUser(menu.user);
+            },
+          },
+        ]}
+      />
+
+      <UserDetailModal
+        user={selectedUser}
+        open={detailOpen}
+        onClose={() => {
+          setDetailOpen(false);
+          setSelectedUser(null);
+        }}
+      />
+
+      <ConfirmModal
+        open={Boolean(removingUser)}
+        title="Xóa tài khoản?"
+        confirmText="Xóa tài khoản"
+        loadingText="Đang xóa..."
+        confirmVariant="danger"
+        submitting={removing}
+        onClose={() => {
+          if (removing) return;
+
+          setRemovingUser(null);
+          setRemoveError("");
+        }}
+        onConfirm={confirmRemove}
+      >
+        <p>
+          Tài khoản{" "}
+          <strong className="text-text-default">
+            {removingUser?.fullName ||
+              removingUser?.userCode}
+          </strong>{" "}
+          sẽ bị vô hiệu hóa và tất cả phiên đăng nhập sẽ kết thúc.
+        </p>
+
+        {removeError && (
+          <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-danger">
+            {removeError}
+          </p>
+        )}
+      </ConfirmModal>
+    </>
+  );
+};
+
+export default UserManagementPage;

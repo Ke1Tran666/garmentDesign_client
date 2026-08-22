@@ -5,9 +5,8 @@ import {
   Search,
   Trash2,
   UserRound,
-  X,
 } from "lucide-react";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { userApi } from "@/api/userApi";
@@ -97,86 +96,6 @@ const getStatusInfo = (user) => {
   };
 };
 
-const UserDetailModal = ({ user, open, onClose }) => {
-  if (!open || !user) return null;
-
-  const status = getStatusInfo(user);
-
-  const detailItems = [
-    ["ID", user.idUser],
-    ["Mã người dùng", user.userCode],
-    ["Họ và tên", user.fullName],
-    ["Giới tính", user.gender],
-    ["Ngày sinh", formatDate(user.birthday)],
-    ["Vai trò", getRoleName(user)],
-    ["Đăng nhập gần nhất", formatDate(user.lastLogin)],
-    ["Ngày tạo", formatDate(user.createdAt)],
-    ["Ngày cập nhật", formatDate(user.updatedAt)],
-  ];
-
-  return (
-    <div
-      className="fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4"
-      onClick={onClose}
-    >
-      <div
-        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-surface p-6 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          aria-label="Đóng"
-          onClick={onClose}
-          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-text-muted transition hover:bg-surface-muted"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="flex items-center gap-4 pr-12">
-          <img
-            src={user.avatar || defaultAvatar}
-            alt={user.fullName || "Người dùng"}
-            className="h-16 w-16 rounded-2xl object-cover"
-          />
-
-          <div className="min-w-0">
-            <h2 className="truncate text-xl font-bold text-text-strong">
-              {user.fullName || "Chưa cập nhật tên"}
-            </h2>
-
-            <p className="mt-1 text-sm text-text-muted">
-              {user.userCode || user.idUser}
-            </p>
-
-            <span
-              className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
-            >
-              {status.label}
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {detailItems.map(([label, value]) => (
-            <div
-              key={label}
-              className="rounded-xl border border-border-subtle bg-surface-subtle p-4"
-            >
-              <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
-                {label}
-              </p>
-
-              <p className="mt-1 wrap-break-words text-sm font-semibold text-text-default">
-                {value || "Chưa có"}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const UserManagementPage = () => {
   const { adminUser, searchKeyword = "" } = useOutletContext();
   const { showNotification } = useNotification();
@@ -196,13 +115,13 @@ const UserManagementPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [detailOpen, setDetailOpen] = useState(false);
   const [menu, setMenu] = useState(initialMenu);
 
   const [removingUser, setRemovingUser] = useState(null);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     let active = true;
@@ -330,20 +249,9 @@ const UserManagementPage = () => {
     });
   };
 
-  const openDetail = async (user) => {
-    try {
-      const detail = await userApi.getById(user.idUser);
-
-      setSelectedUser(detail);
-      setDetailOpen(true);
-    } catch (error) {
-      showNotification(
-        "error",
-        "Không thể xem người dùng",
-        error.response?.data?.message ||
-          "Không thể tải thông tin người dùng.",
-      );
-    }
+  const openDetail = (user) => {
+    setMenu(initialMenu);
+    navigate(`/admin/users/${user.idUser}`);
   };
 
   const confirmRemove = async () => {
@@ -596,15 +504,6 @@ const UserManagementPage = () => {
             },
           },
         ]}
-      />
-
-      <UserDetailModal
-        user={selectedUser}
-        open={detailOpen}
-        onClose={() => {
-          setDetailOpen(false);
-          setSelectedUser(null);
-        }}
       />
 
       <ConfirmModal

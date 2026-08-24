@@ -1,9 +1,8 @@
-import { useState } from "react";
-import {
-  LoaderCircle,
-  Save,
-  X,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import FormModal from "./FormModal";
+import UploadBox from "@/components/ui/Upload/UploadBox";
+import defaultAvatar from "@/assets/images/avatar-default.jpg";
+import FormInput from "../Input/FormInput";
 
 const createInitialForm = (user, phone) => ({
   fullName: user?.fullName || "",
@@ -20,12 +19,23 @@ const UserIdentityEditModal = ({
   onClose,
   onSubmit,
 }) => {
-  const [form, setForm] = useState(() =>
-    createInitialForm(user, phone),
-  );
+  const [form, setForm] = useState(() => createInitialForm(user, phone));
 
-  const [validationError, setValidationError] =
-    useState("");
+  const [validationError, setValidationError] = useState("");
+
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(
+    () => user?.avatar || "",
+  );
+  const [avatarDeleted, setAvatarDeleted] = useState(false);
+  
+  useEffect(() => {
+    return () => {
+      if (avatarPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   if (!user) return null;
 
@@ -37,6 +47,51 @@ const UserIdentityEditModal = ({
       [name]: value,
     }));
 
+    setValidationError("");
+  };
+
+  const handleAvatarUpload = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setValidationError(
+        "Chỉ chấp nhận ảnh JPEG hoặc PNG.",
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    const maxFileSize = 5 * 1024 * 1024;
+
+    if (file.size > maxFileSize) {
+      setValidationError(
+        "Ảnh đại diện không được vượt quá 5 MB.",
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    setAvatarFile(file);
+    setAvatarDeleted(false);
+    setAvatarPreview(URL.createObjectURL(file));
+    setValidationError("");
+
+    event.target.value = "";
+  };
+
+  const handleAvatarDelete = () => {
+    setAvatarFile(null);
+    setAvatarPreview("");
+    setAvatarDeleted(Boolean(user.avatar));
     setValidationError("");
   };
 
@@ -96,253 +151,122 @@ const UserIdentityEditModal = ({
       birthday: form.birthday,
       gender: form.gender,
       phone: normalizedPhone,
+      avatarFile,
+      avatarDeleted,
     });
   };
 
-  const handleBackdropClick = () => {
-    if (!submitting) {
-      onClose?.();
-    }
-  };
-
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="identity-edit-title"
-      onClick={handleBackdropClick}
-      className="
-        fixed inset-0 z-70 flex items-center
-        justify-center bg-black/40 px-4 py-6
-      "
+    <FormModal
+      open
+      title="Chỉnh sửa danh tính"
+      description={`Cập nhật thông tin của ${
+        user.fullName || user.userCode
+      }.`}
+      submitting={submitting}
+      errorMessage={validationError || errorMessage}
+      onClose={onClose}
+      onSubmit={handleSubmit}
+      submitText="Lưu thay đổi"
+      loadingText="Đang lưu..."
+      cancelText="Hủy"
     >
-      <div
-        onClick={(event) =>
-          event.stopPropagation()
-        }
-        className="
-          relative w-full max-w-xl
-          overflow-hidden rounded-2xl
-          border border-border-subtle
-          bg-surface shadow-2xl
-        "
-      >
+      <div>
+        <label className="mb-2 block text-sm font-semibold text-text-default">
+          Ảnh đại diện
+        </label>
 
-        <div className="h-1 w-full bg-brand" />
+        <UploadBox
+          variant="avatar"
+          preview={avatarPreview}
+          fallback={defaultAvatar}
+          accept="image/jpeg,image/png"
+          uploadText={
+            avatarPreview
+              ? "Thay đổi ảnh"
+              : "Chọn ảnh"
+          }
+          deleteText="Xóa ảnh"
+          onUpload={handleAvatarUpload}
+          onDelete={handleAvatarDelete}
+        />
 
-        <header className="flex items-center justify-between border-b border-border-subtle px-5 py-4 sm:px-6">
-          <div>
-            <h2
-              id="identity-edit-title"
-              className="text-lg font-bold text-text-strong"
-            >
-              Chỉnh sửa danh tính
-            </h2>
-
-            <p className="mt-1 text-sm text-text-muted">
-              Cập nhật thông tin của{" "}
-              {user.fullName || user.userCode}.
-            </p>
-          </div>
-
-            <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            aria-label="Đóng form chỉnh sửa"
-            className="
-                group flex h-9 w-9 items-center
-                justify-center rounded-lg
-                text-text-muted transition-colors
-                duration-300
-                hover:bg-danger-soft
-                hover:text-danger
-                disabled:opacity-50
-            "
-            >
-            <X
-                size={19}
-                className="
-                transition-transform duration-300
-                ease-in-out
-                group-hover:rotate-180
-                "
-            />
-            </button>
-        </header>
-
-        <form onSubmit={handleSubmit}>
-          <div className="max-h-[70vh] space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
-            <div>
-              <label
-                htmlFor="edit-full-name"
-                className="mb-2 block text-sm font-semibold text-text-default"
-              >
-                Họ tên
-              </label>
-
-              <input
-                id="edit-full-name"
-                type="text"
-                name="fullName"
-                value={form.fullName}
-                onChange={handleChange}
-                disabled={submitting}
-                placeholder="Nhập họ tên"
-                autoFocus
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  px-4 text-sm text-text-default
-                  outline-none transition
-                  focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                  disabled:bg-surface-muted
-                "
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="edit-birthday"
-                  className="mb-2 block text-sm font-semibold text-text-default"
-                >
-                  Ngày sinh
-                </label>
-
-                <input
-                  id="edit-birthday"
-                  type="date"
-                  name="birthday"
-                  value={form.birthday}
-                  onChange={handleChange}
-                  disabled={submitting}
-                  className="
-                    h-11 w-full rounded-xl
-                    border border-input bg-surface
-                    px-4 text-sm text-text-default
-                    outline-none transition
-                    focus:border-brand
-                    focus:ring-4 focus:ring-brand/10
-                    disabled:bg-surface-muted
-                  "
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="edit-gender"
-                  className="mb-2 block text-sm font-semibold text-text-default"
-                >
-                  Giới tính
-                </label>
-
-                <select
-                  id="edit-gender"
-                  name="gender"
-                  value={form.gender}
-                  onChange={handleChange}
-                  disabled={submitting}
-                  className="
-                    h-11 w-full rounded-xl
-                    border border-input bg-surface
-                    px-4 text-sm text-text-default
-                    outline-none transition
-                    focus:border-brand
-                    focus:ring-4 focus:ring-brand/10
-                    disabled:bg-surface-muted
-                  "
-                >
-                  <option value="Male">Nam</option>
-                  <option value="Female">Nữ</option>
-                  <option value="Unknown">
-                    Không xác định
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="edit-phone"
-                className="mb-2 block text-sm font-semibold text-text-default"
-              >
-                Số điện thoại
-              </label>
-
-              <input
-                id="edit-phone"
-                type="tel"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                disabled={submitting}
-                placeholder="Nhập số điện thoại"
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  px-4 text-sm text-text-default
-                  outline-none transition
-                  focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                  disabled:bg-surface-muted
-                "
-              />
-            </div>
-
-            {(validationError || errorMessage) && (
-              <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
-                {validationError || errorMessage}
-              </p>
-            )}
-          </div>
-
-          <footer className="flex justify-end gap-3 border-t border-border-subtle px-5 py-4 sm:px-6">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-              className="
-                rounded-xl border border-border
-                px-4 py-2.5 text-sm font-semibold
-                text-text-muted transition
-                hover:bg-surface-muted
-                disabled:opacity-50
-              "
-            >
-              Hủy
-            </button>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="
-                inline-flex min-w-32 items-center
-                justify-center gap-2 rounded-xl
-                bg-brand! px-4 py-2.5
-                text-sm font-semibold text-white
-                transition hover:opacity-90
-                disabled:opacity-50
-              "
-            >
-              {submitting ? (
-                <LoaderCircle
-                  size={17}
-                  className="animate-spin"
-                />
-              ) : (
-                <Save size={17} />
-              )}
-
-              {submitting
-                ? "Đang lưu..."
-                : "Lưu thay đổi"}
-            </button>
-          </footer>
-        </form>
+        <p className="mt-2 text-xs text-text-muted">
+          Chấp nhận JPEG hoặc PNG, dung lượng tối đa
+          5 MB.
+        </p>
       </div>
-    </div>
+
+      <FormInput
+        id="edit-full-name"
+        label="Họ tên"
+        name="fullName"
+        value={form.fullName}
+        onChange={handleChange}
+        disabled={submitting}
+        placeholder="Nhập họ tên"
+        autoComplete="name"
+      />
+
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <FormInput
+          id="edit-birthday"
+          label="Ngày sinh"
+          type="date"
+          name="birthday"
+          value={form.birthday}
+          onChange={handleChange}
+          disabled={submitting}
+        />
+
+        <div>
+          <label
+            htmlFor="edit-gender"
+            className="mb-2 block text-sm font-semibold text-text-default"
+          >
+            Giới tính
+          </label>
+
+          <select
+            id="edit-gender"
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            disabled={submitting}
+            className="
+              h-11 w-full rounded-xl
+              border border-input bg-surface
+              px-4 text-sm text-text-default
+              outline-none transition
+              focus:border-brand
+              focus:ring-4 focus:ring-brand/10
+              disabled:cursor-not-allowed
+              disabled:bg-surface-muted
+            "
+          >
+            <option value="Male">Nam</option>
+            <option value="Female">Nữ</option>
+            <option value="Unknown">
+              Không xác định
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <FormInput
+        id="edit-phone"
+        label="Số điện thoại"
+        type="tel"
+        name="phone"
+        value={form.phone}
+        onChange={handleChange}
+        disabled={submitting}
+        placeholder="Nhập số điện thoại"
+        autoComplete="tel"
+        inputMode="tel"
+        hint="Ví dụ: 0912345678"
+      />
+    </FormModal>
   );
 };
 

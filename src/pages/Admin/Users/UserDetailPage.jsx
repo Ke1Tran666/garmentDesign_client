@@ -6,17 +6,16 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
-  Clock3,
   EllipsisVertical,
   Hash,
   LockKeyhole,
   Mail,
   MapPin,
+  Pencil,
   Phone,
   ShieldCheck,
   Trash2,
   UserRound,
-  VenusAndMars,
 } from "lucide-react";
 import {
   useNavigate,
@@ -24,12 +23,12 @@ import {
   useParams,
 } from "react-router-dom";
 
-import defaultAvatar from "@/assets/images/avatar-default.jpg";
 import { userApi } from "@/api/userApi";
 import { normalizeRole } from "@/lib/authRole";
 
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
+import UserIdentityEditModal from "@/components/ui/Forms/UserIdentityEditModal";
 
 const EMPTY_VALUE = "Chưa có dữ liệu";
 
@@ -47,6 +46,45 @@ const formatDate = (value) => {
     month: "2-digit",
     year: "numeric",
   }).format(date);
+};
+
+const formatGender = (gender) => {
+  const normalizedGender = String(gender || "")
+    .trim()
+    .toLowerCase();
+
+  if (normalizedGender === "male") {
+    return "Nam";
+  }
+
+  if (normalizedGender === "female") {
+    return "Nữ";
+  }
+
+  if (normalizedGender === "unknown") {
+    return "Không xác định";
+  }
+
+  return EMPTY_VALUE;
+};
+
+const getInitials = (fullName) => {
+  const normalizedName = String(fullName || "").trim();
+
+  if (!normalizedName) {
+    return "U";
+  }
+
+  const nameParts = normalizedName.split(/\s+/);
+
+  if (nameParts.length === 1) {
+    return nameParts[0].slice(0, 2).toUpperCase();
+  }
+
+  const firstName = nameParts[0];
+  const lastName = nameParts[nameParts.length - 1];
+
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 };
 
 const formatActivityDate = (value) => {
@@ -220,11 +258,13 @@ const UserDetailPage = () => {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  const isAdmin =
-    normalizeRole(adminUser?.role) === "admin";
+  const [identityEditOpen, setIdentityEditOpen] = useState(false);
+  const [identitySubmitting, setIdentitySubmitting] = useState(false);
+  const [identityUpdateError, setIdentityUpdateError] = useState("");
 
-  const isCurrentUser =
-    user?.idUser === adminUser?.idUser;
+  const isAdmin = normalizeRole(adminUser?.role) === "admin";
+
+  const isCurrentUser = user?.idUser === adminUser?.idUser;
 
   useEffect(() => {
     let active = true;
@@ -422,6 +462,31 @@ const UserDetailPage = () => {
   }
 
   const status = getStatusInfo(user);
+
+  const handleOpenIdentityEdit = () => {
+    setIdentityUpdateError("");
+    setIdentityEditOpen(true);
+  };
+
+  const handleIdentitySubmit = async () => {
+    try {
+      setIdentitySubmitting(true);
+      setIdentityUpdateError("");
+
+      // Backend hiện chưa có API để admin cập nhật người dùng.
+      showNotification(
+        "info",
+        "Chưa thể cập nhật",
+        "Backend chưa có API để admin cập nhật thông tin người dùng."
+      );
+    } catch (error) {
+      setIdentityUpdateError(
+        error.response?.data?.message || "Không thể cập nhật người dùng."
+      );
+    } finally {
+      setIdentitySubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -792,13 +857,6 @@ const UserDetailPage = () => {
                 </SidebarInfoRow>
 
                 <SidebarInfoRow
-                  icon={Clock3}
-                  label="Đăng nhập"
-                >
-                  {formatDate(user.lastLogin)}
-                </SidebarInfoRow>
-
-                <SidebarInfoRow
                   icon={BadgeCheck}
                   label="Trạng thái"
                 >
@@ -810,22 +868,40 @@ const UserDetailPage = () => {
                 </SidebarInfoRow>
               </SidebarSection>
 
-              <SidebarSection title="Danh tính">
-                <div className="mb-4 flex items-center gap-3 rounded-xl bg-surface-subtle p-3">
-                  <img
-                    src={user.avatar || defaultAvatar}
-                    alt={user.fullName || "Người dùng"}
-                    className="h-12 w-12 rounded-xl object-cover"
-                  />
+              <SidebarSection
+                title="Danh tính"
+                action={
+                  <button
+                    type="button"
+                    onClick={handleOpenIdentityEdit}
+                    disabled={!isAdmin || Boolean(user.deletedAt)}
+                    className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    aria-label="Chỉnh sửa danh tính"
+                    title="Chỉnh sửa danh tính"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                }
+              >
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.fullName || "Người dùng"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      getInitials(user.fullName)
+                    )}
+                  </div>
 
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-text-default">
-                      {user.fullName ||
-                        "Chưa cập nhật tên"}
+                    <p className="truncate font-medium text-slate-900">
+                      {user.fullName || "Chưa có dữ liệu"}
                     </p>
-
-                    <p className="mt-1 text-xs text-text-muted">
-                      {getRoleName(user)}
+                    <p className="truncate text-sm text-slate-500">
+                      {user.email || "Chưa có dữ liệu"}
                     </p>
                   </div>
                 </div>
@@ -845,15 +921,15 @@ const UserDetailPage = () => {
                 </SidebarInfoRow>
 
                 <SidebarInfoRow
-                  icon={VenusAndMars}
+                  icon={UserRound}
                   label="Giới tính"
                 >
-                  {user.gender || EMPTY_VALUE}
+                  {formatGender(user.gender)}
                 </SidebarInfoRow>
 
                 <SidebarInfoRow
                   icon={Phone}
-                  label="Điện thoại"
+                  label="Số điện thoại"
                 >
                   {phoneProvider?.phone || EMPTY_VALUE}
                 </SidebarInfoRow>
@@ -862,12 +938,13 @@ const UserDetailPage = () => {
                   icon={MapPin}
                   label="Địa chỉ"
                 >
-                  {user.defaultAddress?.address ||
-                    EMPTY_VALUE}
+                  {user.defaultAddress?.address || EMPTY_VALUE}
                 </SidebarInfoRow>
               </SidebarSection>
 
-              <SidebarSection title="Số điện thoại">
+              <SidebarSection 
+                title="Số điện thoại"
+              >
                 {phoneProvider ? (
                   <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-subtle px-3 py-3">
                     <span className="truncate text-sm font-medium text-text-default">
@@ -908,6 +985,22 @@ const UserDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {identityEditOpen && (
+        <UserIdentityEditModal
+          user={user}
+          phone={phoneProvider?.phone || ""}
+          submitting={identitySubmitting}
+          errorMessage={identityUpdateError}
+          onClose={() => {
+            if (identitySubmitting) return;
+
+            setIdentityEditOpen(false);
+            setIdentityUpdateError("");
+          }}
+          onSubmit={handleIdentitySubmit}
+        />
+      )}
 
       <ConfirmModal
         open={deleteOpen}

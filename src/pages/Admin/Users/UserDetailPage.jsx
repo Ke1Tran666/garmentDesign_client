@@ -243,6 +243,33 @@ const SidebarSection = ({
   </section>
 );
 
+const normalizeUserDetail = (data) => {
+  const userData = data?.user;
+
+  if (!userData) {
+    return null;
+  }
+
+  return {
+    ...userData,
+
+    authProviders: Array.isArray(
+      data.authProviders,
+    )
+      ? data.authProviders
+      : [],
+
+    addresses: Array.isArray(data.addresses)
+      ? data.addresses
+      : [],
+
+    defaultAddress:
+      data.defaultAddress ||
+      userData.defaultAddress ||
+      null,
+  };
+};
+
 const UserDetailPage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -277,21 +304,8 @@ const UserDetailPage = () => {
         const data = await userApi.getById(userId);
 
         if (active) {
-          const userData = data?.user;
 
-          setUser({
-            ...userData,
-            authProviders: Array.isArray(data?.authProviders)
-              ? data.authProviders
-              : [],
-            addresses: Array.isArray(data?.addresses)
-              ? data.addresses
-              : [],
-            defaultAddress:
-              data?.defaultAddress ||
-              userData?.defaultAddress ||
-              null,
-          });
+          setUser(normalizeUserDetail(data));
         }
       } catch (error) {
         if (!active) return;
@@ -468,20 +482,54 @@ const UserDetailPage = () => {
     setIdentityEditOpen(true);
   };
 
-  const handleIdentitySubmit = async () => {
+  const handleIdentitySubmit = async ({
+    fullName,
+    birthday,
+    gender,
+    phone,
+    avatarFile,
+    avatarDeleted,
+  }) => {
     try {
       setIdentitySubmitting(true);
       setIdentityUpdateError("");
 
-      // Backend hiện chưa có API để admin cập nhật người dùng.
+      await userApi.updateById(user.idUser, {
+        fullName,
+        birthday,
+        gender,
+        phone,
+      });
+
+      if (avatarDeleted) {
+        await userApi.removeAvatarById(
+          user.idUser,
+        );
+      } else if (avatarFile) {
+        await userApi.uploadAvatarById(
+          user.idUser,
+          avatarFile,
+        );
+      }
+
+      const refreshedData =
+        await userApi.getById(user.idUser);
+
+      setUser(
+        normalizeUserDetail(refreshedData),
+      );
+
+      setIdentityEditOpen(false);
+
       showNotification(
-        "info",
-        "Chưa thể cập nhật",
-        "Backend chưa có API để admin cập nhật thông tin người dùng."
+        "success",
+        "Cập nhật thành công",
+        "Thông tin người dùng đã được cập nhật.",
       );
     } catch (error) {
       setIdentityUpdateError(
-        error.response?.data?.message || "Không thể cập nhật người dùng."
+        error.response?.data?.message ||
+          "Không thể cập nhật thông tin người dùng.",
       );
     } finally {
       setIdentitySubmitting(false);

@@ -19,6 +19,36 @@ export const userApi = {
     return response.data;
   },
 
+  async updateById(userId, payload) {
+    const response = await httpClient.put(
+      `/users/${userId}`,
+      payload,
+    );
+
+    return response.data;
+  },
+
+  async uploadAvatarById(userId, file) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await httpClient.put(
+      `/users/${userId}/avatar`,
+      formData,
+    );
+
+    return response.data;
+  },
+
+  async removeAvatarById(userId) {
+    const response = await httpClient.delete(
+      `/users/${userId}/avatar`,
+    );
+
+    return response.data;
+  },
+
   async update(payload) {
     const response = await httpClient.put(
       "/users/me",

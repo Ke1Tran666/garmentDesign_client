@@ -58,7 +58,7 @@ const ADMIN_GROUPS = [
         label: "Người dùng",
         text: "Quản lý tài khoản người dùng.",
         path: "/admin/users",
-        available: false,
+        available: true,
       },
       {
         icon: ClipboardList,

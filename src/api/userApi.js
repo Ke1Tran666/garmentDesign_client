@@ -19,6 +19,36 @@ export const userApi = {
     return response.data;
   },
 
+  async updateById(userId, payload) {
+    const response = await httpClient.put(
+      `/users/${userId}`,
+      payload,
+    );
+
+    return response.data;
+  },
+
+  async uploadAvatarById(userId, file) {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await httpClient.put(
+      `/users/${userId}/avatar`,
+      formData,
+    );
+
+    return response.data;
+  },
+
+  async removeAvatarById(userId) {
+    const response = await httpClient.delete(
+      `/users/${userId}/avatar`,
+    );
+
+    return response.data;
+  },
+
   async update(payload) {
     const response = await httpClient.put(
       "/users/me",
@@ -101,5 +131,18 @@ export const userApi = {
     );
 
     return response.data;
+  },
+  async getAll(config = {}) {
+    const response = await httpClient.get("/users", config);
+    return response.data;
+  },
+
+  async create(payload) {
+    const response = await httpClient.post("/users", payload);
+    return response.data;
+  },
+
+  async remove(userId) {
+    await httpClient.delete(`/users/${userId}`);
   },
 };

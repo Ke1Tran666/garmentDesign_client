@@ -29,6 +29,7 @@ import { normalizeRole } from "@/lib/authRole";
 import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
 import { useNotification } from "@/components/ui/Notification/NotificationContext";
 import UserIdentityEditModal from "@/components/ui/Forms/UserIdentityEditModal";
+import UserPhoneEditModal from "@/components/ui/Forms/UserPhoneEditModal";
 
 const EMPTY_VALUE = "Chưa có dữ liệu";
 
@@ -289,6 +290,10 @@ const UserDetailPage = () => {
   const [identitySubmitting, setIdentitySubmitting] = useState(false);
   const [identityUpdateError, setIdentityUpdateError] = useState("");
 
+  const [phoneEditOpen, setPhoneEditOpen] = useState(false);
+  const [phoneSubmitting, setPhoneSubmitting] = useState(false);
+  const [phoneUpdateError, setPhoneUpdateError] = useState("");
+
   const isAdmin = normalizeRole(adminUser?.role) === "admin";
 
   const isCurrentUser = user?.idUser === adminUser?.idUser;
@@ -533,6 +538,45 @@ const UserDetailPage = () => {
       );
     } finally {
       setIdentitySubmitting(false);
+    }
+  };
+
+  const handleOpenPhoneEdit = () => {
+    setPhoneUpdateError("");
+    setPhoneEditOpen(true);
+  };
+
+  const handlePhoneSubmit = async (phone) => {
+    try {
+      setPhoneSubmitting(true);
+      setPhoneUpdateError("");
+
+      await userApi.updatePhoneById(
+        user.idUser,
+        phone,
+      );
+
+      const refreshedData =
+        await userApi.getById(user.idUser);
+
+      setUser(
+        normalizeUserDetail(refreshedData),
+      );
+
+      setPhoneEditOpen(false);
+
+      showNotification(
+        "success",
+        "Cập nhật thành công",
+        "Số điện thoại đã được cập nhật.",
+      );
+    } catch (error) {
+      setPhoneUpdateError(
+        error.response?.data?.message ||
+          "Không thể cập nhật số điện thoại.",
+      );
+    } finally {
+      setPhoneSubmitting(false);
     }
   };
 
@@ -990,8 +1034,28 @@ const UserDetailPage = () => {
                 </SidebarInfoRow>
               </SidebarSection>
 
-              <SidebarSection 
+              <SidebarSection
                 title="Số điện thoại"
+                action={
+                  <button
+                    type="button"
+                    onClick={handleOpenPhoneEdit}
+                    disabled={
+                      !isAdmin || Boolean(user.deletedAt)
+                    }
+                    className="
+                      rounded-md p-1.5 text-slate-400
+                      transition hover:bg-slate-100
+                      hover:text-slate-700
+                      disabled:cursor-not-allowed
+                      disabled:opacity-40
+                    "
+                    aria-label="Chỉnh sửa số điện thoại"
+                    title="Chỉnh sửa số điện thoại"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                }
               >
                 {phoneProvider ? (
                   <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-subtle px-3 py-3">
@@ -1047,6 +1111,21 @@ const UserDetailPage = () => {
             setIdentityUpdateError("");
           }}
           onSubmit={handleIdentitySubmit}
+        />
+      )}
+
+      {phoneEditOpen && (
+        <UserPhoneEditModal
+          phone={phoneProvider?.phone || ""}
+          submitting={phoneSubmitting}
+          errorMessage={phoneUpdateError}
+          onClose={() => {
+            if (phoneSubmitting) return;
+
+            setPhoneEditOpen(false);
+            setPhoneUpdateError("");
+          }}
+          onSubmit={handlePhoneSubmit}
         />
       )}
 

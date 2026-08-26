@@ -145,4 +145,13 @@ export const userApi = {
   async remove(userId) {
     await httpClient.delete(`/users/${userId}`);
   },
+
+  async updatePhoneById(userId, phone) {
+    const response = await httpClient.put(
+      `/users/${userId}/phone`,
+      { phone },
+    );
+
+    return response.data;
+  },
 };

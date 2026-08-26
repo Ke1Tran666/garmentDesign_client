@@ -170,102 +170,115 @@ const UserIdentityEditModal = ({
       submitText="Lưu thay đổi"
       loadingText="Đang lưu..."
       cancelText="Hủy"
+      maxWidthClassName="max-w-5xl"
     >
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-text-default">
-          Ảnh đại diện
-        </label>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
+        {/* BÊN TRÁI */}
+        <div className="space-y-5">
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-text-default">
+              Ảnh đại diện
+            </label>
 
-        <UploadBox
-          variant="avatar"
-          preview={avatarPreview}
-          fallback={defaultAvatar}
-          accept="image/jpeg,image/png"
-          uploadText={
-            avatarPreview
-              ? "Thay đổi ảnh"
-              : "Chọn ảnh"
-          }
-          deleteText="Xóa ảnh"
-          onUpload={handleAvatarUpload}
-          onDelete={handleAvatarDelete}
-        />
+            <UploadBox
+              variant="avatar"
+              preview={avatarPreview}
+              fallback={defaultAvatar}
+              accept="image/jpeg,image/png"
+              uploadText={
+                avatarPreview
+                  ? "Thay đổi ảnh"
+                  : "Chọn ảnh"
+              }
+              deleteText="Xóa ảnh"
+              onUpload={handleAvatarUpload}
+              onDelete={handleAvatarDelete}
+            />
 
-        <p className="mt-2 text-xs text-text-muted">
-          Chấp nhận JPEG hoặc PNG, dung lượng tối đa
-          5 MB.
-        </p>
-      </div>
+            <p className="mt-2 text-xs text-text-muted">
+              Chấp nhận JPEG hoặc PNG, dung lượng tối đa
+              5 MB.
+            </p>
+          </div>
 
-      <FormInput
-        id="edit-full-name"
-        label="Họ tên"
-        name="fullName"
-        value={form.fullName}
-        onChange={handleChange}
-        disabled={submitting}
-        placeholder="Nhập họ tên"
-        autoComplete="name"
-      />
-
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <FormInput
-          id="edit-birthday"
-          label="Ngày sinh"
-          type="date"
-          name="birthday"
-          value={form.birthday}
-          onChange={handleChange}
-          disabled={submitting}
-        />
-
-        <div>
-          <label
-            htmlFor="edit-gender"
-            className="mb-2 block text-sm font-semibold text-text-default"
-          >
-            Giới tính
-          </label>
-
-          <select
-            id="edit-gender"
-            name="gender"
-            value={form.gender}
+          <FormInput
+            id="edit-full-name"
+            label="Họ tên"
+            name="fullName"
+            value={form.fullName}
             onChange={handleChange}
             disabled={submitting}
-            className="
-              h-11 w-full rounded-xl
-              border border-input bg-surface
-              px-4 text-sm text-text-default
-              outline-none transition
-              focus:border-brand
-              focus:ring-4 focus:ring-brand/10
-              disabled:cursor-not-allowed
-              disabled:bg-surface-muted
-            "
-          >
-            <option value="Male">Nam</option>
-            <option value="Female">Nữ</option>
-            <option value="Unknown">
-              Không xác định
-            </option>
-          </select>
+            placeholder="Nhập họ tên"
+            autoComplete="name"
+          />
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormInput
+              id="edit-birthday"
+              label="Ngày sinh"
+              type="date"
+              name="birthday"
+              value={form.birthday}
+              onChange={handleChange}
+              disabled={submitting}
+            />
+
+            <div>
+              <label
+                htmlFor="edit-gender"
+                className="mb-2 block text-sm font-semibold text-text-default"
+              >
+                Giới tính
+              </label>
+
+              <select
+                id="edit-gender"
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                disabled={submitting}
+                className="
+                  h-11 w-full rounded-xl
+                  border border-input bg-surface
+                  px-4 text-sm text-text-default
+                  outline-none transition
+                  focus:border-brand
+                  focus:ring-4 focus:ring-brand/10
+                  disabled:cursor-not-allowed
+                  disabled:bg-surface-muted
+                "
+              >
+                <option value="Male">Nam</option>
+                <option value="Female">Nữ</option>
+                <option value="Unknown">
+                  Không xác định
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* BÊN PHẢI */}
+        <div className="border-t border-border-subtle pt-6 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+          <h3 className="mb-4 text-sm font-bold text-text-strong">
+            Thông tin liên hệ
+          </h3>
+
+          <FormInput
+            id="edit-phone"
+            label="Số điện thoại"
+            type="tel"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            disabled={submitting}
+            placeholder="Nhập số điện thoại"
+            autoComplete="tel"
+            inputMode="tel"
+            hint="Ví dụ: 0912345678"
+          />
         </div>
       </div>
-
-      <FormInput
-        id="edit-phone"
-        label="Số điện thoại"
-        type="tel"
-        name="phone"
-        value={form.phone}
-        onChange={handleChange}
-        disabled={submitting}
-        placeholder="Nhập số điện thoại"
-        autoComplete="tel"
-        inputMode="tel"
-        hint="Ví dụ: 0912345678"
-      />
     </FormModal>
   );
 };

@@ -15,6 +15,7 @@ const FormModal = ({
   cancelText = "Hủy",
   submitting = false,
   errorMessage = "",
+  maxWidthClassName = "max-w-xl",
 }) => {
   if (!open) return null;
 
@@ -37,12 +38,12 @@ const FormModal = ({
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="
-          relative w-full max-w-xl
-          overflow-hidden rounded-2xl
-          border border-border-subtle
-          bg-surface shadow-2xl
-        "
+        className={`
+            relative w-full ${maxWidthClassName}
+            overflow-hidden rounded-2xl
+            border border-border-subtle
+            bg-surface shadow-2xl
+          `}
       >
         <div className="h-1 w-full bg-brand" />
 

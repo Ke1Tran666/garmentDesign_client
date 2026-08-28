@@ -15,8 +15,8 @@ import {
   vi,
 } from "vitest";
 import LoginPage from "./LoginPage";
-import { authApi } from "@/api/authApi";
-import { authStorage } from "@/lib/authStorage";
+import { authApi } from "@/features/auth/api/authApi";
+import { authStorage } from "@/features/auth/lib/authStorage";
 
 const {
   showNotificationMock,
@@ -26,7 +26,7 @@ const {
   googleLoginMock: vi.fn(),
 }));
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/features/auth/api/authApi", () => ({
   authApi: {
     login: vi.fn(),
     googleLogin: vi.fn(),
@@ -35,14 +35,14 @@ vi.mock("@/api/authApi", () => ({
   },
 }));
 
-vi.mock("@/lib/authStorage", () => ({
+vi.mock("@/features/auth/lib/authStorage", () => ({
   authStorage: {
     save: vi.fn(),
   },
 }));
 
 vi.mock(
-  "@/components/ui/Notification/NotificationContext",
+  "@/app/providers/NotificationProvider",
   () => ({
     useNotification: () => ({
       showNotification: showNotificationMock,

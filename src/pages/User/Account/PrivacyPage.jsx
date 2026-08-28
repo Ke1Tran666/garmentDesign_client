@@ -1,13 +1,13 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
-import { Divider } from "@/components/ui/Divider/Divider";
-import { SectionCard } from "@/components/ui/Section/Section";
-import { HandleButtonIcon } from "@/components/ui/Button/Button";
+import { Divider } from "@/shared/ui/divider/Divider";
+import { SectionCard } from "@/shared/ui/section/Section";
+import { HandleButtonIcon } from "@/shared/ui/button/Button";
 import { Download, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
-import { userApi } from "@/api/userApi";
-import { useAuth } from "@/components/auth/useAuth";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { userApi } from "@/entities/user/api/userApi";
+import { useAuth } from "@/features/auth/model/useAuth";
 
 const PrivacyPage = () => {
   const navigate = useNavigate();

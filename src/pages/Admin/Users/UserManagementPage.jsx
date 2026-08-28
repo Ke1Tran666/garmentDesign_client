@@ -8,15 +8,15 @@ import {
 } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
-import defaultAvatar from "@/assets/images/avatar-default.jpg";
-import { userApi } from "@/api/userApi";
-import { normalizeRole } from "@/lib/authRole";
+import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
+import { userApi } from "@/entities/user/api/userApi";
+import { normalizeRole } from "@/features/auth/lib/authRole";
 
-import DataTable from "@/components/ui/Table/DataTable";
-import Pagination from "@/components/ui/Table/Pagination";
-import MenuTable from "@/components/ui/Menu/MenuTable";
-import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
-import { useNotification } from "@/components/ui/Notification/NotificationContext";
+import DataTable from "@/shared/ui/table/DataTable";
+import Pagination from "@/shared/ui/table/Pagination";
+import MenuTable from "@/shared/ui/menu/MenuTable";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { useNotification } from "@/app/providers/NotificationProvider";
 
 const PAGE_SIZE = 15;
 

@@ -14,9 +14,9 @@ import {
   vi,
 } from "vitest";
 import AddressPage from "./AddressPage";
-import { addressApi } from "@/api/addressApi";
-import { userApi } from "@/api/userApi";
-import { authStorage } from "@/lib/authStorage";
+import { addressApi } from "@/entities/address/api/addressApi";
+import { userApi } from "@/entities/user/api/userApi";
+import { authStorage } from "@/features/auth/lib/authStorage";
 
 const { showNotificationMock } = vi.hoisted(
   () => ({
@@ -24,7 +24,7 @@ const { showNotificationMock } = vi.hoisted(
   }),
 );
 
-vi.mock("@/api/addressApi", () => ({
+vi.mock("@/entities/address/api/addressApi", () => ({
   addressApi: {
     getByUser: vi.fn(),
     create: vi.fn(),
@@ -34,20 +34,20 @@ vi.mock("@/api/addressApi", () => ({
   },
 }));
 
-vi.mock("@/api/userApi", () => ({
+vi.mock("@/entities/user/api/userApi", () => ({
   userApi: {
     getMe: vi.fn(),
   },
 }));
 
-vi.mock("@/lib/authStorage", () => ({
+vi.mock("@/features/auth/lib/authStorage", () => ({
   authStorage: {
     getUserId: vi.fn(),
   },
 }));
 
 vi.mock(
-  "@/components/ui/Notification/NotificationContext",
+  "@/app/providers/NotificationProvider",
   () => ({
     useNotification: () => ({
       showNotification: showNotificationMock,

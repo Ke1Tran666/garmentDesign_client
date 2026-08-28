@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import BirthdayInput from "@/components/ui/Input/BirthdayInput";
-import FloatingInput from "@/components/ui/Input/FloatingInput";
+import BirthdayInput from "@/shared/ui/input/BirthdayInput";
+import FloatingInput from "@/shared/ui/input/FloatingInput";
 import { useBeforeUnload, useOutletContext } from "react-router-dom";
-import { ContactRow, EmptyContact } from "@/components/common/Contact/ContactRow";
-import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import defaultAvatar from "@/assets/images/avatar-default.jpg";
-import { HandleButton } from "@/components/ui/Button/Button";
-import { SectionCard } from "@/components/ui/Section/Section";
-import { Divider } from "@/components/ui/Divider/Divider";
-import RadioGroup from "@/components/ui/RadioGroup/RadioGroup";
-import UploadBox from "@/components/ui/Upload/UploadBox";
-import { userApi } from "@/api/userApi";
-import { useAuth } from "@/components/auth/useAuth";
-import OTPModal from "@/components/ui/OTP/OTPModal";
-import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
+import { ContactRow, EmptyContact } from "@/entities/user/ui/ContactRow";
+import { useNotification } from "@/app/providers/NotificationProvider";
+import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
+import { HandleButton } from "@/shared/ui/button/Button";
+import { SectionCard } from "@/shared/ui/section/Section";
+import { Divider } from "@/shared/ui/divider/Divider";
+import RadioGroup from "@/shared/ui/radio-group/RadioGroup";
+import UploadBox from "@/shared/ui/upload/UploadBox";
+import { userApi } from "@/entities/user/api/userApi";
+import { useAuth } from "@/features/auth/model/useAuth";
+import OTPModal from "@/features/auth/ui/OTPModal";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 
 const getProfilePhone = (data) => {
   const provider = (

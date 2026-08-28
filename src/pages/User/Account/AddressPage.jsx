@@ -9,17 +9,17 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { ButtonIconText } from "@/components/ui/Button/Button";
-import { SectionCard } from "@/components/ui/Section/Section";
-import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import FormModal from "@/components/ui/Modal/FormModal";
-import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
-import DataTable from "@/components/ui/Table/DataTable";
-import Pagination from "@/components/ui/Table/Pagination";
-import MenuTable from "@/components/ui/Menu/MenuTable";
-import { addressApi } from "@/api/addressApi";
-import { userApi } from "@/api/userApi";
-import { useAuth } from "@/components/auth/useAuth";
+import { ButtonIconText } from "@/shared/ui/button/Button";
+import { SectionCard } from "@/shared/ui/section/Section";
+import { useNotification } from "@/app/providers/NotificationProvider";
+import FormModal from "@/shared/ui/modal/FormModal";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import DataTable from "@/shared/ui/table/DataTable";
+import Pagination from "@/shared/ui/table/Pagination";
+import MenuTable from "@/shared/ui/menu/MenuTable";
+import { addressApi } from "@/entities/address/api/addressApi";
+import { userApi } from "@/entities/user/api/userApi";
+import { useAuth } from "@/features/auth/model/useAuth";
 
 const statusClassName = {
   Active: "bg-success-soft text-success ring-1 ring-success-border",

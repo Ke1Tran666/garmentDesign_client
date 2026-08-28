@@ -1,0 +1,2063 @@
+import { memo, useEffect, useMemo, useState } from "react";
+import {
+  Building2,
+  CalendarDays,
+  CreditCard,
+  Download,
+  FileText,
+  ImagePlus,
+  LoaderCircle,
+  MapPin,
+  Paperclip,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
+import { BACKEND_URL } from "@/shared/config/apiConfig";
+import { userApi } from "@/entities/user/api/userApi";
+import { addressApi } from "@/entities/address/api/addressApi";
+import { serviceOrderFileApi } from "@/entities/service-order/api/serviceOrderFileApi";
+import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
+import { useFileUpload } from "@/shared/hooks/useFileUpload";
+import ProductImagePicker from "@/features/service-orders/ui/file-upload/ProductImagePicker";
+import AttachmentPicker from "@/features/service-orders/ui/file-upload/AttachmentPicker";
+import { useAuth } from "@/features/auth/model/useAuth";
+
+const EMPTY_VALUE = "Chưa có thông tin";
+
+const employeeNameCache = new Map();
+
+const DATE_FORMATTER = new Intl.DateTimeFormat(
+  "vi-VN",
+  {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }
+);
+
+const DATE_TIME_FORMATTER =
+  new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const CURRENCY_FORMATTER =
+  new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  });
+
+const hasValue = (value) =>
+  value !== null &&
+  value !== undefined &&
+  value !== "";
+
+const formatDate = (
+  value,
+  includeTime = false
+) => {
+  if (!value) return EMPTY_VALUE;
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return includeTime
+    ? DATE_TIME_FORMATTER.format(date)
+    : DATE_FORMATTER.format(date);
+};
+
+const formatCurrency = (value) => {
+  if (!hasValue(value)) return EMPTY_VALUE;
+
+  const number = Number(value);
+
+  return Number.isNaN(number)
+    ? String(value)
+    : CURRENCY_FORMATTER.format(number);
+};
+
+const resolveBackendUrl = (url) => {
+  if (!url) return "";
+
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  return `${BACKEND_URL}${
+    url.startsWith("/") ? url : `/${url}`
+  }`;
+};
+
+const getStatusStyle = (status) => {
+  const text = String(status || "").toLowerCase();
+
+  if (
+    text.includes("hoàn") ||
+    text.includes("complete")
+  ) {
+    return {
+      badge:
+        "bg-success-soft text-success ring-success-border",
+      dot: "bg-success",
+    };
+  }
+
+  if (
+    text.includes("hủy") ||
+    text.includes("cancel")
+  ) {
+    return {
+      badge:
+        "bg-danger-soft text-danger ring-danger-border",
+      dot: "bg-danger",
+    };
+  }
+
+  if (
+    text.includes("chờ") ||
+    text.includes("pending")
+  ) {
+    return {
+      badge:
+        "bg-warning-soft text-warning ring-warning-border",
+      dot: "bg-warning",
+    };
+  }
+
+  return {
+    badge:
+      "bg-info-soft text-info ring-info-border",
+    dot: "bg-info",
+  };
+};
+
+const InfoItem = ({
+  label,
+  value,
+  fullWidth = false,
+}) => (
+  <div
+    className={
+      fullWidth ? "sm:col-span-2" : ""
+    }
+  >
+    <dt className="text-xs font-medium uppercase tracking-wide text-text-subtle">
+      {label}
+    </dt>
+
+    <dd className="mt-1.5 wrap-break-word text-sm font-medium leading-6 text-text-default">
+      {hasValue(value)
+        ? value
+        : EMPTY_VALUE}
+    </dd>
+  </div>
+);
+
+const CardHeader = ({
+  icon: Icon,
+  title,
+  description,
+  iconClassName = "bg-surface-muted text-text-muted",
+  action,
+}) => (
+  <div className="flex items-start justify-between gap-4">
+    <div className="flex min-w-0 items-center gap-3">
+      <div
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClassName}`}
+      >
+        <Icon size={21} />
+      </div>
+
+      <div className="min-w-0">
+        <h4 className="font-bold text-text-strong">
+          {title}
+        </h4>
+
+        {description && (
+          <p className="mt-0.5 text-xs text-text-muted">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+
+    {action && (
+      <div className="shrink-0">
+        {action}
+      </div>
+    )}
+  </div>
+);
+
+const ServiceOrderDetailModal = ({
+  open,
+  order,
+  onClose,
+  onUpdated,
+  title = "Chi tiết đơn hàng",
+}) => {
+  const [employeeNames, setEmployeeNames] = useState({});
+
+  const [isEditingProduct, setIsEditingProduct] = useState(false);
+
+  const [editForm, setEditForm] = useState({
+    productName: "",
+    unitType: "",
+    quantity: "",
+    customerRequest: "",
+  });
+
+  const [deletingFileId, setDeletingFileId] = useState(null);
+
+  const [fileError, setFileError] = useState("");
+
+  const [updateError, setUpdateError] = useState("");
+
+  const {
+    productImageFile,
+    productImagePreview,
+    attachmentFiles,
+    hasUpload,
+    handleProductImageChange,
+    handleAttachmentChange,
+    removeAttachment,
+    resetFiles,
+    validateTotalSize,
+    buildFormData,
+  } = useFileUpload({
+    onError: setUpdateError,
+  });
+
+  const [fileState, setFileState] = useState({orderId: null,items: []});
+
+  const [updating, setUpdating] = useState(false);
+
+  const [addressState, setAddressState] = useState({
+    idUser: null,
+    items: [],
+    error: "",
+  });
+
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [updatingAddress, setUpdatingAddress] = useState(false);
+  const [addressError, setAddressError] = useState("");
+
+  const { user: authenticatedUser } = useAuth();
+  const currentUserId = authenticatedUser?.idUser;
+
+  const userAddresses =
+    addressState.idUser === currentUserId
+      ? addressState.items
+      : [];
+
+  const addressesLoading =
+    isEditingAddress &&
+    Boolean(currentUserId) &&
+    addressState.idUser !== currentUserId;
+
+  const defaultAddressId =
+    order?.user?.defaultAddress?.addressId;
+
+  useEffect(() => {
+    if (
+      !open ||
+      !isEditingAddress ||
+      !currentUserId ||
+      addressState.idUser === currentUserId
+    ) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const fetchUserAddresses = async () => {
+      try {
+        const addresses = await addressApi.getMine({
+            signal: controller.signal,
+          });
+
+        if (controller.signal.aborted) return;
+
+        setAddressState({
+          idUser: currentUserId,
+          items: addresses || [],
+          error: "",
+        });
+      } catch (error) {
+        if (
+          error.code === "ERR_CANCELED" ||
+          error.name === "CanceledError"
+        ) {
+          return;
+        }
+
+        console.error(
+          "Không thể tải địa chỉ:",
+          error
+        );
+
+        setAddressState({
+          idUser: currentUserId,
+          items: [],
+          error:
+            error.response?.data?.message ||
+            "Không thể tải danh sách địa chỉ.",
+        });
+      }
+    };
+
+    fetchUserAddresses();
+
+    return () => controller.abort();
+  }, [
+    open,
+    isEditingAddress,
+    currentUserId,
+    addressState.idUser,
+  ]);
+
+  const orderId = order?.serviceOrderId;
+  const createdBy = order?.createdBy;
+  const updatedBy = order?.updatedBy;
+  const serviceTags = order?.service?.tags;
+
+  const tags = useMemo(() => {
+    if (!serviceTags) return [];
+
+    return String(serviceTags)
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+  }, [serviceTags]);
+
+  /*
+   * Ghép ảnh đại diện từ Service_Orders
+   * với file bổ sung từ Service_Order_Files.
+   */
+  const displayFiles = useMemo(() => {
+    const uploadedFiles =
+      fileState.orderId === orderId
+        ? fileState.items
+        : [];
+
+    const productImage =
+      order?.productImage;
+
+    const productImageItem =
+      productImage
+        ? {
+            fileId: `product-image-${orderId}`,
+            fileName: order.productName
+              ? `Ảnh đại diện - ${order.productName}`
+              : "Ảnh đại diện sản phẩm",
+            fileType: "image/product",
+            contentUrl: productImage,
+            uploadedAt:
+              order.updatedAt ||
+              order.createdAt,
+            isProductImage: true,
+          }
+        : null;
+
+    /*
+     * Loại record cũ nếu phiên bản trước
+     * từng lưu ảnh đại diện trong order-files.
+     */
+    const additionalFiles =
+      uploadedFiles.filter(
+        (file) =>
+          !productImage ||
+          file.contentUrl !== productImage
+      );
+
+    return productImageItem
+      ? [
+          productImageItem,
+          ...additionalFiles,
+        ]
+      : additionalFiles;
+  }, [fileState, order, orderId]);
+
+  /*
+  * Khóa scroll trang và xử lý phím ESC.
+  */
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    const handleKeyDown = (event) => {
+      if (event.key !== "Escape") return;
+
+      if (updating || updatingAddress) {
+        return;
+      }
+
+      if (isEditingProduct) {
+        resetFiles();
+        setIsEditingProduct(false);
+        setUpdateError("");
+        return;
+      }
+
+      if (isEditingAddress) {
+        setIsEditingAddress(false);
+        setSelectedAddressId("");
+        setAddressError("");
+        return;
+      }
+
+      onClose();
+    };
+
+    document.body.style.overflow = "hidden";
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [
+    open,
+    onClose,
+    isEditingProduct,
+    isEditingAddress,
+    updating,
+    updatingAddress,
+    resetFiles,
+  ]);
+
+  /*
+   * Lấy tên người nhận và người cập nhật.
+   */
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const employeeIds = [
+      ...new Set(
+        [createdBy, updatedBy].filter(Boolean)
+      ),
+    ];
+
+    const missingIds = employeeIds.filter(
+      (id) => !employeeNameCache.has(id)
+    );
+
+    if (missingIds.length === 0) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const fetchEmployeeNames = async () => {
+      const results =
+        await Promise.allSettled(
+          missingIds.map((id) =>
+            userApi.getById(id, {
+              signal: controller.signal,
+            })
+          )
+        );
+
+      if (controller.signal.aborted) return;
+
+      const loadedNames = {};
+
+      results.forEach((result, index) => {
+        const employeeId =
+          missingIds[index];
+
+        const employeeName =
+          result.status === "fulfilled"
+            ? result.value?.fullName ||
+              "Không xác định"
+            : "Không xác định";
+
+        employeeNameCache.set(
+          employeeId,
+          employeeName
+        );
+
+        loadedNames[employeeId] =
+          employeeName;
+      });
+
+      setEmployeeNames(
+        (previousNames) => ({
+          ...previousNames,
+          ...loadedNames,
+        })
+      );
+    };
+
+    fetchEmployeeNames();
+
+    return () => {
+      controller.abort();
+    };
+  }, [open, createdBy, updatedBy]);
+
+  /*
+   * Lấy file bổ sung của đơn hàng.
+   */
+  useEffect(() => {
+    if (!open || !orderId) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    const fetchFiles = async () => {
+      try {
+        const files = await serviceOrderFileApi.getByOrder(
+          orderId,
+          {
+            signal: controller.signal,
+          },
+        );
+
+        if (controller.signal.aborted) return;
+
+        setFileState({
+          orderId,
+          items: files || [],
+        });
+      } catch (error) {
+        if (
+          error.code !== "ERR_CANCELED" &&
+          error.name !== "CanceledError"
+        ) {
+          console.error(
+            "Không thể tải danh sách file:",
+            error
+          );
+
+          setFileState({
+            orderId,
+            items: [],
+          });
+        }
+      }
+    };
+
+    fetchFiles();
+
+    return () => {
+      controller.abort();
+    };
+  }, [open, orderId]);
+
+  if (!open || !order) return null;
+
+  const user = order.user || {};
+  const service = order.service || {};
+  const address = order.address || {};
+
+  const statusStyle = getStatusStyle(
+    order.status
+  );
+
+  const orderCode = `ORD-${orderId}`;
+
+  const unitType =
+    order.unitType ||
+    service.unitType ||
+    "";
+
+  const currentProductImage =
+    productImagePreview ||
+    resolveBackendUrl(order.productImage);
+
+  const getEmployeeName = (employeeId) => {
+    if (!employeeId) return EMPTY_VALUE;
+
+    return (
+      employeeNames[employeeId] ||
+      employeeNameCache.get(employeeId) ||
+      "Đang tải..."
+    );
+  };
+
+  const receiverName =
+    getEmployeeName(createdBy);
+
+  const updaterName =
+    getEmployeeName(updatedBy);
+
+  const handleStartEditProduct = () => {
+    if (
+      isEditingAddress ||
+      updatingAddress ||
+      updating
+    ) {
+      return;
+    }
+
+    resetFiles();
+
+    setEditForm({
+      productName: order.productName || "",
+      unitType,
+      quantity: order.quantity ?? "",
+      customerRequest:
+        order.customerRequest || "",
+    });
+
+    setUpdateError("");
+    setIsEditingProduct(true);
+  };
+
+  const handleCancelEditProduct = () => {
+    if (updating) return;
+
+    resetFiles();
+
+    setIsEditingProduct(false);
+    setUpdateError("");
+  };
+
+  const handleRequestClose = () => {
+    if (updating || updatingAddress) {
+      return;
+    }
+
+    if (isEditingProduct) {
+      handleCancelEditProduct();
+      return;
+    }
+
+    if (isEditingAddress) {
+      handleCancelEditAddress();
+      return;
+    }
+
+    onClose();
+  };
+
+  const handleEditFormChange = (event) => {
+    const { name, value } = event.target;
+
+    setEditForm((previousForm) => ({
+      ...previousForm,
+      [name]: value,
+    }));
+  };
+
+  const handleDeleteUploadedFile = async (
+    file
+  ) => {
+    /*
+    * Ảnh đại diện là dữ liệu tổng hợp từ
+    * Service_Orders nên không xóa ở đây.
+    */
+    if (
+      file.isProductImage ||
+      !file.fileId
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn xóa file "${file.fileName}" không?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingFileId(file.fileId);
+      setFileError("");
+
+      await serviceOrderFileApi.remove(file.fileId);
+
+      setFileState((previousState) => ({
+        ...previousState,
+        items: previousState.items.filter(
+          (item) =>
+            item.fileId !== file.fileId
+        ),
+      }));
+    } catch (error) {
+      console.error(
+        "Không thể xóa file:",
+        error
+      );
+
+      setFileError(
+        error.response?.data?.message ||
+          "Không thể xóa file. Vui lòng thử lại."
+      );
+    } finally {
+      setDeletingFileId(null);
+    }
+  };
+
+  const handleUpdateProduct = async (
+    event
+  ) => {
+    event.preventDefault();
+
+    const productName =
+      editForm.productName.trim();
+
+    const unitTypeValue =
+      editForm.unitType.trim();
+
+    const quantity = Number(
+      editForm.quantity
+    );
+
+    const customerRequest =
+      editForm.customerRequest.trim();
+
+    if (!productName) {
+      setUpdateError(
+        "Vui lòng nhập tên sản phẩm."
+      );
+      return;
+    }
+
+    if (!unitTypeValue) {
+      setUpdateError(
+        "Vui lòng nhập đơn vị tính."
+      );
+      return;
+    }
+
+    if (
+      !Number.isFinite(quantity) ||
+      quantity <= 0
+    ) {
+      setUpdateError(
+        "Số lượng phải lớn hơn 0."
+      );
+      return;
+    }
+
+    if (!validateTotalSize()) {
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setUpdateError("");
+
+      let updatedOrder = await serviceOrderApi.update(
+          orderId,
+          {
+            productName,
+            unitType: unitTypeValue,
+            quantity,
+            customerRequest,
+          },
+        );
+
+      /*
+       * Upload ảnh đại diện và file bổ sung.
+       */
+      if (hasUpload) {
+        const uploadData = buildFormData(
+          "File do khách hàng cung cấp",
+        );
+
+        try {
+          const uploadResult = await serviceOrderFileApi.upload(
+              orderId,
+              uploadData,
+            );
+
+          updatedOrder =
+            uploadResult?.order || updatedOrder;
+
+          const newFiles =
+            uploadResult?.files || [];
+
+          setFileState(
+            (previousState) => {
+              const previousItems =
+                previousState.orderId === orderId
+                  ? previousState.items
+                  : [];
+
+              const fileMap = new Map();
+
+              [
+                ...previousItems,
+                ...newFiles,
+              ].forEach((file) => {
+                fileMap.set(
+                  file.fileId,
+                  file
+                );
+              });
+
+              return {
+                orderId,
+                items: Array.from(
+                  fileMap.values()
+                ),
+              };
+            }
+          );
+        } catch (uploadError) {
+          /*
+           * Thông tin đã cập nhật thành công,
+           * nhưng ảnh/file upload thất bại.
+           */
+          onUpdated?.(updatedOrder);
+
+          setUpdateError(
+            uploadError.response?.data?.message ||
+              "Thông tin đã được cập nhật, nhưng ảnh hoặc file tải lên thất bại."
+          );
+
+          return;
+        }
+      }
+
+      onUpdated?.(updatedOrder);
+
+      resetFiles();
+
+      setIsEditingProduct(false);
+    } catch (error) {
+      console.error(
+        "Không thể cập nhật đơn hàng:",
+        error
+      );
+
+      setUpdateError(
+        error.response?.data?.message ||
+          "Không thể cập nhật đơn hàng. Vui lòng thử lại."
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleStartEditAddress = () => {
+    if (
+      updatingAddress ||
+      updating ||
+      isEditingProduct
+    ) {
+      return;
+    }
+
+    setSelectedAddressId(
+      order.address?.addressId != null
+        ? String(order.address.addressId)
+        : ""
+    );
+
+    setAddressError("");
+    setIsEditingAddress(true);
+  };
+
+  const handleCancelEditAddress = () => {
+    if (updatingAddress) return;
+
+    setSelectedAddressId("");
+    setAddressError("");
+    setIsEditingAddress(false);
+  };
+
+  const handleUpdateAddress = async () => {
+    const addressId = Number(
+      selectedAddressId
+    );
+
+    if (
+      !Number.isInteger(addressId) ||
+      addressId <= 0
+    ) {
+      setAddressError(
+        "Vui lòng chọn một địa chỉ nhận hàng."
+      );
+      return;
+    }
+
+    if (!currentUserId) {
+      setAddressError(
+        "Không tìm thấy thông tin người dùng."
+      );
+      return;
+    }
+
+    /*
+    * Không gọi API nếu người dùng vẫn chọn
+    * đúng địa chỉ hiện tại.
+    */
+    if (
+      String(order.address?.addressId) ===
+      String(addressId)
+    ) {
+      setSelectedAddressId("");
+      setAddressError("");
+      setIsEditingAddress(false);
+      return;
+    }
+
+    try {
+      setUpdatingAddress(true);
+      setAddressError("");
+
+      const updatedOrder = await serviceOrderApi.updateAddress(
+          orderId,
+          addressId,
+        );
+
+      onUpdated?.(updatedOrder);
+
+      setSelectedAddressId("");
+      setAddressError("");
+      setIsEditingAddress(false);
+    } catch (error) {
+      console.error(
+        "Không thể cập nhật địa chỉ:",
+        error
+      );
+
+      setAddressError(
+        error.response?.data?.message ||
+          "Không thể cập nhật địa chỉ. Vui lòng thử lại."
+      );
+    } finally {
+      setUpdatingAddress(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-70 flex items-center justify-center bg-gray-950/45 px-3 py-4 animate-in fade-in duration-150 sm:px-6"
+      onClick={handleRequestClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="service-order-title"
+        onClick={(event) =>
+          event.stopPropagation()
+        }
+        className="flex max-h-[96vh] w-[96vw] max-w-360 flex-col overflow-hidden rounded-3xl bg-surface-subtle shadow-xl animate-in zoom-in-95 slide-in-from-bottom-2 duration-200 ease-out"
+      >
+        {/* Header */}
+        <header className="relative shrink-0 overflow-hidden border-b border-border-subtle bg-surface">
+          <div className="absolute inset-x-0 top-0 h-1 bg-brand" />
+
+          <div className="relative flex items-start justify-between gap-5 px-5 pb-5 pt-6 sm:px-7">
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="hidden h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-sm sm:flex">
+                <FileText size={23} />
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex rounded-lg bg-brand-light px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand">
+                    {orderCode}
+                  </span>
+
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusStyle.badge}`}
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
+                    />
+
+                    {order.status ||
+                      "Đang xử lý"}
+                  </span>
+                </div>
+
+                <div className="mt-2.5 flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-5">
+                  <h2
+                    id="service-order-title"
+                    className="shrink-0 text-xl font-bold tracking-tight text-text-strong sm:text-2xl"
+                  >
+                    {title}
+                  </h2>
+
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-text-muted">
+                    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                      <CalendarDays
+                        size={15}
+                        className="shrink-0 text-text-subtle"
+                      />
+
+                      Tạo ngày{" "}
+                      {formatDate(
+                        order.createdAt,
+                        true
+                      )}
+                    </span>
+
+                    <span className="h-1 w-1 shrink-0 rounded-full bg-gray-300" />
+
+                    <span className="truncate">
+                      Khách hàng:{" "}
+                      <span className="font-semibold text-text-default">
+                        {user.fullName ||
+                          "Chưa xác định"}
+                      </span>
+                    </span>
+
+                    {service.serviceName && (
+                      <>
+                        <span className="hidden h-1 w-1 shrink-0 rounded-full bg-gray-300 xl:block" />
+
+                        <span className="hidden truncate xl:block">
+                          Dịch vụ:{" "}
+                          <span className="font-semibold text-text-default">
+                            {
+                              service.serviceName
+                            }
+                          </span>
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRequestClose}
+              disabled={updating || updatingAddress}
+              aria-label="Đóng chi tiết đơn hàng"
+              className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-text-muted shadow-sm transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <X
+                size={19}
+                className="transition-transform duration-200 group-hover:rotate-90"
+              />
+            </button>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="overflow-y-auto">
+          <div className="grid grid-cols-1 gap-6 p-4 sm:p-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+            {/* Left */}
+            <main className="min-w-0 space-y-6">
+              <form
+                id="product-edit-form"
+                onSubmit={handleUpdateProduct}
+                className="space-y-6"
+              >
+                {/* Product */}
+                <section
+                  className={`overflow-hidden rounded-3xl border bg-surface shadow-sm transition ${
+                    isEditingProduct
+                      ? "border-brand/30 ring-4 ring-brand/5"
+                      : "border-border-subtle"
+                  }`}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]">
+                    {/* Product image */}
+                    <ProductImagePicker
+                      variant="overlay"
+                      imageUrl={currentProductImage}
+                      selectedFile={productImageFile}
+                      editable={isEditingProduct}
+                      disabled={updating || updatingAddress}
+                      onChange={handleProductImageChange}
+                      alt={order.productName || "Sản phẩm"}
+                    />
+
+                    {/* Product information */}
+                    <div className="flex min-w-0 flex-col p-6 sm:p-7">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">
+                            {service.serviceName ||
+                              "Dịch vụ"}
+                          </p>
+
+                          {isEditingProduct ? (
+                            <div className="mt-3">
+                              <label
+                                htmlFor="productName"
+                                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                              >
+                                Tên sản phẩm
+                              </label>
+
+                              <input
+                                id="productName"
+                                type="text"
+                                name="productName"
+                                value={
+                                  editForm.productName
+                                }
+                                onChange={
+                                  handleEditFormChange
+                                }
+                                disabled={updating || updatingAddress}
+                                autoFocus
+                                className="h-11 w-full rounded-xl border border-border px-3.5 text-base font-semibold text-text-strong outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                              />
+                            </div>
+                          ) : (
+                            <h3 className="mt-3 text-2xl font-bold leading-tight text-text-strong">
+                              {order.productName ||
+                                "Chưa có tên sản phẩm"}
+                            </h3>
+                          )}
+
+                          <p className="mt-2 text-sm text-text-muted">
+                            Mã đơn hàng{" "}
+                            <span className="font-semibold text-text-default">
+                              {orderCode}
+                            </span>
+                          </p>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-2">
+                          {!isEditingProduct ? (
+                            <>
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-inset ${statusStyle.badge}`}
+                              >
+                                <span
+                                  className={`h-2 w-2 rounded-full ${statusStyle.dot}`}
+                                />
+
+                                {order.status ||
+                                  "Đang xử lý"}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={handleStartEditProduct}
+                                disabled={
+                                  isEditingAddress ||
+                                  updatingAddress ||
+                                  updating
+                                }
+                                title={
+                                  isEditingAddress
+                                    ? "Hãy hoàn tất chỉnh sửa địa chỉ trước"
+                                    : "Chỉnh sửa đơn hàng"
+                                }
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-brand/30 hover:bg-brand-light hover:text-brand disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                <Pencil size={17} />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="submit"
+                                disabled={updating || updatingAddress}
+                                className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {updating ? (
+                                  <LoaderCircle
+                                    size={15}
+                                    className="animate-spin"
+                                  />
+                                ) : (
+                                  <Save
+                                    size={15}
+                                  />
+                                )}
+
+                                {updating
+                                  ? "Đang cập nhật"
+                                  : "Cập nhật"}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={
+                                  handleCancelEditProduct
+                                }
+                                disabled={updating || updatingAddress}
+                                title="Hủy chỉnh sửa"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:opacity-50"
+                              >
+                                <X size={17} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="my-6 h-px bg-surface-muted" />
+
+                      {isEditingProduct ? (
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          <div>
+                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                              Mã dịch vụ
+                            </label>
+
+                            <div className="flex h-11 items-center rounded-xl bg-surface-muted px-3.5 text-sm font-medium text-text-muted">
+                              {service.serviceCode ||
+                                EMPTY_VALUE}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor="unitType"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                            >
+                              Đơn vị tính
+                            </label>
+
+                            <input
+                              id="unitType"
+                              type="text"
+                              name="unitType"
+                              value={
+                                editForm.unitType
+                              }
+                              onChange={
+                                handleEditFormChange
+                              }
+                              disabled={updating || updatingAddress}
+                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                            />
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor="quantity"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                            >
+                              Số lượng
+                            </label>
+
+                            <input
+                              id="quantity"
+                              type="number"
+                              name="quantity"
+                              min="0.01"
+                              step="0.01"
+                              value={
+                                editForm.quantity
+                              }
+                              onChange={
+                                handleEditFormChange
+                              }
+                              disabled={updating || updatingAddress}
+                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                              Ngày tạo
+                            </label>
+
+                            <div className="flex h-11 items-center rounded-xl bg-surface-muted px-3.5 text-sm font-medium text-text-muted">
+                              {formatDate(
+                                order.createdAt
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label
+                              htmlFor="customerRequest"
+                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                            >
+                              Yêu cầu khách hàng
+                            </label>
+
+                            <textarea
+                              id="customerRequest"
+                              name="customerRequest"
+                              rows={4}
+                              value={
+                                editForm.customerRequest
+                              }
+                              onChange={
+                                handleEditFormChange
+                              }
+                              disabled={updating || updatingAddress}
+                              className="w-full resize-none rounded-xl border border-border px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
+                            <InfoItem
+                              label="Mã dịch vụ"
+                              value={
+                                service.serviceCode
+                              }
+                            />
+
+                            <InfoItem
+                              label="Đơn vị tính"
+                              value={unitType}
+                            />
+
+                            <InfoItem
+                              label="Số lượng"
+                              value={
+                                order.quantity
+                              }
+                            />
+
+                            <InfoItem
+                              label="Ngày tạo"
+                              value={formatDate(
+                                order.createdAt
+                              )}
+                            />
+                          </dl>
+
+                          <div className="mt-auto pt-6">
+                            <div className="rounded-2xl bg-brand-light/60 p-4">
+                              <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                                Yêu cầu của khách hàng
+                              </p>
+
+                              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-text-default">
+                                {order.customerRequest ||
+                                  EMPTY_VALUE}
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {updateError && (
+                        <div
+                          role="alert"
+                          className="mt-5 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger"
+                        >
+                          {updateError}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Files */}
+                <section
+                  className={`rounded-3xl border bg-surface p-6 shadow-sm transition ${
+                    isEditingProduct
+                      ? "border-brand/20"
+                      : "border-border-subtle"
+                  }`}
+                >
+                  <CardHeader
+                    icon={Paperclip}
+                    title="File khách hàng"
+                    description="Ảnh bổ sung, tài liệu và file đính kèm"
+                    iconClassName="bg-cyan-50 text-cyan-600"
+                  />
+
+                  {isEditingProduct && (
+                    <div className="mt-6">
+                      <AttachmentPicker
+                        files={attachmentFiles}
+                        disabled={
+                          updating || updatingAddress
+                        }
+                        onChange={handleAttachmentChange}
+                        onRemove={removeAttachment}
+                      />
+                    </div>
+                  )}
+
+                  <div className="mt-6">
+                    {fileError && (
+                      <div
+                        role="alert"
+                        className="mb-4 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger"
+                      >
+                        {fileError}
+                      </div>
+                    )}
+
+                    {displayFiles.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {displayFiles.map((file) => {
+                          const isImage =
+                            String(file.fileType || "")
+                              .toLowerCase()
+                              .startsWith("image/");
+
+                          const isDeleting =
+                            deletingFileId === file.fileId;
+
+                          return (
+                            <div
+                              key={file.fileId}
+                              className="group flex min-w-0 items-center gap-3 rounded-2xl border border-border-subtle bg-surface-subtle p-3 transition hover:border-brand/20 hover:bg-brand-light/30"
+                            >
+                              {/* File icon */}
+                              <div
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface shadow-sm ${
+                                  isImage
+                                    ? "text-violet-600"
+                                    : "text-brand"
+                                }`}
+                              >
+                                {isImage ? (
+                                  <ImagePlus size={18} />
+                                ) : (
+                                  <FileText size={18} />
+                                )}
+                              </div>
+
+                              {/* File information */}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex min-w-0 items-center gap-2">
+                                  <p className="truncate text-sm font-semibold text-text-default">
+                                    {file.fileName}
+                                  </p>
+
+                                  {file.isProductImage && (
+                                    <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600">
+                                      Ảnh đại diện
+                                    </span>
+                                  )}
+                                </div>
+
+                                <p className="mt-0.5 text-xs text-text-subtle">
+                                  {file.isProductImage
+                                    ? "Ảnh chính của đơn hàng"
+                                    : formatDate(
+                                        file.uploadedAt,
+                                        true
+                                      )}
+                                </p>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex shrink-0 items-center gap-1">
+                                <a
+                                  href={resolveBackendUrl(
+                                    file.contentUrl
+                                  )}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={
+                                    isImage
+                                      ? "Xem ảnh"
+                                      : "Tải file"
+                                  }
+                                  aria-label={
+                                    isImage
+                                      ? `Xem ${file.fileName}`
+                                      : `Tải ${file.fileName}`
+                                  }
+                                  className="flex h-9 w-9 items-center justify-center rounded-lg text-text-subtle transition hover:bg-brand-light hover:text-brand"
+                                >
+                                  <Download size={17} />
+                                </a>
+
+                                {!file.isProductImage && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleDeleteUploadedFile(file)
+                                    }
+                                    disabled={
+                                      isDeleting || updating
+                                    }
+                                    title="Xóa file"
+                                    aria-label={`Xóa ${file.fileName}`}
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-text-subtle transition hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {isDeleting ? (
+                                      <LoaderCircle
+                                        size={17}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      <Trash2 size={17} />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl bg-surface-subtle px-5 py-7 text-center">
+                        <FileText
+                          size={26}
+                          className="mx-auto text-text-subtle"
+                        />
+
+                        <p className="mt-2 text-sm text-text-muted">
+                          Chưa có file đính kèm
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </form>
+
+              {/* Service */}
+              <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
+                <CardHeader
+                  icon={FileText}
+                  title="Thông tin dịch vụ"
+                  description="Chi tiết dịch vụ khách hàng đã lựa chọn"
+                  iconClassName="bg-violet-50 text-violet-600"
+                />
+
+                <dl className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+                  <InfoItem
+                    label="Tên dịch vụ"
+                    value={service.serviceName}
+                  />
+
+                  <InfoItem
+                    label="Mã dịch vụ"
+                    value={service.serviceCode}
+                  />
+
+                  <InfoItem
+                    label="Giá cơ bản"
+                    value={formatCurrency(
+                      service.basePrice
+                    )}
+                  />
+                </dl>
+
+                <div className="my-6 h-px bg-surface-muted" />
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-text-subtle">
+                      Mô tả dịch vụ
+                    </p>
+
+                    <p className="mt-2 whitespace-pre-line text-sm leading-6 text-text-default">
+                      {service.description ||
+                        EMPTY_VALUE}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-text-subtle">
+                      Tags
+                    </p>
+
+                    {tags.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full bg-surface-muted px-3 py-1 text-xs font-medium text-text-muted"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm text-text-muted">
+                        {EMPTY_VALUE}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Customer and address */}
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
+                  <CardHeader
+                    icon={User}
+                    title="Khách hàng"
+                    description="Người đặt dịch vụ"
+                    iconClassName="bg-info-soft text-info"
+                  />
+
+                  <dl className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <InfoItem
+                      label="Họ và tên"
+                      value={user.fullName}
+                    />
+
+                    <InfoItem
+                      label="Mã khách hàng"
+                      value={
+                        user.userCode ||
+                        user.idUser
+                      }
+                    />
+
+                    <InfoItem
+                      label="Giới tính"
+                      value={user.gender}
+                    />
+
+                    <InfoItem
+                      label="Ngày sinh"
+                      value={formatDate(
+                        user.birthday
+                      )}
+                    />
+
+                    <InfoItem
+                      label="Trạng thái"
+                      value={user.status}
+                    />
+                  </dl>
+                </section>
+
+                <section
+                  className={`rounded-3xl border bg-surface p-6 shadow-sm transition ${
+                    isEditingAddress
+                      ? "border-orange-200 ring-4 ring-orange-50"
+                      : "border-border-subtle"
+                  }`}
+                >
+                  <CardHeader
+                    icon={MapPin}
+                    title="Địa chỉ"
+                    description={
+                      isEditingAddress
+                        ? "Chọn một địa chỉ đã thêm trước đó"
+                        : "Địa chỉ tiếp nhận hoặc giao sản phẩm"
+                    }
+                    iconClassName="bg-orange-50 text-orange-600"
+                    action={
+                      isEditingAddress ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleUpdateAddress}
+                            disabled={
+                              updatingAddress ||
+                              addressesLoading ||
+                              userAddresses.length === 0 ||
+                              !selectedAddressId
+                            }
+                            className="inline-flex h-9 items-center gap-2 rounded-xl bg-orange-500! px-3.5 text-xs font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {updatingAddress ? (
+                              <LoaderCircle
+                                size={15}
+                                className="animate-spin"
+                              />
+                            ) : (
+                              <Save size={15} />
+                            )}
+
+                            {updatingAddress
+                              ? "Đang cập nhật"
+                              : "Cập nhật"}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={
+                              handleCancelEditAddress
+                            }
+                            disabled={updatingAddress}
+                            aria-label="Hủy chỉnh sửa địa chỉ"
+                            title="Hủy chỉnh sửa"
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={
+                            handleStartEditAddress
+                          }
+                          disabled={
+                            isEditingProduct ||
+                            updating ||
+                            updatingAddress
+                          }
+                          className="inline-flex h-9 items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-3.5 text-xs font-semibold text-orange-600 transition hover:border-orange-300 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      )
+                    }
+                  />
+
+                  {isEditingAddress ? (
+                    <div className="mt-6">
+                      {addressesLoading ? (
+                        <div className="flex items-center justify-center gap-2 rounded-2xl bg-surface-subtle px-4 py-8 text-sm text-text-muted">
+                          <LoaderCircle
+                            size={18}
+                            className="animate-spin"
+                          />
+
+                          Đang tải danh sách địa chỉ...
+                        </div>
+                      ) : addressState.error ? (
+                        <div className="rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger">
+                          {addressState.error}
+                        </div>
+                      ) : userAddresses.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-border bg-surface-subtle px-5 py-8 text-center">
+                          <MapPin
+                            size={26}
+                            className="mx-auto text-text-subtle"
+                          />
+
+                          <p className="mt-2 text-sm font-medium text-text-muted">
+                            Bạn chưa có địa chỉ nào
+                          </p>
+
+                          <p className="mt-1 text-xs text-text-subtle">
+                            Vui lòng thêm địa chỉ tại
+                            trang quản lý địa chỉ.
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          role="radiogroup"
+                          aria-label="Chọn địa chỉ cho đơn hàng"
+                          className="max-h-80 space-y-3 overflow-y-auto pr-1"
+                        >
+                          {userAddresses.map((item) => {
+                            const itemAddressId =
+                              String(item.addressId);
+
+                            const isSelected =
+                              itemAddressId ===
+                              String(selectedAddressId);
+
+                            const isCurrentAddress =
+                              itemAddressId ===
+                              String(
+                                order.address?.addressId
+                              );
+
+                            const isDefault =
+                              itemAddressId ===
+                              String(defaultAddressId);
+
+                            return (
+                              <label
+                                key={item.addressId}
+                                className={`relative flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
+                                  isSelected
+                                    ? "border-orange-400 bg-orange-50/70 ring-4 ring-orange-100/60"
+                                    : "border-border-subtle bg-surface-subtle hover:border-orange-200 hover:bg-orange-50/30"
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="selectedOrderAddress"
+                                  value={item.addressId}
+                                  checked={isSelected}
+                                  onChange={(event) => {
+                                    setSelectedAddressId(
+                                      event.target.value
+                                    );
+
+                                    setAddressError("");
+                                  }}
+                                  disabled={
+                                    updatingAddress
+                                  }
+                                  className="mt-1 h-4 w-4 shrink-0 accent-orange-500"
+                                />
+
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <p className="font-semibold text-text-strong">
+                                      {item.companyName ||
+                                        "Địa chỉ cá nhân"}
+                                    </p>
+
+                                    {isCurrentAddress && (
+                                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">
+                                        Đang sử dụng
+                                      </span>
+                                    )}
+
+                                    {isDefault && (
+                                      <span className="rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">
+                                        Mặc định
+                                      </span>
+                                    )}
+
+                                    {isSelected &&
+                                      !isCurrentAddress && (
+                                        <span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-info">
+                                          Đang chọn
+                                        </span>
+                                      )}
+                                  </div>
+
+                                  <p className="mt-1 text-sm leading-6 text-text-muted">
+                                    {item.address ||
+                                      EMPTY_VALUE}
+                                  </p>
+
+                                  {item.note && (
+                                    <p className="mt-1 text-xs text-text-subtle">
+                                      Ghi chú: {item.note}
+                                    </p>
+                                  )}
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {addressError && (
+                        <div className="mt-4 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger">
+                          {addressError}
+                        </div>
+                      )}
+
+                      <p className="mt-4 text-xs leading-5 text-text-subtle">
+                        Địa chỉ này chỉ áp dụng cho đơn
+                        hàng hiện tại, không thay đổi địa
+                        chỉ mặc định của tài khoản.
+                      </p>
+                    </div>
+                  ) : (
+                    <dl className="mt-6 space-y-5">
+                      <InfoItem
+                        label="Tên công ty"
+                        value={address.companyName}
+                      />
+
+                      <InfoItem
+                        label="Địa chỉ chi tiết"
+                        value={address.address}
+                      />
+
+                      <InfoItem
+                        label="Ghi chú"
+                        value={address.note}
+                      />
+                    </dl>
+                  )}
+                </section>
+              </div>
+            </main>
+
+            {/* Right sidebar */}
+            <aside className="space-y-6 xl:sticky xl:top-0 xl:self-start">
+              {/* Payment */}
+              <section className="overflow-hidden rounded-3xl bg-gray-950 text-white shadow-sm">
+                <div className="p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-text-subtle">
+                        Tổng thanh toán
+                      </p>
+
+                      <p className="mt-3 text-3xl font-bold tracking-tight">
+                        {formatCurrency(
+                          order.totalPrice
+                        )}
+                      </p>
+                    </div>
+
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface/10">
+                      <CreditCard size={23} />
+                    </div>
+                  </div>
+
+                  <div className="my-6 h-px bg-white/10" />
+
+                  <dl className="space-y-4">
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-sm text-text-subtle">
+                        Đơn giá
+                      </dt>
+
+                      <dd className="text-sm font-semibold">
+                        {formatCurrency(
+                          order.unitPrice
+                        )}
+                      </dd>
+                    </div>
+
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-sm text-text-subtle">
+                        Số lượng
+                      </dt>
+
+                      <dd className="text-sm font-semibold">
+                        {hasValue(
+                          order.quantity
+                        )
+                          ? `${order.quantity} ${unitType}`.trim()
+                          : EMPTY_VALUE}
+                      </dd>
+                    </div>
+
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-sm text-text-subtle">
+                        Giảm giá
+                      </dt>
+
+                      <dd className="text-sm font-semibold text-success">
+                        {formatCurrency(order.discountAmount)}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="flex justify-between bg-white/5 px-6 py-4">
+                  <span className="text-xs text-text-subtle">
+                    Thành tiền sau giảm giá
+                  </span>
+
+                  <span className="text-sm font-bold">
+                    {formatCurrency(order.totalPrice)}
+                  </span>
+                </div>
+              </section>
+
+              {/* Timeline */}
+              <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
+                <CardHeader
+                  icon={CalendarDays}
+                  title="Thời gian thực hiện"
+                  description="Tiến trình đơn hàng"
+                  iconClassName="bg-info-soft text-info"
+                />
+
+                <div className="relative mt-7 space-y-8 pl-9">
+                  <div className="absolute bottom-3 left-2 top-3 w-px bg-border" />
+
+                  <div className="relative">
+                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-info-border bg-surface">
+                      <span className="h-2 w-2 rounded-full bg-info" />
+                    </span>
+
+                    <p className="text-xs text-text-subtle">
+                      Ngày tiếp nhận
+                    </p>
+
+                    <p className="mt-1 font-bold text-text-strong">
+                      {formatDate(order.receivedDate)}
+                    </p>
+                  </div>
+
+                  <div className="relative">
+                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-success-border bg-surface">
+                      <span className="h-2 w-2 rounded-full bg-success" />
+                    </span>
+
+                    <p className="text-xs text-text-subtle">
+                      Ngày hoàn thành
+                    </p>
+
+                    <p className="mt-1 font-bold text-text-strong">
+                      {formatDate(
+                        order.completedDate
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* System */}
+              <section className="rounded-3xl border border-border-subtle bg-surface p-6 shadow-sm">
+                <CardHeader
+                  icon={Building2}
+                  title="Thông tin hệ thống"
+                  description="Lịch sử của đơn hàng"
+                />
+
+                <div className="mt-6">
+                  <dl className="grid grid-cols-2 gap-6">
+                    <InfoItem
+                      label="Người nhận"
+                      value={receiverName}
+                    />
+
+                    <InfoItem
+                      label="Người cập nhật"
+                      value={updaterName}
+                    />
+                  </dl>
+
+                  <div className="my-5 h-px bg-surface-muted" />
+
+                  <dl className="grid grid-cols-2 gap-6">
+                    <InfoItem
+                      label="Thời gian nhận"
+                      value={formatDate(
+                        order.createdAt,
+                        true
+                      )}
+                    />
+
+                    <InfoItem
+                      label="Cập nhật gần nhất"
+                      value={formatDate(
+                        order.updatedAt,
+                        true
+                      )}
+                    />
+                  </dl>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="flex shrink-0 items-center justify-between gap-4 border-t border-border-subtle bg-surface px-5 py-4 sm:px-7">
+          <p className="hidden text-xs text-text-subtle sm:block">
+            {isEditingProduct
+              ? "Bạn đang chỉnh sửa thông tin đơn hàng"
+              : isEditingAddress
+                ? "Bạn đang thay đổi địa chỉ của đơn hàng"
+                : "Nhấn ESC hoặc bên ngoài để đóng"}
+          </p>
+
+          <button
+            type="button"
+            onClick={handleRequestClose}
+            disabled={
+              updating || updatingAddress
+            }
+            className="ml-auto min-w-28 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {updating || updatingAddress
+              ? "Đang xử lý..."
+              : isEditingProduct ||
+                  isEditingAddress
+                ? "Hủy chỉnh sửa"
+                : "Đóng"}
+          </button>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+export default memo(ServiceOrderDetailModal);

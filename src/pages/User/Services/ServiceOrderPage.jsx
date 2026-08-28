@@ -1,14 +1,14 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Clock, Eye, MoreVertical, Plus, Search, Trash2 } from "lucide-react";
-import { SectionCard } from "@/components/ui/Section/Section";
-import MenuTable from "@/components/ui/Menu/MenuTable";
-import ServiceOrderDetailModal from "@/components/ui/ServiceOrder/ServiceOrderDetailModal";
-import ServiceOrderCreateModal from "@/components/ui/ServiceOrder/ServiceOrderCreateModal";
-import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
-import DataTable from "@/components/ui/Table/DataTable";
-import Pagination from "@/components/ui/Table/Pagination";
+import { SectionCard } from "@/shared/ui/section/Section";
+import MenuTable from "@/shared/ui/menu/MenuTable";
+import ServiceOrderDetailModal from "@/features/service-orders/ui/ServiceOrderDetailModal";
+import ServiceOrderCreateModal from "@/features/service-orders/ui/ServiceOrderCreateModal";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import DataTable from "@/shared/ui/table/DataTable";
+import Pagination from "@/shared/ui/table/Pagination";
 
-import { serviceOrderApi } from "@/api/serviceOrderApi";
+import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
 
 const hasEmployeeReceiver = (order) => {
   const createdBy = String(order?.createdBy || "").trim();

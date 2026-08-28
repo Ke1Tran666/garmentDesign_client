@@ -23,13 +23,13 @@ import {
   useParams,
 } from "react-router-dom";
 
-import { userApi } from "@/api/userApi";
-import { normalizeRole } from "@/lib/authRole";
+import { userApi } from "@/entities/user/api/userApi";
+import { normalizeRole } from "@/features/auth/lib/authRole";
 
-import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
-import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import UserIdentityEditModal from "@/components/ui/Forms/UserIdentityEditModal";
-import UserPhoneEditModal from "@/components/ui/Forms/UserPhoneEditModal";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { useNotification } from "@/app/providers/NotificationProvider";
+import UserIdentityEditModal from "@/features/user-management/ui/UserIdentityEditModal";
+import UserPhoneEditModal from "@/features/user-management/ui/UserPhoneEditModal";
 
 const EMPTY_VALUE = "Chưa có dữ liệu";
 

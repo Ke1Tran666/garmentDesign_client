@@ -187,43 +187,84 @@ yarn lint
 ## 📂 Cấu trúc dự án | Project Structure
 
 ```text
-src
-│
-├── assets
-│
-├── components
-│   ├── common
-│   │   └── Logo
-│   │
-│   ├── layout
-│   │   └── AuthBackground
-│   │
-│   └── ui
-│       ├── Button
-│       ├── Notification
-│       └── FloatingButtons
-│
-├── css
-│
-├── hooks
-│
-├── layouts
-│   └── MainLayout
-│
-├── pages
-│   ├── Auth
-│   │   ├── LoginPage
-│   │   ├── RegisterPage
-│   │   └── ForgotPasswordPage
-│   │
-│   └── Home
-│
-├── services
-│
-├── routes
-│
-├── App.jsx
+src/
+├── app/
+│   ├── providers/
+│   │   ├── AppProviders.jsx
+│   │   └── NotificationProvider.jsx
+│   ├── router/
+│   │   ├── AppRouter.jsx
+│   │   └── RoleProtectedRoute.jsx
+│   ├── App.css
+│   └── App.jsx
+├── entities/
+│   ├── address/
+│   ├── service/
+│   ├── service-order/
+│   └── user/
+├── features/
+│   ├── auth/
+│   ├── contact/
+│   ├── newsletter/
+│   ├── service-orders/
+│   ├── service-reviews/
+│   ├── settings/
+│   └── user-management/
+├── pages/
+│   ├── Admin/
+│   ├── Auth/
+│   ├── home/
+│   ├── not-found/
+│   └── User/
+├── shared/
+│   ├── api/
+│   ├── assets/
+│   ├── config/
+│   ├── hooks/
+│   ├── lib/
+│   ├── styles/
+│   └── ui/
+├── test/
+├── widgets/
+│   ├── admin-shell/
+│   ├── auth-shell/
+│   ├── floating-actions/
+│   ├── footer/
+│   ├── home-sections/
+│   ├── main-navigation/
+│   └── user-shell/
 └── main.jsx
+```
+
+### Vai trò của từng tầng
+
+- `app`: khởi tạo ứng dụng, router và các provider toàn cục.
+- `pages`: các component tương ứng với route; ưu tiên làm nhiệm vụ kết hợp widget và feature.
+- `widgets`: các khối giao diện lớn như sidebar, navigation, footer và dashboard shell.
+- `features`: các chức năng hoặc hành động nghiệp vụ như xác thực, tạo đơn và quản lý người dùng.
+- `entities`: dữ liệu nghiệp vụ được nhiều feature sử dụng như user, address, service và service order.
+- `shared`: tài nguyên dùng chung, không phụ thuộc vào nghiệp vụ cụ thể của ứng dụng.
+
+### Quy tắc dependency
+
+Dependency chỉ đi theo một chiều:
+
+```text
+app → pages → widgets/features → entities → shared
+```
+
+- `shared` không import từ `entities`, `features`, `widgets`, `pages` hoặc `app`.
+- `entities` không phụ thuộc vào `features`, `widgets`, `pages` hoặc `app`.
+- Component UI dùng chung không gọi API và không chứa logic nghiệp vụ.
+- Component nghiệp vụ được đặt trong feature tương ứng, không đặt trong `shared/ui`.
+- Sử dụng alias `@/` cho import nội bộ thay vì đường dẫn tương đối nhiều cấp.
+
+Ví dụ:
+
+```jsx
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { userApi } from "@/entities/user/api/userApi";
+import { useAuth } from "@/features/auth/model/useAuth";
 ```
 
 ---

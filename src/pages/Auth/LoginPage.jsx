@@ -1,23 +1,23 @@
 import { ArrowRight, Mail, Phone } from "lucide-react";
 
-import '../../index.css'
+import "@/shared/styles/index.css";
 
 import { Link, useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 
-import { useNotification } from "../../components/ui/Notification/NotificationContext";
+import { useNotification } from "@/app/providers/NotificationProvider";
 
-import PrimaryButton from "../../components/ui/Button/PrimaryButton";
-import FloatingInput from "../../components/ui/Input/FloatingInput";
-import PasswordInput from "../../components/ui/Input/PasswordInput";
-import BrandHeader from "@/components/common/Logo/BrandHeader";
-import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/components/ui/OTP/otp";
+import PrimaryButton from "@/shared/ui/button/PrimaryButton";
+import FloatingInput from "@/shared/ui/input/FloatingInput";
+import PasswordInput from "@/shared/ui/input/PasswordInput";
+import BrandHeader from "@/shared/ui/brand/BrandHeader";
+import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/features/auth/ui/otp";
 
-import OtpInput from "@/components/ui/OTP/OtpInput";
-import { authApi } from "@/api/authApi";
-import { getAccountPathByRole } from "@/lib/authRole";
-import { useAuth } from "@/components/auth/useAuth";
+import OtpInput from "@/features/auth/ui/OtpInput";
+import { authApi } from "@/features/auth/api/authApi";
+import { getAccountPathByRole } from "@/features/auth/lib/authRole";
+import { useAuth } from "@/features/auth/model/useAuth";
 
 const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
   return (

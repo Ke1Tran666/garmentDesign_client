@@ -1,16 +1,16 @@
 import { ArrowRight, ChevronDown } from "lucide-react";
 
-import "../../index.css";
+import "@/shared/styles/index.css";
 
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { useNotification } from "../../components/ui/Notification/NotificationContext";
-import PrimaryButton from "../../components/ui/Button/PrimaryButton";
-import BirthdayInput from "../../components/ui/Input/BirthdayInput";
-import FloatingInput from "../../components/ui/Input/FloatingInput";
-import PasswordInput from "../../components/ui/Input/PasswordInput";
-import BrandHeader from "@/components/common/Logo/BrandHeader";
-import { authApi } from "@/api/authApi";
+import { useNotification } from "@/app/providers/NotificationProvider";
+import PrimaryButton from "@/shared/ui/button/PrimaryButton";
+import BirthdayInput from "@/shared/ui/input/BirthdayInput";
+import FloatingInput from "@/shared/ui/input/FloatingInput";
+import PasswordInput from "@/shared/ui/input/PasswordInput";
+import BrandHeader from "@/shared/ui/brand/BrandHeader";
+import { authApi } from "@/features/auth/api/authApi";
 
 const RegisterPage = () => {
 

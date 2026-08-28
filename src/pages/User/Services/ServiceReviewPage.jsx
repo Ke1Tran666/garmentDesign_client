@@ -15,14 +15,14 @@ import {
   ZoomIn,
 } from "lucide-react";
 
-import { BACKEND_URL } from "@/api/config";
-import { serviceReviewApi } from "@/api/serviceReviewApi";
+import { BACKEND_URL } from "@/shared/config/apiConfig";
+import { serviceReviewApi } from "@/features/service-reviews/api/serviceReviewApi";
 
-import ConfirmModal from "@/components/ui/Modal/ConfirmModal";
-import { SectionCard } from "@/components/ui/Section/Section";
-import Switch from "@/components/ui/Switch/Switch";
-import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import { SearchInput } from "@/components/ui/Search/SearchInput";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { SectionCard } from "@/shared/ui/section/Section";
+import Switch from "@/shared/ui/switch/Switch";
+import { useNotification } from "@/app/providers/NotificationProvider";
+import { SearchInput } from "@/shared/ui/search/search-input";
 
 const EMPTY_FORM = {
   rating: 0,

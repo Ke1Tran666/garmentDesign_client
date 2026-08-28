@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Info } from "lucide-react";
-import { HandleButton } from "@/components/ui/Button/Button";
-import { Divider } from "@/components/ui/Divider/Divider";
-import PasswordInput from "@/components/ui/Input/PasswordInput";
-import { SectionCard } from "@/components/ui/Section/Section";
-import Switch from "@/components/ui/Switch/Switch";
-import { useNotification } from "@/components/ui/Notification/NotificationContext";
-import { userApi } from "@/api/userApi";
-import { useAuth } from "@/components/auth/useAuth";
+import { HandleButton } from "@/shared/ui/button/Button";
+import { Divider } from "@/shared/ui/divider/Divider";
+import PasswordInput from "@/shared/ui/input/PasswordInput";
+import { SectionCard } from "@/shared/ui/section/Section";
+import Switch from "@/shared/ui/switch/Switch";
+import { useNotification } from "@/app/providers/NotificationProvider";
+import { userApi } from "@/entities/user/api/userApi";
+import { useAuth } from "@/features/auth/model/useAuth";
 const SecurityPage = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");

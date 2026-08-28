@@ -15,7 +15,7 @@ import {
   vi,
 } from "vitest";
 import ForgotPasswordPage from "./ForgotPasswordPage";
-import { authApi } from "@/api/authApi";
+import { authApi } from "@/features/auth/api/authApi";
 
 const { showNotificationMock } = vi.hoisted(
   () => ({
@@ -23,7 +23,7 @@ const { showNotificationMock } = vi.hoisted(
   }),
 );
 
-vi.mock("@/api/authApi", () => ({
+vi.mock("@/features/auth/api/authApi", () => ({
   authApi: {
     forgotPassword: vi.fn(),
     verifyForgotOtp: vi.fn(),
@@ -32,7 +32,7 @@ vi.mock("@/api/authApi", () => ({
 }));
 
 vi.mock(
-  "@/components/ui/Notification/NotificationContext",
+  "@/app/providers/NotificationProvider",
   () => ({
     useNotification: () => ({
       showNotification: showNotificationMock,

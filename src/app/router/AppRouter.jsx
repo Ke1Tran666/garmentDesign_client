@@ -23,6 +23,7 @@ import AdminDashboardPage from "@/pages/Admin/Dashboard/AdminDashboardPage";
 import RoleProtectedRoute from "@/app/router/RoleProtectedRoute";
 import UserManagementPage from "@/pages/Admin/Users/UserManagementPage";
 import UserDetailPage from "@/pages/Admin/Users/UserDetailPage";
+import ServiceManagementPage from "@/pages/Admin/Services/ServiceManagementPage";
 
 const AppRouter = () => {
   return (
@@ -69,6 +70,7 @@ const AppRouter = () => {
           <Route path="dashboard" element={<AdminDashboardPage />}/>
           <Route path="users" element={<UserManagementPage />} />
           <Route path="users/:userId" element={<UserDetailPage />} />
+          <Route path="services" element={<ServiceManagementPage />} />
         </Route>
 
         <Route path="/not-found" element={<NotFoundPage />}/>

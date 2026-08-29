@@ -72,7 +72,7 @@ const ADMIN_GROUPS = [
         label: "Dịch vụ",
         text: "Thiết lập danh mục dịch vụ.",
         path: "/admin/services",
-        available: false,
+        available: true,
       },
       {
         icon: MessageSquareText,

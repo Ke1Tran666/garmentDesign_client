@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import FormModal from "./FormModal";
 import UploadBox from "@/shared/ui/upload/UploadBox";
 import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
 import FormInput from "@/shared/ui/input/FormInput";
+import FormModal from "@/shared/ui/modal/FormModal";
 
 const createInitialForm = (user, phone) => ({
   fullName: user?.fullName || "",

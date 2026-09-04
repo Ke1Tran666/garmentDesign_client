@@ -10,7 +10,6 @@ import {
   Search,
   Trash2,
   Wrench,
-  X,
 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 
@@ -19,6 +18,7 @@ import { useNotification } from "@/app/providers/NotificationProvider";
 import DataTable from "@/shared/ui/table/DataTable";
 import Pagination from "@/shared/ui/table/Pagination";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import FormModal from "@/shared/ui/modal/FormModal";
 
 const PAGE_SIZE = 10;
 
@@ -150,336 +150,6 @@ const getStatusInfo = (service) => {
   };
 };
 
-const ServiceFormModal = ({
-  open,
-  service,
-  submitting,
-  errorMessage,
-  onClose,
-  onSubmit,
-}) => {
-  const [form, setForm] = useState(() =>
-    createInitialForm(service),
-    );
-
-    const editing = Boolean(service);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const handleEscape = (event) => {
-      if (event.key === "Escape" && !submitting) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener(
-        "keydown",
-        handleEscape,
-      );
-    };
-  }, [open, submitting, onClose]);
-
-  if (!open) return null;
-
-  const updateField = (event) => {
-    const { name, value } = event.target;
-
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  };
-
-  const submitForm = (event) => {
-    event.preventDefault();
-
-    onSubmit({
-      serviceCode: form.serviceCode.trim(),
-      serviceName: form.serviceName.trim(),
-      unitType: form.unitType.trim(),
-      basePrice: Number(form.basePrice),
-      description: form.description.trim(),
-      tags: form.tags.trim(),
-      status: form.status,
-    });
-  };
-
-  return (
-    <div
-      className="
-        fixed inset-0 z-60
-        flex items-center justify-center
-        overflow-y-auto bg-black/40 px-4 py-8
-      "
-      onMouseDown={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          !submitting
-        ) {
-          onClose();
-        }
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="service-form-title"
-        className="
-          relative w-full max-w-2xl
-          rounded-2xl border border-border
-          bg-surface p-6 shadow-2xl
-        "
-      >
-        <button
-          type="button"
-          aria-label="Đóng biểu mẫu"
-          onClick={onClose}
-          disabled={submitting}
-          className="
-            absolute right-4 top-4
-            flex h-9 w-9 items-center justify-center
-            rounded-full text-text-muted
-            transition hover:bg-surface-muted
-            hover:text-text-default
-            disabled:cursor-not-allowed disabled:opacity-50
-          "
-        >
-          <X size={20} />
-        </button>
-
-        <div className="pr-12">
-          <h2
-            id="service-form-title"
-            className="text-xl font-bold text-text-strong"
-          >
-            {editing
-              ? "Chỉnh sửa dịch vụ"
-              : "Thêm dịch vụ mới"}
-          </h2>
-
-          <p className="mt-1 text-sm text-text-muted">
-            Cập nhật thông tin hiển thị và giá cơ bản của
-            dịch vụ.
-          </p>
-        </div>
-
-        <form
-          onSubmit={submitForm}
-          className="mt-6 space-y-5"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-text-default">
-                Mã dịch vụ
-              </span>
-
-              <input
-                name="serviceCode"
-                value={form.serviceCode}
-                onChange={updateField}
-                required
-                maxLength={50}
-                placeholder="Ví dụ: DES001"
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  px-3 text-sm outline-none
-                  transition focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                "
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-text-default">
-                Tên dịch vụ
-              </span>
-
-              <input
-                name="serviceName"
-                value={form.serviceName}
-                onChange={updateField}
-                required
-                maxLength={255}
-                placeholder="Tên dịch vụ"
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  px-3 text-sm outline-none
-                  transition focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                "
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-text-default">
-                Đơn vị tính
-              </span>
-
-              <input
-                name="unitType"
-                value={form.unitType}
-                onChange={updateField}
-                required
-                maxLength={100}
-                placeholder="Ví dụ: Sản phẩm"
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  px-3 text-sm outline-none
-                  transition focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                "
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-text-default">
-                Giá cơ bản
-              </span>
-
-              <input
-                type="number"
-                name="basePrice"
-                value={form.basePrice}
-                onChange={updateField}
-                required
-                min="0"
-                step="1000"
-                placeholder="0"
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  px-3 text-sm outline-none
-                  transition focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                "
-              />
-            </label>
-          </div>
-
-          <label className="block space-y-2">
-            <span className="text-sm font-semibold text-text-default">
-              Thẻ dịch vụ
-            </span>
-
-            <input
-              name="tags"
-              value={form.tags}
-              onChange={updateField}
-              placeholder="Thiết kế, Rập, May mặc"
-              className="
-                h-11 w-full rounded-xl
-                border border-input bg-surface
-                px-3 text-sm outline-none
-                transition focus:border-brand
-                focus:ring-4 focus:ring-brand/10
-              "
-            />
-
-            <span className="block text-xs text-text-muted">
-              Phân cách các thẻ bằng dấu phẩy.
-            </span>
-          </label>
-
-          <label className="block space-y-2">
-            <span className="text-sm font-semibold text-text-default">
-              Mô tả
-            </span>
-
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={updateField}
-              rows={4}
-              maxLength={1000}
-              placeholder="Mô tả ngắn về dịch vụ..."
-              className="
-                w-full resize-y rounded-xl
-                border border-input bg-surface
-                px-3 py-3 text-sm outline-none
-                transition focus:border-brand
-                focus:ring-4 focus:ring-brand/10
-              "
-            />
-          </label>
-
-          <label className="block space-y-2">
-            <span className="text-sm font-semibold text-text-default">
-              Trạng thái
-            </span>
-
-            <select
-              name="status"
-              value={form.status}
-              onChange={updateField}
-              className="
-                h-11 w-full rounded-xl
-                border border-input bg-surface
-                px-3 text-sm outline-none
-                focus:border-brand
-              "
-            >
-              <option value="active">
-                Đang hoạt động
-              </option>
-
-              <option value="inactive">
-                Tạm ngừng
-              </option>
-            </select>
-          </label>
-
-          {errorMessage && (
-            <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
-              {errorMessage}
-            </p>
-          )}
-
-          <div className="flex justify-end gap-3 border-t border-border-subtle pt-5">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-              className="
-                rounded-xl border border-border
-                px-5 py-2.5 text-sm font-semibold
-                text-text-muted transition
-                hover:bg-surface-muted
-                disabled:cursor-not-allowed disabled:opacity-50
-              "
-            >
-              Hủy
-            </button>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="
-                rounded-xl bg-brand!
-                px-5 py-2.5 text-sm font-semibold
-                text-white transition hover:opacity-90
-                disabled:cursor-not-allowed disabled:opacity-60
-              "
-            >
-              {submitting
-                ? "Đang lưu..."
-                : editing
-                  ? "Lưu thay đổi"
-                  : "Thêm dịch vụ"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
 const ServiceManagementPage = () => {
   const { searchKeyword = "" } = useOutletContext();
   const { showNotification } = useNotification();
@@ -497,13 +167,14 @@ const ServiceManagementPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [formOpen, setFormOpen] = useState(false);
-  const [editingService, setEditingService] =
-    useState(null);
+  const [form, setForm] = useState(() => ({
+    ...EMPTY_FORM,
+  }));
+  const [editingService, setEditingService] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
 
-  const [removingService, setRemovingService] =
-    useState(null);
+  const [removingService, setRemovingService] = useState(null);
   const [removing, setRemoving] = useState(false);
   const [removeError, setRemoveError] = useState("");
 
@@ -613,12 +284,14 @@ const ServiceManagementPage = () => {
 
   const openCreateForm = () => {
     setEditingService(null);
+    setForm({ ...EMPTY_FORM });
     setFormError("");
     setFormOpen(true);
   };
 
   const openEditForm = (service) => {
     setEditingService(service);
+    setForm(createInitialForm(service));
     setFormError("");
     setFormOpen(true);
   };
@@ -770,6 +443,31 @@ const ServiceManagementPage = () => {
     } finally {
       setRemoving(false);
     }
+  };
+
+  const handleChangeForm = (event) => {
+    const { name, value } = event.target;
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmitForm = (event) => {
+    event.preventDefault();
+
+    if (submitting) return;
+
+    saveService({
+      serviceCode: form.serviceCode.trim(),
+      serviceName: form.serviceName.trim(),
+      unitType: form.unitType.trim(),
+      basePrice: Number(form.basePrice),
+      description: form.description.trim(),
+      tags: form.tags.trim(),
+      status: form.status,
+    });
   };
 
   return (
@@ -1001,17 +699,221 @@ const ServiceManagementPage = () => {
         </div>
       </div>
 
-        {formOpen && (
-        <ServiceFormModal
-            key={editingService?.serviceId ?? "new-service"}
-            open
-            service={editingService}
-            submitting={submitting}
-            errorMessage={formError}
-            onClose={closeForm}
-            onSubmit={saveService}
-        />
-        )}
+      <FormModal
+        open={formOpen}
+        title={
+          editingService
+            ? "Chỉnh sửa dịch vụ"
+            : "Thêm dịch vụ mới"
+        }
+        description="Cập nhật thông tin hiển thị, giá và trạng thái dịch vụ."
+        form={form}
+        onChange={handleChangeForm}
+        onClose={closeForm}
+        onSubmit={handleSubmitForm}
+        submitText={
+          editingService
+            ? "Lưu thay đổi"
+            : "Thêm dịch vụ"
+        }
+        loadingText="Đang lưu..."
+        submitting={submitting}
+        errorMessage={formError}
+        maxWidthClassName="max-w-2xl"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-semibold text-text-default">
+              Mã dịch vụ
+            </span>
+
+            <input
+              name="serviceCode"
+              value={form.serviceCode}
+              onChange={handleChangeForm}
+              disabled={submitting}
+              required
+              maxLength={50}
+              placeholder="Ví dụ: DES001"
+              className="
+                h-11 w-full rounded-xl
+                border border-input bg-surface
+                px-4 text-sm text-text-default
+                outline-none transition
+                focus:border-brand
+                focus:ring-4 focus:ring-brand/10
+                disabled:cursor-not-allowed
+                disabled:bg-surface-muted
+              "
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-semibold text-text-default">
+              Tên dịch vụ
+            </span>
+
+            <input
+              name="serviceName"
+              value={form.serviceName}
+              onChange={handleChangeForm}
+              disabled={submitting}
+              required
+              maxLength={255}
+              placeholder="Nhập tên dịch vụ"
+              className="
+                h-11 w-full rounded-xl
+                border border-input bg-surface
+                px-4 text-sm text-text-default
+                outline-none transition
+                focus:border-brand
+                focus:ring-4 focus:ring-brand/10
+                disabled:cursor-not-allowed
+                disabled:bg-surface-muted
+              "
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-semibold text-text-default">
+              Đơn vị tính
+            </span>
+
+            <input
+              name="unitType"
+              value={form.unitType}
+              onChange={handleChangeForm}
+              disabled={submitting}
+              required
+              maxLength={100}
+              placeholder="Ví dụ: Sản phẩm"
+              className="
+                h-11 w-full rounded-xl
+                border border-input bg-surface
+                px-4 text-sm text-text-default
+                outline-none transition
+                focus:border-brand
+                focus:ring-4 focus:ring-brand/10
+                disabled:cursor-not-allowed
+                disabled:bg-surface-muted
+              "
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-sm font-semibold text-text-default">
+              Giá cơ bản
+            </span>
+
+            <input
+              type="number"
+              name="basePrice"
+              value={form.basePrice}
+              onChange={handleChangeForm}
+              disabled={submitting}
+              required
+              min="0"
+              step="1000"
+              placeholder="0"
+              className="
+                h-11 w-full rounded-xl
+                border border-input bg-surface
+                px-4 text-sm text-text-default
+                outline-none transition
+                focus:border-brand
+                focus:ring-4 focus:ring-brand/10
+                disabled:cursor-not-allowed
+                disabled:bg-surface-muted
+              "
+            />
+          </label>
+        </div>
+
+        <label className="block space-y-2">
+          <span className="text-sm font-semibold text-text-default">
+            Thẻ dịch vụ
+          </span>
+
+          <input
+            name="tags"
+            value={form.tags}
+            onChange={handleChangeForm}
+            disabled={submitting}
+            placeholder="Thiết kế, Rập, May mặc"
+            className="
+              h-11 w-full rounded-xl
+              border border-input bg-surface
+              px-4 text-sm text-text-default
+              outline-none transition
+              focus:border-brand
+              focus:ring-4 focus:ring-brand/10
+              disabled:cursor-not-allowed
+              disabled:bg-surface-muted
+            "
+          />
+
+          <span className="block text-xs text-text-muted">
+            Phân cách các thẻ bằng dấu phẩy.
+          </span>
+        </label>
+
+        <label className="block space-y-2">
+          <span className="text-sm font-semibold text-text-default">
+            Mô tả
+          </span>
+
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChangeForm}
+            disabled={submitting}
+            rows={4}
+            maxLength={1000}
+            placeholder="Mô tả ngắn về dịch vụ..."
+            className="
+              w-full resize-y rounded-xl
+              border border-input bg-surface
+              px-4 py-3 text-sm text-text-default
+              outline-none transition
+              focus:border-brand
+              focus:ring-4 focus:ring-brand/10
+              disabled:cursor-not-allowed
+              disabled:bg-surface-muted
+            "
+          />
+        </label>
+
+        <label className="block space-y-2">
+          <span className="text-sm font-semibold text-text-default">
+            Trạng thái
+          </span>
+
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChangeForm}
+            disabled={submitting}
+            className="
+              h-11 w-full rounded-xl
+              border border-input bg-surface
+              px-4 text-sm text-text-default
+              outline-none transition
+              focus:border-brand
+              focus:ring-4 focus:ring-brand/10
+              disabled:cursor-not-allowed
+              disabled:bg-surface-muted
+            "
+          >
+            <option value="active">
+              Đang hoạt động
+            </option>
+
+            <option value="inactive">
+              Tạm ngừng
+            </option>
+          </select>
+        </label>
+      </FormModal>
 
       <ConfirmModal
         open={Boolean(removingService)}

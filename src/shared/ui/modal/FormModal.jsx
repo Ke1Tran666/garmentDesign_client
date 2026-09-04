@@ -1,84 +1,189 @@
-import { X } from "lucide-react";
+import { LoaderCircle, Save, X } from "lucide-react";
 
 const FormModal = ({
-  open,
+  open = true,
   title,
+  description,
+  children,
   fields = [],
-  form,
+  form = {},
   onChange,
   onClose,
   onSubmit,
-  submitText = "Lưu",
+  submitText = "Lưu thay đổi",
   loadingText = "Đang lưu...",
+  cancelText = "Hủy",
   submitting = false,
+  errorMessage = "",
+  maxWidthClassName = "max-w-xl",
 }) => {
   if (!open) return null;
 
+  const handleBackdropClick = () => {
+    if (!submitting) {
+      onClose?.();
+    }
+  };
+
   return (
     <div
-        onClick={onClose}
-        className={`
-            fixed inset-0 z-60 flex items-center justify-center bg-black/30 px-4
-        `}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="form-modal-title"
+      onClick={handleBackdropClick}
+      className="
+        fixed inset-0 z-70 flex items-center
+        justify-center bg-black/40 px-4 py-6
+      "
     >
-      <div 
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg rounded-xl bg-surface p-6 shadow-2xl"
+      <div
+        onClick={(event) => event.stopPropagation()}
+        className={`
+            relative w-full ${maxWidthClassName}
+            overflow-hidden rounded-2xl
+            border border-border-subtle
+            bg-surface shadow-2xl
+          `}
       >
-        <button
-        type="button"
-        onClick={onClose}
-        disabled={submitting}
-        className="
-            absolute right-4 top-4
-            flex h-9 w-9 items-center justify-center
-            rounded-full text-text-muted transition
-            hover:bg-surface-muted hover:text-text-default
-            disabled:cursor-not-allowed disabled:opacity-60
-        "
-        >
-        <X size={20} />
-        </button>
-        <h3 className="text-lg font-bold text-text-strong">
-          {title}
-        </h3>
+        <div className="h-1 w-full bg-brand" />
 
-        <div className="mt-5 space-y-4">
-          {fields.map((field) =>
-            field.type === "textarea" ? (
-              <textarea
-                key={field.name}
-                name={field.name}
-                value={form[field.name] || ""}
-                onChange={onChange}
-                placeholder={field.placeholder}
-                rows={field.rows || 4}
-                className="w-full rounded-lg border border-input px-4 py-3 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-              />
-            ) : (
-              <input
-                key={field.name}
-                type={field.type || "text"}
-                name={field.name}
-                value={form[field.name] || ""}
-                onChange={onChange}
-                placeholder={field.placeholder}
-                className="h-11 w-full rounded-lg border border-input px-4 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
-              />
-            )
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-end">
-            <button
-                type="button"
-                onClick={onSubmit}
-                disabled={submitting}
-                className="rounded-lg bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+        <header className="flex items-center justify-between border-b border-border-subtle px-5 py-4 sm:px-6">
+          <div className="min-w-0 pr-4">
+            <h2
+              id="form-modal-title"
+              className="text-lg font-bold text-text-strong"
             >
-                {submitting ? loadingText : submitText}
+              {title}
+            </h2>
+
+            {description && (
+              <p className="mt-1 text-sm text-text-muted">
+                {description}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            aria-label="Đóng"
+            className="
+              group flex h-9 w-9 shrink-0
+              items-center justify-center rounded-lg
+              text-text-muted transition-colors
+              duration-300 hover:bg-danger-soft
+              hover:text-danger disabled:opacity-50
+            "
+          >
+            <X
+              size={19}
+              className="
+                transition-transform duration-300
+                ease-in-out group-hover:rotate-180
+              "
+            />
+          </button>
+        </header>
+
+        <form onSubmit={onSubmit}>
+          <div className="max-h-[70vh] space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
+            {children ??
+              fields.map((field) => {
+                const commonProps = {
+                  id: field.name,
+                  name: field.name,
+                  value: form[field.name] || "",
+                  onChange,
+                  disabled: submitting,
+                  placeholder: field.placeholder,
+                };
+
+                if (field.type === "textarea") {
+                  return (
+                    <textarea
+                      key={field.name}
+                      {...commonProps}
+                      rows={field.rows || 4}
+                      className="
+                        w-full rounded-xl border
+                        border-input bg-surface
+                        px-4 py-3 text-sm
+                        text-text-default outline-none
+                        transition focus:border-brand
+                        focus:ring-4 focus:ring-brand/10
+                        disabled:bg-surface-muted
+                      "
+                    />
+                  );
+                }
+
+                return (
+                  <input
+                    key={field.name}
+                    {...commonProps}
+                    type={field.type || "text"}
+                    className="
+                      h-11 w-full rounded-xl
+                      border border-input bg-surface
+                      px-4 text-sm text-text-default
+                      outline-none transition
+                      focus:border-brand
+                      focus:ring-4 focus:ring-brand/10
+                      disabled:bg-surface-muted
+                    "
+                  />
+                );
+              })}
+
+            {errorMessage && (
+              <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+                {errorMessage}
+              </p>
+            )}
+          </div>
+
+          <footer className="flex justify-end gap-3 border-t border-border-subtle px-5 py-4 sm:px-6">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="
+                rounded-xl border border-border
+                px-4 py-2.5 text-sm font-semibold
+                text-text-muted transition
+                hover:bg-surface-muted
+                disabled:opacity-50
+              "
+            >
+              {cancelText}
             </button>
-        </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="
+                inline-flex min-w-32 items-center
+                justify-center gap-2 rounded-xl
+                bg-brand! px-4 py-2.5
+                text-sm font-semibold text-white
+                transition hover:opacity-90
+                disabled:opacity-50
+              "
+            >
+              {submitting ? (
+                <LoaderCircle
+                  size={17}
+                  className="animate-spin"
+                />
+              ) : (
+                <Save size={17} />
+              )}
+
+              {submitting ? loadingText : submitText}
+            </button>
+          </footer>
+        </form>
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import DataTable from "@/shared/ui/table/DataTable";
 import Pagination from "@/shared/ui/table/Pagination";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import FormModal from "@/shared/ui/modal/FormModal";
+import FilterSelect from "@/shared/ui/select/FilterSelect";
 
 const PAGE_SIZE = 10;
 
@@ -47,6 +48,21 @@ const COLUMNS = [
     key: "action",
     title: "Thao tác",
     className: "text-center",
+  },
+];
+
+const SERVICE_STATUS_OPTIONS = [
+  {
+    value: "all",
+    label: "Tất cả trạng thái",
+  },
+  {
+    value: "active",
+    label: "Đang hoạt động",
+  },
+  {
+    value: "inactive",
+    label: "Tạm ngừng",
   },
 ];
 
@@ -536,30 +552,15 @@ const ServiceManagementPage = () => {
               />
             </label>
 
-            <select
+            <FilterSelect
               value={statusFilter}
-              onChange={(event) => {
-                setStatusFilter(event.target.value);
+              options={SERVICE_STATUS_OPTIONS}
+              ariaLabel="Lọc dịch vụ theo trạng thái"
+              onValueChange={(value) => {
+                setStatusFilter(value);
                 setCurrentPage(1);
               }}
-              className="
-                h-11 rounded-xl border border-input
-                bg-surface px-3 text-sm outline-none
-                focus:border-brand
-              "
-            >
-              <option value="all">
-                Tất cả trạng thái
-              </option>
-
-              <option value="active">
-                Đang hoạt động
-              </option>
-
-              <option value="inactive">
-                Tạm ngừng
-              </option>
-            </select>
+            />
           </div>
 
           <div className="mt-5">

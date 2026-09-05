@@ -1,8 +1,7 @@
 import { useState } from "react";
 
 import FormInput from "@/shared/ui/input/FormInput";
-
-import FormModal from "./FormModal";
+import FormModal from "@/shared/ui/modal/FormModal";
 
 const UserPhoneEditModal = ({
   phone = "",

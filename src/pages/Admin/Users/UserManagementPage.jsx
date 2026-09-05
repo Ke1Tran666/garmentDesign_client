@@ -17,6 +17,7 @@ import Pagination from "@/shared/ui/table/Pagination";
 import MenuTable from "@/shared/ui/menu/MenuTable";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import { useNotification } from "@/app/providers/NotificationProvider";
+import FilterSelect from "@/shared/ui/select/FilterSelect";
 
 const PAGE_SIZE = 15;
 
@@ -30,6 +31,29 @@ const COLUMNS = [
     key: "action",
     title: "Thao tác",
     className: "text-center",
+  },
+];
+
+const USER_STATUS_OPTIONS = [
+  {
+    value: "all",
+    label: "Tất cả trạng thái",
+  },
+  {
+    value: "active",
+    label: "Hoạt động",
+  },
+  {
+    value: "pending",
+    label: "Chờ hoàn thiện",
+  },
+  {
+    value: "inactive",
+    label: "Đã khóa",
+  },
+  {
+    value: "deleted",
+    label: "Đã xóa",
   },
 ];
 
@@ -358,20 +382,15 @@ const UserManagementPage = () => {
               ))}
             </select>
 
-            <select
+            <FilterSelect
               value={statusFilter}
-              onChange={(event) => {
-                setStatusFilter(event.target.value);
+              options={USER_STATUS_OPTIONS}
+              ariaLabel="Lọc người dùng theo trạng thái"
+              onValueChange={(value) => {
+                setStatusFilter(value);
                 setCurrentPage(1);
               }}
-              className="h-11 rounded-xl border border-input bg-surface px-3 text-sm outline-none focus:border-brand"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">Hoạt động</option>
-              <option value="pending">Chờ hoàn thiện</option>
-              <option value="inactive">Đã khóa</option>
-              <option value="deleted">Đã xóa</option>
-            </select>
+            />
           </div>
 
           <div className="mt-5">

@@ -12,7 +12,6 @@ import {
 import { ButtonIconText } from "@/shared/ui/button/Button";
 import { SectionCard } from "@/shared/ui/section/Section";
 import { useNotification } from "@/app/providers/NotificationProvider";
-import FormModal from "@/shared/ui/modal/FormModal";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import DataTable from "@/shared/ui/table/DataTable";
 import Pagination from "@/shared/ui/table/Pagination";
@@ -20,6 +19,7 @@ import MenuTable from "@/shared/ui/menu/MenuTable";
 import { addressApi } from "@/entities/address/api/addressApi";
 import { userApi } from "@/entities/user/api/userApi";
 import { useAuth } from "@/features/auth/model/useAuth";
+import FormModal from "@/shared/ui/modal/FormModal";
 
 const statusClassName = {
   Active: "bg-success-soft text-success ring-1 ring-success-border",
@@ -745,7 +745,15 @@ const AddressPage = () => {
             setAddingAddress(false);
             setEditingAddress(null);
           }}
-          onSubmit={editingAddress ? handleUpdateAddress : handleCreateAddress}
+          onSubmit={(event) => {
+            event.preventDefault();
+
+            if (editingAddress) {
+              handleUpdateAddress();
+            } else {
+              handleCreateAddress();
+            }
+          }}
           submitText={editingAddress ? "Lưu thay đổi" : "Thêm địa chỉ"}
           loadingText={editingAddress ? "Đang lưu..." : "Đang thêm..."}
           submitting={submitting}

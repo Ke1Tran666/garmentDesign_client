@@ -7,7 +7,6 @@ import {
 import {
   Pencil,
   Plus,
-  Search,
   Trash2,
   Wrench,
 } from "lucide-react";
@@ -20,6 +19,9 @@ import Pagination from "@/shared/ui/table/Pagination";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import FormModal from "@/shared/ui/modal/FormModal";
 import FilterSelect from "@/shared/ui/select/FilterSelect";
+import { SearchInput } from "@/shared/ui/search/search-input";
+import CountBadge from "@/shared/ui/badge/CountBadge";
+import PageHeading from "@/shared/ui/heading/PageHeading";
 
 const PAGE_SIZE = 10;
 
@@ -490,22 +492,17 @@ const ServiceManagementPage = () => {
     <>
       <div className="space-y-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-text-strong">
-              Quản lý dịch vụ
-            </h1>
-
-            <p className="mt-1 text-sm text-text-muted">
-              Thiết lập danh mục, giá và trạng thái các
-              dịch vụ của phần mềm.
-            </p>
-          </div>
+          <PageHeading
+            title="Quản lý dịch vụ"
+            description="Thiết lập danh mục, giá và trạng thái các dịch vụ của phần mềm."
+          />
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-xl bg-info-soft px-4 py-2 text-sm font-medium text-info">
-              <Wrench size={18} />
-              {filteredServices.length} dịch vụ
-            </div>
+            <CountBadge
+              count={filteredServices.length}
+              label="dịch vụ"
+              icon={Wrench}
+            />
 
             <button
               type="button"
@@ -526,31 +523,15 @@ const ServiceManagementPage = () => {
 
         <div className="rounded-2xl border border-border-subtle bg-surface p-5 shadow-sm">
           <div className="grid gap-3 md:grid-cols-[1fr_220px]">
-            <label className="relative">
-              <Search
-                size={18}
-                className="
-                  absolute left-3 top-1/2
-                  -translate-y-1/2 text-text-muted
-                "
-              />
-
-              <input
-                value={localSearch}
-                onChange={(event) => {
-                  setLocalSearch(event.target.value);
-                  setCurrentPage(1);
-                }}
-                placeholder="Tìm theo tên, mã hoặc thẻ dịch vụ..."
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  pl-10 pr-4 text-sm outline-none
-                  transition focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                "
-              />
-            </label>
+            <SearchInput
+              value={localSearch}
+              onChange={(value) => {
+                setLocalSearch(value);
+                setCurrentPage(1);
+              }}
+              placeholder="Tìm theo tên, mã dịch vụ, mô tả..."
+              className="w-full"
+            />
 
             <FilterSelect
               value={statusFilter}

@@ -1,8 +1,6 @@
 import { useEffect,useState} from "react";
 import {
-  Bell,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   House,
   LogOut,
@@ -14,11 +12,12 @@ import {
 import { Outlet, useLocation, useNavigate} from "react-router-dom";
 
 import Logo from "@/shared/ui/brand/Logo";
-import { ButtonIcon } from "@/shared/ui/button/Button";
 import GooeySearchBar from "@/shared/ui/search/gooey-input/GooeySearchBar";
 
 import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
 import { useAuth } from "@/features/auth/model/useAuth";
+import NotificationButton from "@/shared/ui/notification/NotificationButton";
+import MenuTable from "@/shared/ui/menu/MenuTable";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -108,11 +107,37 @@ const DashboardLayout = ({
 
   const [openUserMenu,setOpenUserMenu] = useState(false);
 
-  const [isNotificationExpanded,setIsNotificationExpanded] = useState(false);
-
   const [isAsideCollapsed, setIsAsideCollapsed] = useState(
     () => localStorage.getItem(storageKey) === "true",
   );
+
+  const [userMenuPosition, setUserMenuPosition] = useState({x: 0, y: 0});
+
+  const userMenuWidth = 208;
+
+  const handleToggleUserMenu = (event) => {
+    event.stopPropagation();
+
+    if (openUserMenu) {
+      setOpenUserMenu(false);
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    setUserMenuPosition({
+      x: Math.max(
+        8,
+        Math.min(
+          rect.right - userMenuWidth,
+          window.innerWidth - userMenuWidth - 8,
+        ),
+      ),
+      y: rect.bottom + 8,
+    });
+
+    setOpenUserMenu(true);
+  };
 
   useEffect(() => {
     localStorage.setItem(storageKey, String(isAsideCollapsed));
@@ -139,26 +164,6 @@ const DashboardLayout = ({
     ];
 
   const CurrentGroupIcon = currentGroup.btn.icon;
-
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setOpenUserMenu(false);
-    };
-
-    if (openUserMenu) {
-      document.addEventListener(
-        "click",
-        handleClickOutside,
-      );
-    }
-
-    return () => {
-      document.removeEventListener(
-        "click",
-        handleClickOutside,
-      );
-    };
-  }, [openUserMenu]);
 
   const navigateToItem = (
     item,
@@ -698,193 +703,61 @@ const DashboardLayout = ({
           </div>
 
           <div className="flex items-center justify-center gap-4">
-            <div
-              className={`
-                fixed right-0
-                bottom-[calc(5.25rem+env(safe-area-inset-bottom))]
-                z-40 flex items-center
-                gap-2 rounded-l-full
-                border border-r-0
-                border-border
-                bg-surface p-2 pl-1
-                shadow-lg
-                transition-transform
-                duration-300 ease-in-out
-
-                ${
-                  isNotificationExpanded
-                    ? "translate-x-0"
-                    : "translate-x-[calc(100%-3rem)]"
-                }
-
-                md:static
-                md:translate-x-0
-                md:border-0
-                md:bg-transparent
-                md:p-0 md:shadow-none
-              `}
-            >
-              <button
-                type="button"
-                aria-label={
-                  isNotificationExpanded
-                    ? "Thu nút thông báo"
-                    : "Mở nút thông báo"
-                }
-                aria-expanded={
-                  isNotificationExpanded
-                }
-                onClick={() =>
-                  setIsNotificationExpanded(
-                    (current) =>
-                      !current,
-                  )
-                }
-                className="
-                  flex h-10 w-10
-                  shrink-0 items-center
-                  justify-center
-                  rounded-full
-                  text-text-muted
-                  transition-colors
-                  hover:bg-surface-muted
-                  hover:text-brand
-                  md:hidden
-                "
-              >
-                <ChevronLeft
-                  size={20}
-                  className={`
-                    transition-transform
-                    duration-300
-                    ${
-                      isNotificationExpanded
-                        ? "rotate-180"
-                        : ""
-                    }
-                  `}
-                />
-              </button>
-
-              <ButtonIcon
-                icon={Bell}
-                sizeIcon={22}
-                aria-label="Xem thông báo"
-                className="
-                  relative shrink-0
-                  bg-linear-to-br
-                  from-indigo-500
-                  to-brand shadow-lg
-                  hover:from-indigo-600
-                  hover:to-brand
-                  hover:shadow-xl
-                  active:scale-95
-                "
-                classNameIcon="text-white"
-              >
-                <span
-                  className="
-                    absolute right-2 top-2
-                    h-2.5 w-2.5
-                    animate-pulse
-                    rounded-full bg-warning
-                    shadow-lg
-                    shadow-warning/50
-                  "
-                />
-              </ButtonIcon>
-            </div>
+            <NotificationButton />
 
             <div className="relative">
               <button
                 type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-
-                  setOpenUserMenu(
-                    (current) =>
-                      !current,
-                  );
-                }}
+                aria-label="Menu tài khoản"
+                aria-haspopup="menu"
+                aria-expanded={openUserMenu}
+                onMouseDown={(event) => event.stopPropagation()}
+                onClick={handleToggleUserMenu}
                 className="
                   flex items-center gap-3
                   rounded-xl px-2 py-1
-                  transition
-                  hover:bg-surface-subtle
+                  transition hover:bg-surface-subtle
                 "
               >
                 <img
-                src={user?.avatar || defaultAvatar}
-                alt={user?.fullName || fallbackName}
-                className="h-10 w-10 rounded-xl object-cover"
+                  src={user?.avatar || defaultAvatar}
+                  alt={user?.fullName || fallbackName}
+                  className="h-10 w-10 rounded-xl object-cover"
                 />
 
                 <span className="hidden max-w-40 truncate font-semibold text-text-default md:inline">
-                    {user?.fullName || fallbackName}
+                  {user?.fullName || fallbackName}
                 </span>
 
                 <ChevronDown
                   size={16}
-                  className={`
-                    transition
-                    ${
-                      openUserMenu
-                        ? "rotate-180"
-                        : ""
-                    }
-                  `}
+                  aria-hidden="true"
+                  className={`transition ${openUserMenu ? "rotate-180" : ""}`}
                 />
               </button>
 
-              {openUserMenu && (
-                <div
-                  onClick={(event) =>
-                    event.stopPropagation()
-                  }
-                  className="
-                    absolute right-0 top-full
-                    z-50 mt-2 w-52
-                    rounded-xl
-                    border border-border
-                    bg-surface p-2
-                    shadow-lg
-                  "
-                >
-                  {profilePath && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                        setOpenUserMenu(false);
-                        navigate(profilePath);
-                        }}
-                        className="
-                        flex w-full items-center gap-3
-                        rounded-lg px-3 py-2
-                        text-sm text-text-default
-                        hover:bg-surface-muted
-                        "
-                    >
-                        <User size={16} />
-                        My Profile
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="
-                      flex w-full
-                      items-center gap-3
-                      rounded-lg px-3 py-2
-                      text-sm text-danger
-                      hover:bg-danger-soft
-                    "
-                  >
-                    <LogoutIcon size={16} />
-                    {logoutLabel}
-                  </button>
-                </div>
-              )}
+              <MenuTable
+                open={openUserMenu}
+                position={userMenuPosition}
+                width={userMenuWidth}
+                onClose={() => setOpenUserMenu(false)}
+                items={[
+                  {
+                    id: "profile",
+                    label: "My Profile",
+                    icon: User,
+                    hidden: !profilePath,
+                    onClick: () => navigate(profilePath),
+                  },
+                  {
+                    id: "logout",
+                    label: logoutLabel,
+                    icon: LogoutIcon,
+                    danger: true,
+                    onClick: handleLogout,
+                  },
+                ]}
+              />
             </div>
           </div>
         </div>

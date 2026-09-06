@@ -102,7 +102,7 @@ export const HandleButtonIcon = ({
         type="button"
         onClick={onClick}
         className={`
-            flex item-center justify-center gap-3
+            flex items-center justify-center gap-3
             rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 
             ${className}
             

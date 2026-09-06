@@ -2,7 +2,6 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   Eye,
   MoreVertical,
-  Search,
   Trash2,
   UserRound,
 } from "lucide-react";
@@ -18,6 +17,9 @@ import MenuTable from "@/shared/ui/menu/MenuTable";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import { useNotification } from "@/app/providers/NotificationProvider";
 import FilterSelect from "@/shared/ui/select/FilterSelect";
+import { SearchInput } from "@/shared/ui/search/search-input";
+import CountBadge from "@/shared/ui/badge/CountBadge";
+import PageHeading from "@/shared/ui/heading/PageHeading";
 
 const PAGE_SIZE = 15;
 
@@ -330,40 +332,29 @@ const UserManagementPage = () => {
     <>
       <div className="space-y-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-text-strong">
-              Quản lý người dùng
-            </h1>
+          <PageHeading
+            title="Quản lý người dùng"
+            description="Xem và quản lý tài khoản trong hệ thống."
+          />
 
-            <p className="mt-1 text-sm text-text-muted">
-              Xem và quản lý tài khoản trong hệ thống.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-xl bg-info-soft px-4 py-2 text-sm font-medium text-info">
-            <UserRound size={18} />
-            {filteredUsers.length} người dùng
-          </div>
+          <CountBadge
+            count={filteredUsers.length}
+            label="người dùng"
+            icon={UserRound}
+          />
         </div>
 
         <div className="rounded-2xl border border-border-subtle bg-surface p-5 shadow-sm">
           <div className="grid gap-3 md:grid-cols-[1fr_180px_180px]">
-            <label className="relative">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-              />
-
-              <input
-                value={localSearch}
-                onChange={(event) => {
-                  setLocalSearch(event.target.value);
-                  setCurrentPage(1);
-                }}
-                placeholder="Tìm theo tên, mã hoặc vai trò..."
-                className="h-11 w-full rounded-xl border border-input bg-surface pl-10 pr-4 text-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10"
-              />
-            </label>
+            <SearchInput
+              value={localSearch}
+              onChange={(value) => {
+                setLocalSearch(value);
+                setCurrentPage(1);
+              }}
+              placeholder="Tìm theo tên, mã hoặc vai trò..."
+              className="w-full"
+            />
 
             <select
               value={roleFilter}

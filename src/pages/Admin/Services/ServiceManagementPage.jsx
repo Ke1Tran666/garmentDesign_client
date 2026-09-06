@@ -1,10 +1,6 @@
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import {
+    MoreVertical,
   Pencil,
   Plus,
   Trash2,
@@ -17,11 +13,13 @@ import { useNotification } from "@/app/providers/NotificationProvider";
 import DataTable from "@/shared/ui/table/DataTable";
 import Pagination from "@/shared/ui/table/Pagination";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
-import FormModal from "@/shared/ui/modal/FormModal";
 import FilterSelect from "@/shared/ui/select/FilterSelect";
 import { SearchInput } from "@/shared/ui/search/search-input";
 import CountBadge from "@/shared/ui/badge/CountBadge";
 import PageHeading from "@/shared/ui/heading/PageHeading";
+import { HandleButtonIcon } from "@/shared/ui/button/Button";
+import ServiceFormModal from "@/features/service-management/ui/ServiceFormModal";
+import MenuTable from "@/shared/ui/menu/MenuTable";
 
 const PAGE_SIZE = 10;
 
@@ -68,38 +66,17 @@ const SERVICE_STATUS_OPTIONS = [
   },
 ];
 
-const EMPTY_FORM = {
-  serviceCode: "",
-  serviceName: "",
-  unitType: "",
-  basePrice: "",
-  description: "",
-  tags: "",
-  status: "active",
-};
-
-const createInitialForm = (service) => {
-  if (!service) {
-    return { ...EMPTY_FORM };
-  }
-
-  return {
-    serviceCode: service.serviceCode || "",
-    serviceName: service.serviceName || "",
-    unitType: service.unitType || "",
-    basePrice: service.basePrice ?? "",
-    description: service.description || "",
-    tags: service.tags || "",
-    status: service.status || "active",
-  };
+const INITIAL_MENU = {
+  open: false,
+  x: 0,
+  y: 0,
+  service: null,
 };
 
 const getErrorMessage = (error, fallback) => {
   const responseData = error.response?.data;
 
-  if (typeof responseData === "string") {
-    return responseData;
-  }
+  if (typeof responseData === "string") return responseData;
 
   return responseData?.message || fallback;
 };
@@ -107,9 +84,7 @@ const getErrorMessage = (error, fallback) => {
 const formatPrice = (value) => {
   const price = Number(value);
 
-  if (!Number.isFinite(price)) {
-    return "Chưa thiết lập";
-  }
+  if (!Number.isFinite(price)) return "Chưa thiết lập";
 
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -123,9 +98,7 @@ const formatDate = (value) => {
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
+  if (Number.isNaN(date.getTime())) return value;
 
   return new Intl.DateTimeFormat("vi-VN", {
     day: "2-digit",
@@ -144,9 +117,7 @@ const getStatusInfo = (service) => {
     };
   }
 
-  const status = String(service?.status || "")
-    .trim()
-    .toLowerCase();
+  const status = String(service?.status || "").trim().toLowerCase();
 
   if (status === "active") {
     return {
@@ -177,20 +148,17 @@ const ServiceManagementPage = () => {
   const [loadError, setLoadError] = useState("");
 
   const [localSearch, setLocalSearch] = useState("");
-  const deferredSearch = useDeferredValue(
-    localSearch || searchKeyword,
-  );
+  const deferredSearch = useDeferredValue(localSearch || searchKeyword);
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
   const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm] = useState(() => ({
-    ...EMPTY_FORM,
-  }));
   const [editingService, setEditingService] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+
+  const [menu, setMenu] = useState(INITIAL_MENU);
 
   const [removingService, setRemovingService] = useState(null);
   const [removing, setRemoving] = useState(false);
@@ -199,9 +167,7 @@ const ServiceManagementPage = () => {
   useEffect(() => {
     let active = true;
 
-    serviceApi
-      .getAll()
-      .then((data) => {
+    serviceApi.getAll().then((data) => {
         if (!active) return;
 
         setServices(Array.isArray(data) ? data : []);
@@ -224,25 +190,17 @@ const ServiceManagementPage = () => {
         );
       })
       .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       });
 
-    return () => {
-      active = false;
-    };
+    return () => {active = false};
   }, []);
 
   const filteredServices = useMemo(() => {
-    const keyword = deferredSearch
-      .trim()
-      .toLowerCase();
+    const keyword = deferredSearch.trim().toLowerCase();
 
     return services.filter((service) => {
-      const status = String(
-        service.status || "",
-      ).toLowerCase();
+      const status = String(service.status || "").toLowerCase();
 
       const matchesKeyword =
         !keyword ||
@@ -258,58 +216,68 @@ const ServiceManagementPage = () => {
           .toLowerCase()
           .includes(keyword);
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        status === statusFilter;
+      const matchesStatus = statusFilter === "all" || status === statusFilter;
 
       return matchesKeyword && matchesStatus;
     });
-  }, [
-    services,
-    deferredSearch,
-    statusFilter,
-  ]);
+  }, [ services, deferredSearch, statusFilter ]);
 
   const totalPages = Math.max(
-    1,
-    Math.ceil(filteredServices.length / PAGE_SIZE),
+    1, Math.ceil(filteredServices.length / PAGE_SIZE),
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages,
-  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const visibleServices = useMemo(() => {
-    const start =
-      (safeCurrentPage - 1) * PAGE_SIZE;
+    const start = (safeCurrentPage - 1) * PAGE_SIZE;
 
-    return filteredServices.slice(
-      start,
-      start + PAGE_SIZE,
-    );
+    return filteredServices.slice( start, start + PAGE_SIZE);
   }, [filteredServices, safeCurrentPage]);
 
   const showingStart =
-    filteredServices.length === 0
-      ? 0
-      : (safeCurrentPage - 1) * PAGE_SIZE + 1;
+    filteredServices.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
 
   const showingEnd = Math.min(
-    safeCurrentPage * PAGE_SIZE,
-    filteredServices.length,
+    safeCurrentPage * PAGE_SIZE, filteredServices.length
   );
 
   const openCreateForm = () => {
     setEditingService(null);
-    setForm({ ...EMPTY_FORM });
     setFormError("");
     setFormOpen(true);
   };
 
+  const openActionMenu = (event, service) => {
+    event.stopPropagation();
+
+    const rect =
+      event.currentTarget.getBoundingClientRect();
+
+    const menuWidth = 176;
+    const menuHeight = 132;
+
+    setMenu({
+      open: true,
+      service,
+      x: Math.max(
+        12,
+        Math.min(
+          rect.right - menuWidth,
+          window.innerWidth - menuWidth - 12,
+        ),
+      ),
+      y: Math.max(
+        12,
+        Math.min(
+          rect.bottom + 6,
+          window.innerHeight - menuHeight - 12,
+        ),
+      ),
+    });
+  };
+
   const openEditForm = (service) => {
     setEditingService(service);
-    setForm(createInitialForm(service));
     setFormError("");
     setFormOpen(true);
   };
@@ -334,10 +302,7 @@ const ServiceManagementPage = () => {
       return;
     }
 
-    if (
-      !Number.isFinite(payload.basePrice) ||
-      payload.basePrice < 0
-    ) {
+    if (!Number.isFinite(payload.basePrice) || payload.basePrice < 0) {
       setFormError(
         "Giá cơ bản phải là một số lớn hơn hoặc bằng 0.",
       );
@@ -364,10 +329,6 @@ const ServiceManagementPage = () => {
       setFormError("");
 
       if (editingService) {
-        /*
-         * Giữ lại serviceId và createdAt vì backend hiện
-         * dùng BeanUtils.copyProperties khi cập nhật.
-         */
         const updated = await serviceApi.update(
           editingService.serviceId,
           {
@@ -380,11 +341,8 @@ const ServiceManagementPage = () => {
 
         setServices((current) =>
           current.map((service) =>
-            service.serviceId ===
-            editingService.serviceId
-              ? updated
-              : service,
-          ),
+            service.serviceId === editingService.serviceId ? updated : service
+          )
         );
 
         showNotification(
@@ -393,13 +351,9 @@ const ServiceManagementPage = () => {
           `${updated.serviceName} đã được cập nhật.`,
         );
       } else {
-        const created =
-          await serviceApi.create(payload);
+        const created = await serviceApi.create(payload);
 
-        setServices((current) => [
-          created,
-          ...current,
-        ]);
+        setServices((current) => [created, ...current]);
 
         setCurrentPage(1);
 
@@ -432,15 +386,11 @@ const ServiceManagementPage = () => {
       setRemoving(true);
       setRemoveError("");
 
-      await serviceApi.remove(
-        removingService.serviceId,
-      );
+      await serviceApi.remove(removingService.serviceId);
 
       setServices((current) =>
         current.filter(
-          (service) =>
-            service.serviceId !==
-            removingService.serviceId,
+          (service) => service.serviceId !== removingService.serviceId
         ),
       );
 
@@ -463,31 +413,6 @@ const ServiceManagementPage = () => {
     }
   };
 
-  const handleChangeForm = (event) => {
-    const { name, value } = event.target;
-
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmitForm = (event) => {
-    event.preventDefault();
-
-    if (submitting) return;
-
-    saveService({
-      serviceCode: form.serviceCode.trim(),
-      serviceName: form.serviceName.trim(),
-      unitType: form.unitType.trim(),
-      basePrice: Number(form.basePrice),
-      description: form.description.trim(),
-      tags: form.tags.trim(),
-      status: form.status,
-    });
-  };
-
   return (
     <>
       <div className="space-y-6">
@@ -504,20 +429,13 @@ const ServiceManagementPage = () => {
               icon={Wrench}
             />
 
-            <button
-              type="button"
+            <HandleButtonIcon
+              icon={Plus}
               onClick={openCreateForm}
-              className="
-                inline-flex items-center gap-2
-                rounded-xl bg-brand!
-                px-4 py-2.5 text-sm font-semibold
-                text-white shadow-sm
-                transition hover:opacity-90
-              "
+              className="bg-brand!"
             >
-              <Plus size={18} />
               Thêm dịch vụ
-            </button>
+            </HandleButtonIcon>
           </div>
         </div>
 
@@ -559,9 +477,7 @@ const ServiceManagementPage = () => {
                 return (
                   <tr
                     key={service.serviceId}
-                    className="
-                      transition hover:bg-surface-subtle
-                    "
+                    className="transition hover:bg-surface-subtle"
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-start gap-3">
@@ -577,8 +493,7 @@ const ServiceManagementPage = () => {
 
                         <div className="min-w-0">
                           <p className="max-w-70 truncate text-sm font-semibold text-text-default">
-                            {service.serviceName ||
-                              "Chưa đặt tên"}
+                            {service.serviceName || "Chưa đặt tên"}
                           </p>
 
                           <p className="mt-1 text-xs text-text-muted">
@@ -600,9 +515,7 @@ const ServiceManagementPage = () => {
                     </td>
 
                     <td className="px-4 py-3 text-sm font-semibold text-text-default">
-                      {formatPrice(
-                        service.basePrice,
-                      )}
+                      {formatPrice(service.basePrice)}
                     </td>
 
                     <td className="px-4 py-3">
@@ -618,48 +531,26 @@ const ServiceManagementPage = () => {
                     </td>
 
                     <td className="px-4 py-3 text-sm text-text-muted">
-                      {formatDate(
-                        service.updatedAt ||
-                          service.createdAt,
-                      )}
+                      {formatDate(service.updatedAt || service.createdAt)}
                     </td>
 
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          type="button"
-                          aria-label={`Sửa ${service.serviceName}`}
-                          onClick={() =>
-                            openEditForm(service)
-                          }
-                          className="
-                            flex h-9 w-9 items-center
-                            justify-center rounded-lg
-                            text-text-muted transition
-                            hover:bg-info-soft hover:text-info
-                          "
-                        >
-                          <Pencil size={17} />
-                        </button>
-
-                        <button
-                          type="button"
-                          aria-label={`Xóa ${service.serviceName}`}
-                          onClick={() => {
-                            setRemoveError("");
-                            setRemovingService(service);
-                          }}
-                          className="
-                            flex h-9 w-9 items-center
-                            justify-center rounded-lg
-                            text-text-muted transition
-                            hover:bg-danger-soft
-                            hover:text-danger
-                          "
-                        >
-                          <Trash2 size={17} />
-                        </button>
-                      </div>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        aria-label={`Mở thao tác cho ${service.serviceName}`}
+                        onClick={(event) =>
+                          openActionMenu(event, service)
+                        }
+                        className="
+                          inline-flex h-9 w-9
+                          items-center justify-center
+                          rounded-lg text-text-muted
+                          transition hover:bg-surface-muted
+                          hover:text-text-default
+                        "
+                      >
+                        <MoreVertical size={18} />
+                      </button>
                     </td>
                   </tr>
                 );
@@ -681,221 +572,59 @@ const ServiceManagementPage = () => {
         </div>
       </div>
 
-      <FormModal
-        open={formOpen}
-        title={
-          editingService
-            ? "Chỉnh sửa dịch vụ"
-            : "Thêm dịch vụ mới"
-        }
-        description="Cập nhật thông tin hiển thị, giá và trạng thái dịch vụ."
-        form={form}
-        onChange={handleChangeForm}
-        onClose={closeForm}
-        onSubmit={handleSubmitForm}
-        submitText={
-          editingService
-            ? "Lưu thay đổi"
-            : "Thêm dịch vụ"
-        }
-        loadingText="Đang lưu..."
-        submitting={submitting}
-        errorMessage={formError}
-        maxWidthClassName="max-w-2xl"
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="space-y-2">
-            <span className="text-sm font-semibold text-text-default">
-              Mã dịch vụ
-            </span>
+      <MenuTable
+        open={menu.open}
+        position={{
+          x: menu.x,
+          y: menu.y,
+        }}
+        onClose={() => setMenu(INITIAL_MENU)}
+        items={[
+          {
+            id: "edit",
+            label: "Chỉnh sửa",
+            icon: Pencil,
+            onClick: () => {
+              if (!menu.service) return;
 
-            <input
-              name="serviceCode"
-              value={form.serviceCode}
-              onChange={handleChangeForm}
-              disabled={submitting}
-              required
-              maxLength={50}
-              placeholder="Ví dụ: DES001"
-              className="
-                h-11 w-full rounded-xl
-                border border-input bg-surface
-                px-4 text-sm text-text-default
-                outline-none transition
-                focus:border-brand
-                focus:ring-4 focus:ring-brand/10
-                disabled:cursor-not-allowed
-                disabled:bg-surface-muted
-              "
-            />
-          </label>
+              openEditForm(menu.service);
+            },
+          },
+          {
+            id: "divider",
+            type: "divider",
+          },
+          {
+            id: "delete",
+            label: "Xóa dịch vụ",
+            icon: Trash2,
+            danger: true,
+            disabled:
+              !menu.service ||
+              Boolean(menu.service.deletedAt),
+            onClick: () => {
+              if (!menu.service) return;
 
-          <label className="space-y-2">
-            <span className="text-sm font-semibold text-text-default">
-              Tên dịch vụ
-            </span>
+              setRemoveError("");
+              setRemovingService(menu.service);
+            },
+          },
+        ]}
+      />
 
-            <input
-              name="serviceName"
-              value={form.serviceName}
-              onChange={handleChangeForm}
-              disabled={submitting}
-              required
-              maxLength={255}
-              placeholder="Nhập tên dịch vụ"
-              className="
-                h-11 w-full rounded-xl
-                border border-input bg-surface
-                px-4 text-sm text-text-default
-                outline-none transition
-                focus:border-brand
-                focus:ring-4 focus:ring-brand/10
-                disabled:cursor-not-allowed
-                disabled:bg-surface-muted
-              "
-            />
-          </label>
-
-          <label className="space-y-2">
-            <span className="text-sm font-semibold text-text-default">
-              Đơn vị tính
-            </span>
-
-            <input
-              name="unitType"
-              value={form.unitType}
-              onChange={handleChangeForm}
-              disabled={submitting}
-              required
-              maxLength={100}
-              placeholder="Ví dụ: Sản phẩm"
-              className="
-                h-11 w-full rounded-xl
-                border border-input bg-surface
-                px-4 text-sm text-text-default
-                outline-none transition
-                focus:border-brand
-                focus:ring-4 focus:ring-brand/10
-                disabled:cursor-not-allowed
-                disabled:bg-surface-muted
-              "
-            />
-          </label>
-
-          <label className="space-y-2">
-            <span className="text-sm font-semibold text-text-default">
-              Giá cơ bản
-            </span>
-
-            <input
-              type="number"
-              name="basePrice"
-              value={form.basePrice}
-              onChange={handleChangeForm}
-              disabled={submitting}
-              required
-              min="0"
-              step="1000"
-              placeholder="0"
-              className="
-                h-11 w-full rounded-xl
-                border border-input bg-surface
-                px-4 text-sm text-text-default
-                outline-none transition
-                focus:border-brand
-                focus:ring-4 focus:ring-brand/10
-                disabled:cursor-not-allowed
-                disabled:bg-surface-muted
-              "
-            />
-          </label>
-        </div>
-
-        <label className="block space-y-2">
-          <span className="text-sm font-semibold text-text-default">
-            Thẻ dịch vụ
-          </span>
-
-          <input
-            name="tags"
-            value={form.tags}
-            onChange={handleChangeForm}
-            disabled={submitting}
-            placeholder="Thiết kế, Rập, May mặc"
-            className="
-              h-11 w-full rounded-xl
-              border border-input bg-surface
-              px-4 text-sm text-text-default
-              outline-none transition
-              focus:border-brand
-              focus:ring-4 focus:ring-brand/10
-              disabled:cursor-not-allowed
-              disabled:bg-surface-muted
-            "
-          />
-
-          <span className="block text-xs text-text-muted">
-            Phân cách các thẻ bằng dấu phẩy.
-          </span>
-        </label>
-
-        <label className="block space-y-2">
-          <span className="text-sm font-semibold text-text-default">
-            Mô tả
-          </span>
-
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChangeForm}
-            disabled={submitting}
-            rows={4}
-            maxLength={1000}
-            placeholder="Mô tả ngắn về dịch vụ..."
-            className="
-              w-full resize-y rounded-xl
-              border border-input bg-surface
-              px-4 py-3 text-sm text-text-default
-              outline-none transition
-              focus:border-brand
-              focus:ring-4 focus:ring-brand/10
-              disabled:cursor-not-allowed
-              disabled:bg-surface-muted
-            "
-          />
-        </label>
-
-        <label className="block space-y-2">
-          <span className="text-sm font-semibold text-text-default">
-            Trạng thái
-          </span>
-
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChangeForm}
-            disabled={submitting}
-            className="
-              h-11 w-full rounded-xl
-              border border-input bg-surface
-              px-4 text-sm text-text-default
-              outline-none transition
-              focus:border-brand
-              focus:ring-4 focus:ring-brand/10
-              disabled:cursor-not-allowed
-              disabled:bg-surface-muted
-            "
-          >
-            <option value="active">
-              Đang hoạt động
-            </option>
-
-            <option value="inactive">
-              Tạm ngừng
-            </option>
-          </select>
-        </label>
-      </FormModal>
+      {formOpen && (
+        <ServiceFormModal
+          key={
+            editingService?.serviceId ??
+            "create-service"
+          }
+          service={editingService}
+          submitting={submitting}
+          errorMessage={formError}
+          onClose={closeForm}
+          onSubmit={saveService}
+        />
+      )}
 
       <ConfirmModal
         open={Boolean(removingService)}

@@ -46,4 +46,29 @@ export const serviceOrderApi = {
 
     return response.data;
   },
+
+  async getAll(config = {}) {
+    const response = await httpClient.get(
+      "/service-orders",
+      config,
+    );
+
+    return response.data;
+  },
+
+  async getById(orderId, config = {}) {
+    const response = await httpClient.get(
+      `/service-orders/${orderId}`,
+      config,
+    );
+
+    return response.data;
+  },
+
+  async removeByAdmin(orderId, config = {}) {
+    await httpClient.delete(
+      `/service-orders/${orderId}`,
+      config,
+    );
+  },
 };

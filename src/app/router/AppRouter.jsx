@@ -24,6 +24,7 @@ import RoleProtectedRoute from "@/app/router/RoleProtectedRoute";
 import UserManagementPage from "@/pages/Admin/Users/UserManagementPage";
 import UserDetailPage from "@/pages/Admin/Users/UserDetailPage";
 import ServiceManagementPage from "@/pages/Admin/Services/ServiceManagementPage";
+import ServiceOrderManagementPage from "@/pages/Admin/ServiceOrders/ServiceOrderManagementPage";
 
 const AppRouter = () => {
   return (
@@ -71,6 +72,10 @@ const AppRouter = () => {
           <Route path="users" element={<UserManagementPage />} />
           <Route path="users/:userId" element={<UserDetailPage />} />
           <Route path="services" element={<ServiceManagementPage />} />
+          <Route 
+            path="service-orders" 
+            element={<ServiceOrderManagementPage />}
+          />
         </Route>
 
         <Route path="/not-found" element={<NotFoundPage />}/>

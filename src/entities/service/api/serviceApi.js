@@ -3,12 +3,25 @@ import httpClient from "@/shared/api/httpClient";
 export const serviceApi = {
   async getAll(config = {}) {
     const response = await httpClient.get("/services", config);
+
     return response.data;
   },
 
   async getById(serviceId, config = {}) {
+    const response = await httpClient.get(`/services/${serviceId}`, config);
+
+    return response.data;
+  },
+
+  async getAdminAll(config = {}) {
+    const response = await httpClient.get("/admin/services", config);
+
+    return response.data;
+  },
+
+  async getAdminById(serviceId, config = {}) {
     const response = await httpClient.get(
-      `/services/${serviceId}`,
+      `/admin/services/${serviceId}`,
       config,
     );
 
@@ -16,18 +29,14 @@ export const serviceApi = {
   },
 
   async create(payload, config = {}) {
-    const response = await httpClient.post(
-      "/services",
-      payload,
-      config,
-    );
+    const response = await httpClient.post("/admin/services", payload, config);
 
     return response.data;
   },
 
   async update(serviceId, payload, config = {}) {
     const response = await httpClient.put(
-      `/services/${serviceId}`,
+      `/admin/services/${serviceId}`,
       payload,
       config,
     );
@@ -36,9 +45,11 @@ export const serviceApi = {
   },
 
   async remove(serviceId, config = {}) {
-    await httpClient.delete(
-      `/services/${serviceId}`,
+    const response = await httpClient.delete(
+      `/admin/services/${serviceId}`,
       config,
     );
+
+    return response.data;
   },
 };

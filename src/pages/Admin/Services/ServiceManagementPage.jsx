@@ -1,12 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import {
-    MoreVertical,
-  Pencil,
-  Plus,
-  Trash2,
-  Wrench,
-} from "lucide-react";
-import { useOutletContext } from "react-router-dom";
+import { Eye, MoreVertical, Plus, Trash2, Wrench } from "lucide-react";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { normalizeRole } from "@/features/auth/lib/authRole";
 
 import { serviceApi } from "@/entities/service/api/serviceApi";
 import { useNotification } from "@/app/providers/NotificationProvider";
@@ -21,7 +16,7 @@ import { HandleButtonIcon } from "@/shared/ui/button/Button";
 import ServiceFormModal from "@/features/service-management/ui/ServiceFormModal";
 import MenuTable from "@/shared/ui/menu/MenuTable";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 15;
 
 const COLUMNS = [
   {
@@ -63,6 +58,10 @@ const SERVICE_STATUS_OPTIONS = [
   {
     value: "inactive",
     label: "Tạm ngừng",
+  },
+  {
+    value: "deleted",
+    label: "Đã xóa",
   },
 ];
 
@@ -117,7 +116,9 @@ const getStatusInfo = (service) => {
     };
   }
 
-  const status = String(service?.status || "").trim().toLowerCase();
+  const status = String(service?.status || "")
+    .trim()
+    .toLowerCase();
 
   if (status === "active") {
     return {
@@ -140,8 +141,11 @@ const getStatusInfo = (service) => {
 };
 
 const ServiceManagementPage = () => {
-  const { searchKeyword = "" } = useOutletContext();
+  const { adminUser, searchKeyword = "" } = useOutletContext();
+  const navigate = useNavigate();
   const { showNotification } = useNotification();
+
+  const isAdmin = normalizeRole(adminUser?.role) === "admin";
 
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -167,33 +171,31 @@ const ServiceManagementPage = () => {
   useEffect(() => {
     let active = true;
 
-    serviceApi.getAll().then((data) => {
+    serviceApi
+      .getAdminAll()
+      .then((data) => {
         if (!active) return;
 
         setServices(Array.isArray(data) ? data : []);
         setLoadError("");
       })
       .catch((error) => {
-        console.error(
-          "Không thể tải danh sách dịch vụ:",
-          error,
-        );
+        console.error("Không thể tải danh sách dịch vụ:", error);
 
         if (!active) return;
 
         setServices([]);
         setLoadError(
-          getErrorMessage(
-            error,
-            "Không thể tải danh sách dịch vụ.",
-          ),
+          getErrorMessage(error, "Không thể tải danh sách dịch vụ."),
         );
       })
       .finally(() => {
         if (active) setLoading(false);
       });
 
-    return () => {active = false};
+    return () => {
+      active = false;
+    };
   }, []);
 
   const filteredServices = useMemo(() => {
@@ -216,14 +218,19 @@ const ServiceManagementPage = () => {
           .toLowerCase()
           .includes(keyword);
 
-      const matchesStatus = statusFilter === "all" || status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "deleted"
+          ? Boolean(service.deletedAt)
+          : !service.deletedAt && status === statusFilter);
 
       return matchesKeyword && matchesStatus;
     });
-  }, [ services, deferredSearch, statusFilter ]);
+  }, [services, deferredSearch, statusFilter]);
 
   const totalPages = Math.max(
-    1, Math.ceil(filteredServices.length / PAGE_SIZE),
+    1,
+    Math.ceil(filteredServices.length / PAGE_SIZE),
   );
 
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -231,14 +238,15 @@ const ServiceManagementPage = () => {
   const visibleServices = useMemo(() => {
     const start = (safeCurrentPage - 1) * PAGE_SIZE;
 
-    return filteredServices.slice( start, start + PAGE_SIZE);
+    return filteredServices.slice(start, start + PAGE_SIZE);
   }, [filteredServices, safeCurrentPage]);
 
   const showingStart =
     filteredServices.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
 
   const showingEnd = Math.min(
-    safeCurrentPage * PAGE_SIZE, filteredServices.length
+    safeCurrentPage * PAGE_SIZE,
+    filteredServices.length,
   );
 
   const openCreateForm = () => {
@@ -250,8 +258,7 @@ const ServiceManagementPage = () => {
   const openActionMenu = (event, service) => {
     event.stopPropagation();
 
-    const rect =
-      event.currentTarget.getBoundingClientRect();
+    const rect = event.currentTarget.getBoundingClientRect();
 
     const menuWidth = 176;
     const menuHeight = 132;
@@ -261,25 +268,13 @@ const ServiceManagementPage = () => {
       service,
       x: Math.max(
         12,
-        Math.min(
-          rect.right - menuWidth,
-          window.innerWidth - menuWidth - 12,
-        ),
+        Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 12),
       ),
       y: Math.max(
         12,
-        Math.min(
-          rect.bottom + 6,
-          window.innerHeight - menuHeight - 12,
-        ),
+        Math.min(rect.bottom + 6, window.innerHeight - menuHeight - 12),
       ),
     });
-  };
-
-  const openEditForm = (service) => {
-    setEditingService(service);
-    setFormError("");
-    setFormOpen(true);
   };
 
   const closeForm = () => {
@@ -291,21 +286,13 @@ const ServiceManagementPage = () => {
   };
 
   const saveService = async (payload) => {
-    if (
-      !payload.serviceCode ||
-      !payload.serviceName ||
-      !payload.unitType
-    ) {
-      setFormError(
-        "Vui lòng nhập đầy đủ mã, tên và đơn vị dịch vụ.",
-      );
+    if (!payload.serviceCode || !payload.serviceName || !payload.unitType) {
+      setFormError("Vui lòng nhập đầy đủ mã, tên và đơn vị dịch vụ.");
       return;
     }
 
     if (!Number.isFinite(payload.basePrice) || payload.basePrice < 0) {
-      setFormError(
-        "Giá cơ bản phải là một số lớn hơn hoặc bằng 0.",
-      );
+      setFormError("Giá cơ bản phải là một số lớn hơn hoặc bằng 0.");
       return;
     }
 
@@ -313,14 +300,11 @@ const ServiceManagementPage = () => {
       (service) =>
         service.serviceCode?.trim().toLowerCase() ===
           payload.serviceCode.toLowerCase() &&
-        service.serviceId !==
-          editingService?.serviceId,
+        service.serviceId !== editingService?.serviceId,
     );
 
     if (duplicatedCode) {
-      setFormError(
-        "Mã dịch vụ đã tồn tại trong danh sách.",
-      );
+      setFormError("Mã dịch vụ đã tồn tại trong danh sách.");
       return;
     }
 
@@ -329,20 +313,17 @@ const ServiceManagementPage = () => {
       setFormError("");
 
       if (editingService) {
-        const updated = await serviceApi.update(
-          editingService.serviceId,
-          {
-            ...editingService,
-            ...payload,
-            serviceId: editingService.serviceId,
-            createdAt: editingService.createdAt,
-          },
-        );
+        const updated = await serviceApi.update(editingService.serviceId, {
+          ...editingService,
+          ...payload,
+          serviceId: editingService.serviceId,
+          createdAt: editingService.createdAt,
+        });
 
         setServices((current) =>
           current.map((service) =>
-            service.serviceId === editingService.serviceId ? updated : service
-          )
+            service.serviceId === editingService.serviceId ? updated : service,
+          ),
         );
 
         showNotification(
@@ -386,31 +367,34 @@ const ServiceManagementPage = () => {
       setRemoving(true);
       setRemoveError("");
 
-      await serviceApi.remove(removingService.serviceId);
+      const deletedService = await serviceApi.remove(removingService.serviceId);
 
       setServices((current) =>
-        current.filter(
-          (service) => service.serviceId !== removingService.serviceId
+        current.map((service) =>
+          service.serviceId === removingService.serviceId
+            ? deletedService
+            : service,
         ),
       );
 
       showNotification(
         "success",
         "Đã xóa dịch vụ",
-        `${removingService.serviceName} đã được xóa khỏi hệ thống.`,
+        `${removingService.serviceName} đã ngừng cung cấp.`,
       );
 
       setRemovingService(null);
     } catch (error) {
-      setRemoveError(
-        getErrorMessage(
-          error,
-          "Không thể xóa dịch vụ. Dịch vụ có thể đang được sử dụng trong đơn hàng.",
-        ),
-      );
+      setRemoveError(getErrorMessage(error, "Không thể xóa dịch vụ."));
     } finally {
       setRemoving(false);
     }
+  };
+
+  const openDetail = (service) => {
+    setMenu(INITIAL_MENU);
+
+    navigate(`/admin/services/${service.serviceId}`);
   };
 
   return (
@@ -429,13 +413,15 @@ const ServiceManagementPage = () => {
               icon={Wrench}
             />
 
-            <HandleButtonIcon
-              icon={Plus}
-              onClick={openCreateForm}
-              className="bg-brand!"
-            >
-              Thêm dịch vụ
-            </HandleButtonIcon>
+            {isAdmin && (
+              <HandleButtonIcon
+                icon={Plus}
+                onClick={openCreateForm}
+                className="bg-brand!"
+              >
+                Thêm dịch vụ
+              </HandleButtonIcon>
+            )}
           </div>
         </div>
 
@@ -471,8 +457,7 @@ const ServiceManagementPage = () => {
               emptyText="Không tìm thấy dịch vụ"
               minWidth="min-w-240"
               renderRow={(service) => {
-                const status =
-                  getStatusInfo(service);
+                const status = getStatusInfo(service);
 
                 return (
                   <tr
@@ -481,13 +466,7 @@ const ServiceManagementPage = () => {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-start gap-3">
-                        <span
-                          className="
-                            flex h-10 w-10 shrink-0
-                            items-center justify-center
-                            rounded-xl bg-brand-soft text-brand
-                          "
-                        >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand">
                           <Wrench size={18} />
                         </span>
 
@@ -497,8 +476,7 @@ const ServiceManagementPage = () => {
                           </p>
 
                           <p className="mt-1 text-xs text-text-muted">
-                            {service.serviceCode ||
-                              `#${service.serviceId}`}
+                            {service.serviceCode || `#${service.serviceId}`}
                           </p>
 
                           {service.tags && (
@@ -520,11 +498,7 @@ const ServiceManagementPage = () => {
 
                     <td className="px-4 py-3">
                       <span
-                        className={`
-                          rounded-full px-3 py-1
-                          text-xs font-semibold
-                          ${status.className}
-                        `}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className} `}
                       >
                         {status.label}
                       </span>
@@ -538,16 +512,8 @@ const ServiceManagementPage = () => {
                       <button
                         type="button"
                         aria-label={`Mở thao tác cho ${service.serviceName}`}
-                        onClick={(event) =>
-                          openActionMenu(event, service)
-                        }
-                        className="
-                          inline-flex h-9 w-9
-                          items-center justify-center
-                          rounded-lg text-text-muted
-                          transition hover:bg-surface-muted
-                          hover:text-text-default
-                        "
+                        onClick={(event) => openActionMenu(event, service)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-muted hover:text-text-default"
                       >
                         <MoreVertical size={18} />
                       </button>
@@ -581,27 +547,27 @@ const ServiceManagementPage = () => {
         onClose={() => setMenu(INITIAL_MENU)}
         items={[
           {
-            id: "edit",
-            label: "Chỉnh sửa",
-            icon: Pencil,
+            id: "detail",
+            label: "Xem chi tiết",
+            icon: Eye,
             onClick: () => {
               if (!menu.service) return;
 
-              openEditForm(menu.service);
+              openDetail(menu.service);
             },
           },
           {
             id: "divider",
             type: "divider",
+            hidden: !isAdmin,
           },
           {
             id: "delete",
             label: "Xóa dịch vụ",
             icon: Trash2,
             danger: true,
-            disabled:
-              !menu.service ||
-              Boolean(menu.service.deletedAt),
+            hidden: !isAdmin,
+            disabled: !menu.service || Boolean(menu.service.deletedAt),
             onClick: () => {
               if (!menu.service) return;
 
@@ -614,10 +580,7 @@ const ServiceManagementPage = () => {
 
       {formOpen && (
         <ServiceFormModal
-          key={
-            editingService?.serviceId ??
-            "create-service"
-          }
+          key={editingService?.serviceId ?? "create-service"}
           service={editingService}
           submitting={submitting}
           errorMessage={formError}
@@ -650,8 +613,7 @@ const ServiceManagementPage = () => {
         </p>
 
         <p className="mt-2">
-          Dịch vụ đang được sử dụng trong đơn hàng có thể
-          không xóa được.
+          Dịch vụ đang được sử dụng trong đơn hàng có thể không xóa được.
         </p>
 
         {removeError && (

@@ -7,9 +7,7 @@ import "@/shared/styles/index.css";
 import App from "@/app/App";
 import AppProviders from "@/app/providers/AppProviders";
 
-createRoot(
-  document.getElementById("root"),
-).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AppProviders>
       <App />

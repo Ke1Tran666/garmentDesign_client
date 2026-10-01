@@ -1,22 +1,13 @@
 import { useEffect, useRef } from "react";
 
-const MenuTable = ({
-  open,
-  position,
-  items = [],
-  onClose,
-  width = 176,
-}) => {
+const MenuTable = ({ open, position, items = [], onClose, width = 176 }) => {
   const menuRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
 
     const handleClickOutside = (event) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
         onClose?.();
       }
     };
@@ -50,11 +41,7 @@ const MenuTable = ({
     <div
       ref={menuRef}
       role="menu"
-      className="
-        fixed z-50 overflow-hidden rounded-xl
-        border border-border bg-surface
-        py-1 shadow-xl
-      "
+      className="fixed z-50 overflow-hidden rounded-xl border border-border bg-surface py-1 shadow-xl"
       style={{
         top: position?.y ?? 0,
         left: position?.x ?? 0,
@@ -88,18 +75,11 @@ const MenuTable = ({
               item.onClick?.();
               onClose?.();
             }}
-            className={`
-              flex w-full items-center gap-3
-              px-4 py-2.5 text-left text-sm
-              transition
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-              ${
-                item.danger
-                  ? "text-danger hover:bg-danger-soft"
-                  : "text-text-default hover:bg-surface-subtle"
-              }
-            `}
+            className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              item.danger
+                ? "text-danger hover:bg-danger-soft"
+                : "text-text-default hover:bg-surface-subtle"
+            } `}
           >
             {Icon && <Icon size={17} className="shrink-0" />}
 

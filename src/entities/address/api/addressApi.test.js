@@ -1,10 +1,4 @@
-import {
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import httpClient from "@/shared/api/httpClient";
 import { addressApi } from "./addressApi";
 
@@ -44,10 +38,7 @@ describe("addressApi", () => {
       data: addresses,
     });
 
-    const result = await addressApi.getByUser(
-      10,
-      config,
-    );
+    const result = await addressApi.getByUser(10, config);
 
     expect(httpClient.get).toHaveBeenCalledWith(
       "/user-addresses/user/10",
@@ -74,10 +65,7 @@ describe("addressApi", () => {
       data: createdAddress,
     });
 
-    const result = await addressApi.create(
-      10,
-      payload,
-    );
+    const result = await addressApi.create(10, payload);
 
     expect(httpClient.post).toHaveBeenCalledWith(
       "/user-addresses/user/10",
@@ -103,15 +91,9 @@ describe("addressApi", () => {
       data: updatedAddress,
     });
 
-    const result = await addressApi.update(
-      5,
-      payload,
-    );
+    const result = await addressApi.update(5, payload);
 
-    expect(httpClient.put).toHaveBeenCalledWith(
-      "/user-addresses/5",
-      payload,
-    );
+    expect(httpClient.put).toHaveBeenCalledWith("/user-addresses/5", payload);
 
     expect(result).toEqual(updatedAddress);
   });
@@ -127,9 +109,7 @@ describe("addressApi", () => {
 
     const result = await addressApi.remove(5);
 
-    expect(httpClient.delete).toHaveBeenCalledWith(
-      "/user-addresses/5",
-    );
+    expect(httpClient.delete).toHaveBeenCalledWith("/user-addresses/5");
 
     expect(result).toEqual(responseData);
   });
@@ -144,10 +124,7 @@ describe("addressApi", () => {
       data: responseData,
     });
 
-    const result = await addressApi.setDefault(
-      10,
-      5,
-    );
+    const result = await addressApi.setDefault(10, 5);
 
     expect(httpClient.put).toHaveBeenCalledWith(
       "/user-addresses/user/10/default/5",
@@ -157,19 +134,12 @@ describe("addressApi", () => {
   });
 
   test("chuyển tiếp lỗi khi lấy danh sách thất bại", async () => {
-    const apiError = new Error(
-      "Không thể tải danh sách địa chỉ",
-    );
+    const apiError = new Error("Không thể tải danh sách địa chỉ");
 
     httpClient.get.mockRejectedValue(apiError);
 
-    await expect(
-      addressApi.getByUser(10),
-    ).rejects.toBe(apiError);
+    await expect(addressApi.getByUser(10)).rejects.toBe(apiError);
 
-    expect(httpClient.get).toHaveBeenCalledWith(
-      "/user-addresses/user/10",
-      {},
-    );
+    expect(httpClient.get).toHaveBeenCalledWith("/user-addresses/user/10", {});
   });
 });

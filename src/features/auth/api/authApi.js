@@ -6,15 +6,13 @@ const ensureCsrf = async () => {
 
 export const authApi = {
   async csrf() {
-    const response =
-      await httpClient.get("/auth/csrf");
+    const response = await httpClient.get("/auth/csrf");
 
     return response.data;
   },
 
   async me() {
-    const response =
-      await httpClient.get("/auth/me");
+    const response = await httpClient.get("/auth/me");
 
     if (response.status === 204) {
       return null;
@@ -26,8 +24,7 @@ export const authApi = {
   async logout() {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post("/auth/logout");
+    const response = await httpClient.post("/auth/logout");
 
     return response.data;
   },
@@ -35,13 +32,10 @@ export const authApi = {
   async login(payload) {
     await ensureCsrf();
 
-    const response = await httpClient.post(
-      "/auth/login",
-      {
-        email: payload.email.trim().toLowerCase(),
-        password: payload.password,
-      },
-    );
+    const response = await httpClient.post("/auth/login", {
+      email: payload.email.trim().toLowerCase(),
+      password: payload.password,
+    });
 
     return response.data;
   },
@@ -50,12 +44,12 @@ export const authApi = {
     await ensureCsrf();
 
     if (!credential) {
-      throw new Error(
-        "Không nhận được Google ID token",
-      );
+      throw new Error("Không nhận được Google ID token");
     }
 
-    const response = await httpClient.post("/auth/google-login",{credential});
+    const response = await httpClient.post("/auth/google-login", {
+      credential,
+    });
 
     return response.data;
   },
@@ -63,11 +57,7 @@ export const authApi = {
   async register(payload) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/register",
-        payload,
-      );
+    const response = await httpClient.post("/auth/register", payload);
 
     return response.data;
   },
@@ -75,13 +65,9 @@ export const authApi = {
   async sendPhoneOtp(phone) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/send-otp",
-        {
-          phone,
-        },
-      );
+    const response = await httpClient.post("/auth/send-otp", {
+      phone,
+    });
 
     return response.data;
   },
@@ -89,11 +75,7 @@ export const authApi = {
   async verifyPhoneOtp(payload) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/verify-otp",
-        payload,
-      );
+    const response = await httpClient.post("/auth/verify-otp", payload);
 
     return response.data;
   },
@@ -101,16 +83,11 @@ export const authApi = {
   async forgotPassword(email) {
     await ensureCsrf();
 
-    const normalizedEmail =
-      email.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const response =
-      await httpClient.post(
-        "/auth/forgot-password",
-        {
-          email: normalizedEmail,
-        },
-      );
+    const response = await httpClient.post("/auth/forgot-password", {
+      email: normalizedEmail,
+    });
 
     return response.data;
   },
@@ -118,17 +95,10 @@ export const authApi = {
   async verifyForgotOtp(payload) {
     await ensureCsrf();
 
-    const response =
-      await httpClient.post(
-        "/auth/verify-forgot-otp",
-        {
-          email:
-            payload.email
-              .trim()
-              .toLowerCase(),
-          otp: payload.otp,
-        },
-      );
+    const response = await httpClient.post("/auth/verify-forgot-otp", {
+      email: payload.email.trim().toLowerCase(),
+      otp: payload.otp,
+    });
 
     return response.data;
   },
@@ -136,18 +106,13 @@ export const authApi = {
   async resetPassword(payload) {
     await ensureCsrf();
 
-    const response = await httpClient.post(
-      "/auth/reset-password",
-      {
-        email: payload.email
-          .trim()
-          .toLowerCase(),
+    const response = await httpClient.post("/auth/reset-password", {
+      email: payload.email.trim().toLowerCase(),
 
-        newPassword: payload.newPassword,
+      newPassword: payload.newPassword,
 
-        resetToken: payload.resetToken,
-      },
-    );
+      resetToken: payload.resetToken,
+    });
 
     return response.data;
   },

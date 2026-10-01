@@ -82,70 +82,41 @@ const getStatusInfo = (order) => {
   };
 };
 
-const DetailItem = ({
-  label,
-  value,
-  className = "",
-}) => (
+const DetailItem = ({ label, value, className = "" }) => (
   <div className={className}>
-    <p className="text-xs font-medium uppercase tracking-wide text-text-subtle">
+    <p className="text-xs font-medium tracking-wide text-text-subtle uppercase">
       {label}
     </p>
 
-    <p className="mt-1 whitespace-pre-wrap text-sm font-medium text-text-default">
+    <p className="mt-1 text-sm font-medium whitespace-pre-wrap text-text-default">
       {value || "Chưa có"}
     </p>
   </div>
 );
 
-const DetailSection = ({
-  icon: Icon,
-  title,
-  children,
-}) => (
+const DetailSection = ({ icon: Icon, title, children }) => (
   <section className="rounded-xl border border-border-subtle p-4">
     <div className="mb-4 flex items-center gap-2">
-      <Icon
-        size={18}
-        className="shrink-0 text-brand"
-        aria-hidden="true"
-      />
+      <Icon size={18} className="shrink-0 text-brand" aria-hidden="true" />
 
-      <h3 className="font-semibold text-text-strong">
-        {title}
-      </h3>
+      <h3 className="font-semibold text-text-strong">{title}</h3>
     </div>
 
     {children}
   </section>
 );
 
-const AdminServiceOrderDetailModal = ({
-  open,
-  order,
-  onClose,
-}) => {
+const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
   if (!open || !order) return null;
 
   const status = getStatusInfo(order);
 
-  const address = [
-    order.address?.companyName,
-    order.address?.address,
-  ]
+  const address = [order.address?.companyName, order.address?.address]
     .filter(Boolean)
     .join(" - ");
 
-  const quantity = [
-    order.quantity,
-    order.unitType,
-  ]
-    .filter(
-      (value) =>
-        value !== undefined &&
-        value !== null &&
-        value !== "",
-    )
+  const quantity = [order.quantity, order.unitType]
+    .filter((value) => value !== undefined && value !== null && value !== "")
     .join(" ");
 
   return (
@@ -154,20 +125,11 @@ const AdminServiceOrderDetailModal = ({
       aria-modal="true"
       aria-labelledby="service-order-detail-title"
       onClick={onClose}
-      className="
-        fixed inset-0 z-70 flex items-center
-        justify-center bg-black/40 px-4 py-6
-      "
+      className="fixed inset-0 z-70 flex items-center justify-center bg-black/40 px-4 py-6"
     >
       <div
-        onClick={(event) =>
-          event.stopPropagation()
-        }
-        className="
-          relative w-full max-w-3xl overflow-hidden
-          rounded-2xl border border-border-subtle
-          bg-surface shadow-2xl
-        "
+        onClick={(event) => event.stopPropagation()}
+        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-border-subtle bg-surface shadow-2xl"
       >
         <div className="h-1 w-full bg-brand" />
 
@@ -183,11 +145,7 @@ const AdminServiceOrderDetailModal = ({
               </h2>
 
               <span
-                className={`
-                  rounded-full px-3 py-1
-                  text-xs font-semibold
-                  ${status.className}
-                `}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className} `}
               >
                 {status.label}
               </span>
@@ -202,48 +160,28 @@ const AdminServiceOrderDetailModal = ({
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="
-              group flex h-9 w-9 shrink-0
-              items-center justify-center rounded-lg
-              text-text-muted transition
-              hover:bg-danger-soft hover:text-danger
-            "
+            className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-text-muted transition hover:bg-danger-soft hover:text-danger"
           >
             <X
               size={19}
-              className="
-                transition-transform duration-300
-                group-hover:rotate-180
-              "
+              className="transition-transform duration-300 group-hover:rotate-180"
             />
           </button>
         </header>
 
         <div className="max-h-[75vh] space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
-          <DetailSection
-            icon={UserRound}
-            title="Khách hàng"
-          >
+          <DetailSection icon={UserRound} title="Khách hàng">
             <div className="grid gap-4 sm:grid-cols-2">
-              <DetailItem
-                label="Họ và tên"
-                value={order.user?.fullName}
-              />
+              <DetailItem label="Họ và tên" value={order.user?.fullName} />
 
               <DetailItem
                 label="Mã người dùng"
-                value={
-                  order.user?.userCode ||
-                  order.user?.idUser
-                }
+                value={order.user?.userCode || order.user?.idUser}
               />
             </div>
           </DetailSection>
 
-          <DetailSection
-            icon={Wrench}
-            title="Thông tin dịch vụ"
-          >
+          <DetailSection icon={Wrench} title="Thông tin dịch vụ">
             <div className="grid gap-4 sm:grid-cols-2">
               <DetailItem
                 label="Tên dịch vụ"
@@ -260,22 +198,13 @@ const AdminServiceOrderDetailModal = ({
                 }
               />
 
-              <DetailItem
-                label="Tên sản phẩm"
-                value={order.productName}
-              />
+              <DetailItem label="Tên sản phẩm" value={order.productName} />
 
-              <DetailItem
-                label="Số lượng"
-                value={quantity}
-              />
+              <DetailItem label="Số lượng" value={quantity} />
             </div>
           </DetailSection>
 
-          <DetailSection
-            icon={Package}
-            title="Giá trị đơn hàng"
-          >
+          <DetailSection icon={Package} title="Giá trị đơn hàng">
             <div className="grid gap-4 sm:grid-cols-3">
               <DetailItem
                 label="Đơn giá"
@@ -284,9 +213,7 @@ const AdminServiceOrderDetailModal = ({
 
               <DetailItem
                 label="Giảm giá"
-                value={formatPrice(
-                  order.discountAmount,
-                )}
+                value={formatPrice(order.discountAmount)}
               />
 
               <DetailItem
@@ -296,14 +223,8 @@ const AdminServiceOrderDetailModal = ({
             </div>
           </DetailSection>
 
-          <DetailSection
-            icon={MapPin}
-            title="Địa chỉ nhận hàng"
-          >
-            <DetailItem
-              label="Địa chỉ"
-              value={address}
-            />
+          <DetailSection icon={MapPin} title="Địa chỉ nhận hàng">
+            <DetailItem label="Địa chỉ" value={address} />
 
             {order.address?.note && (
               <DetailItem
@@ -314,31 +235,21 @@ const AdminServiceOrderDetailModal = ({
             )}
           </DetailSection>
 
-          <DetailSection
-            icon={CalendarDays}
-            title="Thời gian xử lý"
-          >
+          <DetailSection icon={CalendarDays} title="Thời gian xử lý">
             <div className="grid gap-4 sm:grid-cols-3">
               <DetailItem
                 label="Ngày tạo"
-                value={formatDate(
-                  order.createdAt,
-                  true,
-                )}
+                value={formatDate(order.createdAt, true)}
               />
 
               <DetailItem
                 label="Ngày tiếp nhận"
-                value={formatDate(
-                  order.receivedDate,
-                )}
+                value={formatDate(order.receivedDate)}
               />
 
               <DetailItem
                 label="Ngày hoàn thành"
-                value={formatDate(
-                  order.completedDate,
-                )}
+                value={formatDate(order.completedDate)}
               />
             </div>
           </DetailSection>
@@ -353,15 +264,9 @@ const AdminServiceOrderDetailModal = ({
             />
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <DetailItem
-                label="Người tiếp nhận"
-                value={order.createdBy}
-              />
+              <DetailItem label="Người tiếp nhận" value={order.createdBy} />
 
-              <DetailItem
-                label="Người cập nhật"
-                value={order.updatedBy}
-              />
+              <DetailItem label="Người cập nhật" value={order.updatedBy} />
             </div>
           </section>
         </div>
@@ -370,11 +275,7 @@ const AdminServiceOrderDetailModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="
-              rounded-xl bg-brand! px-5 py-2.5
-              text-sm font-semibold text-white
-              transition hover:opacity-90
-            "
+            className="rounded-xl bg-brand! px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
           >
             Đóng
           </button>

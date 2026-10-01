@@ -1,15 +1,5 @@
-import {
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import {
-  ClipboardList,
-  Eye,
-  MoreVertical,
-  Trash2,
-} from "lucide-react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { ClipboardList, Eye, MoreVertical, Trash2 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 
 import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
@@ -189,9 +179,7 @@ const ServiceOrderManagementPage = () => {
   const [loadError, setLoadError] = useState("");
 
   const [localSearch, setLocalSearch] = useState("");
-  const deferredSearch = useDeferredValue(
-    localSearch || searchKeyword,
-  );
+  const deferredSearch = useDeferredValue(localSearch || searchKeyword);
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -215,19 +203,13 @@ const ServiceOrderManagementPage = () => {
         setLoadError("");
       })
       .catch((error) => {
-        console.error(
-          "Không thể tải danh sách đơn dịch vụ:",
-          error,
-        );
+        console.error("Không thể tải danh sách đơn dịch vụ:", error);
 
         if (!active) return;
 
         setOrders([]);
         setLoadError(
-          getErrorMessage(
-            error,
-            "Không thể tải danh sách đơn dịch vụ.",
-          ),
+          getErrorMessage(error, "Không thể tải danh sách đơn dịch vụ."),
         );
       })
       .finally(() => {
@@ -242,9 +224,7 @@ const ServiceOrderManagementPage = () => {
   }, []);
 
   const filteredOrders = useMemo(() => {
-    const keyword = deferredSearch
-      .trim()
-      .toLowerCase();
+    const keyword = deferredSearch.trim().toLowerCase();
 
     return orders.filter((order) => {
       const matchesKeyword =
@@ -265,47 +245,27 @@ const ServiceOrderManagementPage = () => {
           .toLowerCase()
           .includes(keyword);
 
-      const orderStatus =
-        getOrderStatusValue(order);
+      const orderStatus = getOrderStatusValue(order);
 
       const matchesStatus =
-        statusFilter === "all" ||
-        orderStatus === statusFilter;
+        statusFilter === "all" || orderStatus === statusFilter;
 
       return matchesKeyword && matchesStatus;
     });
-  }, [
-    orders,
-    deferredSearch,
-    statusFilter,
-  ]);
+  }, [orders, deferredSearch, statusFilter]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredOrders.length / PAGE_SIZE),
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages,
-  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const visibleOrders = useMemo(() => {
-    const start =
-      (safeCurrentPage - 1) * PAGE_SIZE;
+    const start = (safeCurrentPage - 1) * PAGE_SIZE;
 
-    return filteredOrders.slice(
-      start,
-      start + PAGE_SIZE,
-    );
+    return filteredOrders.slice(start, start + PAGE_SIZE);
   }, [filteredOrders, safeCurrentPage]);
 
   const showingStart =
-    filteredOrders.length === 0
-      ? 0
-      : (safeCurrentPage - 1) *
-          PAGE_SIZE +
-        1;
+    filteredOrders.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
 
   const showingEnd = Math.min(
     safeCurrentPage * PAGE_SIZE,
@@ -315,8 +275,7 @@ const ServiceOrderManagementPage = () => {
   const openActionMenu = (event, order) => {
     event.stopPropagation();
 
-    const rect =
-      event.currentTarget.getBoundingClientRect();
+    const rect = event.currentTarget.getBoundingClientRect();
 
     const menuWidth = 176;
     const menuHeight = 132;
@@ -326,21 +285,11 @@ const ServiceOrderManagementPage = () => {
       order,
       x: Math.max(
         12,
-        Math.min(
-          rect.right - menuWidth,
-          window.innerWidth -
-            menuWidth -
-            12,
-        ),
+        Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 12),
       ),
       y: Math.max(
         12,
-        Math.min(
-          rect.bottom + 6,
-          window.innerHeight -
-            menuHeight -
-            12,
-        ),
+        Math.min(rect.bottom + 6, window.innerHeight - menuHeight - 12),
       ),
     });
   };
@@ -352,15 +301,11 @@ const ServiceOrderManagementPage = () => {
       setRemoving(true);
       setRemoveError("");
 
-      await serviceOrderApi.removeByAdmin(
-        removingOrder.serviceOrderId,
-      );
+      await serviceOrderApi.removeByAdmin(removingOrder.serviceOrderId);
 
       setOrders((current) =>
         current.filter(
-          (order) =>
-            order.serviceOrderId !==
-            removingOrder.serviceOrderId,
+          (order) => order.serviceOrderId !== removingOrder.serviceOrderId,
         ),
       );
 
@@ -372,12 +317,7 @@ const ServiceOrderManagementPage = () => {
 
       setRemovingOrder(null);
     } catch (error) {
-      setRemoveError(
-        getErrorMessage(
-          error,
-          "Không thể xóa đơn dịch vụ.",
-        ),
-      );
+      setRemoveError(getErrorMessage(error, "Không thể xóa đơn dịch vụ."));
     } finally {
       setRemoving(false);
     }
@@ -432,8 +372,7 @@ const ServiceOrderManagementPage = () => {
               emptyText="Không tìm thấy đơn dịch vụ"
               minWidth="min-w-240"
               renderRow={(order) => {
-                const status =
-                  getStatusInfo(order);
+                const status = getStatusInfo(order);
 
                 return (
                   <tr
@@ -446,15 +385,13 @@ const ServiceOrderManagementPage = () => {
                       </p>
 
                       <p className="mt-1 max-w-55 truncate text-xs text-text-muted">
-                        {order.productName ||
-                          "Chưa có tên sản phẩm"}
+                        {order.productName || "Chưa có tên sản phẩm"}
                       </p>
                     </td>
 
                     <td className="px-4 py-3">
                       <p className="max-w-50 truncate text-sm font-medium text-text-default">
-                        {order.user?.fullName ||
-                          "Không rõ khách hàng"}
+                        {order.user?.fullName || "Không rõ khách hàng"}
                       </p>
 
                       <p className="mt-1 text-xs text-text-muted">
@@ -466,8 +403,7 @@ const ServiceOrderManagementPage = () => {
 
                     <td className="px-4 py-3">
                       <p className="max-w-50 truncate text-sm text-text-default">
-                        {order.service?.serviceName ||
-                          "Không rõ dịch vụ"}
+                        {order.service?.serviceName || "Không rõ dịch vụ"}
                       </p>
 
                       <p className="mt-1 text-xs text-text-muted">
@@ -487,11 +423,7 @@ const ServiceOrderManagementPage = () => {
 
                     <td className="px-4 py-3">
                       <span
-                        className={`
-                          rounded-full px-3 py-1
-                          text-xs font-semibold
-                          ${status.className}
-                        `}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className} `}
                       >
                         {status.label}
                       </span>
@@ -502,20 +434,8 @@ const ServiceOrderManagementPage = () => {
                         type="button"
                         aria-label={`Mở thao tác cho đơn ORD-${order.serviceOrderId}`}
                         aria-haspopup="menu"
-                        onClick={(event) =>
-                          openActionMenu(
-                            event,
-                            order,
-                          )
-                        }
-                        className="
-                          inline-flex h-9 w-9
-                          items-center justify-center
-                          rounded-lg text-text-muted
-                          transition
-                          hover:bg-surface-muted
-                          hover:text-text-default
-                        "
+                        onClick={(event) => openActionMenu(event, order)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-muted hover:text-text-default"
                       >
                         <MoreVertical size={18} />
                       </button>
@@ -546,9 +466,7 @@ const ServiceOrderManagementPage = () => {
           x: menu.x,
           y: menu.y,
         }}
-        onClose={() =>
-          setMenu(INITIAL_MENU)
-        }
+        onClose={() => setMenu(INITIAL_MENU)}
         items={[
           {
             id: "detail",
@@ -583,9 +501,7 @@ const ServiceOrderManagementPage = () => {
       <AdminServiceOrderDetailModal
         open={Boolean(selectedOrder)}
         order={selectedOrder}
-        onClose={() =>
-          setSelectedOrder(null)
-        }
+        onClose={() => setSelectedOrder(null)}
       />
 
       <ConfirmModal
@@ -612,8 +528,8 @@ const ServiceOrderManagementPage = () => {
         </p>
 
         <p className="mt-2 text-xs text-danger">
-          Backend hiện đang xóa trực tiếp đơn khỏi cơ sở dữ
-          liệu. Thao tác này không thể hoàn tác.
+          Backend hiện đang xóa trực tiếp đơn khỏi cơ sở dữ liệu. Thao tác này
+          không thể hoàn tác.
         </p>
 
         {removeError && (

@@ -1,10 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import {
-  Eye,
-  MoreVertical,
-  Trash2,
-  UserRound,
-} from "lucide-react";
+import { Eye, MoreVertical, Trash2, UserRound } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
 import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
@@ -82,8 +77,7 @@ const formatDate = (value) => {
   }).format(date);
 };
 
-const getRoleName = (user) =>
-  user?.role?.nameRole || "Chưa phân quyền";
+const getRoleName = (user) => user?.role?.nameRole || "Chưa phân quyền";
 
 const getStatusInfo = (user) => {
   if (user?.deletedAt) {
@@ -133,9 +127,7 @@ const UserManagementPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [localSearch, setLocalSearch] = useState("");
-  const deferredSearch = useDeferredValue(
-    localSearch || searchKeyword,
-  );
+  const deferredSearch = useDeferredValue(localSearch || searchKeyword);
 
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -184,11 +176,7 @@ const UserManagementPage = () => {
 
   const availableRoles = useMemo(() => {
     return Array.from(
-      new Set(
-        users
-          .map((user) => getRoleName(user))
-          .filter(Boolean),
-      ),
+      new Set(users.map((user) => getRoleName(user)).filter(Boolean)),
     );
   }, [users]);
 
@@ -201,13 +189,7 @@ const UserManagementPage = () => {
 
       const matchesKeyword =
         !keyword ||
-        [
-          user.idUser,
-          user.userCode,
-          user.fullName,
-          role,
-          status.label,
-        ]
+        [user.idUser, user.userCode, user.fullName, role, status.label]
           .join(" ")
           .toLowerCase()
           .includes(keyword);
@@ -221,57 +203,34 @@ const UserManagementPage = () => {
         (statusFilter === "deleted"
           ? Boolean(user.deletedAt)
           : !user.deletedAt &&
-            String(user.status || "").toLowerCase() ===
-              statusFilter);
+            String(user.status || "").toLowerCase() === statusFilter);
 
       return matchesKeyword && matchesRole && matchesStatus;
     });
-  }, [
-    users,
-    deferredSearch,
-    roleFilter,
-    statusFilter,
-  ]);
+  }, [users, deferredSearch, roleFilter, statusFilter]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredUsers.length / PAGE_SIZE),
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages,
-  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const visibleUsers = useMemo(() => {
-    const start =
-      (safeCurrentPage - 1) * PAGE_SIZE;
+    const start = (safeCurrentPage - 1) * PAGE_SIZE;
 
-    return filteredUsers.slice(
-      start,
-      start + PAGE_SIZE,
-    );
+    return filteredUsers.slice(start, start + PAGE_SIZE);
   }, [filteredUsers, safeCurrentPage]);
 
   const openActionMenu = (event, user) => {
     event.stopPropagation();
 
-    const rect =
-      event.currentTarget.getBoundingClientRect();
+    const rect = event.currentTarget.getBoundingClientRect();
 
     const width = 176;
 
     setMenu({
       open: true,
       user,
-      x: Math.min(
-        rect.right - width,
-        window.innerWidth - width - 12,
-      ),
-      y: Math.min(
-        rect.bottom + 6,
-        window.innerHeight - 150,
-      ),
+      x: Math.min(rect.right - width, window.innerWidth - width - 12),
+      y: Math.min(rect.bottom + 6, window.innerHeight - 150),
     });
   };
 
@@ -310,8 +269,7 @@ const UserManagementPage = () => {
       );
     } catch (error) {
       setRemoveError(
-        error.response?.data?.message ||
-          "Không thể xóa người dùng.",
+        error.response?.data?.message || "Không thể xóa người dùng.",
       );
     } finally {
       setRemoving(false);
@@ -319,9 +277,7 @@ const UserManagementPage = () => {
   };
 
   const showingStart =
-    filteredUsers.length === 0
-      ? 0
-      : (safeCurrentPage - 1) * PAGE_SIZE + 1;
+    filteredUsers.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
 
   const showingEnd = Math.min(
     safeCurrentPage * PAGE_SIZE,
@@ -394,8 +350,7 @@ const UserManagementPage = () => {
               minWidth="min-w-225"
               renderRow={(user) => {
                 const status = getStatusInfo(user);
-                const isCurrentUser =
-                  user.idUser === adminUser?.idUser;
+                const isCurrentUser = user.idUser === adminUser?.idUser;
 
                 return (
                   <tr
@@ -412,8 +367,7 @@ const UserManagementPage = () => {
 
                         <div className="min-w-0">
                           <p className="max-w-55 truncate text-sm font-semibold text-text-default">
-                            {user.fullName ||
-                              "Chưa cập nhật tên"}
+                            {user.fullName || "Chưa cập nhật tên"}
                           </p>
 
                           <p className="text-xs text-text-muted">
@@ -449,18 +403,14 @@ const UserManagementPage = () => {
                       <button
                         type="button"
                         aria-label="Mở thao tác"
-                        onClick={(event) =>
-                          openActionMenu(event, user)
-                        }
+                        onClick={(event) => openActionMenu(event, user)}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-muted hover:text-text-default"
                       >
                         <MoreVertical size={18} />
                       </button>
 
                       {isCurrentUser && (
-                        <span className="sr-only">
-                          Tài khoản hiện tại
-                        </span>
+                        <span className="sr-only">Tài khoản hiện tại</span>
                       )}
                     </td>
                   </tr>
@@ -506,8 +456,7 @@ const UserManagementPage = () => {
             danger: true,
             hidden: !isAdmin,
             disabled:
-              menu.user?.deletedAt ||
-              menu.user?.idUser === adminUser?.idUser,
+              menu.user?.deletedAt || menu.user?.idUser === adminUser?.idUser,
             onClick: () => {
               setRemoveError("");
               setRemovingUser(menu.user);
@@ -534,8 +483,7 @@ const UserManagementPage = () => {
         <p>
           Tài khoản{" "}
           <strong className="text-text-default">
-            {removingUser?.fullName ||
-              removingUser?.userCode}
+            {removingUser?.fullName || removingUser?.userCode}
           </strong>{" "}
           sẽ bị vô hiệu hóa và tất cả phiên đăng nhập sẽ kết thúc.
         </p>

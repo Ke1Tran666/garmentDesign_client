@@ -1,19 +1,31 @@
-"use client";;
-import { useState, useRef, useEffect, useId, useMemo, useCallback } from "react";
+"use client";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useId,
+  useMemo,
+  useCallback,
+} from "react";
 import { motion } from "motion/react";
 import { cn } from "@/shared/lib/utils";
 
-const GooeyFilter = ({filterId,blur}) => {
+const GooeyFilter = ({ filterId, blur }) => {
   return (
     <svg className="absolute hidden h-0 w-0" aria-hidden>
       <defs>
         <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation={blur} result="blur" />
+          <feGaussianBlur
+            in="SourceGraphic"
+            stdDeviation={blur}
+            result="blur"
+          />
           <feColorMatrix
             in="blur"
             type="matrix"
             values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"
-            result="goo" />
+            result="goo"
+          />
           <feComposite in="SourceGraphic" in2="goo" operator="atop" />
         </filter>
       </defs>
@@ -21,7 +33,7 @@ const GooeyFilter = ({filterId,blur}) => {
   );
 };
 
-const SearchIcon = ({layoutId}) => {
+const SearchIcon = ({ layoutId }) => {
   return (
     <motion.svg
       layoutId={layoutId}
@@ -32,14 +44,15 @@ const SearchIcon = ({layoutId}) => {
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      className="size-4 shrink-0">
+      className="size-4 shrink-0"
+    >
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
     </motion.svg>
   );
 };
 
-const transition = {duration: 0.4,type: "spring",bounce: 0.25};
+const transition = { duration: 0.4, type: "spring", bounce: 0.25 };
 
 const iconBubbleVariants = {
   collapsed: { scale: 0, opacity: 0 },
@@ -47,18 +60,18 @@ const iconBubbleVariants = {
 };
 
 export const GooeyInput = ({
-    placeholder = "Type to search...",
-    className,
-    classNames,
-    collapsedWidth = 115,
-    expandedWidth = 200,
-    expandedOffset = 50,
-    gooeyBlur = 5,
-    value: valueProp,
-    defaultValue = "",
-    onValueChange,
-    onOpenChange,
-    disabled = false
+  placeholder = "Type to search...",
+  className,
+  classNames,
+  collapsedWidth = 115,
+  expandedWidth = 200,
+  expandedOffset = 50,
+  gooeyBlur = 5,
+  value: valueProp,
+  defaultValue = "",
+  onValueChange,
+  onOpenChange,
+  disabled = false,
 }) => {
   const reactId = useId();
   const safeId = reactId.replace(/:/g, "");
@@ -74,17 +87,23 @@ export const GooeyInput = ({
   const isControlled = valueProp !== undefined;
   const searchText = isControlled ? valueProp : uncontrolledValue;
 
-  const setSearchText = useCallback((next) => {
-    if (!isControlled) {
-      setUncontrolledValue(next);
-    }
-    onValueChange?.(next);
-  }, [isControlled, onValueChange]);
+  const setSearchText = useCallback(
+    (next) => {
+      if (!isControlled) {
+        setUncontrolledValue(next);
+      }
+      onValueChange?.(next);
+    },
+    [isControlled, onValueChange],
+  );
 
-  const setExpanded = useCallback((next) => {
-    setIsExpanded(next);
-    onOpenChange?.(next);
-  }, [onOpenChange]);
+  const setExpanded = useCallback(
+    (next) => {
+      setIsExpanded(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange],
+  );
 
   useEffect(() => {
     if (isExpanded) {
@@ -95,18 +114,24 @@ export const GooeyInput = ({
     prevExpandedRef.current = isExpanded;
   }, [isExpanded, setSearchText]);
 
-  const buttonVariants = useMemo(() => ({
-    collapsed: { width: collapsedWidth, marginLeft: 0 },
-    expanded: { width: expandedWidth, marginLeft: expandedOffset },
-  }), [collapsedWidth, expandedWidth, expandedOffset]);
+  const buttonVariants = useMemo(
+    () => ({
+      collapsed: { width: collapsedWidth, marginLeft: 0 },
+      expanded: { width: expandedWidth, marginLeft: expandedOffset },
+    }),
+    [collapsedWidth, expandedWidth, expandedOffset],
+  );
 
   const handleExpand = useCallback(() => {
     if (!disabled) setExpanded(true);
   }, [disabled, setExpanded]);
 
-  const handleChange = useCallback((e) => {
-    setSearchText(e.target.value);
-  }, [setSearchText]);
+  const handleChange = useCallback(
+    (e) => {
+      setSearchText(e.target.value);
+    },
+    [setSearchText],
+  );
 
   const handleBlur = useCallback(() => {
     if (!searchText) setExpanded(false);
@@ -117,29 +142,41 @@ export const GooeyInput = ({
 
   return (
     <div
-      className={cn("relative flex items-center justify-center", className, classNames?.root)}>
+      className={cn(
+        "relative flex items-center justify-center",
+        className,
+        classNames?.root,
+      )}
+    >
       <GooeyFilter filterId={filterId} blur={gooeyBlur} />
       <div
-        className={cn("relative flex h-10 items-center justify-center", classNames?.filterWrap)}
-        style={{ filter: `url(#${filterId})` }}>
+        className={cn(
+          "relative flex h-10 items-center justify-center",
+          classNames?.filterWrap,
+        )}
+        style={{ filter: `url(#${filterId})` }}
+      >
         <motion.div
-          className={cn("flex h-10 items-center justify-center", classNames?.buttonRow)}
+          className={cn(
+            "flex h-10 items-center justify-center",
+            classNames?.buttonRow,
+          )}
           variants={buttonVariants}
           initial="collapsed"
           animate={isExpanded ? "expanded" : "collapsed"}
-          transition={transition}>
+          transition={transition}
+        >
           <button
             type="button"
             disabled={disabled}
             onClick={handleExpand}
             className={cn(
-              "flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-medium outline-none transition-[color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+              "flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-medium transition-[color,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
               surfaceClass,
-              classNames?.trigger
-            )}>
-            {!isExpanded ? (
-              <SearchIcon layoutId={iconLayoutId} />
-            ) : null}
+              classNames?.trigger,
+            )}
+          >
+            {!isExpanded ? <SearchIcon layoutId={iconLayoutId} /> : null}
             <motion.input
               layoutId={inputLayoutId}
               ref={inputRef}
@@ -156,26 +193,29 @@ export const GooeyInput = ({
                 isExpanded
                   ? "placeholder:text-background/50 dark:placeholder:text-background/45"
                   : "pointer-events-none placeholder:text-background/80 dark:placeholder:text-background/70",
-                classNames?.input
-              )} />
+                classNames?.input,
+              )}
+            />
           </button>
         </motion.div>
 
         <motion.div
           className={cn(
             "absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center",
-            classNames?.bubble
+            classNames?.bubble,
           )}
           variants={iconBubbleVariants}
           initial="collapsed"
           animate={isExpanded ? "expanded" : "collapsed"}
-          transition={transition}>
+          transition={transition}
+        >
           <div
             className={cn(
               "flex size-10 items-center justify-center rounded-full",
               surfaceClass,
-              classNames?.bubbleSurface
-            )}>
+              classNames?.bubbleSurface,
+            )}
+          >
             <SearchIcon layoutId={iconLayoutId} />
           </div>
         </motion.div>

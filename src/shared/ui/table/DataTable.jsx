@@ -15,10 +15,7 @@ const DataTable = ({
     <tr>
       <td
         colSpan={columns.length}
-        className={`
-          px-4 py-10 text-center text-sm
-          ${isError ? "text-danger" : "text-text-muted"}
-        `}
+        className={`px-4 py-10 text-center text-sm ${isError ? "text-danger" : "text-text-muted"} `}
       >
         {message}
       </td>
@@ -27,18 +24,10 @@ const DataTable = ({
 
   return (
     <div
-      className={`
-        overflow-x-auto rounded-xl border border-border-subtle
-        ${containerClassName}
-      `}
+      className={`overflow-x-auto rounded-xl border border-border-subtle ${containerClassName} `}
     >
       <table
-        className={`
-          w-full text-left
-          ${minWidth}
-          ${colGroup.length > 0 ? "table-fixed" : ""}
-          ${tableClassName}
-        `}
+        className={`w-full text-left ${minWidth} ${colGroup.length > 0 ? "table-fixed" : ""} ${tableClassName} `}
       >
         {colGroup.length > 0 && (
           <colgroup>
@@ -53,10 +42,7 @@ const DataTable = ({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`
-                  px-4 py-3 font-medium
-                  ${column.className || ""}
-                `}
+                className={`px-4 py-3 font-medium ${column.className || ""} `}
               >
                 {column.title}
               </th>

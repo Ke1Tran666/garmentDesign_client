@@ -1,4 +1,4 @@
-import { useEffect,useState} from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -9,7 +9,7 @@ import {
   PanelLeftOpen,
   User,
 } from "lucide-react";
-import { Outlet, useLocation, useNavigate} from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import Logo from "@/shared/ui/brand/Logo";
 import GooeySearchBar from "@/shared/ui/search/gooey-input/GooeySearchBar";
@@ -45,8 +45,7 @@ const matchesItemPath = (pathname, itemPath) => {
 
   return (
     currentPath === normalizedPath ||
-    (normalizedPath !== "/" &&
-      currentPath.startsWith(`${normalizedPath}/`))
+    (normalizedPath !== "/" && currentPath.startsWith(`${normalizedPath}/`))
   );
 };
 
@@ -59,8 +58,7 @@ const findActiveRoute = (groups, pathname, preferredGroupIndex) => {
 
       const pathLength = item.path.replace(/\/+$/, "").length;
 
-      const isMoreSpecific =
-        !bestMatch || pathLength > bestMatch.pathLength;
+      const isMoreSpecific = !bestMatch || pathLength > bestMatch.pathLength;
 
       const isPreferredTie =
         bestMatch &&
@@ -92,7 +90,6 @@ const DashboardLayout = ({
   roleLabel,
   RoleIcon,
 }) => {
-
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -105,13 +102,13 @@ const DashboardLayout = ({
 
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
-  const [openUserMenu,setOpenUserMenu] = useState(false);
+  const [openUserMenu, setOpenUserMenu] = useState(false);
 
   const [isAsideCollapsed, setIsAsideCollapsed] = useState(
     () => localStorage.getItem(storageKey) === "true",
   );
 
-  const [userMenuPosition, setUserMenuPosition] = useState({x: 0, y: 0});
+  const [userMenuPosition, setUserMenuPosition] = useState({ x: 0, y: 0 });
 
   const userMenuWidth = 208;
 
@@ -143,40 +140,26 @@ const DashboardLayout = ({
     localStorage.setItem(storageKey, String(isAsideCollapsed));
   }, [isAsideCollapsed, storageKey]);
 
-  const activeRoute = findActiveRoute(
-    groups,
-    location.pathname,
-    activeGroup,
-  );
+  const activeRoute = findActiveRoute(groups, location.pathname, activeGroup);
 
   const displayGroupIndex = activeRoute?.groupIndex ?? activeGroup;
 
   const displayItemIndex = activeRoute?.itemIndex ?? activeItem;
 
-  const currentGroup =
-    groups[
-      displayGroupIndex
-    ];
+  const currentGroup = groups[displayGroupIndex];
 
-  const currentItem =
-    currentGroup.items[
-      displayItemIndex
-    ];
+  const currentItem = currentGroup.items[displayItemIndex];
 
   const CurrentGroupIcon = currentGroup.btn.icon;
 
-  const navigateToItem = (
-    item,
-    groupIndex,
-    itemIndex,
-  ) => {
+  const navigateToItem = (item, groupIndex, itemIndex) => {
     setActiveGroup(groupIndex);
     setActiveItem(itemIndex);
     setOpenMobileMenu(false);
 
     if (item.path && item.available !== false) {
-        navigate(item.path);
-        return;
+      navigate(item.path);
+      return;
     }
 
     navigate("/not-found", {
@@ -186,25 +169,14 @@ const DashboardLayout = ({
     });
   };
 
-  const handleGroupChange = (
-    groupIndex,
-  ) => {
-    const selectedGroup =
-      groups[groupIndex];
+  const handleGroupChange = (groupIndex) => {
+    const selectedGroup = groups[groupIndex];
 
-    const itemIndex =
-      selectedGroup.defaultItem;
+    const itemIndex = selectedGroup.defaultItem;
 
-    const item =
-      selectedGroup.items[
-        itemIndex
-      ];
+    const item = selectedGroup.items[itemIndex];
 
-    navigateToItem(
-      item,
-      groupIndex,
-      itemIndex,
-    );
+    navigateToItem(item, groupIndex, itemIndex);
   };
 
   const handleLogout = async () => {
@@ -220,66 +192,23 @@ const DashboardLayout = ({
   };
 
   return (
-    <div
-      className="
-        mx-auto flex min-h-screen
-        w-full bg-surface-subtle
-        pb-[calc(4.75rem+env(safe-area-inset-bottom))]
-        md:pb-0
-      "
-    >
+    <div className="mx-auto flex min-h-screen w-full bg-surface-subtle pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:pb-0">
       <aside
         id={sidebarId}
-        className={`
-          fixed inset-x-0 bottom-0 z-50
-          flex h-auto w-full shrink-0
-          flex-col border-t border-border
-          bg-surface-overlay px-2 pt-2
-          pb-[calc(0.5rem+env(safe-area-inset-bottom))]
-          shadow-(--layout-mobile-navigation-shadow)
-          backdrop-blur-xl
-
-          transition-[width,padding]
-          duration-300 ease-in-out
-
-          md:sticky md:inset-auto
-          md:top-0 md:h-screen
-          md:border-r md:border-t-0
-          md:border-border-subtle
-          md:bg-surface-subtle
-          md:py-8 md:shadow-none
-          md:backdrop-blur-none
-
-          ${
-            isAsideCollapsed
-              ? "md:w-20 md:px-3"
-              : "md:w-72 md:px-6"
-          }
-        `}
+        className={`fixed inset-x-0 bottom-0 z-50 flex h-auto w-full shrink-0 flex-col border-t border-border bg-surface-overlay px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-(--layout-mobile-navigation-shadow) backdrop-blur-xl transition-[width,padding] duration-300 ease-in-out md:sticky md:inset-auto md:top-0 md:h-screen md:border-t-0 md:border-r md:border-border-subtle md:bg-surface-subtle md:py-8 md:shadow-none md:backdrop-blur-none ${
+          isAsideCollapsed ? "md:w-20 md:px-3" : "md:w-72 md:px-6"
+        } `}
       >
         <div className="hidden shrink-0 md:block">
-          <Logo
-            className={
-              isAsideCollapsed
-                ? "[&>span]:hidden"
-                : ""
-            }
-          />
+          <Logo className={isAsideCollapsed ? "[&>span]:hidden" : ""} />
         </div>
 
         <div className="hidden md:contents">
           {!isAsideCollapsed && (
-            <div className="mb-10 mt-10 flex flex-col items-center justify-center">
+            <div className="mt-10 mb-10 flex flex-col items-center justify-center">
               {RoleIcon && (
-                <span
-                    className="
-                    mb-4 flex h-12 w-12
-                    items-center justify-center
-                    rounded-2xl bg-brand text-white
-                    shadow-lg shadow-brand/20
-                    "
-                >
-                    <RoleIcon size={23} />
+                <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/20">
+                  <RoleIcon size={23} />
                 </span>
               )}
 
@@ -292,223 +221,114 @@ const DashboardLayout = ({
               </h3>
 
               {roleLabel && (
-                <p className="mt-2 text-xs font-medium uppercase tracking-wider text-text-muted">
-                    {roleLabel}
+                <p className="mt-2 text-xs font-medium tracking-wider text-text-muted uppercase">
+                  {roleLabel}
                 </p>
               )}
 
               <p className="mt-3 text-sm text-text-muted">
-                {new Date().toLocaleDateString(
-                  "vi-VN",
-                  {
-                    weekday: "short",
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                  },
-                )}
+                {new Date().toLocaleDateString("vi-VN", {
+                  weekday: "short",
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
               </p>
             </div>
           )}
         </div>
 
         {openMobileMenu && (
-          <div
-            className="
-              absolute bottom-full
-              left-3 right-3 mb-3
-              grid grid-cols-2 gap-2
-              rounded-2xl
-              border border-border
-              bg-surface p-3
-              shadow-xl md:hidden
-            "
-          >
+          <div className="absolute right-3 bottom-full left-3 mb-3 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-surface p-3 shadow-xl md:hidden">
             <button
               type="button"
               onClick={() => {
                 setOpenMobileMenu(false);
                 navigate("/");
               }}
-              className="
-                flex min-w-0 items-center
-                gap-3 rounded-xl
-                px-3 py-3 text-left
-                text-sm font-medium
-                text-text-muted
-                transition-colors
-                hover:bg-surface-muted
-                hover:text-brand
-              "
+              className="flex min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-text-muted transition-colors hover:bg-surface-muted hover:text-brand"
             >
-              <span
-                className="
-                  flex h-9 w-9 shrink-0
-                  items-center justify-center
-                  rounded-full bg-surface-muted
-                "
-              >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted">
                 <House size={17} />
               </span>
 
-              <span className="truncate">
-                Trang chủ
-              </span>
+              <span className="truncate">Trang chủ</span>
             </button>
 
-            {groups.map(
-              (group, groupIndex) => {
-                const Icon =
-                  group.btn.icon;
+            {groups.map((group, groupIndex) => {
+              const Icon = group.btn.icon;
 
-                const isActive =
-                  displayGroupIndex ===
-                  groupIndex;
+              const isActive = displayGroupIndex === groupIndex;
 
-                return (
-                  <button
-                    key={group.label}
-                    type="button"
-                    onClick={() =>
-                      handleGroupChange(
-                        groupIndex,
-                      )
-                    }
-                    className={`
-                      flex min-w-0 items-center
-                      gap-3 rounded-xl
-                      px-3 py-3 text-left
-                      text-sm font-medium
-                      transition-colors
-
-                      ${
-                        isActive
-                          ? "bg-brand-soft text-brand"
-                          : "text-text-muted hover:bg-surface-muted"
-                      }
-                    `}
+              return (
+                <button
+                  key={group.label}
+                  type="button"
+                  onClick={() => handleGroupChange(groupIndex)}
+                  className={`flex min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-brand-soft text-brand"
+                      : "text-text-muted hover:bg-surface-muted"
+                  } `}
+                >
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: isActive
+                        ? group.btn.bg
+                        : "var(--color-surface-muted)",
+                      color: isActive
+                        ? group.btn.foreground
+                        : "var(--color-text-default)",
+                    }}
                   >
-                    <span
-                      className="
-                        flex h-9 w-9 shrink-0
-                        items-center justify-center
-                        rounded-full
-                      "
-                      style={{
-                        backgroundColor: isActive
-                            ? group.btn.bg
-                            : "var(--color-surface-muted)",
-                        color: isActive
-                            ? group.btn.foreground
-                            : "var(--color-text-default)",
-                      }}
-                    >
-                      <Icon size={17} />
-                    </span>
+                    <Icon size={17} />
+                  </span>
 
-                    <span className="truncate">
-                      {group.label}
-                    </span>
-                  </button>
-                );
-              },
-            )}
+                  <span className="truncate">{group.label}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 
-        <div
-          className="
-            w-full overflow-x-auto
-            overflow-y-hidden
-            md:min-h-0 md:flex-1
-            md:overflow-y-auto
-            md:overflow-x-hidden
-          "
-        >
+        <div className="w-full overflow-x-auto overflow-y-hidden md:min-h-0 md:flex-1 md:overflow-x-hidden md:overflow-y-auto">
           <nav
-            className={`
-              flex w-full items-stretch
-              gap-1 md:block
-              md:space-y-1
-
-              ${
-                isAsideCollapsed
-                  ? "md:mt-2"
-                  : "md:mt-4"
-              }
-            `}
+            className={`flex w-full items-stretch gap-1 md:block md:space-y-1 ${
+              isAsideCollapsed ? "md:mt-2" : "md:mt-4"
+            } `}
           >
-            {currentGroup.items.map(
-              (item, itemIndex) => {
-                const Icon = item.icon;
+            {currentGroup.items.map((item, itemIndex) => {
+              const Icon = item.icon;
 
-                return (
-                  <AdminSidebarItem
-                    key={item.label}
-                    icon={
-                      <Icon size={19} />
-                    }
-                    label={item.label}
-                    available={
-                      item.available
-                    }
-                    active={
+              return (
+                <AdminSidebarItem
+                  key={item.label}
+                  icon={<Icon size={19} />}
+                  label={item.label}
+                  available={item.available}
+                  active={
                     displayItemIndex === itemIndex &&
                     matchesItemPath(location.pathname, item.path)
-                    }
-                    collapsed={
-                      isAsideCollapsed
-                    }
-                    onClick={() =>
-                      navigateToItem(
-                        item,
-                        displayGroupIndex,
-                        itemIndex,
-                      )
-                    }
-                  />
-                );
-              },
-            )}
+                  }
+                  collapsed={isAsideCollapsed}
+                  onClick={() =>
+                    navigateToItem(item, displayGroupIndex, itemIndex)
+                  }
+                />
+              );
+            })}
 
             <button
               type="button"
               aria-label="Mở menu"
-              aria-expanded={
+              aria-expanded={openMobileMenu}
+              onClick={() => setOpenMobileMenu((current) => !current)}
+              className={`relative flex min-h-14 min-w-17 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium transition-colors md:hidden ${
                 openMobileMenu
-              }
-              onClick={() =>
-                setOpenMobileMenu(
-                  (current) =>
-                    !current,
-                )
-              }
-              className={`
-                relative flex min-h-14
-                min-w-17 flex-1
-                flex-col items-center
-                justify-center gap-1
-                rounded-xl px-2 py-1
-                text-[11px] font-medium
-                transition-colors
-                md:hidden
-
-                ${
-                  openMobileMenu
-                    ? `
-                      text-brand
-                      after:absolute
-                      after:-top-2
-                      after:left-1/2
-                      after:h-1
-                      after:w-10
-                      after:-translate-x-1/2
-                      after:rounded-full
-                      after:bg-brand
-                    `
-                    : "text-text-muted"
-                }
-              `}
+                  ? `text-brand after:absolute after:-top-2 after:left-1/2 after:h-1 after:w-10 after:-translate-x-1/2 after:rounded-full after:bg-brand`
+                  : "text-text-muted"
+              } `}
             >
               <Menu size={20} />
               <span>Menu</span>
@@ -517,82 +337,46 @@ const DashboardLayout = ({
         </div>
 
         <div
-          className={`
-            mt-4 hidden shrink-0
-            items-center justify-center
-            gap-3 md:flex
-
-            ${
-              isAsideCollapsed
-                ? "flex-col"
-                : "flex-row"
-            }
-          `}
+          className={`mt-4 hidden shrink-0 items-center justify-center gap-3 md:flex ${
+            isAsideCollapsed ? "flex-col" : "flex-row"
+          } `}
         >
-          {groups.map(
-            (group, groupIndex) => {
-              const isActive =
-                displayGroupIndex ===
-                groupIndex;
+          {groups.map((group, groupIndex) => {
+            const isActive = displayGroupIndex === groupIndex;
 
-              const GroupIcon =
-                group.btn.icon;
+            const GroupIcon = group.btn.icon;
 
-              return (
-                <button
-                  key={group.label}
-                  type="button"
-                  title={group.label}
-                  aria-label={group.label}
-                  onClick={() =>
-                    handleGroupChange(
-                      groupIndex,
-                    )
-                  }
-                  style={
-                    isActive
-                      ? {
-                          backgroundColor: group.btn.bg,
-                          boxShadow: `0 10px 25px ${group.btn.shadow}`,
-                          color: group.btn.foreground,
-                        }
-                      : undefined
-                  }
-                  className={`
-                    flex items-center justify-center rounded-full 
-                    transition-all duration-300
-                    hover:-translate-y-0.5 hover:scale-105
-
-                    ${
-                      isActive
-                        ? "h-11 w-11"
-                        : `
-                          h-9 w-9 bg-surface text-text-subtle shadow-sm
-                          hover:bg-surface-muted
-                        `
-                    }
-                  `}
-                >
-                  <GroupIcon
-                    size={
-                      isActive ? 18 : 16
-                    }
-                  />
-                </button>
-              );
-            },
-          )}
+            return (
+              <button
+                key={group.label}
+                type="button"
+                title={group.label}
+                aria-label={group.label}
+                onClick={() => handleGroupChange(groupIndex)}
+                style={
+                  isActive
+                    ? {
+                        backgroundColor: group.btn.bg,
+                        boxShadow: `0 10px 25px ${group.btn.shadow}`,
+                        color: group.btn.foreground,
+                      }
+                    : undefined
+                }
+                className={`flex items-center justify-center rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 ${
+                  isActive
+                    ? "h-11 w-11"
+                    : `h-9 w-9 bg-surface text-text-subtle shadow-sm hover:bg-surface-muted`
+                } `}
+              >
+                <GroupIcon size={isActive ? 18 : 16} />
+              </button>
+            );
+          })}
         </div>
 
         {!isAsideCollapsed && (
           <p
-            className="
-              mt-3 hidden shrink-0
-              text-center text-sm
-              font-medium
-              transition-all
-              duration-300 md:block
-            "
+            className="mt-3 hidden shrink-0 text-center text-sm font-medium transition-all duration-300 md:block"
             style={{
               color: currentGroup.btn.labelColor,
             }}
@@ -603,37 +387,12 @@ const DashboardLayout = ({
 
         <button
           type="button"
-          onClick={() =>
-            setIsAsideCollapsed(
-              (current) => !current,
-            )
-          }
-          aria-label={
-            isAsideCollapsed
-              ? "Mở rộng menu"
-              : "Thu gọn menu"
-          }
+          onClick={() => setIsAsideCollapsed((current) => !current)}
+          aria-label={isAsideCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
           aria-controls={sidebarId}
-          aria-expanded={
-            !isAsideCollapsed
-          }
-          title={
-            isAsideCollapsed
-              ? "Mở rộng menu"
-              : "Thu gọn menu"
-          }
-          className="
-            absolute -right-3 bottom-8
-            z-20 hidden h-7 w-7
-            items-center justify-center
-            rounded-full
-            border border-border
-            bg-surface text-text-muted
-            shadow-md transition
-            hover:border-brand
-            hover:text-brand
-            md:flex
-          "
+          aria-expanded={!isAsideCollapsed}
+          title={isAsideCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
+          className="absolute -right-3 bottom-8 z-20 hidden h-7 w-7 items-center justify-center rounded-full border border-border bg-surface text-text-muted shadow-md transition hover:border-brand hover:text-brand md:flex"
         >
           {isAsideCollapsed ? (
             <PanelLeftOpen size={15} />
@@ -643,59 +402,32 @@ const DashboardLayout = ({
         </button>
       </aside>
 
-      <main
-        className="
-          m-2 min-w-0 flex-1
-          rounded-xl bg-surface
-          p-4 transition-all
-          duration-300 md:p-8
-        "
-      >
+      <main className="m-2 min-w-0 flex-1 rounded-xl bg-surface p-4 transition-all duration-300 md:p-8">
         <div className="mb-4 flex items-center justify-between">
           <div className="mb-4 flex min-w-0 items-center gap-2 text-sm text-text-subtle">
             <span
-              className="
-                inline-flex items-center
-                md:hidden
-              "
+              className="inline-flex items-center md:hidden"
               aria-label="Trang chủ"
             >
               <House size={17} />
             </span>
 
-            <span className="hidden md:inline">
-                {breadcrumbLabel}
-            </span>
+            <span className="hidden md:inline">{breadcrumbLabel}</span>
 
-            <ChevronRight
-              size={14}
-              className="shrink-0"
-            />
+            <ChevronRight size={14} className="shrink-0" />
 
             <span
-              className="
-                inline-flex shrink-0
-                items-center
-                text-text-default
-                md:hidden
-              "
-              aria-label={
-                currentGroup.label
-              }
+              className="inline-flex shrink-0 items-center text-text-default md:hidden"
+              aria-label={currentGroup.label}
             >
-              <CurrentGroupIcon
-                size={17}
-              />
+              <CurrentGroupIcon size={17} />
             </span>
 
             <span className="hidden font-medium text-text-default md:inline">
               {currentGroup.label}
             </span>
 
-            <ChevronRight
-              size={14}
-              className="shrink-0"
-            />
+            <ChevronRight size={14} className="shrink-0" />
 
             <span className="truncate font-medium text-text-default">
               {currentItem?.label}
@@ -713,11 +445,7 @@ const DashboardLayout = ({
                 aria-expanded={openUserMenu}
                 onMouseDown={(event) => event.stopPropagation()}
                 onClick={handleToggleUserMenu}
-                className="
-                  flex items-center gap-3
-                  rounded-xl px-2 py-1
-                  transition hover:bg-surface-subtle
-                "
+                className="flex items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-surface-subtle"
               >
                 <img
                   src={user?.avatar || defaultAvatar}
@@ -762,20 +490,10 @@ const DashboardLayout = ({
           </div>
         </div>
 
-        <header
-          className="
-            flex flex-col gap-5
-            border-b-3
-            border-border-subtle
-            py-6 lg:flex-row
-            lg:items-center
-            lg:justify-between
-          "
-        >
+        <header className="flex flex-col gap-5 border-b-3 border-border-subtle py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 flex-col justify-center gap-2">
             <h2 className="truncate text-2xl font-bold text-text-strong md:text-3xl">
-              {currentItem?.label ||
-                title}
+              {currentItem?.label || title}
             </h2>
 
             <p className="text-sm text-text-muted md:text-base">
@@ -783,22 +501,17 @@ const DashboardLayout = ({
             </p>
           </div>
 
-          <GooeySearchBar
-            value={searchKeyword}
-            onSearch={
-              setSearchKeyword
-            }
-          />
+          <GooeySearchBar value={searchKeyword} onSearch={setSearchKeyword} />
         </header>
 
         <section className="p-2 md:p-4">
-            <Outlet
-                context={
-                    getOutletContext
-                    ? getOutletContext({ searchKeyword, user })
-                    : { searchKeyword }
-                }
-            />
+          <Outlet
+            context={
+              getOutletContext
+                ? getOutletContext({ searchKeyword, user })
+                : { searchKeyword }
+            }
+          />
         </section>
       </main>
     </div>
@@ -817,97 +530,31 @@ const AdminSidebarItem = ({
     <button
       type="button"
       onClick={onClick}
-      title={
-        collapsed
-          ? label
-          : undefined
-      }
+      title={collapsed ? label : undefined}
       aria-label={label}
-      aria-current={
+      aria-current={active ? "page" : undefined}
+      className={`relative mb-0 flex min-h-14 min-w-17 flex-1 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium transition-all duration-200 md:mb-2 md:min-h-0 md:w-full md:min-w-0 md:flex-none md:flex-row md:text-sm ${
+        collapsed
+          ? `md:h-11 md:justify-center md:gap-0 md:px-0`
+          : `md:gap-3 md:px-4 md:py-3`
+      } ${
         active
-          ? "page"
-          : undefined
-      }
-      className={`
-        relative mb-0
-        flex min-h-14 min-w-17
-        flex-1 flex-col
-        items-center gap-1
-        rounded-xl px-2 py-1
-        text-[11px] font-medium
-        transition-all duration-200
-
-        md:mb-2 md:min-h-0
-        md:min-w-0 md:w-full
-        md:flex-none md:flex-row
-        md:text-sm
-
-        ${
-          collapsed
-            ? `
-              md:h-11
-              md:justify-center
-              md:gap-0 md:px-0
-            `
-            : `
-              md:gap-3
-              md:px-4 md:py-3
-            `
-        }
-
-        ${
-          active
-            ? `
-              text-brand
-              after:absolute
-              after:-top-2
-              after:left-1/2
-              after:h-1 after:w-10
-              after:-translate-x-1/2
-              after:rounded-full
-              after:bg-brand
-              md:bg-surface
-              md:shadow-sm
-              md:after:hidden
-            `
-            : `
-              text-text-muted
-              hover:bg-surface
-              hover:text-text-default
-            `
-        }
-      `}
+          ? `text-brand after:absolute after:-top-2 after:left-1/2 after:h-1 after:w-10 after:-translate-x-1/2 after:rounded-full after:bg-brand md:bg-surface md:shadow-sm md:after:hidden`
+          : `text-text-muted hover:bg-surface hover:text-text-default`
+      } `}
     >
-      <span className="flex shrink-0 items-center justify-center">
-        {icon}
-      </span>
+      <span className="flex shrink-0 items-center justify-center">{icon}</span>
 
       <span
-        className={`
-          min-w-0 max-w-full
-          truncate
-          ${
-            collapsed
-              ? "md:hidden"
-              : ""
-          }
-        `}
+        className={`max-w-full min-w-0 truncate ${
+          collapsed ? "md:hidden" : ""
+        } `}
       >
         {label}
       </span>
 
       {!available && !collapsed && (
-        <span
-          className="
-            ml-auto hidden shrink-0
-            rounded-full
-            bg-warning-soft
-            px-2 py-0.5
-            text-[10px]
-            font-semibold text-warning
-            md:inline-flex
-          "
-        >
+        <span className="ml-auto hidden shrink-0 rounded-full bg-warning-soft px-2 py-0.5 text-[10px] font-semibold text-warning md:inline-flex">
           Sắp có
         </span>
       )}

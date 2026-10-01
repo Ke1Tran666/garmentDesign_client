@@ -10,43 +10,100 @@ const tabs = [
 
 const products = {
   all: [
-    { id: 1, img: "shirt-white-design", name: "Áo Sơ Mi Slim", service: "In sơ đồ + In rập" },
-    { id: 2, img: "trousers-dark-blue", name: "Quần Tây Công Sở", service: "Thiết kế + Tính định mức" },
-    { id: 3, img: "dress-elegant-red", name: "Đầm Maxi Hoa", service: "Trọn gói 4 dịch vụ" },
-    { id: 4, img: "polo-shirt-knit", name: "Áo Polo Knit", service: "In rập + Định mức" },
-    { id: 5, img: "jacket-canvas-brown", name: "Áo Khoác Canvas", service: "In sơ đồ + Thiết kế" },
-    { id: 6, img: "skirt-pleated-gray", name: "Chân Váy Nếp Gấp", service: "In rập + Tính định mức" },
+    {
+      id: 1,
+      img: "shirt-white-design",
+      name: "Áo Sơ Mi Slim",
+      service: "In sơ đồ + In rập",
+    },
+    {
+      id: 2,
+      img: "trousers-dark-blue",
+      name: "Quần Tây Công Sở",
+      service: "Thiết kế + Tính định mức",
+    },
+    {
+      id: 3,
+      img: "dress-elegant-red",
+      name: "Đầm Maxi Hoa",
+      service: "Trọn gói 4 dịch vụ",
+    },
+    {
+      id: 4,
+      img: "polo-shirt-knit",
+      name: "Áo Polo Knit",
+      service: "In rập + Định mức",
+    },
+    {
+      id: 5,
+      img: "jacket-canvas-brown",
+      name: "Áo Khoác Canvas",
+      service: "In sơ đồ + Thiết kế",
+    },
+    {
+      id: 6,
+      img: "skirt-pleated-gray",
+      name: "Chân Váy Nếp Gấp",
+      service: "In rập + Tính định mức",
+    },
   ],
   ao: [
-    { id: 1, img: "tshirt-oversized-black", name: "Áo T-Shirt Oversized", service: "In sơ đồ + In rập" },
-    { id: 2, img: "shirt-white-design", name: "Áo Sơ Mi Slim", service: "Trọn gói" },
+    {
+      id: 1,
+      img: "tshirt-oversized-black",
+      name: "Áo T-Shirt Oversized",
+      service: "In sơ đồ + In rập",
+    },
+    {
+      id: 2,
+      img: "shirt-white-design",
+      name: "Áo Sơ Mi Slim",
+      service: "Trọn gói",
+    },
   ],
   quan: [
-    { id: 1, img: "trousers-dark-blue", name: "Quần Tây Công Sở", service: "Thiết kế + Định mức" },
+    {
+      id: 1,
+      img: "trousers-dark-blue",
+      name: "Quần Tây Công Sở",
+      service: "Thiết kế + Định mức",
+    },
   ],
   vay: [
-    { id: 1, img: "dress-elegant-red", name: "Đầm Maxi Hoa", service: "Trọn gói 4 dịch vụ" },
-    { id: 2, img: "skirt-pleated-gray", name: "Chân Váy Nếp Gấp", service: "In rập + Định mức" },
+    {
+      id: 1,
+      img: "dress-elegant-red",
+      name: "Đầm Maxi Hoa",
+      service: "Trọn gói 4 dịch vụ",
+    },
+    {
+      id: 2,
+      img: "skirt-pleated-gray",
+      name: "Chân Váy Nếp Gấp",
+      service: "In rập + Định mức",
+    },
   ],
 };
 
 const ProductCard = ({ img, name, service }) => (
-  <div className="card-hover rounded-2xl overflow-hidden bg-surface border border-border/60 group">
+  <div className="card-hover group overflow-hidden rounded-2xl border border-border/60 bg-surface">
     <div className="img-hover aspect-4/5 overflow-hidden">
       <img
         src={`https://picsum.photos/seed/${img}/600/750.jpg`}
         alt={name}
-        className="w-full h-full object-cover"
+        className="h-full w-full object-cover"
       />
     </div>
     <div className="p-5">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-heading font-medium text-base text-text-strong">{name}</h3>
-          <p className="text-xs text-text-subtle mt-1">{service}</p>
+          <h3 className="font-heading text-base font-medium text-text-strong">
+            {name}
+          </h3>
+          <p className="mt-1 text-xs text-text-subtle">{service}</p>
         </div>
-        <span className="w-8 h-8 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:text-brand group-hover:bg-brand-50 transition-all duration-300 shrink-0 mt-0.5">
-          <ArrowUpRight className="w-3.5 h-3.5" />
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border transition-all duration-300 group-hover:border-brand/40 group-hover:bg-brand-50 group-hover:text-brand">
+          <ArrowUpRight className="h-3.5 w-3.5" />
         </span>
       </div>
     </div>
@@ -60,48 +117,58 @@ const ProductsSection = () => {
 
   const handleTabClick = (tabId) => {
     if (tabId === activeTab) return;
- 
+
     setIsVisible(false);
- 
+
     setTimeout(() => {
-  
       prevTabRef.current = tabId;
       setActiveTab(tabId);
-      
+
       setIsVisible(true);
-    }, 220); 
+    }, 220);
   };
 
   return (
-    <section id="products" className="relative py-24 md:py-32 px-4 bg-surface-subtle/50">
-      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
+    <section
+      id="products"
+      className="relative bg-surface-subtle/50 px-4 py-24 md:py-32"
+    >
+      <div className="absolute top-0 right-0 left-0 h-px bg-linear-to-r from-transparent via-gray-200 to-transparent" />
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="relative z-10 mx-auto max-w-6xl">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 reveal">
+        <div className="reveal mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium">Sản phẩm</span>
-            <h2 className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-text-strong">
+            <span className="font-mono text-xs font-medium tracking-widest text-brand uppercase">
+              Sản phẩm
+            </span>
+            <h2 className="mt-4 font-heading text-3xl font-medium tracking-tight text-text-strong md:text-5xl">
               Sản phẩm của chúng tôi
             </h2>
-            <p className="text-text-muted font-light mt-3 max-w-lg">
-              Những sản phẩm thực tế chúng tôi đã hoàn thành cho khách hàng trên khắp Việt Nam.
+            <p className="mt-3 max-w-lg font-light text-text-muted">
+              Những sản phẩm thực tế chúng tôi đã hoàn thành cho khách hàng trên
+              khắp Việt Nam.
             </p>
           </div>
-          <a href="#" className="inline-flex items-center gap-2 text-brand font-heading font-medium text-base hover:gap-3 transition-all duration-300 self-start md:self-auto shrink-0 group">
+          <a
+            href="#"
+            className="group inline-flex shrink-0 items-center gap-2 self-start font-heading text-base font-medium text-brand transition-all duration-300 hover:gap-3 md:self-auto"
+          >
             Xem thêm
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </a>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex gap-2 mb-10 reveal" style={{ transitionDelay: "150ms" }}>
+        <div
+          className="reveal mb-10 flex gap-2"
+          style={{ transitionDelay: "150ms" }}
+        >
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`tab-btn text-sm font-heading px-5 py-2 rounded-full border transition-all duration-300 hover:border-brand/30 
-                ${activeTab === tab.id ? "active border-brand text-brand" : "border-border text-text-muted"}`}
+              className={`tab-btn rounded-full border px-5 py-2 font-heading text-sm transition-all duration-300 hover:border-brand/30 ${activeTab === tab.id ? "active border-brand text-brand" : "border-border text-text-muted"}`}
             >
               {tab.label}
             </button>
@@ -111,7 +178,8 @@ const ProductsSection = () => {
         {/* Tab Content */}
         <div
           id={`tab-${activeTab}`}
-          className={`tab-content grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ${isVisible ? "active" : ""}`}>
+          className={`tab-content grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 ${isVisible ? "active" : ""}`}
+        >
           {products[activeTab].map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}

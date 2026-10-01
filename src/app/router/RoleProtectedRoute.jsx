@@ -1,12 +1,15 @@
 import { Navigate, useLocation } from "react-router-dom";
 
-import { getAccountPathByRole, normalizeRole } from "@/features/auth/lib/authRole";
+import {
+  getAccountPathByRole,
+  normalizeRole,
+} from "@/features/auth/lib/authRole";
 import { useAuth } from "@/features/auth/model/useAuth";
 
 const RoleProtectedRoute = ({ allowedRoles = [], children }) => {
   const location = useLocation();
 
-  const {user,loading} = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -33,12 +36,7 @@ const RoleProtectedRoute = ({ allowedRoles = [], children }) => {
   const normalizedAllowedRoles = allowedRoles.map(normalizeRole);
 
   if (!normalizedAllowedRoles.includes(role)) {
-    return (
-      <Navigate
-        to={getAccountPathByRole(role)}
-        replace
-      />
-    );
+    return <Navigate to={getAccountPathByRole(role)} replace />;
   }
 
   return children;

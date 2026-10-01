@@ -17,42 +17,19 @@ const FloatingInput = ({
         value={value}
         onChange={onChange}
         placeholder={label}
-        className={`
-          peer w-full rounded-xl border-2 border-white/25
-          bg-transparent px-4 pt-5 pb-2
-          ${Icon ? "pr-12" : ""}
-          text-sm text-white outline-none
-          transition-all duration-300
-          placeholder:text-transparent
-          focus:border-auth-accent
-          focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-          ${className}
-        `}
+        className={`peer w-full rounded-xl border-2 border-white/25 bg-transparent px-4 pt-5 pb-2 ${Icon ? "pr-12" : ""} text-sm text-white transition-all duration-300 outline-none placeholder:text-transparent focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)] ${className} `}
         {...props}
       />
 
       <label
-        className={`
-          pointer-events-none absolute left-4 top-1/2
-          -translate-y-1/2 text-sm text-white/55
-          transition-all duration-300
-          peer-valid:top-2 peer-valid:translate-y-0
-          peer-valid:text-xs peer-valid:text-auth-accent
-          peer-focus:top-2 peer-focus:translate-y-0
-          peer-focus:text-xs peer-focus:text-auth-accent
-          ${labelClassName}
-        `}
+        className={`pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-white/55 transition-all duration-300 peer-valid:top-2 peer-valid:translate-y-0 peer-valid:text-xs peer-valid:text-auth-accent peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-auth-accent ${labelClassName} `}
       >
         {label}
       </label>
 
       {Icon && (
         <Icon
-          className={`
-            absolute right-4 top-1/2 h-5 w-5
-            -translate-y-1/2 text-white/45
-            ${iconClassName}
-          `}
+          className={`absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-white/45 ${iconClassName} `}
         />
       )}
     </div>

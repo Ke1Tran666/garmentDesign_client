@@ -59,12 +59,7 @@ const Pagination = ({
           type="button"
           onClick={() => changePage(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="
-            rounded-xl border border-border
-            px-4 py-2 text-sm font-semibold text-text-muted
-            transition hover:bg-surface-subtle
-            disabled:cursor-not-allowed disabled:opacity-40
-          "
+          className="rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-muted transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40"
         >
           Trước
         </button>
@@ -72,35 +67,21 @@ const Pagination = ({
         <div className="flex items-center gap-1">
           {displayedPages.map((pageNumber, index) => {
             const previousPage = displayedPages[index - 1];
-            const hasGap =
-              previousPage && pageNumber - previousPage > 1;
+            const hasGap = previousPage && pageNumber - previousPage > 1;
 
             return (
-              <div
-                key={pageNumber}
-                className="flex items-center gap-1"
-              >
-                {hasGap && (
-                  <span className="px-1 text-text-subtle">
-                    ...
-                  </span>
-                )}
+              <div key={pageNumber} className="flex items-center gap-1">
+                {hasGap && <span className="px-1 text-text-subtle">...</span>}
 
                 <button
                   type="button"
                   onClick={() => changePage(pageNumber)}
-                  aria-current={
-                    pageNumber === currentPage ? "page" : undefined
-                  }
-                  className={`
-                    flex h-9 min-w-9 items-center justify-center
-                    rounded-xl px-2 text-sm font-semibold transition
-                    ${
-                      pageNumber === currentPage
-                        ? "bg-brand! text-white"
-                        : "border border-border text-text-muted hover:bg-surface-subtle"
-                    }
-                  `}
+                  aria-current={pageNumber === currentPage ? "page" : undefined}
+                  className={`flex h-9 min-w-9 items-center justify-center rounded-xl px-2 text-sm font-semibold transition ${
+                    pageNumber === currentPage
+                      ? "bg-brand! text-white"
+                      : "border border-border text-text-muted hover:bg-surface-subtle"
+                  } `}
                 >
                   {pageNumber}
                 </button>
@@ -113,12 +94,7 @@ const Pagination = ({
           type="button"
           onClick={() => changePage(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="
-            rounded-xl border border-border
-            px-4 py-2 text-sm font-semibold text-text-muted
-            transition hover:bg-surface-subtle
-            disabled:cursor-not-allowed disabled:opacity-40
-          "
+          className="rounded-xl border border-border px-4 py-2 text-sm font-semibold text-text-muted transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-40"
         >
           Sau
         </button>

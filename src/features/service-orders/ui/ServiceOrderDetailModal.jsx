@@ -29,39 +29,29 @@ const EMPTY_VALUE = "Chưa có thông tin";
 
 const employeeNameCache = new Map();
 
-const DATE_FORMATTER = new Intl.DateTimeFormat(
-  "vi-VN",
-  {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }
-);
+const DATE_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
 
-const DATE_TIME_FORMATTER =
-  new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
-const CURRENCY_FORMATTER =
-  new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  });
+const CURRENCY_FORMATTER = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+});
 
 const hasValue = (value) =>
-  value !== null &&
-  value !== undefined &&
-  value !== "";
+  value !== null && value !== undefined && value !== "";
 
-const formatDate = (
-  value,
-  includeTime = false
-) => {
+const formatDate = (value, includeTime = false) => {
   if (!value) return EMPTY_VALUE;
 
   const date = new Date(value);
@@ -92,72 +82,47 @@ const resolveBackendUrl = (url) => {
     return url;
   }
 
-  return `${BACKEND_URL}${
-    url.startsWith("/") ? url : `/${url}`
-  }`;
+  return `${BACKEND_URL}${url.startsWith("/") ? url : `/${url}`}`;
 };
 
 const getStatusStyle = (status) => {
   const text = String(status || "").toLowerCase();
 
-  if (
-    text.includes("hoàn") ||
-    text.includes("complete")
-  ) {
+  if (text.includes("hoàn") || text.includes("complete")) {
     return {
-      badge:
-        "bg-success-soft text-success ring-success-border",
+      badge: "bg-success-soft text-success ring-success-border",
       dot: "bg-success",
     };
   }
 
-  if (
-    text.includes("hủy") ||
-    text.includes("cancel")
-  ) {
+  if (text.includes("hủy") || text.includes("cancel")) {
     return {
-      badge:
-        "bg-danger-soft text-danger ring-danger-border",
+      badge: "bg-danger-soft text-danger ring-danger-border",
       dot: "bg-danger",
     };
   }
 
-  if (
-    text.includes("chờ") ||
-    text.includes("pending")
-  ) {
+  if (text.includes("chờ") || text.includes("pending")) {
     return {
-      badge:
-        "bg-warning-soft text-warning ring-warning-border",
+      badge: "bg-warning-soft text-warning ring-warning-border",
       dot: "bg-warning",
     };
   }
 
   return {
-    badge:
-      "bg-info-soft text-info ring-info-border",
+    badge: "bg-info-soft text-info ring-info-border",
     dot: "bg-info",
   };
 };
 
-const InfoItem = ({
-  label,
-  value,
-  fullWidth = false,
-}) => (
-  <div
-    className={
-      fullWidth ? "sm:col-span-2" : ""
-    }
-  >
-    <dt className="text-xs font-medium uppercase tracking-wide text-text-subtle">
+const InfoItem = ({ label, value, fullWidth = false }) => (
+  <div className={fullWidth ? "sm:col-span-2" : ""}>
+    <dt className="text-xs font-medium tracking-wide text-text-subtle uppercase">
       {label}
     </dt>
 
-    <dd className="mt-1.5 wrap-break-word text-sm font-medium leading-6 text-text-default">
-      {hasValue(value)
-        ? value
-        : EMPTY_VALUE}
+    <dd className="mt-1.5 text-sm leading-6 font-medium wrap-break-word text-text-default">
+      {hasValue(value) ? value : EMPTY_VALUE}
     </dd>
   </div>
 );
@@ -178,23 +143,15 @@ const CardHeader = ({
       </div>
 
       <div className="min-w-0">
-        <h4 className="font-bold text-text-strong">
-          {title}
-        </h4>
+        <h4 className="font-bold text-text-strong">{title}</h4>
 
         {description && (
-          <p className="mt-0.5 text-xs text-text-muted">
-            {description}
-          </p>
+          <p className="mt-0.5 text-xs text-text-muted">{description}</p>
         )}
       </div>
     </div>
 
-    {action && (
-      <div className="shrink-0">
-        {action}
-      </div>
-    )}
+    {action && <div className="shrink-0">{action}</div>}
   </div>
 );
 
@@ -237,7 +194,7 @@ const ServiceOrderDetailModal = ({
     onError: setUpdateError,
   });
 
-  const [fileState, setFileState] = useState({orderId: null,items: []});
+  const [fileState, setFileState] = useState({ orderId: null, items: [] });
 
   const [updating, setUpdating] = useState(false);
 
@@ -256,17 +213,14 @@ const ServiceOrderDetailModal = ({
   const currentUserId = authenticatedUser?.idUser;
 
   const userAddresses =
-    addressState.idUser === currentUserId
-      ? addressState.items
-      : [];
+    addressState.idUser === currentUserId ? addressState.items : [];
 
   const addressesLoading =
     isEditingAddress &&
     Boolean(currentUserId) &&
     addressState.idUser !== currentUserId;
 
-  const defaultAddressId =
-    order?.user?.defaultAddress?.addressId;
+  const defaultAddressId = order?.user?.defaultAddress?.addressId;
 
   useEffect(() => {
     if (
@@ -283,8 +237,8 @@ const ServiceOrderDetailModal = ({
     const fetchUserAddresses = async () => {
       try {
         const addresses = await addressApi.getMine({
-            signal: controller.signal,
-          });
+          signal: controller.signal,
+        });
 
         if (controller.signal.aborted) return;
 
@@ -294,24 +248,17 @@ const ServiceOrderDetailModal = ({
           error: "",
         });
       } catch (error) {
-        if (
-          error.code === "ERR_CANCELED" ||
-          error.name === "CanceledError"
-        ) {
+        if (error.code === "ERR_CANCELED" || error.name === "CanceledError") {
           return;
         }
 
-        console.error(
-          "Không thể tải địa chỉ:",
-          error
-        );
+        console.error("Không thể tải địa chỉ:", error);
 
         setAddressState({
           idUser: currentUserId,
           items: [],
           error:
-            error.response?.data?.message ||
-            "Không thể tải danh sách địa chỉ.",
+            error.response?.data?.message || "Không thể tải danh sách địa chỉ.",
         });
       }
     };
@@ -319,12 +266,7 @@ const ServiceOrderDetailModal = ({
     fetchUserAddresses();
 
     return () => controller.abort();
-  }, [
-    open,
-    isEditingAddress,
-    currentUserId,
-    addressState.idUser,
-  ]);
+  }, [open, isEditingAddress, currentUserId, addressState.idUser]);
 
   const orderId = order?.serviceOrderId;
   const createdBy = order?.createdBy;
@@ -345,57 +287,43 @@ const ServiceOrderDetailModal = ({
    * với file bổ sung từ Service_Order_Files.
    */
   const displayFiles = useMemo(() => {
-    const uploadedFiles =
-      fileState.orderId === orderId
-        ? fileState.items
-        : [];
+    const uploadedFiles = fileState.orderId === orderId ? fileState.items : [];
 
-    const productImage =
-      order?.productImage;
+    const productImage = order?.productImage;
 
-    const productImageItem =
-      productImage
-        ? {
-            fileId: `product-image-${orderId}`,
-            fileName: order.productName
-              ? `Ảnh đại diện - ${order.productName}`
-              : "Ảnh đại diện sản phẩm",
-            fileType: "image/product",
-            contentUrl: productImage,
-            uploadedAt:
-              order.updatedAt ||
-              order.createdAt,
-            isProductImage: true,
-          }
-        : null;
+    const productImageItem = productImage
+      ? {
+          fileId: `product-image-${orderId}`,
+          fileName: order.productName
+            ? `Ảnh đại diện - ${order.productName}`
+            : "Ảnh đại diện sản phẩm",
+          fileType: "image/product",
+          contentUrl: productImage,
+          uploadedAt: order.updatedAt || order.createdAt,
+          isProductImage: true,
+        }
+      : null;
 
     /*
      * Loại record cũ nếu phiên bản trước
      * từng lưu ảnh đại diện trong order-files.
      */
-    const additionalFiles =
-      uploadedFiles.filter(
-        (file) =>
-          !productImage ||
-          file.contentUrl !== productImage
-      );
+    const additionalFiles = uploadedFiles.filter(
+      (file) => !productImage || file.contentUrl !== productImage,
+    );
 
     return productImageItem
-      ? [
-          productImageItem,
-          ...additionalFiles,
-        ]
+      ? [productImageItem, ...additionalFiles]
       : additionalFiles;
   }, [fileState, order, orderId]);
 
   /*
-  * Khóa scroll trang và xử lý phím ESC.
-  */
+   * Khóa scroll trang và xử lý phím ESC.
+   */
   useEffect(() => {
     if (!open) return undefined;
 
-    const previousOverflow =
-      document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
 
     const handleKeyDown = (event) => {
       if (event.key !== "Escape") return;
@@ -423,19 +351,12 @@ const ServiceOrderDetailModal = ({
 
     document.body.style.overflow = "hidden";
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
 
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [
     open,
@@ -453,15 +374,9 @@ const ServiceOrderDetailModal = ({
   useEffect(() => {
     if (!open) return undefined;
 
-    const employeeIds = [
-      ...new Set(
-        [createdBy, updatedBy].filter(Boolean)
-      ),
-    ];
+    const employeeIds = [...new Set([createdBy, updatedBy].filter(Boolean))];
 
-    const missingIds = employeeIds.filter(
-      (id) => !employeeNameCache.has(id)
-    );
+    const missingIds = employeeIds.filter((id) => !employeeNameCache.has(id));
 
     if (missingIds.length === 0) {
       return undefined;
@@ -470,44 +385,35 @@ const ServiceOrderDetailModal = ({
     const controller = new AbortController();
 
     const fetchEmployeeNames = async () => {
-      const results =
-        await Promise.allSettled(
-          missingIds.map((id) =>
-            userApi.getById(id, {
-              signal: controller.signal,
-            })
-          )
-        );
+      const results = await Promise.allSettled(
+        missingIds.map((id) =>
+          userApi.getById(id, {
+            signal: controller.signal,
+          }),
+        ),
+      );
 
       if (controller.signal.aborted) return;
 
       const loadedNames = {};
 
       results.forEach((result, index) => {
-        const employeeId =
-          missingIds[index];
+        const employeeId = missingIds[index];
 
         const employeeName =
           result.status === "fulfilled"
-            ? result.value?.fullName ||
-              "Không xác định"
+            ? result.value?.fullName || "Không xác định"
             : "Không xác định";
 
-        employeeNameCache.set(
-          employeeId,
-          employeeName
-        );
+        employeeNameCache.set(employeeId, employeeName);
 
-        loadedNames[employeeId] =
-          employeeName;
+        loadedNames[employeeId] = employeeName;
       });
 
-      setEmployeeNames(
-        (previousNames) => ({
-          ...previousNames,
-          ...loadedNames,
-        })
-      );
+      setEmployeeNames((previousNames) => ({
+        ...previousNames,
+        ...loadedNames,
+      }));
     };
 
     fetchEmployeeNames();
@@ -529,12 +435,9 @@ const ServiceOrderDetailModal = ({
 
     const fetchFiles = async () => {
       try {
-        const files = await serviceOrderFileApi.getByOrder(
-          orderId,
-          {
-            signal: controller.signal,
-          },
-        );
+        const files = await serviceOrderFileApi.getByOrder(orderId, {
+          signal: controller.signal,
+        });
 
         if (controller.signal.aborted) return;
 
@@ -543,14 +446,8 @@ const ServiceOrderDetailModal = ({
           items: files || [],
         });
       } catch (error) {
-        if (
-          error.code !== "ERR_CANCELED" &&
-          error.name !== "CanceledError"
-        ) {
-          console.error(
-            "Không thể tải danh sách file:",
-            error
-          );
+        if (error.code !== "ERR_CANCELED" && error.name !== "CanceledError") {
+          console.error("Không thể tải danh sách file:", error);
 
           setFileState({
             orderId,
@@ -573,20 +470,14 @@ const ServiceOrderDetailModal = ({
   const service = order.service || {};
   const address = order.address || {};
 
-  const statusStyle = getStatusStyle(
-    order.status
-  );
+  const statusStyle = getStatusStyle(order.status);
 
   const orderCode = `ORD-${orderId}`;
 
-  const unitType =
-    order.unitType ||
-    service.unitType ||
-    "";
+  const unitType = order.unitType || service.unitType || "";
 
   const currentProductImage =
-    productImagePreview ||
-    resolveBackendUrl(order.productImage);
+    productImagePreview || resolveBackendUrl(order.productImage);
 
   const getEmployeeName = (employeeId) => {
     if (!employeeId) return EMPTY_VALUE;
@@ -598,18 +489,12 @@ const ServiceOrderDetailModal = ({
     );
   };
 
-  const receiverName =
-    getEmployeeName(createdBy);
+  const receiverName = getEmployeeName(createdBy);
 
-  const updaterName =
-    getEmployeeName(updatedBy);
+  const updaterName = getEmployeeName(updatedBy);
 
   const handleStartEditProduct = () => {
-    if (
-      isEditingAddress ||
-      updatingAddress ||
-      updating
-    ) {
+    if (isEditingAddress || updatingAddress || updating) {
       return;
     }
 
@@ -619,8 +504,7 @@ const ServiceOrderDetailModal = ({
       productName: order.productName || "",
       unitType,
       quantity: order.quantity ?? "",
-      customerRequest:
-        order.customerRequest || "",
+      customerRequest: order.customerRequest || "",
     });
 
     setUpdateError("");
@@ -663,22 +547,17 @@ const ServiceOrderDetailModal = ({
     }));
   };
 
-  const handleDeleteUploadedFile = async (
-    file
-  ) => {
+  const handleDeleteUploadedFile = async (file) => {
     /*
-    * Ảnh đại diện là dữ liệu tổng hợp từ
-    * Service_Orders nên không xóa ở đây.
-    */
-    if (
-      file.isProductImage ||
-      !file.fileId
-    ) {
+     * Ảnh đại diện là dữ liệu tổng hợp từ
+     * Service_Orders nên không xóa ở đây.
+     */
+    if (file.isProductImage || !file.fileId) {
       return;
     }
 
     const confirmed = window.confirm(
-      `Bạn có chắc muốn xóa file "${file.fileName}" không?`
+      `Bạn có chắc muốn xóa file "${file.fileName}" không?`,
     );
 
     if (!confirmed) return;
@@ -692,64 +571,44 @@ const ServiceOrderDetailModal = ({
       setFileState((previousState) => ({
         ...previousState,
         items: previousState.items.filter(
-          (item) =>
-            item.fileId !== file.fileId
+          (item) => item.fileId !== file.fileId,
         ),
       }));
     } catch (error) {
-      console.error(
-        "Không thể xóa file:",
-        error
-      );
+      console.error("Không thể xóa file:", error);
 
       setFileError(
         error.response?.data?.message ||
-          "Không thể xóa file. Vui lòng thử lại."
+          "Không thể xóa file. Vui lòng thử lại.",
       );
     } finally {
       setDeletingFileId(null);
     }
   };
 
-  const handleUpdateProduct = async (
-    event
-  ) => {
+  const handleUpdateProduct = async (event) => {
     event.preventDefault();
 
-    const productName =
-      editForm.productName.trim();
+    const productName = editForm.productName.trim();
 
-    const unitTypeValue =
-      editForm.unitType.trim();
+    const unitTypeValue = editForm.unitType.trim();
 
-    const quantity = Number(
-      editForm.quantity
-    );
+    const quantity = Number(editForm.quantity);
 
-    const customerRequest =
-      editForm.customerRequest.trim();
+    const customerRequest = editForm.customerRequest.trim();
 
     if (!productName) {
-      setUpdateError(
-        "Vui lòng nhập tên sản phẩm."
-      );
+      setUpdateError("Vui lòng nhập tên sản phẩm.");
       return;
     }
 
     if (!unitTypeValue) {
-      setUpdateError(
-        "Vui lòng nhập đơn vị tính."
-      );
+      setUpdateError("Vui lòng nhập đơn vị tính.");
       return;
     }
 
-    if (
-      !Number.isFinite(quantity) ||
-      quantity <= 0
-    ) {
-      setUpdateError(
-        "Số lượng phải lớn hơn 0."
-      );
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setUpdateError("Số lượng phải lớn hơn 0.");
       return;
     }
 
@@ -761,63 +620,44 @@ const ServiceOrderDetailModal = ({
       setUpdating(true);
       setUpdateError("");
 
-      let updatedOrder = await serviceOrderApi.update(
-          orderId,
-          {
-            productName,
-            unitType: unitTypeValue,
-            quantity,
-            customerRequest,
-          },
-        );
+      let updatedOrder = await serviceOrderApi.update(orderId, {
+        productName,
+        unitType: unitTypeValue,
+        quantity,
+        customerRequest,
+      });
 
       /*
        * Upload ảnh đại diện và file bổ sung.
        */
       if (hasUpload) {
-        const uploadData = buildFormData(
-          "File do khách hàng cung cấp",
-        );
+        const uploadData = buildFormData("File do khách hàng cung cấp");
 
         try {
           const uploadResult = await serviceOrderFileApi.upload(
-              orderId,
-              uploadData,
-            );
-
-          updatedOrder =
-            uploadResult?.order || updatedOrder;
-
-          const newFiles =
-            uploadResult?.files || [];
-
-          setFileState(
-            (previousState) => {
-              const previousItems =
-                previousState.orderId === orderId
-                  ? previousState.items
-                  : [];
-
-              const fileMap = new Map();
-
-              [
-                ...previousItems,
-                ...newFiles,
-              ].forEach((file) => {
-                fileMap.set(
-                  file.fileId,
-                  file
-                );
-              });
-
-              return {
-                orderId,
-                items: Array.from(
-                  fileMap.values()
-                ),
-              };
-            }
+            orderId,
+            uploadData,
           );
+
+          updatedOrder = uploadResult?.order || updatedOrder;
+
+          const newFiles = uploadResult?.files || [];
+
+          setFileState((previousState) => {
+            const previousItems =
+              previousState.orderId === orderId ? previousState.items : [];
+
+            const fileMap = new Map();
+
+            [...previousItems, ...newFiles].forEach((file) => {
+              fileMap.set(file.fileId, file);
+            });
+
+            return {
+              orderId,
+              items: Array.from(fileMap.values()),
+            };
+          });
         } catch (uploadError) {
           /*
            * Thông tin đã cập nhật thành công,
@@ -827,7 +667,7 @@ const ServiceOrderDetailModal = ({
 
           setUpdateError(
             uploadError.response?.data?.message ||
-              "Thông tin đã được cập nhật, nhưng ảnh hoặc file tải lên thất bại."
+              "Thông tin đã được cập nhật, nhưng ảnh hoặc file tải lên thất bại.",
           );
 
           return;
@@ -840,14 +680,11 @@ const ServiceOrderDetailModal = ({
 
       setIsEditingProduct(false);
     } catch (error) {
-      console.error(
-        "Không thể cập nhật đơn hàng:",
-        error
-      );
+      console.error("Không thể cập nhật đơn hàng:", error);
 
       setUpdateError(
         error.response?.data?.message ||
-          "Không thể cập nhật đơn hàng. Vui lòng thử lại."
+          "Không thể cập nhật đơn hàng. Vui lòng thử lại.",
       );
     } finally {
       setUpdating(false);
@@ -855,18 +692,12 @@ const ServiceOrderDetailModal = ({
   };
 
   const handleStartEditAddress = () => {
-    if (
-      updatingAddress ||
-      updating ||
-      isEditingProduct
-    ) {
+    if (updatingAddress || updating || isEditingProduct) {
       return;
     }
 
     setSelectedAddressId(
-      order.address?.addressId != null
-        ? String(order.address.addressId)
-        : ""
+      order.address?.addressId != null ? String(order.address.addressId) : "",
     );
 
     setAddressError("");
@@ -882,35 +713,23 @@ const ServiceOrderDetailModal = ({
   };
 
   const handleUpdateAddress = async () => {
-    const addressId = Number(
-      selectedAddressId
-    );
+    const addressId = Number(selectedAddressId);
 
-    if (
-      !Number.isInteger(addressId) ||
-      addressId <= 0
-    ) {
-      setAddressError(
-        "Vui lòng chọn một địa chỉ nhận hàng."
-      );
+    if (!Number.isInteger(addressId) || addressId <= 0) {
+      setAddressError("Vui lòng chọn một địa chỉ nhận hàng.");
       return;
     }
 
     if (!currentUserId) {
-      setAddressError(
-        "Không tìm thấy thông tin người dùng."
-      );
+      setAddressError("Không tìm thấy thông tin người dùng.");
       return;
     }
 
     /*
-    * Không gọi API nếu người dùng vẫn chọn
-    * đúng địa chỉ hiện tại.
-    */
-    if (
-      String(order.address?.addressId) ===
-      String(addressId)
-    ) {
+     * Không gọi API nếu người dùng vẫn chọn
+     * đúng địa chỉ hiện tại.
+     */
+    if (String(order.address?.addressId) === String(addressId)) {
       setSelectedAddressId("");
       setAddressError("");
       setIsEditingAddress(false);
@@ -922,9 +741,9 @@ const ServiceOrderDetailModal = ({
       setAddressError("");
 
       const updatedOrder = await serviceOrderApi.updateAddress(
-          orderId,
-          addressId,
-        );
+        orderId,
+        addressId,
+      );
 
       onUpdated?.(updatedOrder);
 
@@ -932,14 +751,11 @@ const ServiceOrderDetailModal = ({
       setAddressError("");
       setIsEditingAddress(false);
     } catch (error) {
-      console.error(
-        "Không thể cập nhật địa chỉ:",
-        error
-      );
+      console.error("Không thể cập nhật địa chỉ:", error);
 
       setAddressError(
         error.response?.data?.message ||
-          "Không thể cập nhật địa chỉ. Vui lòng thử lại."
+          "Không thể cập nhật địa chỉ. Vui lòng thử lại.",
       );
     } finally {
       setUpdatingAddress(false);
@@ -948,23 +764,21 @@ const ServiceOrderDetailModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-70 flex items-center justify-center bg-gray-950/45 px-3 py-4 animate-in fade-in duration-150 sm:px-6"
+      className="fixed inset-0 z-70 flex animate-in items-center justify-center bg-gray-950/45 px-3 py-4 duration-150 fade-in sm:px-6"
       onClick={handleRequestClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="service-order-title"
-        onClick={(event) =>
-          event.stopPropagation()
-        }
-        className="flex max-h-[96vh] w-[96vw] max-w-360 flex-col overflow-hidden rounded-3xl bg-surface-subtle shadow-xl animate-in zoom-in-95 slide-in-from-bottom-2 duration-200 ease-out"
+        onClick={(event) => event.stopPropagation()}
+        className="flex max-h-[96vh] w-[96vw] max-w-360 animate-in flex-col overflow-hidden rounded-3xl bg-surface-subtle shadow-xl duration-200 ease-out zoom-in-95 slide-in-from-bottom-2"
       >
         {/* Header */}
         <header className="relative shrink-0 overflow-hidden border-b border-border-subtle bg-surface">
           <div className="absolute inset-x-0 top-0 h-1 bg-brand" />
 
-          <div className="relative flex items-start justify-between gap-5 px-5 pb-5 pt-6 sm:px-7">
+          <div className="relative flex items-start justify-between gap-5 px-5 pt-6 pb-5 sm:px-7">
             <div className="flex min-w-0 items-start gap-4">
               <div className="hidden h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-sm sm:flex">
                 <FileText size={23} />
@@ -972,7 +786,7 @@ const ServiceOrderDetailModal = ({
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-lg bg-brand-light px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand">
+                  <span className="inline-flex rounded-lg bg-brand-light px-2.5 py-1 text-xs font-bold tracking-wide text-brand uppercase">
                     {orderCode}
                   </span>
 
@@ -983,8 +797,7 @@ const ServiceOrderDetailModal = ({
                       className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
                     />
 
-                    {order.status ||
-                      "Đang xử lý"}
+                    {order.status || "Đang xử lý"}
                   </span>
                 </div>
 
@@ -1002,12 +815,7 @@ const ServiceOrderDetailModal = ({
                         size={15}
                         className="shrink-0 text-text-subtle"
                       />
-
-                      Tạo ngày{" "}
-                      {formatDate(
-                        order.createdAt,
-                        true
-                      )}
+                      Tạo ngày {formatDate(order.createdAt, true)}
                     </span>
 
                     <span className="h-1 w-1 shrink-0 rounded-full bg-gray-300" />
@@ -1015,8 +823,7 @@ const ServiceOrderDetailModal = ({
                     <span className="truncate">
                       Khách hàng:{" "}
                       <span className="font-semibold text-text-default">
-                        {user.fullName ||
-                          "Chưa xác định"}
+                        {user.fullName || "Chưa xác định"}
                       </span>
                     </span>
 
@@ -1027,9 +834,7 @@ const ServiceOrderDetailModal = ({
                         <span className="hidden truncate xl:block">
                           Dịch vụ:{" "}
                           <span className="font-semibold text-text-default">
-                            {
-                              service.serviceName
-                            }
+                            {service.serviceName}
                           </span>
                         </span>
                       </>
@@ -1088,16 +893,15 @@ const ServiceOrderDetailModal = ({
                     <div className="flex min-w-0 flex-col p-6 sm:p-7">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand">
-                            {service.serviceName ||
-                              "Dịch vụ"}
+                          <p className="text-xs font-bold tracking-[0.16em] text-brand uppercase">
+                            {service.serviceName || "Dịch vụ"}
                           </p>
 
                           {isEditingProduct ? (
                             <div className="mt-3">
                               <label
                                 htmlFor="productName"
-                                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                                className="mb-1.5 block text-xs font-semibold tracking-wide text-text-subtle uppercase"
                               >
                                 Tên sản phẩm
                               </label>
@@ -1106,21 +910,16 @@ const ServiceOrderDetailModal = ({
                                 id="productName"
                                 type="text"
                                 name="productName"
-                                value={
-                                  editForm.productName
-                                }
-                                onChange={
-                                  handleEditFormChange
-                                }
+                                value={editForm.productName}
+                                onChange={handleEditFormChange}
                                 disabled={updating || updatingAddress}
                                 autoFocus
-                                className="h-11 w-full rounded-xl border border-border px-3.5 text-base font-semibold text-text-strong outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                                className="h-11 w-full rounded-xl border border-border px-3.5 text-base font-semibold text-text-strong transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                               />
                             </div>
                           ) : (
-                            <h3 className="mt-3 text-2xl font-bold leading-tight text-text-strong">
-                              {order.productName ||
-                                "Chưa có tên sản phẩm"}
+                            <h3 className="mt-3 text-2xl leading-tight font-bold text-text-strong">
+                              {order.productName || "Chưa có tên sản phẩm"}
                             </h3>
                           )}
 
@@ -1142,8 +941,7 @@ const ServiceOrderDetailModal = ({
                                   className={`h-2 w-2 rounded-full ${statusStyle.dot}`}
                                 />
 
-                                {order.status ||
-                                  "Đang xử lý"}
+                                {order.status || "Đang xử lý"}
                               </span>
 
                               <button
@@ -1177,21 +975,15 @@ const ServiceOrderDetailModal = ({
                                     className="animate-spin"
                                   />
                                 ) : (
-                                  <Save
-                                    size={15}
-                                  />
+                                  <Save size={15} />
                                 )}
 
-                                {updating
-                                  ? "Đang cập nhật"
-                                  : "Cập nhật"}
+                                {updating ? "Đang cập nhật" : "Cập nhật"}
                               </button>
 
                               <button
                                 type="button"
-                                onClick={
-                                  handleCancelEditProduct
-                                }
+                                onClick={handleCancelEditProduct}
                                 disabled={updating || updatingAddress}
                                 title="Hủy chỉnh sửa"
                                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-muted transition hover:border-danger-border hover:bg-danger-soft hover:text-danger disabled:opacity-50"
@@ -1208,20 +1000,19 @@ const ServiceOrderDetailModal = ({
                       {isEditingProduct ? (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                            <label className="mb-1.5 block text-xs font-semibold tracking-wide text-text-subtle uppercase">
                               Mã dịch vụ
                             </label>
 
                             <div className="flex h-11 items-center rounded-xl bg-surface-muted px-3.5 text-sm font-medium text-text-muted">
-                              {service.serviceCode ||
-                                EMPTY_VALUE}
+                              {service.serviceCode || EMPTY_VALUE}
                             </div>
                           </div>
 
                           <div>
                             <label
                               htmlFor="unitType"
-                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                              className="mb-1.5 block text-xs font-semibold tracking-wide text-text-subtle uppercase"
                             >
                               Đơn vị tính
                             </label>
@@ -1230,21 +1021,17 @@ const ServiceOrderDetailModal = ({
                               id="unitType"
                               type="text"
                               name="unitType"
-                              value={
-                                editForm.unitType
-                              }
-                              onChange={
-                                handleEditFormChange
-                              }
+                              value={editForm.unitType}
+                              onChange={handleEditFormChange}
                               disabled={updating || updatingAddress}
-                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                             />
                           </div>
 
                           <div>
                             <label
                               htmlFor="quantity"
-                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                              className="mb-1.5 block text-xs font-semibold tracking-wide text-text-subtle uppercase"
                             >
                               Số lượng
                             </label>
@@ -1255,33 +1042,27 @@ const ServiceOrderDetailModal = ({
                               name="quantity"
                               min="0.01"
                               step="0.01"
-                              value={
-                                editForm.quantity
-                              }
-                              onChange={
-                                handleEditFormChange
-                              }
+                              value={editForm.quantity}
+                              onChange={handleEditFormChange}
                               disabled={updating || updatingAddress}
-                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                              className="h-11 w-full rounded-xl border border-border px-3.5 text-sm font-medium transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                             />
                           </div>
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                            <label className="mb-1.5 block text-xs font-semibold tracking-wide text-text-subtle uppercase">
                               Ngày tạo
                             </label>
 
                             <div className="flex h-11 items-center rounded-xl bg-surface-muted px-3.5 text-sm font-medium text-text-muted">
-                              {formatDate(
-                                order.createdAt
-                              )}
+                              {formatDate(order.createdAt)}
                             </div>
                           </div>
 
                           <div className="sm:col-span-2">
                             <label
                               htmlFor="customerRequest"
-                              className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-subtle"
+                              className="mb-1.5 block text-xs font-semibold tracking-wide text-text-subtle uppercase"
                             >
                               Yêu cầu khách hàng
                             </label>
@@ -1290,14 +1071,10 @@ const ServiceOrderDetailModal = ({
                               id="customerRequest"
                               name="customerRequest"
                               rows={4}
-                              value={
-                                editForm.customerRequest
-                              }
-                              onChange={
-                                handleEditFormChange
-                              }
+                              value={editForm.customerRequest}
+                              onChange={handleEditFormChange}
                               disabled={updating || updatingAddress}
-                              className="w-full resize-none rounded-xl border border-border px-3.5 py-3 text-sm leading-6 outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                              className="w-full resize-none rounded-xl border border-border px-3.5 py-3 text-sm leading-6 transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                             />
                           </div>
                         </div>
@@ -1306,40 +1083,27 @@ const ServiceOrderDetailModal = ({
                           <dl className="grid grid-cols-2 gap-x-6 gap-y-5">
                             <InfoItem
                               label="Mã dịch vụ"
-                              value={
-                                service.serviceCode
-                              }
+                              value={service.serviceCode}
                             />
 
-                            <InfoItem
-                              label="Đơn vị tính"
-                              value={unitType}
-                            />
+                            <InfoItem label="Đơn vị tính" value={unitType} />
 
-                            <InfoItem
-                              label="Số lượng"
-                              value={
-                                order.quantity
-                              }
-                            />
+                            <InfoItem label="Số lượng" value={order.quantity} />
 
                             <InfoItem
                               label="Ngày tạo"
-                              value={formatDate(
-                                order.createdAt
-                              )}
+                              value={formatDate(order.createdAt)}
                             />
                           </dl>
 
                           <div className="mt-auto pt-6">
                             <div className="rounded-2xl bg-brand-light/60 p-4">
-                              <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+                              <p className="text-xs font-semibold tracking-wide text-brand uppercase">
                                 Yêu cầu của khách hàng
                               </p>
 
-                              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-text-default">
-                                {order.customerRequest ||
-                                  EMPTY_VALUE}
+                              <p className="mt-2 text-sm leading-6 whitespace-pre-line text-text-default">
+                                {order.customerRequest || EMPTY_VALUE}
                               </p>
                             </div>
                           </div>
@@ -1377,9 +1141,7 @@ const ServiceOrderDetailModal = ({
                     <div className="mt-6">
                       <AttachmentPicker
                         files={attachmentFiles}
-                        disabled={
-                          updating || updatingAddress
-                        }
+                        disabled={updating || updatingAddress}
                         onChange={handleAttachmentChange}
                         onRemove={removeAttachment}
                       />
@@ -1399,13 +1161,11 @@ const ServiceOrderDetailModal = ({
                     {displayFiles.length > 0 ? (
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {displayFiles.map((file) => {
-                          const isImage =
-                            String(file.fileType || "")
-                              .toLowerCase()
-                              .startsWith("image/");
+                          const isImage = String(file.fileType || "")
+                            .toLowerCase()
+                            .startsWith("image/");
 
-                          const isDeleting =
-                            deletingFileId === file.fileId;
+                          const isDeleting = deletingFileId === file.fileId;
 
                           return (
                             <div
@@ -1415,9 +1175,7 @@ const ServiceOrderDetailModal = ({
                               {/* File icon */}
                               <div
                                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface shadow-sm ${
-                                  isImage
-                                    ? "text-violet-600"
-                                    : "text-brand"
+                                  isImage ? "text-violet-600" : "text-brand"
                                 }`}
                               >
                                 {isImage ? (
@@ -1435,7 +1193,7 @@ const ServiceOrderDetailModal = ({
                                   </p>
 
                                   {file.isProductImage && (
-                                    <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600">
+                                    <span className="shrink-0 rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold tracking-wide text-violet-600 uppercase">
                                       Ảnh đại diện
                                     </span>
                                   )}
@@ -1444,26 +1202,17 @@ const ServiceOrderDetailModal = ({
                                 <p className="mt-0.5 text-xs text-text-subtle">
                                   {file.isProductImage
                                     ? "Ảnh chính của đơn hàng"
-                                    : formatDate(
-                                        file.uploadedAt,
-                                        true
-                                      )}
+                                    : formatDate(file.uploadedAt, true)}
                                 </p>
                               </div>
 
                               {/* Actions */}
                               <div className="flex shrink-0 items-center gap-1">
                                 <a
-                                  href={resolveBackendUrl(
-                                    file.contentUrl
-                                  )}
+                                  href={resolveBackendUrl(file.contentUrl)}
                                   target="_blank"
                                   rel="noreferrer"
-                                  title={
-                                    isImage
-                                      ? "Xem ảnh"
-                                      : "Tải file"
-                                  }
+                                  title={isImage ? "Xem ảnh" : "Tải file"}
                                   aria-label={
                                     isImage
                                       ? `Xem ${file.fileName}`
@@ -1480,9 +1229,7 @@ const ServiceOrderDetailModal = ({
                                     onClick={() =>
                                       handleDeleteUploadedFile(file)
                                     }
-                                    disabled={
-                                      isDeleting || updating
-                                    }
+                                    disabled={isDeleting || updating}
                                     title="Xóa file"
                                     aria-label={`Xóa ${file.fileName}`}
                                     className="flex h-9 w-9 items-center justify-center rounded-lg text-text-subtle transition hover:bg-danger-soft hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
@@ -1528,21 +1275,13 @@ const ServiceOrderDetailModal = ({
                 />
 
                 <dl className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-                  <InfoItem
-                    label="Tên dịch vụ"
-                    value={service.serviceName}
-                  />
+                  <InfoItem label="Tên dịch vụ" value={service.serviceName} />
 
-                  <InfoItem
-                    label="Mã dịch vụ"
-                    value={service.serviceCode}
-                  />
+                  <InfoItem label="Mã dịch vụ" value={service.serviceCode} />
 
                   <InfoItem
                     label="Giá cơ bản"
-                    value={formatCurrency(
-                      service.basePrice
-                    )}
+                    value={formatCurrency(service.basePrice)}
                   />
                 </dl>
 
@@ -1550,18 +1289,17 @@ const ServiceOrderDetailModal = ({
 
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-text-subtle">
+                    <p className="text-xs font-medium tracking-wide text-text-subtle uppercase">
                       Mô tả dịch vụ
                     </p>
 
-                    <p className="mt-2 whitespace-pre-line text-sm leading-6 text-text-default">
-                      {service.description ||
-                        EMPTY_VALUE}
+                    <p className="mt-2 text-sm leading-6 whitespace-pre-line text-text-default">
+                      {service.description || EMPTY_VALUE}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-text-subtle">
+                    <p className="text-xs font-medium tracking-wide text-text-subtle uppercase">
                       Tags
                     </p>
 
@@ -1596,35 +1334,21 @@ const ServiceOrderDetailModal = ({
                   />
 
                   <dl className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <InfoItem
-                      label="Họ và tên"
-                      value={user.fullName}
-                    />
+                    <InfoItem label="Họ và tên" value={user.fullName} />
 
                     <InfoItem
                       label="Mã khách hàng"
-                      value={
-                        user.userCode ||
-                        user.idUser
-                      }
+                      value={user.userCode || user.idUser}
                     />
 
-                    <InfoItem
-                      label="Giới tính"
-                      value={user.gender}
-                    />
+                    <InfoItem label="Giới tính" value={user.gender} />
 
                     <InfoItem
                       label="Ngày sinh"
-                      value={formatDate(
-                        user.birthday
-                      )}
+                      value={formatDate(user.birthday)}
                     />
 
-                    <InfoItem
-                      label="Trạng thái"
-                      value={user.status}
-                    />
+                    <InfoItem label="Trạng thái" value={user.status} />
                   </dl>
                 </section>
 
@@ -1667,16 +1391,12 @@ const ServiceOrderDetailModal = ({
                               <Save size={15} />
                             )}
 
-                            {updatingAddress
-                              ? "Đang cập nhật"
-                              : "Cập nhật"}
+                            {updatingAddress ? "Đang cập nhật" : "Cập nhật"}
                           </button>
 
                           <button
                             type="button"
-                            onClick={
-                              handleCancelEditAddress
-                            }
+                            onClick={handleCancelEditAddress}
                             disabled={updatingAddress}
                             aria-label="Hủy chỉnh sửa địa chỉ"
                             title="Hủy chỉnh sửa"
@@ -1688,13 +1408,9 @@ const ServiceOrderDetailModal = ({
                       ) : (
                         <button
                           type="button"
-                          onClick={
-                            handleStartEditAddress
-                          }
+                          onClick={handleStartEditAddress}
                           disabled={
-                            isEditingProduct ||
-                            updating ||
-                            updatingAddress
+                            isEditingProduct || updating || updatingAddress
                           }
                           className="inline-flex h-9 items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-3.5 text-xs font-semibold text-orange-600 transition hover:border-orange-300 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
                         >
@@ -1708,11 +1424,7 @@ const ServiceOrderDetailModal = ({
                     <div className="mt-6">
                       {addressesLoading ? (
                         <div className="flex items-center justify-center gap-2 rounded-2xl bg-surface-subtle px-4 py-8 text-sm text-text-muted">
-                          <LoaderCircle
-                            size={18}
-                            className="animate-spin"
-                          />
-
+                          <LoaderCircle size={18} className="animate-spin" />
                           Đang tải danh sách địa chỉ...
                         </div>
                       ) : addressState.error ? (
@@ -1731,8 +1443,7 @@ const ServiceOrderDetailModal = ({
                           </p>
 
                           <p className="mt-1 text-xs text-text-subtle">
-                            Vui lòng thêm địa chỉ tại
-                            trang quản lý địa chỉ.
+                            Vui lòng thêm địa chỉ tại trang quản lý địa chỉ.
                           </p>
                         </div>
                       ) : (
@@ -1742,22 +1453,17 @@ const ServiceOrderDetailModal = ({
                           className="max-h-80 space-y-3 overflow-y-auto pr-1"
                         >
                           {userAddresses.map((item) => {
-                            const itemAddressId =
-                              String(item.addressId);
+                            const itemAddressId = String(item.addressId);
 
                             const isSelected =
-                              itemAddressId ===
-                              String(selectedAddressId);
+                              itemAddressId === String(selectedAddressId);
 
                             const isCurrentAddress =
                               itemAddressId ===
-                              String(
-                                order.address?.addressId
-                              );
+                              String(order.address?.addressId);
 
                             const isDefault =
-                              itemAddressId ===
-                              String(defaultAddressId);
+                              itemAddressId === String(defaultAddressId);
 
                             return (
                               <label
@@ -1774,48 +1480,41 @@ const ServiceOrderDetailModal = ({
                                   value={item.addressId}
                                   checked={isSelected}
                                   onChange={(event) => {
-                                    setSelectedAddressId(
-                                      event.target.value
-                                    );
+                                    setSelectedAddressId(event.target.value);
 
                                     setAddressError("");
                                   }}
-                                  disabled={
-                                    updatingAddress
-                                  }
+                                  disabled={updatingAddress}
                                   className="mt-1 h-4 w-4 shrink-0 accent-orange-500"
                                 />
 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex flex-wrap items-center gap-2">
                                     <p className="font-semibold text-text-strong">
-                                      {item.companyName ||
-                                        "Địa chỉ cá nhân"}
+                                      {item.companyName || "Địa chỉ cá nhân"}
                                     </p>
 
                                     {isCurrentAddress && (
-                                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-600">
+                                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-orange-600 uppercase">
                                         Đang sử dụng
                                       </span>
                                     )}
 
                                     {isDefault && (
-                                      <span className="rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">
+                                      <span className="rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-bold tracking-wide text-success uppercase">
                                         Mặc định
                                       </span>
                                     )}
 
-                                    {isSelected &&
-                                      !isCurrentAddress && (
-                                        <span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-info">
-                                          Đang chọn
-                                        </span>
-                                      )}
+                                    {isSelected && !isCurrentAddress && (
+                                      <span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-bold tracking-wide text-info uppercase">
+                                        Đang chọn
+                                      </span>
+                                    )}
                                   </div>
 
                                   <p className="mt-1 text-sm leading-6 text-text-muted">
-                                    {item.address ||
-                                      EMPTY_VALUE}
+                                    {item.address || EMPTY_VALUE}
                                   </p>
 
                                   {item.note && (
@@ -1837,9 +1536,8 @@ const ServiceOrderDetailModal = ({
                       )}
 
                       <p className="mt-4 text-xs leading-5 text-text-subtle">
-                        Địa chỉ này chỉ áp dụng cho đơn
-                        hàng hiện tại, không thay đổi địa
-                        chỉ mặc định của tài khoản.
+                        Địa chỉ này chỉ áp dụng cho đơn hàng hiện tại, không
+                        thay đổi địa chỉ mặc định của tài khoản.
                       </p>
                     </div>
                   ) : (
@@ -1854,10 +1552,7 @@ const ServiceOrderDetailModal = ({
                         value={address.address}
                       />
 
-                      <InfoItem
-                        label="Ghi chú"
-                        value={address.note}
-                      />
+                      <InfoItem label="Ghi chú" value={address.note} />
                     </dl>
                   )}
                 </section>
@@ -1871,14 +1566,12 @@ const ServiceOrderDetailModal = ({
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-text-subtle">
+                      <p className="text-xs font-semibold tracking-[0.14em] text-text-subtle uppercase">
                         Tổng thanh toán
                       </p>
 
                       <p className="mt-3 text-3xl font-bold tracking-tight">
-                        {formatCurrency(
-                          order.totalPrice
-                        )}
+                        {formatCurrency(order.totalPrice)}
                       </p>
                     </div>
 
@@ -1891,35 +1584,25 @@ const ServiceOrderDetailModal = ({
 
                   <dl className="space-y-4">
                     <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-text-subtle">
-                        Đơn giá
-                      </dt>
+                      <dt className="text-sm text-text-subtle">Đơn giá</dt>
 
                       <dd className="text-sm font-semibold">
-                        {formatCurrency(
-                          order.unitPrice
-                        )}
+                        {formatCurrency(order.unitPrice)}
                       </dd>
                     </div>
 
                     <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-text-subtle">
-                        Số lượng
-                      </dt>
+                      <dt className="text-sm text-text-subtle">Số lượng</dt>
 
                       <dd className="text-sm font-semibold">
-                        {hasValue(
-                          order.quantity
-                        )
+                        {hasValue(order.quantity)
                           ? `${order.quantity} ${unitType}`.trim()
                           : EMPTY_VALUE}
                       </dd>
                     </div>
 
                     <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-text-subtle">
-                        Giảm giá
-                      </dt>
+                      <dt className="text-sm text-text-subtle">Giảm giá</dt>
 
                       <dd className="text-sm font-semibold text-success">
                         {formatCurrency(order.discountAmount)}
@@ -1949,16 +1632,14 @@ const ServiceOrderDetailModal = ({
                 />
 
                 <div className="relative mt-7 space-y-8 pl-9">
-                  <div className="absolute bottom-3 left-2 top-3 w-px bg-border" />
+                  <div className="absolute top-3 bottom-3 left-2 w-px bg-border" />
 
                   <div className="relative">
-                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-info-border bg-surface">
+                    <span className="absolute top-0.5 -left-9 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-info-border bg-surface">
                       <span className="h-2 w-2 rounded-full bg-info" />
                     </span>
 
-                    <p className="text-xs text-text-subtle">
-                      Ngày tiếp nhận
-                    </p>
+                    <p className="text-xs text-text-subtle">Ngày tiếp nhận</p>
 
                     <p className="mt-1 font-bold text-text-strong">
                       {formatDate(order.receivedDate)}
@@ -1966,18 +1647,14 @@ const ServiceOrderDetailModal = ({
                   </div>
 
                   <div className="relative">
-                    <span className="absolute -left-9 top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-success-border bg-surface">
+                    <span className="absolute top-0.5 -left-9 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-success-border bg-surface">
                       <span className="h-2 w-2 rounded-full bg-success" />
                     </span>
 
-                    <p className="text-xs text-text-subtle">
-                      Ngày hoàn thành
-                    </p>
+                    <p className="text-xs text-text-subtle">Ngày hoàn thành</p>
 
                     <p className="mt-1 font-bold text-text-strong">
-                      {formatDate(
-                        order.completedDate
-                      )}
+                      {formatDate(order.completedDate)}
                     </p>
                   </div>
                 </div>
@@ -1993,15 +1670,9 @@ const ServiceOrderDetailModal = ({
 
                 <div className="mt-6">
                   <dl className="grid grid-cols-2 gap-6">
-                    <InfoItem
-                      label="Người nhận"
-                      value={receiverName}
-                    />
+                    <InfoItem label="Người nhận" value={receiverName} />
 
-                    <InfoItem
-                      label="Người cập nhật"
-                      value={updaterName}
-                    />
+                    <InfoItem label="Người cập nhật" value={updaterName} />
                   </dl>
 
                   <div className="my-5 h-px bg-surface-muted" />
@@ -2009,18 +1680,12 @@ const ServiceOrderDetailModal = ({
                   <dl className="grid grid-cols-2 gap-6">
                     <InfoItem
                       label="Thời gian nhận"
-                      value={formatDate(
-                        order.createdAt,
-                        true
-                      )}
+                      value={formatDate(order.createdAt, true)}
                     />
 
                     <InfoItem
                       label="Cập nhật gần nhất"
-                      value={formatDate(
-                        order.updatedAt,
-                        true
-                      )}
+                      value={formatDate(order.updatedAt, true)}
                     />
                   </dl>
                 </div>
@@ -2042,15 +1707,12 @@ const ServiceOrderDetailModal = ({
           <button
             type="button"
             onClick={handleRequestClose}
-            disabled={
-              updating || updatingAddress
-            }
+            disabled={updating || updatingAddress}
             className="ml-auto min-w-28 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {updating || updatingAddress
               ? "Đang xử lý..."
-              : isEditingProduct ||
-                  isEditingAddress
+              : isEditingProduct || isEditingAddress
                 ? "Hủy chỉnh sửa"
                 : "Đóng"}
           </button>

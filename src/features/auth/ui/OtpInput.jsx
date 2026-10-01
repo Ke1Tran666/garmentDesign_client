@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 const variantClasses = {
   dark: `
@@ -46,14 +41,14 @@ const OtpInput = forwardRef(
     }));
 
     useEffect(() => {
-    if (!autoFocus) return;
+      if (!autoFocus) return;
 
-    const timer = setTimeout(() => {
+      const timer = setTimeout(() => {
         inputRefs.current[0]?.focus();
         inputRefs.current[0]?.select();
-    }, 100);
+      }, 100);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
     }, [autoFocus]);
 
     const updateValue = (index, rawValue) => {
@@ -131,14 +126,7 @@ const OtpInput = forwardRef(
             onChange={(event) => updateValue(index, event.target.value)}
             onKeyDown={(event) => handleKeyDown(index, event)}
             onPaste={(event) => handlePaste(index, event)}
-            className={`
-              h-12 w-12 rounded-xl border-2
-              text-center text-lg font-semibold
-              outline-none transition-all duration-300
-              disabled:cursor-not-allowed disabled:opacity-60
-              ${variantClasses[variant]}
-              ${inputClassName}
-            `}
+            className={`h-12 w-12 rounded-xl border-2 text-center text-lg font-semibold transition-all duration-300 outline-none disabled:cursor-not-allowed disabled:opacity-60 ${variantClasses[variant]} ${inputClassName} `}
           />
         ))}
       </div>

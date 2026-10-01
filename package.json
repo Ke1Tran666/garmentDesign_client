@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "eslint . && prettier --check . && vitest run",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run"
@@ -49,10 +52,13 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.2.1",
+    "eslint-config-prettier": "10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "jsdom": "^29.1.1",
+    "prettier": "3.9.9",
+    "prettier-plugin-tailwindcss": "0.8.1",
     "vite": "^8.0.16",
     "vitest": "^4.1.9"
   }

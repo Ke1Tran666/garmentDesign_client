@@ -13,7 +13,6 @@ const OTPModal = ({
   onVerify,
   onResend,
 }) => {
-
   const [otp, setOtp] = useState(createEmptyOtp);
   const otpInputRef = useRef(null);
 
@@ -26,7 +25,7 @@ const OTPModal = ({
   const handleClose = () => {
     resetOtp();
     onClose?.();
-    };
+  };
 
   const handleVerify = () => {
     if (!isOtpComplete(otp)) {
@@ -52,19 +51,17 @@ const OTPModal = ({
             <p className="mt-1 text-sm text-text-muted">{desc}</p>
 
             {target && (
-              <p className="mt-2 text-sm font-semibold text-brand">
-                {target}
-              </p>
+              <p className="mt-2 text-sm font-semibold text-brand">{target}</p>
             )}
           </div>
 
-            <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-full p-2 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
-            >
-                <X size={18} />
-            </button>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="rounded-full p-2 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         <OtpInput
@@ -78,38 +75,35 @@ const OTPModal = ({
         />
 
         <div className="mb-5 flex items-center justify-between">
-            <button
-                type="button"
-                onClick={() => {
-                  resetOtp();
-                  onResend?.();
+          <button
+            type="button"
+            onClick={() => {
+              resetOtp();
+              onResend?.();
 
-                  requestAnimationFrame(() => {
-                    otpInputRef.current?.focus();
-                  });
-                }}
-                className="text-sm font-medium text-text-muted transition hover:text-brand"
-            >
+              requestAnimationFrame(() => {
+                otpInputRef.current?.focus();
+              });
+            }}
+            className="text-sm font-medium text-text-muted transition hover:text-brand"
+          >
             Gửi lại mã
-            </button>
+          </button>
 
-            <button
-                type="button"
-                onClick={handleClose}
-                className="text-sm font-medium text-text-muted transition hover:text-text-strong"
-            >
-                Hủy
-            </button>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="text-sm font-medium text-text-muted transition hover:text-text-strong"
+          >
+            Hủy
+          </button>
         </div>
 
         <button
           type="button"
           disabled={loading}
           onClick={handleVerify}
-          className="
-            w-full rounded-xl bg-brand! px-5 py-3 text-sm font-semibold text-white
-            shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60
-          "
+          className="w-full rounded-xl bg-brand! px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Đang xác thực..." : "Xác thực"}
         </button>

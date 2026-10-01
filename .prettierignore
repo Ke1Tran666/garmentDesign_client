@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+.vite
+
+*.min.js
+*.min.css
+
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+.env
+.env.*
+!.env.example

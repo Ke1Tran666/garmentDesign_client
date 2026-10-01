@@ -2,28 +2,19 @@ import httpClient from "@/shared/api/httpClient";
 
 export const serviceReviewApi = {
   async getReviewableOrders(config = {}) {
-    const response = await httpClient.get(
-      "/service-reviews/me/orders",
-      config,
-    );
+    const response = await httpClient.get("/service-reviews/me/orders", config);
 
     return response.data;
   },
 
   async getMine(config = {}) {
-    const response = await httpClient.get(
-      "/service-reviews/me",
-      config,
-    );
+    const response = await httpClient.get("/service-reviews/me", config);
 
     return response.data;
   },
 
   async getPublic(config = {}) {
-    const response = await httpClient.get(
-      "/service-reviews/public",
-      config,
-    );
+    const response = await httpClient.get("/service-reviews/public", config);
 
     return response.data;
   },
@@ -47,8 +38,6 @@ export const serviceReviewApi = {
   },
 
   async remove(reviewId) {
-    await httpClient.delete(
-      `/service-reviews/me/${reviewId}`,
-    );
+    await httpClient.delete(`/service-reviews/me/${reviewId}`);
   },
 };

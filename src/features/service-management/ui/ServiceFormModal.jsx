@@ -36,12 +36,9 @@ const ServiceFormModal = ({
   onClose,
   onSubmit,
 }) => {
-  const [form, setForm] = useState(() =>
-    createInitialForm(service),
-  );
+  const [form, setForm] = useState(() => createInitialForm(service));
 
-  const [validationError, setValidationError] =
-    useState("");
+  const [validationError, setValidationError] = useState("");
 
   const editing = Boolean(service);
 
@@ -66,16 +63,12 @@ const ServiceFormModal = ({
     const basePrice = Number(priceText);
 
     if (!serviceCode || !serviceName || !unitType) {
-      setValidationError(
-        "Vui lòng nhập đầy đủ mã, tên và đơn vị dịch vụ.",
-      );
+      setValidationError("Vui lòng nhập đầy đủ mã, tên và đơn vị dịch vụ.");
       return;
     }
 
     if (!priceText || !Number.isFinite(basePrice) || basePrice < 0) {
-      setValidationError(
-        "Giá cơ bản phải là một số lớn hơn hoặc bằng 0.",
-      );
+      setValidationError("Giá cơ bản phải là một số lớn hơn hoặc bằng 0.");
       return;
     }
 
@@ -185,16 +178,7 @@ const ServiceFormModal = ({
           rows={4}
           maxLength={1000}
           placeholder="Mô tả ngắn về dịch vụ..."
-          className="
-            w-full resize-y rounded-xl
-            border border-input bg-surface
-            px-4 py-3 text-sm text-text-default
-            outline-none transition
-            focus:border-brand
-            focus:ring-4 focus:ring-brand/10
-            disabled:cursor-not-allowed
-            disabled:bg-surface-muted
-          "
+          className="w-full resize-y rounded-xl border border-input bg-surface px-4 py-3 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-surface-muted"
         />
       </div>
 
@@ -212,24 +196,11 @@ const ServiceFormModal = ({
           value={form.status}
           onChange={handleChange}
           disabled={submitting}
-          className="
-            h-11 w-full rounded-xl
-            border border-input bg-surface
-            px-4 text-sm text-text-default
-            outline-none transition
-            focus:border-brand
-            focus:ring-4 focus:ring-brand/10
-            disabled:cursor-not-allowed
-            disabled:bg-surface-muted
-          "
+          className="h-11 w-full rounded-xl border border-input bg-surface px-4 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-surface-muted"
         >
-          <option value="active">
-            Đang hoạt động
-          </option>
+          <option value="active">Đang hoạt động</option>
 
-          <option value="inactive">
-            Tạm ngừng
-          </option>
+          <option value="inactive">Tạm ngừng</option>
         </select>
       </div>
     </FormModal>

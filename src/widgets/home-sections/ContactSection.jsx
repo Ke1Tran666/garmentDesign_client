@@ -37,14 +37,16 @@ const inputCls =
 const ContactInfo = ({ icon: Icon, label, value, delay }) => {
   return (
     <div
-      className="flex items-center gap-4 reveal"
+      className="reveal flex items-center gap-4"
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <div className="w-11 h-11 rounded-xl bg-brand/10 flex items-center justify-center">
-        <Icon className="w-5 h-5 text-brand" />
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10">
+        <Icon className="h-5 w-5 text-brand" />
       </div>
       <div>
-        <div className="text-sm font-heading font-medium text-text-strong">{label}</div>
+        <div className="font-heading text-sm font-medium text-text-strong">
+          {label}
+        </div>
         <div className="text-xs text-text-subtle">{value}</div>
       </div>
     </div>
@@ -56,11 +58,11 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
     <form
       id="contactForm"
       onSubmit={onSubmit}
-      className="rounded-2xl bg-surface border border-border/60 p-8 md:p-10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] space-y-6"
+      className="space-y-6 rounded-2xl border border-border/60 bg-surface p-8 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] md:p-10"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
-          <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
+          <label className="mb-2 block font-mono text-xs tracking-wider text-text-subtle uppercase">
             Họ tên *
           </label>
           <input
@@ -73,7 +75,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
         </div>
 
         <div>
-          <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
+          <label className="mb-2 block font-mono text-xs tracking-wider text-text-subtle uppercase">
             Số điện thoại *
           </label>
           <input
@@ -87,7 +89,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
       </div>
 
       <div>
-        <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
+        <label className="mb-2 block font-mono text-xs tracking-wider text-text-subtle uppercase">
           Email *
         </label>
         <input
@@ -100,14 +102,14 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
       </div>
 
       <div>
-        <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
+        <label className="mb-2 block font-mono text-xs tracking-wider text-text-subtle uppercase">
           Dịch vụ cần *
         </label>
 
         <select
           name="serviceCode"
           required
-          className={`${inputCls} appearance-none cursor-pointer text-text-muted`}
+          className={`${inputCls} cursor-pointer appearance-none text-text-muted`}
           defaultValue=""
           disabled={loadingServices || submitting}
         >
@@ -124,7 +126,7 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
       </div>
 
       <div>
-        <label className="text-xs font-mono tracking-wider uppercase text-text-subtle mb-2 block">
+        <label className="mb-2 block font-mono text-xs tracking-wider text-text-subtle uppercase">
           Mô tả yêu cầu
         </label>
         <textarea
@@ -138,10 +140,10 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
       <button
         type="submit"
         disabled={submitting}
-        className="btn-shine w-full bg-brand! text-white font-heading font-medium text-base py-3.5 rounded-xl tracking-wide transition-all duration-300 hover:bg-brand-dark hover:scale-[1.02] hover:shadow-[0_8px_25px_rgba(1,146,245,0.3)] flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+        className="btn-shine flex w-full items-center justify-center gap-2 rounded-xl bg-brand! py-3.5 font-heading text-base font-medium tracking-wide text-white transition-all duration-300 hover:scale-[1.02] hover:bg-brand-dark hover:shadow-[0_8px_25px_rgba(1,146,245,0.3)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
       >
         {submitting ? "Đang gửi..." : "Gửi yêu cầu"}
-        <Send className="w-4 h-4" />
+        <Send className="h-4 w-4" />
       </button>
     </form>
   );
@@ -187,7 +189,7 @@ const ContactSection = () => {
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
 
     elements.forEach((el) => observer.observe(el));
@@ -213,7 +215,7 @@ const ContactSection = () => {
       showNotification(
         "error",
         "Có lỗi xảy ra!",
-        "Vui lòng nhập email của bạn."
+        "Vui lòng nhập email của bạn.",
       );
       return;
     }
@@ -226,7 +228,7 @@ const ContactSection = () => {
       showNotification(
         "success",
         "Gửi thành công",
-        "Chúng tôi sẽ phản hồi sớm nhất."
+        "Chúng tôi sẽ phản hồi sớm nhất.",
       );
 
       form.reset();
@@ -237,7 +239,7 @@ const ContactSection = () => {
         "error",
         "Có lỗi xảy ra!",
         error?.response?.data?.message ||
-          "Gửi yêu cầu thất bại. Vui lòng thử lại."
+          "Gửi yêu cầu thất bại. Vui lòng thử lại.",
       );
     } finally {
       setSubmitting(false);
@@ -245,18 +247,21 @@ const ContactSection = () => {
   };
 
   return (
-    <section id="contact" className="relative py-24 md:py-32 px-4 bg-surface-subtle/50">
-      <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
+    <section
+      id="contact"
+      className="relative bg-surface-subtle/50 px-4 py-24 md:py-32"
+    >
+      <div className="absolute top-0 right-0 left-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
 
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-16">
           <div className="md:col-span-5">
-            <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium reveal">
+            <span className="reveal font-mono text-xs font-medium tracking-widest text-brand uppercase">
               Liên hệ
             </span>
 
             <h2
-              className="font-heading text-3xl md:text-4xl font-medium tracking-tight mt-4 text-text-strong reveal"
+              className="reveal mt-4 font-heading text-3xl font-medium tracking-tight text-text-strong md:text-4xl"
               style={{ transitionDelay: "100ms" }}
             >
               Kết nối với
@@ -265,10 +270,11 @@ const ContactSection = () => {
             </h2>
 
             <p
-              className="text-text-muted font-body font-300 mt-4 text-sm leading-relaxed reveal"
+              className="font-body font-300 reveal mt-4 text-sm leading-relaxed text-text-muted"
               style={{ transitionDelay: "200ms" }}
             >
-              Gửi form hoặc liên hệ trực tiếp. Chúng tôi phản hồi trong vòng 2 giờ trong giờ hành chính.
+              Gửi form hoặc liên hệ trực tiếp. Chúng tôi phản hồi trong vòng 2
+              giờ trong giờ hành chính.
             </p>
 
             <div className="mt-10 space-y-6">
@@ -278,7 +284,10 @@ const ContactSection = () => {
             </div>
           </div>
 
-          <div className="md:col-span-7 reveal" style={{ transitionDelay: "200ms" }}>
+          <div
+            className="reveal md:col-span-7"
+            style={{ transitionDelay: "200ms" }}
+          >
             <ContactForm
               onSubmit={handleSubmit}
               services={activeServices}

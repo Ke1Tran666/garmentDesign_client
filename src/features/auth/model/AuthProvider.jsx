@@ -4,45 +4,36 @@ import { authApi } from "@/features/auth/api/authApi";
 import AuthContext from "./AuthContext";
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] =
-    useState(null);
+  const [user, setUser] = useState(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const refreshSession =
-    useCallback(async () => {
-      try {
-        const currentUser =
-          await authApi.me();
+  const refreshSession = useCallback(async () => {
+    try {
+      const currentUser = await authApi.me();
 
-        setUser(currentUser);
+      setUser(currentUser);
 
-        return currentUser;
-      } catch (error) {
-        if (
-          error.response?.status === 401
-        ) {
-          setUser(null);
-          return null;
-        }
-
-        throw error;
-      }
-    }, []);
-
-  const logout =
-    useCallback(async () => {
-      try {
-        await authApi.logout();
-      } finally {
+      return currentUser;
+    } catch (error) {
+      if (error.response?.status === 401) {
         setUser(null);
-
-        await authApi
-          .csrf()
-          .catch(() => {});
+        return null;
       }
-    }, []);
+
+      throw error;
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+    } finally {
+      setUser(null);
+
+      await authApi.csrf().catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -51,17 +42,13 @@ const AuthProvider = ({ children }) => {
       try {
         await authApi.csrf();
 
-        const currentUser =
-          await authApi.me();
+        const currentUser = await authApi.me();
 
         if (active) {
           setUser(currentUser);
         }
       } catch (error) {
-        console.error(
-          "Không thể khởi tạo phiên:",
-          error,
-        );
+        console.error("Không thể khởi tạo phiên:", error);
 
         if (active) {
           setUser(null);
@@ -87,24 +74,12 @@ const AuthProvider = ({ children }) => {
       setUser,
       refreshSession,
       logout,
-      isAuthenticated:
-        Boolean(user),
+      isAuthenticated: Boolean(user),
     }),
-    [
-      user,
-      loading,
-      refreshSession,
-      logout,
-    ],
+    [user, loading, refreshSession, logout],
   );
 
-  return (
-    <AuthContext.Provider
-      value={value}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;

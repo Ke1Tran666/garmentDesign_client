@@ -2,19 +2,13 @@ import httpClient from "@/shared/api/httpClient";
 
 export const addressApi = {
   async getMine(config = {}) {
-    const response = await httpClient.get(
-      "/user-addresses/me",
-      config,
-    );
+    const response = await httpClient.get("/user-addresses/me", config);
 
     return response.data;
   },
 
   async create(payload) {
-    const response = await httpClient.post(
-      "/user-addresses/me",
-      payload,
-    );
+    const response = await httpClient.post("/user-addresses/me", payload);
 
     return response.data;
   },
@@ -29,9 +23,7 @@ export const addressApi = {
   },
 
   async remove(addressId) {
-    const response = await httpClient.delete(
-      `/user-addresses/me/${addressId}`,
-    );
+    const response = await httpClient.delete(`/user-addresses/me/${addressId}`);
 
     return response.data;
   },

@@ -2,27 +2,19 @@ import httpClient from "@/shared/api/httpClient";
 
 export const serviceOrderApi = {
   async getMine(config = {}) {
-    const response = await httpClient.get(
-      "/service-orders/me",
-      config,
-    );
+    const response = await httpClient.get("/service-orders/me", config);
 
     return response.data;
   },
 
   async create(payload) {
-    const response = await httpClient.post(
-      "/service-orders/me",
-      payload,
-    );
+    const response = await httpClient.post("/service-orders/me", payload);
 
     return response.data;
   },
 
   async remove(orderId) {
-    const response = await httpClient.delete(
-      `/service-orders/me/${orderId}`,
-    );
+    const response = await httpClient.delete(`/service-orders/me/${orderId}`);
 
     return response.data;
   },
@@ -48,27 +40,18 @@ export const serviceOrderApi = {
   },
 
   async getAll(config = {}) {
-    const response = await httpClient.get(
-      "/service-orders",
-      config,
-    );
+    const response = await httpClient.get("/service-orders", config);
 
     return response.data;
   },
 
   async getById(orderId, config = {}) {
-    const response = await httpClient.get(
-      `/service-orders/${orderId}`,
-      config,
-    );
+    const response = await httpClient.get(`/service-orders/${orderId}`, config);
 
     return response.data;
   },
 
   async removeByAdmin(orderId, config = {}) {
-    await httpClient.delete(
-      `/service-orders/${orderId}`,
-      config,
-    );
+    await httpClient.delete(`/service-orders/${orderId}`, config);
   },
 };

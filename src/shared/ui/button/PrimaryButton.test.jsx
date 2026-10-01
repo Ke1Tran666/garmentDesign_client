@@ -16,15 +16,9 @@ describe("PrimaryButton", () => {
     const user = userEvent.setup();
     const handleClick = vi.fn();
 
-    render(
-      <PrimaryButton onClick={handleClick}>
-        Đăng nhập
-      </PrimaryButton>,
-    );
+    render(<PrimaryButton onClick={handleClick}>Đăng nhập</PrimaryButton>);
 
-    await user.click(
-      screen.getByRole("button", { name: "Đăng nhập" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Đăng nhập" }));
 
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
@@ -51,14 +45,11 @@ describe("PrimaryButton", () => {
   });
 
   test("sử dụng type được truyền vào", () => {
-    render(
-      <PrimaryButton type="submit">
-        Gửi dữ liệu
-      </PrimaryButton>,
-    );
+    render(<PrimaryButton type="submit">Gửi dữ liệu</PrimaryButton>);
 
-    expect(
-      screen.getByRole("button", { name: "Gửi dữ liệu" }),
-    ).toHaveAttribute("type", "submit");
+    expect(screen.getByRole("button", { name: "Gửi dữ liệu" })).toHaveAttribute(
+      "type",
+      "submit",
+    );
   });
 });

@@ -110,25 +110,20 @@ const AddressPage = () => {
         setLoading(true);
         setErrorMessage("");
 
-        const [userData, addressData] =
-          await Promise.all([
-            userApi.getMe(),
-            addressApi.getMine(),
-          ]);
+        const [userData, addressData] = await Promise.all([
+          userApi.getMe(),
+          addressApi.getMine(),
+        ]);
 
-        setDefaultAddressId(
-          userData?.user?.defaultAddress?.addressId ?? null,
-        );
+        setDefaultAddressId(userData?.user?.defaultAddress?.addressId ?? null);
 
         setAddresses(addressData || []);
-
       } catch (error) {
         console.error("Lỗi tải địa chỉ:", error);
 
         setAddresses([]);
         setErrorMessage(
-          error.response?.data?.message ||
-            "Không thể tải danh sách địa chỉ.",
+          error.response?.data?.message || "Không thể tải danh sách địa chỉ.",
         );
       } finally {
         setLoading(false);
@@ -146,15 +141,9 @@ const AddressPage = () => {
     // Search
     if (keyword) {
       result = result.filter((item) =>
-        [
-          item.companyName,
-          item.address,
-          item.note,
-        ]
+        [item.companyName, item.address, item.note]
           .filter(Boolean)
-          .some((value) =>
-            value.toLowerCase().includes(keyword)
-          )
+          .some((value) => value.toLowerCase().includes(keyword)),
       );
     }
 
@@ -177,10 +166,7 @@ const AddressPage = () => {
           return bActive - aActive;
         }
 
-        return (a.companyName || "").localeCompare(
-          b.companyName || "",
-          "vi"
-        );
+        return (a.companyName || "").localeCompare(b.companyName || "", "vi");
       });
     }
 
@@ -192,19 +178,12 @@ const AddressPage = () => {
     Math.ceil(filteredAddresses.length / ITEMS_PER_PAGE),
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages,
-  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const paginatedAddresses = useMemo(() => {
-    const start =
-      (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+    const start = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
 
-    return filteredAddresses.slice(
-      start,
-      start + ITEMS_PER_PAGE,
-    );
+    return filteredAddresses.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredAddresses, safeCurrentPage]);
 
   const handleAddMail = () => {
@@ -286,8 +265,7 @@ const AddressPage = () => {
       showNotification(
         "error",
         "Thất bại",
-        error.response?.data?.message ||
-          "Lỗi cập nhật địa chỉ mặc định.",
+        error.response?.data?.message || "Lỗi cập nhật địa chỉ mặc định.",
       );
     } finally {
       setSubmitting(false);
@@ -342,34 +320,25 @@ const AddressPage = () => {
     try {
       setSubmitting(true);
 
-      const updatedAddress =
-        await addressApi.update(
-          editingAddress.addressId,
-          form,
-        );
+      const updatedAddress = await addressApi.update(
+        editingAddress.addressId,
+        form,
+      );
 
       setAddresses((current) =>
         current.map((item) =>
-          item.addressId
-            === editingAddress.addressId
-            ? updatedAddress
-            : item
-        )
+          item.addressId === editingAddress.addressId ? updatedAddress : item,
+        ),
       );
 
       setEditingAddress(null);
 
-      showNotification(
-        "success",
-        "Thành công",
-        "Đã cập nhật địa chỉ."
-      );
+      showNotification("success", "Thành công", "Đã cập nhật địa chỉ.");
     } catch (error) {
       showNotification(
         "error",
         "Thất bại",
-        error.response?.data?.message ||
-          "Không thể cập nhật địa chỉ."
+        error.response?.data?.message || "Không thể cập nhật địa chỉ.",
       );
     } finally {
       setSubmitting(false);
@@ -380,8 +349,7 @@ const AddressPage = () => {
     if (!deleteAddress) return;
 
     const deletedAddressId = deleteAddress.addressId;
-    const deletedWasDefault =
-      deletedAddressId === defaultAddressId;
+    const deletedWasDefault = deletedAddressId === defaultAddressId;
 
     try {
       setSubmitting(true);
@@ -389,9 +357,7 @@ const AddressPage = () => {
       await addressApi.remove(deletedAddressId);
 
       setAddresses((current) =>
-        current.filter(
-          (item) => item.addressId !== deletedAddressId,
-        ),
+        current.filter((item) => item.addressId !== deletedAddressId),
       );
 
       if (deletedWasDefault) setDefaultAddressId(null);
@@ -403,16 +369,13 @@ const AddressPage = () => {
       showNotification(
         "success",
         "Thành công",
-        deletedWasDefault
-          ? "Đã xóa địa chỉ mặc định."
-          : "Đã xóa địa chỉ.",
+        deletedWasDefault ? "Đã xóa địa chỉ mặc định." : "Đã xóa địa chỉ.",
       );
     } catch (error) {
       showNotification(
         "error",
         "Thất bại",
-        error.response?.data?.message ||
-          "Không thể xóa địa chỉ.",
+        error.response?.data?.message || "Không thể xóa địa chỉ.",
       );
     } finally {
       setSubmitting(false);
@@ -421,20 +384,12 @@ const AddressPage = () => {
 
   const handleCreateAddress = async () => {
     if (!form.companyName.trim()) {
-      showNotification(
-        "error",
-        "Thất bại",
-        "Tên công ty không được để trống."
-      );
+      showNotification("error", "Thất bại", "Tên công ty không được để trống.");
       return;
     }
 
     if (!form.address.trim()) {
-      showNotification(
-        "error",
-        "Thất bại",
-        "Địa chỉ không được để trống."
-      );
+      showNotification("error", "Thất bại", "Địa chỉ không được để trống.");
       return;
     }
 
@@ -445,26 +400,15 @@ const AddressPage = () => {
 
       await refreshSession();
 
-      setAddresses((prev) => [
-        ...prev,
-        createdAddress,
-      ]);
+      setAddresses((prev) => [...prev, createdAddress]);
 
       setAddingAddress(false);
 
-      showNotification(
-        "success",
-        "Thành công",
-        "Đã thêm địa chỉ."
-      );
+      showNotification("success", "Thành công", "Đã thêm địa chỉ.");
     } catch (error) {
       console.error("Lỗi thêm địa chỉ:", error);
 
-      showNotification(
-        "error",
-        "Thất bại",
-        "Không thể thêm địa chỉ."
-      );
+      showNotification("error", "Thất bại", "Không thể thêm địa chỉ.");
     } finally {
       setSubmitting(false);
     }
@@ -521,8 +465,7 @@ const AddressPage = () => {
       id: "default",
       label: "Đặt làm mặc định",
       icon: Check,
-      disabled:
-        selectedAddress?.addressId === defaultAddressId,
+      disabled: selectedAddress?.addressId === defaultAddressId,
       onClick: () => {
         if (selectedAddress) {
           setConfirmDefaultAddress(selectedAddress);
@@ -533,10 +476,7 @@ const AddressPage = () => {
 
   return (
     <>
-      <SectionCard
-        title="Address"
-        desc="Edit the user's address."
-      > 
+      <SectionCard title="Address" desc="Edit the user's address.">
         <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium text-text-default">
@@ -550,10 +490,7 @@ const AddressPage = () => {
 
           <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
             <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border px-3 py-2 sm:w-80">
-              <Search
-                size={18}
-                className="shrink-0 text-text-subtle"
-              />
+              <Search size={18} className="shrink-0 text-text-subtle" />
 
               <input
                 type="text"
@@ -570,12 +507,7 @@ const AddressPage = () => {
             <button
               type="button"
               onClick={handleAddMail}
-              className="
-                inline-flex h-11 shrink-0 items-center justify-center
-                gap-2 rounded-xl bg-brand! px-5
-                text-sm font-semibold text-white shadow-sm
-                transition hover:opacity-90
-              "
+              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-brand! px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
             >
               <Plus size={18} />
               Thêm địa chỉ
@@ -588,14 +520,9 @@ const AddressPage = () => {
             text="Tất cả địa chỉ"
             icon={MapPin}
             onClick={handleShowAllAddress}
-            className={`
-              rounded-full!
-              ${sortType === "all" ? "bg-brand! text-white!" : ""}
-            `}
+            className={`rounded-full! ${sortType === "all" ? "bg-brand! text-white!" : ""} `}
             classNameIcon={
-              sortType === "all"
-                ? "border-white! bg-brand! text-white!"
-                : ""
+              sortType === "all" ? "border-white! bg-brand! text-white!" : ""
             }
           />
 
@@ -603,10 +530,7 @@ const AddressPage = () => {
             text="Tên A-Z"
             icon={ArrowDownAZ}
             onClick={handleSortNameAZ}
-            className={`
-              rounded-full!
-              ${sortType === "name-asc" ? "bg-brand! text-white!" : ""}
-            `}
+            className={`rounded-full! ${sortType === "name-asc" ? "bg-brand! text-white!" : ""} `}
             classNameIcon={
               sortType === "name-asc"
                 ? "border-white! bg-brand! text-white!"
@@ -634,11 +558,7 @@ const AddressPage = () => {
             >
               <td className="px-4 py-4">
                 <span
-                  className={`
-                    inline-flex rounded-full px-3 py-1
-                    text-xs font-semibold
-                    ${statusClassName[getAddressStatus(item)]}
-                  `}
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClassName[getAddressStatus(item)]} `}
                 >
                   {getAddressStatus(item)}
                 </span>
@@ -659,24 +579,19 @@ const AddressPage = () => {
               <td className="px-4 py-4 text-center">
                 <button
                   type="button"
-                  onClick={(event) =>
-                    handleOpenActionMenu(event, item)
-                  }
+                  onClick={(event) => handleOpenActionMenu(event, item)}
                   aria-label={`Mở thao tác cho ${item.companyName}`}
                   aria-haspopup="menu"
                   aria-expanded={
                     actionMenu.open &&
                     actionMenu.address?.addressId === item.addressId
                   }
-                  className={`
-                    rounded-lg border p-2 transition
-                    ${
-                      actionMenu.open &&
-                      actionMenu.address?.addressId === item.addressId
-                        ? "border-brand bg-brand-light text-brand"
-                        : "border-border text-text-muted hover:bg-surface-subtle"
-                    }
-                  `}
+                  className={`rounded-lg border p-2 transition ${
+                    actionMenu.open &&
+                    actionMenu.address?.addressId === item.addressId
+                      ? "border-brand bg-brand-light text-brand"
+                      : "border-border text-text-muted hover:bg-surface-subtle"
+                  } `}
                 >
                   <MoreVertical size={18} />
                 </button>
@@ -717,7 +632,7 @@ const AddressPage = () => {
         >
           {isDeleteConfirm ? (
             <>
-              Bạn có chắc muốn xóa {" "}
+              Bạn có chắc muốn xóa{" "}
               <span className="font-semibold text-text-strong">
                 {activeConfirm?.companyName} - {activeConfirm?.address}
               </span>{" "}

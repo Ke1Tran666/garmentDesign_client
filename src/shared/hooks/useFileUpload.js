@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getFileKey, MAX_FILE_SIZE, MAX_REQUEST_SIZE} from "@/shared/lib/fileUploadUtils";
+import {
+  getFileKey,
+  MAX_FILE_SIZE,
+  MAX_REQUEST_SIZE,
+} from "@/shared/lib/fileUploadUtils";
 
-const createImagePreview = (file) =>
-  URL.createObjectURL(file);
+const createImagePreview = (file) => URL.createObjectURL(file);
 
 export const useFileUpload = ({
   onError,
   maxFileSize = MAX_FILE_SIZE,
   maxRequestSize = MAX_REQUEST_SIZE,
 } = {}) => {
-  const [productImageFile, setProductImageFile] =
-    useState(null);
+  const [productImageFile, setProductImageFile] = useState(null);
 
-  const [productImagePreview, setProductImagePreview] =
-    useState("");
+  const [productImagePreview, setProductImagePreview] = useState("");
 
-  const [attachmentFiles, setAttachmentFiles] =
-    useState([]);
+  const [attachmentFiles, setAttachmentFiles] = useState([]);
 
   const previewRef = useRef("");
 
@@ -37,40 +37,35 @@ export const useFileUpload = ({
     };
   }, []);
 
-  const handleProductImageChange =
-    useCallback(
-      (event) => {
-        const file = event.target.files?.[0];
-        event.target.value = "";
+  const handleProductImageChange = useCallback(
+    (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
 
-        if (!file) return;
+      if (!file) return;
 
-        if (!file.type.startsWith("image/")) {
-          onError?.(
-            "Vui lòng chọn đúng định dạng ảnh.",
-          );
-          return;
-        }
+      if (!file.type.startsWith("image/")) {
+        onError?.("Vui lòng chọn đúng định dạng ảnh.");
+        return;
+      }
 
-        if (file.size > maxFileSize) {
-          onError?.(
-            "Ảnh không được vượt quá 50MB.",
-          );
-          return;
-        }
+      if (file.size > maxFileSize) {
+        onError?.("Ảnh không được vượt quá 50MB.");
+        return;
+      }
 
-        clearPreview();
+      clearPreview();
 
-        const preview = createImagePreview(file);
+      const preview = createImagePreview(file);
 
-        previewRef.current = preview;
+      previewRef.current = preview;
 
-        setProductImageFile(file);
-        setProductImagePreview(preview);
-        onError?.("");
-      },
-      [clearPreview, maxFileSize, onError],
-    );
+      setProductImageFile(file);
+      setProductImagePreview(preview);
+      onError?.("");
+    },
+    [clearPreview, maxFileSize, onError],
+  );
 
   const removeProductImage = useCallback(() => {
     clearPreview();
@@ -78,54 +73,43 @@ export const useFileUpload = ({
     onError?.("");
   }, [clearPreview, onError]);
 
-  const handleAttachmentChange =
-    useCallback(
-      (event) => {
-        const selectedFiles = Array.from(
-          event.target.files || [],
-        );
+  const handleAttachmentChange = useCallback(
+    (event) => {
+      const selectedFiles = Array.from(event.target.files || []);
 
-        event.target.value = "";
+      event.target.value = "";
 
-        if (selectedFiles.length === 0) return;
+      if (selectedFiles.length === 0) return;
 
-        const oversizedFile =
-          selectedFiles.find(
-            (file) => file.size > maxFileSize,
-          );
+      const oversizedFile = selectedFiles.find(
+        (file) => file.size > maxFileSize,
+      );
 
-        if (oversizedFile) {
-          onError?.(
-            `File "${oversizedFile.name}" vượt quá 50MB.`,
-          );
-          return;
-        }
+      if (oversizedFile) {
+        onError?.(`File "${oversizedFile.name}" vượt quá 50MB.`);
+        return;
+      }
 
-        setAttachmentFiles((previousFiles) => {
-          const fileMap = new Map();
+      setAttachmentFiles((previousFiles) => {
+        const fileMap = new Map();
 
-          [
-            ...previousFiles,
-            ...selectedFiles,
-          ].forEach((file) => {
-            fileMap.set(getFileKey(file), file);
-          });
-
-          return Array.from(fileMap.values());
+        [...previousFiles, ...selectedFiles].forEach((file) => {
+          fileMap.set(getFileKey(file), file);
         });
 
-        onError?.("");
-      },
-      [maxFileSize, onError],
-    );
+        return Array.from(fileMap.values());
+      });
+
+      onError?.("");
+    },
+    [maxFileSize, onError],
+  );
 
   const removeAttachment = useCallback(
     (removingFile) => {
       setAttachmentFiles((previousFiles) =>
         previousFiles.filter(
-          (file) =>
-            getFileKey(file) !==
-            getFileKey(removingFile),
+          (file) => getFileKey(file) !== getFileKey(removingFile),
         ),
       );
 
@@ -143,42 +127,28 @@ export const useFileUpload = ({
   const totalUploadSize = useMemo(
     () =>
       (productImageFile?.size || 0) +
-      attachmentFiles.reduce(
-        (total, file) => total + file.size,
-        0,
-      ),
+      attachmentFiles.reduce((total, file) => total + file.size, 0),
     [attachmentFiles, productImageFile],
   );
 
-  const hasUpload =
-    Boolean(productImageFile) ||
-    attachmentFiles.length > 0;
+  const hasUpload = Boolean(productImageFile) || attachmentFiles.length > 0;
 
   const validateTotalSize = useCallback(() => {
     if (totalUploadSize <= maxRequestSize) {
       return true;
     }
 
-    onError?.(
-      "Tổng dung lượng ảnh và file không được vượt quá 200MB.",
-    );
+    onError?.("Tổng dung lượng ảnh và file không được vượt quá 200MB.");
 
     return false;
-  }, [
-    maxRequestSize,
-    onError,
-    totalUploadSize,
-  ]);
+  }, [maxRequestSize, onError, totalUploadSize]);
 
   const buildFormData = useCallback(
     (note = "") => {
       const formData = new FormData();
 
       if (productImageFile) {
-        formData.append(
-          "image",
-          productImageFile,
-        );
+        formData.append("image", productImageFile);
       }
 
       attachmentFiles.forEach((file) => {

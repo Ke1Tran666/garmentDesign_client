@@ -1,9 +1,5 @@
 import { formatFileSize } from "@/shared/lib/fileUploadUtils";
-import {
-  ImagePlus,
-  Package,
-  Trash2,
-} from "lucide-react";
+import { ImagePlus, Package, Trash2 } from "lucide-react";
 
 const ProductImagePicker = ({
   imageUrl = "",
@@ -35,9 +31,7 @@ const ProductImagePicker = ({
               <Package size={34} />
             </div>
 
-            <span className="text-sm font-medium">
-              Chưa có hình ảnh
-            </span>
+            <span className="text-sm font-medium">Chưa có hình ảnh</span>
           </div>
         )}
 
@@ -50,9 +44,7 @@ const ProductImagePicker = ({
             }`}
           >
             <ImagePlus size={18} />
-
             Chọn ảnh đại diện
-
             <input
               type="file"
               accept="image/*"
@@ -81,14 +73,10 @@ const ProductImagePicker = ({
 
       <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-xl bg-gray-950/85 px-3 py-2 text-white">
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold">
-            {selectedFile?.name}
-          </p>
+          <p className="truncate text-xs font-semibold">{selectedFile?.name}</p>
 
           <p className="mt-0.5 text-[11px] text-text-subtle">
-            {formatFileSize(
-              selectedFile?.size,
-            )}
+            {formatFileSize(selectedFile?.size)}
           </p>
         </div>
 
@@ -121,9 +109,7 @@ const ProductImagePicker = ({
         Chọn ảnh đại diện
       </p>
 
-      <p className="mt-1 text-xs text-text-subtle">
-        JPG, PNG, WEBP...
-      </p>
+      <p className="mt-1 text-xs text-text-subtle">JPG, PNG, WEBP...</p>
 
       <input
         type="file"

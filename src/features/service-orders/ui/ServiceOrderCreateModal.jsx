@@ -1,5 +1,12 @@
-import {memo, useCallback, useEffect,useMemo,useState} from "react";
-import { AlertCircle, LoaderCircle, MapPin, PackagePlus, Save, X } from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  AlertCircle,
+  LoaderCircle,
+  MapPin,
+  PackagePlus,
+  Save,
+  X,
+} from "lucide-react";
 import { serviceApi } from "@/entities/service/api/serviceApi";
 import { addressApi } from "@/entities/address/api/addressApi";
 import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
@@ -17,11 +24,10 @@ const initialForm = {
   customerRequest: "",
 };
 
-const currencyFormatter =
-  new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  });
+const currencyFormatter = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+});
 
 const formatCurrency = (value) => {
   const number = Number(value);
@@ -33,78 +39,62 @@ const formatCurrency = (value) => {
   return currencyFormatter.format(number);
 };
 
-const AddressOption = memo(({address,selected,disabled,onSelect}) => {
-    const addressId = String(
-      address.addressId
-    );
+const AddressOption = memo(({ address, selected, disabled, onSelect }) => {
+  const addressId = String(address.addressId);
 
-    return (
-      <label
-        className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 ${
-          selected
-            ? "border-brand bg-brand-light ring-2 ring-brand/10"
-            : "border-border-subtle bg-surface-subtle hover:border-brand/30"
-        } ${
-          disabled
-            ? "cursor-not-allowed opacity-60"
-            : ""
-        }`}
-      >
-        <input
-          type="radio"
-          name="addressId"
-          value={addressId}
-          checked={selected}
-          disabled={disabled}
-          onChange={() =>
-            onSelect(addressId)
-          }
-          className="mt-1 h-4 w-4 shrink-0 accent-brand"
-        />
+  return (
+    <label
+      className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 ${
+        selected
+          ? "border-brand bg-brand-light ring-2 ring-brand/10"
+          : "border-border-subtle bg-surface-subtle hover:border-brand/30"
+      } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+    >
+      <input
+        type="radio"
+        name="addressId"
+        value={addressId}
+        checked={selected}
+        disabled={disabled}
+        onChange={() => onSelect(addressId)}
+        className="mt-1 h-4 w-4 shrink-0 accent-brand"
+      />
 
-        <div className="min-w-0">
-          <p className="font-semibold text-text-strong">
-            {address.companyName ||
-              "Địa chỉ cá nhân"}
+      <div className="min-w-0">
+        <p className="font-semibold text-text-strong">
+          {address.companyName || "Địa chỉ cá nhân"}
+        </p>
+
+        <p className="mt-1 text-sm leading-6 text-text-muted">
+          {address.address}
+        </p>
+
+        {address.note && (
+          <p className="mt-1 text-xs text-text-subtle">
+            Ghi chú: {address.note}
           </p>
-
-          <p className="mt-1 text-sm leading-6 text-text-muted">
-            {address.address}
-          </p>
-
-          {address.note && (
-            <p className="mt-1 text-xs text-text-subtle">
-              Ghi chú: {address.note}
-            </p>
-          )}
-        </div>
-      </label>
-    );
-  }
-);
+        )}
+      </div>
+    </label>
+  );
+});
 
 AddressOption.displayName = "AddressOption";
 
-const ServiceOrderCreateModal = ({
-  open,
-  onClose,
-  onCreated,
-}) => {
-  const [form, setForm] =
-    useState(initialForm);
+const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
+  const [form, setForm] = useState(initialForm);
 
-  const [optionState, setOptionState] =
-    useState({
-      idUser: null,
-      services: [],
-      addresses: [],
-      error: "",
-    });
+  const [optionState, setOptionState] = useState({
+    idUser: null,
+    services: [],
+    addresses: [],
+    error: "",
+  });
 
   const [submitting, setSubmitting] = useState(false);
 
   const [submitError, setSubmitError] = useState("");
-  const [createdOrder,setCreatedOrder] = useState(null);
+  const [createdOrder, setCreatedOrder] = useState(null);
 
   const {
     productImageFile,
@@ -126,92 +116,57 @@ const ServiceOrderCreateModal = ({
   const currentUserId = user?.idUser;
 
   const optionsLoading =
-    Boolean(open && currentUserId) &&
-    optionState.idUser !== currentUserId;
+    Boolean(open && currentUserId) && optionState.idUser !== currentUserId;
 
   const services = useMemo(
-    () =>
-      optionState.idUser === currentUserId
-        ? optionState.services
-        : [],
-    [
-      optionState.idUser,
-      optionState.services,
-      currentUserId,
-    ]
+    () => (optionState.idUser === currentUserId ? optionState.services : []),
+    [optionState.idUser, optionState.services, currentUserId],
   );
 
   const addresses = useMemo(
-    () =>
-      optionState.idUser === currentUserId
-        ? optionState.addresses
-        : [],
-    [
-      optionState.idUser,
-      optionState.addresses,
-      currentUserId,
-    ]
+    () => (optionState.idUser === currentUserId ? optionState.addresses : []),
+    [optionState.idUser, optionState.addresses, currentUserId],
   );
 
   const selectedService = useMemo(
     () =>
       services.find(
-        (item) =>
-          String(item.serviceId) ===
-          String(form.serviceId)
+        (item) => String(item.serviceId) === String(form.serviceId),
       ),
-    [services, form.serviceId]
+    [services, form.serviceId],
   );
 
   const quantity = Number(form.quantity);
 
   const estimatedTotal =
-    selectedService &&
-    Number.isFinite(quantity) &&
-    quantity > 0
-      ? Number(selectedService.basePrice || 0) *
-        quantity
+    selectedService && Number.isFinite(quantity) && quantity > 0
+      ? Number(selectedService.basePrice || 0) * quantity
       : 0;
 
   useEffect(() => {
-    if (
-      !open ||
-      !currentUserId ||
-      optionState.idUser === currentUserId
-    ) {
+    if (!open || !currentUserId || optionState.idUser === currentUserId) {
       return undefined;
     }
 
-    const controller =
-      new AbortController();
+    const controller = new AbortController();
 
     const fetchOptions = async () => {
       try {
-        const [
-          serviceData,
-          addressData,
-        ] = await Promise.all([
+        const [serviceData, addressData] = await Promise.all([
           serviceApi.getAll({
             signal: controller.signal,
           }),
           addressApi.getMine({
             signal: controller.signal,
-          })
+          }),
         ]);
 
-        const availableServices = (
-          serviceData || []
-        ).filter((service) => {
+        const availableServices = (serviceData || []).filter((service) => {
           if (service.deletedAt) return false;
 
-          const status = String(
-            service.status || "",
-          ).toLowerCase();
+          const status = String(service.status || "").toLowerCase();
 
-          return (
-            !status.includes("inactive") &&
-            !status.includes("ngừng")
-          );
+          return !status.includes("inactive") && !status.includes("ngừng");
         });
 
         setOptionState({
@@ -224,19 +179,12 @@ const ServiceOrderCreateModal = ({
         if (controller.signal.aborted) {
           return;
         }
-        
       } catch (error) {
-        if (
-          error.code === "ERR_CANCELED" ||
-          error.name === "CanceledError"
-        ) {
+        if (error.code === "ERR_CANCELED" || error.name === "CanceledError") {
           return;
         }
 
-        console.error(
-          "Không thể tải dữ liệu tạo đơn:",
-          error
-        );
+        console.error("Không thể tải dữ liệu tạo đơn:", error);
 
         setOptionState({
           idUser: currentUserId,
@@ -254,23 +202,15 @@ const ServiceOrderCreateModal = ({
     return () => {
       controller.abort();
     };
-  }, [
-    open,
-    currentUserId,
-    optionState.idUser,
-  ]);
+  }, [open, currentUserId, optionState.idUser]);
 
   useEffect(() => {
     if (!open) return undefined;
 
-    const previousOverflow =
-      document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
 
     const handleKeyDown = (event) => {
-      if (
-        event.key !== "Escape" ||
-        submitting
-      ) {
+      if (event.key !== "Escape" || submitting) {
         return;
       }
 
@@ -281,39 +221,27 @@ const ServiceOrderCreateModal = ({
       onClose();
     };
 
-    document.body.style.overflow =
-      "hidden";
+    document.body.style.overflow = "hidden";
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
 
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, submitting, onClose, resetFiles]);
 
-  const handleChange = useCallback(
-    (event) => {
-      const { name, value } =
-        event.target;
+  const handleChange = useCallback((event) => {
+    const { name, value } = event.target;
 
-      setForm((previousForm) => ({
-        ...previousForm,
-        [name]: value,
-      }));
+    setForm((previousForm) => ({
+      ...previousForm,
+      [name]: value,
+    }));
 
-      setSubmitError("");
-    },
-    []
-  );
+    setSubmitError("");
+  }, []);
 
   const resetCreateForm = () => {
     resetFiles();
@@ -346,74 +274,46 @@ const ServiceOrderCreateModal = ({
     }
 
     if (!currentUserId) {
-      setSubmitError(
-        "Không tìm thấy thông tin người dùng."
-      );
+      setSubmitError("Không tìm thấy thông tin người dùng.");
       return;
     }
 
     /*
-    * Khi đơn đã tạo nhưng upload lỗi,
-    * bỏ qua validate form và không POST
-    * tạo đơn lần thứ hai.
-    */
+     * Khi đơn đã tạo nhưng upload lỗi,
+     * bỏ qua validate form và không POST
+     * tạo đơn lần thứ hai.
+     */
     if (!createdOrder) {
-      const serviceId = Number(
-        form.serviceId
-      );
+      const serviceId = Number(form.serviceId);
 
-      const addressId = Number(
-        form.addressId
-      );
+      const addressId = Number(form.addressId);
 
-      const productName =
-        form.productName.trim();
+      const productName = form.productName.trim();
 
-      const orderQuantity = Number(
-        form.quantity
-      );
+      const orderQuantity = Number(form.quantity);
 
-      if (
-        !Number.isInteger(serviceId) ||
-        serviceId <= 0
-      ) {
-        setSubmitError(
-          "Vui lòng chọn dịch vụ."
-        );
+      if (!Number.isInteger(serviceId) || serviceId <= 0) {
+        setSubmitError("Vui lòng chọn dịch vụ.");
         return;
       }
 
-      if (
-        !Number.isInteger(addressId) ||
-        addressId <= 0
-      ) {
-        setSubmitError(
-          "Vui lòng chọn địa chỉ."
-        );
+      if (!Number.isInteger(addressId) || addressId <= 0) {
+        setSubmitError("Vui lòng chọn địa chỉ.");
         return;
       }
 
       if (!productName) {
-        setSubmitError(
-          "Vui lòng nhập tên sản phẩm."
-        );
+        setSubmitError("Vui lòng nhập tên sản phẩm.");
         return;
       }
 
-      if (
-        !Number.isFinite(orderQuantity) ||
-        orderQuantity <= 0
-      ) {
-        setSubmitError(
-          "Số lượng phải lớn hơn 0."
-        );
+      if (!Number.isFinite(orderQuantity) || orderQuantity <= 0) {
+        setSubmitError("Số lượng phải lớn hơn 0.");
         return;
       }
 
       if (!selectedService) {
-        setSubmitError(
-          "Dịch vụ đã chọn không tồn tại."
-        );
+        setSubmitError("Dịch vụ đã chọn không tồn tại.");
         return;
       }
     }
@@ -425,53 +325,42 @@ const ServiceOrderCreateModal = ({
       let orderResult = createdOrder;
 
       /*
-      * Bước 1: tạo đơn hàng.
-      */
+       * Bước 1: tạo đơn hàng.
+       */
       if (!orderResult) {
-        const serviceId = Number(
-          form.serviceId
-        );
+        const serviceId = Number(form.serviceId);
 
-        const addressId = Number(
-          form.addressId
-        );
+        const addressId = Number(form.addressId);
 
-        const orderQuantity = Number(
-          form.quantity
-        );
+        const orderQuantity = Number(form.quantity);
 
         const createResponse = await serviceOrderApi.create({
-            serviceId,
-            addressId,
-            productName:
-              form.productName.trim(),
-            customerRequest:
-              form.customerRequest.trim(),
-            quantity: orderQuantity,
-          });
+          serviceId,
+          addressId,
+          productName: form.productName.trim(),
+          customerRequest: form.customerRequest.trim(),
+          quantity: orderQuantity,
+        });
 
         orderResult = createResponse;
 
         /*
-        * Lưu lại để nếu upload lỗi,
-        * lần thử lại không tạo đơn mới.
-        */
+         * Lưu lại để nếu upload lỗi,
+         * lần thử lại không tạo đơn mới.
+         */
         setCreatedOrder(orderResult);
       }
 
-      const orderId =
-        orderResult?.serviceOrderId;
+      const orderId = orderResult?.serviceOrderId;
 
       if (!orderId) {
-        throw new Error(
-          "Không nhận được mã đơn hàng."
-        );
+        throw new Error("Không nhận được mã đơn hàng.");
       }
 
       /*
-      * Bước 2: upload ảnh đại diện
-      * và file bổ sung.
-      */
+       * Bước 2: upload ảnh đại diện
+       * và file bổ sung.
+       */
       if (hasUpload) {
         const uploadData = buildFormData(
           "File do khách hàng cung cấp khi tạo đơn",
@@ -479,22 +368,21 @@ const ServiceOrderCreateModal = ({
 
         try {
           const uploadResult = await serviceOrderFileApi.upload(
-              orderId,
-              uploadData,
-            );
+            orderId,
+            uploadData,
+          );
 
           orderResult = uploadResult?.order || orderResult;
         } catch (uploadError) {
           /*
-          * Đơn đã được tạo nên phải đưa
-          * vào danh sách trước.
-          */
+           * Đơn đã được tạo nên phải đưa
+           * vào danh sách trước.
+           */
           onCreated?.(orderResult);
 
           setSubmitError(
-            uploadError.response?.data
-              ?.message ||
-              "Đơn hàng đã được tạo nhưng tải ảnh hoặc file thất bại. Bạn có thể nhấn thử lại mà không tạo trùng đơn."
+            uploadError.response?.data?.message ||
+              "Đơn hàng đã được tạo nhưng tải ảnh hoặc file thất bại. Bạn có thể nhấn thử lại mà không tạo trùng đơn.",
           );
 
           return;
@@ -506,15 +394,12 @@ const ServiceOrderCreateModal = ({
       resetCreateForm();
       onClose();
     } catch (error) {
-      console.error(
-        "Không thể tạo đơn hàng:",
-        error
-      );
+      console.error("Không thể tạo đơn hàng:", error);
 
       setSubmitError(
         error.response?.data?.message ||
           error.message ||
-          "Không thể tạo đơn hàng. Vui lòng thử lại."
+          "Không thể tạo đơn hàng. Vui lòng thử lại.",
       );
     } finally {
       setSubmitting(false);
@@ -527,10 +412,7 @@ const ServiceOrderCreateModal = ({
     <div
       className="fixed inset-0 z-80 flex items-center justify-center bg-gray-950/50 px-3 py-5"
       onMouseDown={(event) => {
-        if (
-          event.target ===
-          event.currentTarget
-        ) {
+        if (event.target === event.currentTarget) {
           handleClose();
         }
       }}
@@ -541,7 +423,7 @@ const ServiceOrderCreateModal = ({
         aria-labelledby="create-service-order-title"
         className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl bg-surface shadow-xl"
       >
-        <header className="relative shrink-0 border-b border-border-subtle px-6 pb-5 pt-6 sm:px-8">
+        <header className="relative shrink-0 border-b border-border-subtle px-6 pt-6 pb-5 sm:px-8">
           <div className="absolute inset-x-0 top-0 h-1 bg-brand" />
 
           <div className="flex items-start justify-between gap-5">
@@ -559,8 +441,7 @@ const ServiceOrderCreateModal = ({
                 </h2>
 
                 <p className="mt-1 text-sm text-text-muted">
-                  Chọn dịch vụ và địa chỉ
-                  đã thêm trước đó
+                  Chọn dịch vụ và địa chỉ đã thêm trước đó
                 </p>
               </div>
             </div>
@@ -577,26 +458,16 @@ const ServiceOrderCreateModal = ({
           </div>
         </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex min-h-0 flex-1 flex-col"
-        >
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
           <div className="overflow-y-auto px-6 py-6 sm:px-8">
             {optionsLoading ? (
               <div className="flex min-h-72 items-center justify-center gap-3 text-sm text-text-muted">
-                <LoaderCircle
-                  size={20}
-                  className="animate-spin text-brand"
-                />
-
+                <LoaderCircle size={20} className="animate-spin text-brand" />
                 Đang tải dữ liệu...
               </div>
             ) : optionState.error ? (
               <div className="flex items-start gap-3 rounded-2xl border border-danger-border bg-danger-soft p-4 text-sm text-danger">
-                <AlertCircle
-                  size={19}
-                  className="mt-0.5 shrink-0"
-                />
+                <AlertCircle size={19} className="mt-0.5 shrink-0" />
 
                 {optionState.error}
               </div>
@@ -606,7 +477,7 @@ const ServiceOrderCreateModal = ({
                   <div>
                     <label
                       htmlFor="serviceId"
-                      className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
+                      className="mb-2 block text-xs font-semibold tracking-wide text-text-muted uppercase"
                     >
                       Dịch vụ
                     </label>
@@ -616,34 +487,26 @@ const ServiceOrderCreateModal = ({
                       name="serviceId"
                       value={form.serviceId}
                       onChange={handleChange}
-                      disabled={ submitting || Boolean(createdOrder)}
-                      className="h-12 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-text-default outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                      disabled={submitting || Boolean(createdOrder)}
+                      className="h-12 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                     >
-                      <option value="">
-                        Chọn dịch vụ
-                      </option>
+                      <option value="">Chọn dịch vụ</option>
 
-                      {services.map(
-                        (service) => (
-                          <option
-                            key={
-                              service.serviceId
-                            }
-                            value={
-                              service.serviceId
-                            }
-                          >
-                            {service.serviceName}
-                          </option>
-                        )
-                      )}
+                      {services.map((service) => (
+                        <option
+                          key={service.serviceId}
+                          value={service.serviceId}
+                        >
+                          {service.serviceName}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div>
                     <label
                       htmlFor="quantity"
-                      className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
+                      className="mb-2 block text-xs font-semibold tracking-wide text-text-muted uppercase"
                     >
                       Số lượng
                     </label>
@@ -657,15 +520,13 @@ const ServiceOrderCreateModal = ({
                         step="0.01"
                         value={form.quantity}
                         onChange={handleChange}
-                        disabled={ submitting || Boolean(createdOrder)}
+                        disabled={submitting || Boolean(createdOrder)}
                         placeholder="Nhập số lượng"
                         className="h-12 min-w-0 flex-1 px-3.5 text-sm text-text-default outline-none disabled:bg-surface-subtle"
                       />
 
                       <span className="flex items-center border-l border-border bg-surface-subtle px-3 text-xs font-semibold text-text-muted">
-                        {selectedService
-                          ?.unitType ||
-                          "Đơn vị"}
+                        {selectedService?.unitType || "Đơn vị"}
                       </span>
                     </div>
                   </div>
@@ -674,7 +535,7 @@ const ServiceOrderCreateModal = ({
                 <div>
                   <label
                     htmlFor="productName"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
+                    className="mb-2 block text-xs font-semibold tracking-wide text-text-muted uppercase"
                   >
                     Tên sản phẩm
                   </label>
@@ -685,15 +546,15 @@ const ServiceOrderCreateModal = ({
                     name="productName"
                     value={form.productName}
                     onChange={handleChange}
-                    disabled={ submitting || Boolean(createdOrder)}
+                    disabled={submitting || Boolean(createdOrder)}
                     placeholder="Ví dụ: Áo thun local brand"
-                    className="h-12 w-full rounded-xl border border-border px-3.5 text-sm text-text-default outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                    className="h-12 w-full rounded-xl border border-border px-3.5 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                   />
                 </div>
 
                 <div>
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                    <label className="text-xs font-semibold tracking-wide text-text-muted uppercase">
                       Địa chỉ nhận hàng
                     </label>
 
@@ -704,18 +565,14 @@ const ServiceOrderCreateModal = ({
 
                   {addresses.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-border bg-surface-subtle px-5 py-8 text-center">
-                      <MapPin
-                        size={27}
-                        className="mx-auto text-text-subtle"
-                      />
+                      <MapPin size={27} className="mx-auto text-text-subtle" />
 
                       <p className="mt-2 text-sm font-semibold text-text-muted">
                         Bạn chưa có địa chỉ
                       </p>
 
                       <p className="mt-1 text-xs text-text-subtle">
-                        Hãy thêm địa chỉ tại
-                        trang quản lý tài khoản.
+                        Hãy thêm địa chỉ tại trang quản lý tài khoản.
                       </p>
                     </div>
                   ) : (
@@ -729,16 +586,10 @@ const ServiceOrderCreateModal = ({
                           key={address.addressId}
                           address={address}
                           selected={
-                            String(form.addressId) ===
-                            String(address.addressId)
+                            String(form.addressId) === String(address.addressId)
                           }
-                          disabled={
-                            submitting ||
-                            Boolean(createdOrder)
-                          }
-                          onSelect={
-                            handleSelectAddress
-                          }
+                          disabled={submitting || Boolean(createdOrder)}
+                          onSelect={handleSelectAddress}
                         />
                       ))}
                     </div>
@@ -748,7 +599,7 @@ const ServiceOrderCreateModal = ({
                 <div>
                   <label
                     htmlFor="customerRequest"
-                    className="mb-2 block text-xs font-semibold uppercase tracking-wide text-text-muted"
+                    className="mb-2 block text-xs font-semibold tracking-wide text-text-muted uppercase"
                   >
                     Yêu cầu của khách hàng
                   </label>
@@ -757,13 +608,11 @@ const ServiceOrderCreateModal = ({
                     id="customerRequest"
                     name="customerRequest"
                     rows={4}
-                    value={
-                      form.customerRequest
-                    }
+                    value={form.customerRequest}
                     onChange={handleChange}
-                    disabled={ submitting || Boolean(createdOrder)}
+                    disabled={submitting || Boolean(createdOrder)}
                     placeholder="Nhập kích thước, màu sắc, kiểu in hoặc yêu cầu khác..."
-                    className="w-full resize-none rounded-xl border border-border px-3.5 py-3 text-sm leading-6 text-text-default outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
+                    className="w-full resize-none rounded-xl border border-border px-3.5 py-3 text-sm leading-6 text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
                   />
                 </div>
 
@@ -771,7 +620,7 @@ const ServiceOrderCreateModal = ({
                   {/* Ảnh đại diện */}
                   <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                      <label className="text-xs font-semibold tracking-wide text-text-muted uppercase">
                         Ảnh đại diện sản phẩm
                       </label>
 
@@ -792,7 +641,7 @@ const ServiceOrderCreateModal = ({
                   {/* File bổ sung */}
                   <div>
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <label className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                      <label className="text-xs font-semibold tracking-wide text-text-muted uppercase">
                         File khách hàng
                       </label>
 
@@ -817,8 +666,7 @@ const ServiceOrderCreateModal = ({
                       ORD-
                       {createdOrder.serviceOrderId}
                     </span>{" "}
-                    đã được tạo. Bạn đang thử tải
-                    lại ảnh hoặc file, hệ thống sẽ
+                    đã được tạo. Bạn đang thử tải lại ảnh hoặc file, hệ thống sẽ
                     không tạo thêm đơn mới.
                   </div>
                 )}
@@ -827,31 +675,25 @@ const ServiceOrderCreateModal = ({
                   <div className="rounded-2xl bg-gray-950 p-5 text-white">
                     <div className="flex items-start justify-between gap-5">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                        <p className="text-xs font-semibold tracking-wide text-text-subtle uppercase">
                           Đơn giá
                         </p>
 
                         <p className="mt-2 text-base font-bold">
-                          {formatCurrency(
-                            selectedService.basePrice
-                          )}
+                          {formatCurrency(selectedService.basePrice)}
                           <span className="ml-1 text-xs font-normal text-text-subtle">
-                            /{" "}
-                            {selectedService.unitType ||
-                              "đơn vị"}
+                            / {selectedService.unitType || "đơn vị"}
                           </span>
                         </p>
                       </div>
 
                       <div className="text-right">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                        <p className="text-xs font-semibold tracking-wide text-text-subtle uppercase">
                           Tạm tính
                         </p>
 
                         <p className="mt-2 text-xl font-bold">
-                          {formatCurrency(
-                            estimatedTotal
-                          )}
+                          {formatCurrency(estimatedTotal)}
                         </p>
                       </div>
                     </div>
@@ -860,10 +702,7 @@ const ServiceOrderCreateModal = ({
 
                 {submitError && (
                   <div className="flex items-start gap-3 rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger">
-                    <AlertCircle
-                      size={18}
-                      className="mt-0.5 shrink-0"
-                    />
+                    <AlertCircle size={18} className="mt-0.5 shrink-0" />
 
                     {submitError}
                   </div>
@@ -888,16 +727,12 @@ const ServiceOrderCreateModal = ({
                 submitting ||
                 optionsLoading ||
                 Boolean(optionState.error) ||
-                (!createdOrder &&
-                  addresses.length === 0)
+                (!createdOrder && addresses.length === 0)
               }
               className="inline-flex min-w-40 items-center justify-center gap-2 rounded-xl bg-brand! px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? (
-                <LoaderCircle
-                  size={18}
-                  className="animate-spin"
-                />
+                <LoaderCircle size={18} className="animate-spin" />
               ) : (
                 <Save size={18} />
               )}

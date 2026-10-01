@@ -17,11 +17,7 @@ import {
   Trash2,
   UserRound,
 } from "lucide-react";
-import {
-  useNavigate,
-  useOutletContext,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import { userApi } from "@/entities/user/api/userApi";
 import { normalizeRole } from "@/features/auth/lib/authRole";
@@ -160,25 +156,15 @@ const getStatusInfo = (user) => {
   };
 };
 
-const getRoleName = (user) =>
-  user?.role?.nameRole || "Chưa phân quyền";
+const getRoleName = (user) => user?.role?.nameRole || "Chưa phân quyền";
 
-const SidebarInfoRow = ({
-  icon: Icon,
-  label,
-  children,
-}) => (
+const SidebarInfoRow = ({ icon: Icon, label, children }) => (
   <div className="grid grid-cols-[18px_105px_minmax(0,1fr)] items-start gap-3 py-2.5">
-    <Icon
-      size={16}
-      className="mt-0.5 text-text-subtle"
-    />
+    <Icon size={16} className="mt-0.5 text-text-subtle" />
 
-    <span className="text-sm text-text-muted">
-      {label}
-    </span>
+    <span className="text-sm text-text-muted">{label}</span>
 
-    <div className="wrap-break-word text-sm font-medium text-text-default">
+    <div className="text-sm font-medium wrap-break-word text-text-default">
       {children || EMPTY_VALUE}
     </div>
   </div>
@@ -192,50 +178,30 @@ const SummaryRow = ({
   statusClassName,
 }) => (
   <div className="flex items-center gap-3 border-b border-border-subtle px-4 py-3 last:border-b-0">
-    <Icon
-      size={17}
-      className="shrink-0 text-text-muted"
-    />
+    <Icon size={17} className="shrink-0 text-text-muted" />
 
     <div className="min-w-0 flex-1">
-      <span className="text-sm font-semibold text-text-default">
-        {title}
-      </span>
+      <span className="text-sm font-semibold text-text-default">{title}</span>
 
       {description && (
-        <span className="ml-2 text-xs text-text-muted">
-          {description}
-        </span>
+        <span className="ml-2 text-xs text-text-muted">{description}</span>
       )}
     </div>
 
     <span
-      className={`
-        shrink-0 rounded-md px-2 py-1
-        text-xs font-semibold
-        ${statusClassName}
-      `}
+      className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${statusClassName} `}
     >
       {status}
     </span>
 
-    <ChevronDown
-      size={15}
-      className="shrink-0 text-text-subtle"
-    />
+    <ChevronDown size={15} className="shrink-0 text-text-subtle" />
   </div>
 );
 
-const SidebarSection = ({
-  title,
-  action,
-  children,
-}) => (
+const SidebarSection = ({ title, action, children }) => (
   <section className="border-b border-border-subtle py-5 last:border-b-0">
     <div className="mb-2 flex items-center justify-between gap-4">
-      <h2 className="text-sm font-bold text-text-strong">
-        {title}
-      </h2>
+      <h2 className="text-sm font-bold text-text-strong">{title}</h2>
 
       {action}
     </div>
@@ -254,20 +220,11 @@ const normalizeUserDetail = (data) => {
   return {
     ...userData,
 
-    authProviders: Array.isArray(
-      data.authProviders,
-    )
-      ? data.authProviders
-      : [],
+    authProviders: Array.isArray(data.authProviders) ? data.authProviders : [],
 
-    addresses: Array.isArray(data.addresses)
-      ? data.addresses
-      : [],
+    addresses: Array.isArray(data.addresses) ? data.addresses : [],
 
-    defaultAddress:
-      data.defaultAddress ||
-      userData.defaultAddress ||
-      null,
+    defaultAddress: data.defaultAddress || userData.defaultAddress || null,
   };
 };
 
@@ -309,7 +266,6 @@ const UserDetailPage = () => {
         const data = await userApi.getById(userId);
 
         if (active) {
-
           setUser(normalizeUserDetail(data));
         }
       } catch (error) {
@@ -339,20 +295,13 @@ const UserDetailPage = () => {
     : [];
 
   const loginEmailProvider = authProviders.find((item) => {
-    const provider = String(
-      item.provider || "",
-    ).toLowerCase();
+    const provider = String(item.provider || "").toLowerCase();
 
-    return (
-      item.email &&
-      (provider === "local" || provider === "google")
-    );
+    return item.email && (provider === "local" || provider === "google");
   });
 
   const getProviderInfo = (providerValue) => {
-    const provider = String(
-      providerValue || "",
-    ).toLowerCase();
+    const provider = String(providerValue || "").toLowerCase();
 
     if (provider === "local") {
       return {
@@ -378,9 +327,7 @@ const UserDetailPage = () => {
     ? getProviderInfo(loginEmailProvider.provider)
     : null;
 
-  const phoneProvider = authProviders.find(
-    (item) => item.phone,
-  );
+  const phoneProvider = authProviders.find((item) => item.phone);
 
   const providerNames = authProviders
     .map((item) => item.provider)
@@ -417,10 +364,7 @@ const UserDetailPage = () => {
         : null,
     ]
       .filter(Boolean)
-      .sort(
-        (first, second) =>
-          new Date(second.date) - new Date(first.date),
-      );
+      .sort((first, second) => new Date(second.date) - new Date(first.date));
   }, [user]);
 
   const handleDelete = async () => {
@@ -443,8 +387,7 @@ const UserDetailPage = () => {
       });
     } catch (error) {
       setDeleteError(
-        error.response?.data?.message ||
-          "Không thể xóa người dùng.",
+        error.response?.data?.message || "Không thể xóa người dùng.",
       );
     } finally {
       setDeleting(false);
@@ -507,22 +450,14 @@ const UserDetailPage = () => {
       });
 
       if (avatarDeleted) {
-        await userApi.removeAvatarById(
-          user.idUser,
-        );
+        await userApi.removeAvatarById(user.idUser);
       } else if (avatarFile) {
-        await userApi.uploadAvatarById(
-          user.idUser,
-          avatarFile,
-        );
+        await userApi.uploadAvatarById(user.idUser, avatarFile);
       }
 
-      const refreshedData =
-        await userApi.getById(user.idUser);
+      const refreshedData = await userApi.getById(user.idUser);
 
-      setUser(
-        normalizeUserDetail(refreshedData),
-      );
+      setUser(normalizeUserDetail(refreshedData));
 
       setIdentityEditOpen(false);
 
@@ -551,17 +486,11 @@ const UserDetailPage = () => {
       setPhoneSubmitting(true);
       setPhoneUpdateError("");
 
-      await userApi.updatePhoneById(
-        user.idUser,
-        phone,
-      );
+      await userApi.updatePhoneById(user.idUser, phone);
 
-      const refreshedData =
-        await userApi.getById(user.idUser);
+      const refreshedData = await userApi.getById(user.idUser);
 
-      setUser(
-        normalizeUserDetail(refreshedData),
-      );
+      setUser(normalizeUserDetail(refreshedData));
 
       setPhoneEditOpen(false);
 
@@ -572,8 +501,7 @@ const UserDetailPage = () => {
       );
     } catch (error) {
       setPhoneUpdateError(
-        error.response?.data?.message ||
-          "Không thể cập nhật số điện thoại.",
+        error.response?.data?.message || "Không thể cập nhật số điện thoại.",
       );
     } finally {
       setPhoneSubmitting(false);
@@ -586,11 +514,7 @@ const UserDetailPage = () => {
         <button
           type="button"
           onClick={() => navigate("/admin/users")}
-          className="
-            inline-flex items-center gap-2
-            text-sm font-semibold text-text-muted
-            transition hover:text-brand
-          "
+          className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted transition hover:text-brand"
         >
           <ArrowLeft size={18} />
           Quay lại Người dùng
@@ -607,10 +531,7 @@ const UserDetailPage = () => {
               Người dùng
             </button>
 
-            <ChevronRight
-              size={15}
-              className="text-text-subtle"
-            />
+            <ChevronRight size={15} className="text-text-subtle" />
 
             <span className="truncate font-medium text-text-default">
               {user.userCode || user.idUser}
@@ -637,7 +558,7 @@ const UserDetailPage = () => {
               {providerNames.map((provider) => (
                 <span
                   key={provider}
-                  className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs font-semibold capitalize text-text-default"
+                  className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-default capitalize"
                 >
                   {provider}
                 </span>
@@ -649,9 +570,7 @@ const UserDetailPage = () => {
                   aria-label="Mở thao tác"
                   aria-haspopup="menu"
                   aria-expanded={actionOpen}
-                  onClick={() =>
-                    setActionOpen((current) => !current)
-                  }
+                  onClick={() => setActionOpen((current) => !current)}
                   className="flex h-9 w-10 items-center justify-center rounded-lg border border-border bg-surface-subtle text-text-muted transition hover:bg-surface-muted hover:text-text-default"
                 >
                   <EllipsisVertical size={17} />
@@ -660,15 +579,13 @@ const UserDetailPage = () => {
                 {actionOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 top-full z-30 mt-2 w-52 rounded-xl border border-border bg-surface p-1.5 shadow-xl"
+                    className="absolute top-full right-0 z-30 mt-2 w-52 rounded-xl border border-border bg-surface p-1.5 shadow-xl"
                   >
                     <button
                       type="button"
                       role="menuitem"
                       disabled={
-                        !isAdmin ||
-                        isCurrentUser ||
-                        Boolean(user.deletedAt)
+                        !isAdmin || isCurrentUser || Boolean(user.deletedAt)
                       }
                       onClick={() => {
                         setActionOpen(false);
@@ -757,7 +674,6 @@ const UserDetailPage = () => {
                 <details className="group mt-3 overflow-hidden rounded-xl border border-border bg-surface">
                   <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-4 text-sm font-semibold text-text-default">
                     Chi tiết xác thực
-
                     <ChevronDown
                       size={16}
                       className="text-text-muted transition group-open:rotate-180"
@@ -848,15 +764,12 @@ const UserDetailPage = () => {
                   </h2>
 
                   <span className="text-xs text-text-muted">
-                    {Array.isArray(user.addresses)
-                      ? user.addresses.length
-                      : 0}{" "}
+                    {Array.isArray(user.addresses) ? user.addresses.length : 0}{" "}
                     địa chỉ
                   </span>
                 </div>
 
-                {Array.isArray(user.addresses) &&
-                user.addresses.length > 0 ? (
+                {Array.isArray(user.addresses) && user.addresses.length > 0 ? (
                   <div className="space-y-3">
                     {user.addresses.map((address) => (
                       <div
@@ -869,8 +782,7 @@ const UserDetailPage = () => {
 
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-text-default">
-                            {address.companyName ||
-                              "Địa chỉ người dùng"}
+                            {address.companyName || "Địa chỉ người dùng"}
                           </p>
 
                           <p className="mt-1 text-sm leading-6 text-text-muted">
@@ -898,35 +810,22 @@ const UserDetailPage = () => {
             {/* Cột phải */}
             <aside className="min-w-0 px-5 sm:px-6">
               <SidebarSection title="Thông tin cơ bản">
-                <SidebarInfoRow
-                  icon={Hash}
-                  label="ID"
-                >
+                <SidebarInfoRow icon={Hash} label="ID">
                   {user.idUser}
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={Mail}
-                  label="Email"
-                >
+                <SidebarInfoRow icon={Mail} label="Email">
                   <div className="flex w-full min-w-0 items-center gap-3">
                     <span
                       title={loginEmailProvider?.email || ""}
-                      className="
-                        block min-w-0 max-w-40 flex-1
-                        truncate sm:max-w-48
-                      "
+                      className="block max-w-40 min-w-0 flex-1 truncate sm:max-w-48"
                     >
                       {loginEmailProvider?.email || EMPTY_VALUE}
                     </span>
 
                     {loginProviderInfo && (
                       <span
-                        className={`
-                          shrink-0 rounded-md px-2 py-1
-                          text-xs font-semibold
-                          ${loginProviderInfo.className}
-                        `}
+                        className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${loginProviderInfo.className} `}
                       >
                         {loginProviderInfo.label}
                       </span>
@@ -934,24 +833,15 @@ const UserDetailPage = () => {
                   </div>
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={UserRound}
-                  label="Mã"
-                >
+                <SidebarInfoRow icon={UserRound} label="Mã">
                   {user.userCode || EMPTY_VALUE}
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={CalendarDays}
-                  label="Ngày tạo"
-                >
+                <SidebarInfoRow icon={CalendarDays} label="Ngày tạo">
                   {formatDate(user.createdAt)}
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={BadgeCheck}
-                  label="Trạng thái"
-                >
+                <SidebarInfoRow icon={BadgeCheck} label="Trạng thái">
                   <span
                     className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${status.badgeClassName}`}
                   >
@@ -998,38 +888,23 @@ const UserDetailPage = () => {
                   </div>
                 </div>
 
-                <SidebarInfoRow
-                  icon={UserRound}
-                  label="Họ tên"
-                >
+                <SidebarInfoRow icon={UserRound} label="Họ tên">
                   {user.fullName || EMPTY_VALUE}
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={CalendarDays}
-                  label="Ngày sinh"
-                >
+                <SidebarInfoRow icon={CalendarDays} label="Ngày sinh">
                   {formatDate(user.birthday)}
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={UserRound}
-                  label="Giới tính"
-                >
+                <SidebarInfoRow icon={UserRound} label="Giới tính">
                   {formatGender(user.gender)}
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={Phone}
-                  label="Số điện thoại"
-                >
+                <SidebarInfoRow icon={Phone} label="Số điện thoại">
                   {phoneProvider?.phone || EMPTY_VALUE}
                 </SidebarInfoRow>
 
-                <SidebarInfoRow
-                  icon={MapPin}
-                  label="Địa chỉ"
-                >
+                <SidebarInfoRow icon={MapPin} label="Địa chỉ">
                   {user.defaultAddress?.address || EMPTY_VALUE}
                 </SidebarInfoRow>
               </SidebarSection>
@@ -1040,16 +915,8 @@ const UserDetailPage = () => {
                   <button
                     type="button"
                     onClick={handleOpenPhoneEdit}
-                    disabled={
-                      !isAdmin || Boolean(user.deletedAt)
-                    }
-                    className="
-                      rounded-md p-1.5 text-slate-400
-                      transition hover:bg-slate-100
-                      hover:text-slate-700
-                      disabled:cursor-not-allowed
-                      disabled:opacity-40
-                    "
+                    disabled={!isAdmin || Boolean(user.deletedAt)}
+                    className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label="Chỉnh sửa số điện thoại"
                     title="Chỉnh sửa số điện thoại"
                   >
@@ -1078,13 +945,11 @@ const UserDetailPage = () => {
                 {user.defaultAddress ? (
                   <div className="rounded-xl border border-border bg-surface-subtle px-3 py-3">
                     <p className="text-sm font-medium text-text-default">
-                      {user.defaultAddress.companyName ||
-                        "Địa chỉ người dùng"}
+                      {user.defaultAddress.companyName || "Địa chỉ người dùng"}
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-text-muted">
-                      {user.defaultAddress.address ||
-                        EMPTY_VALUE}
+                      {user.defaultAddress.address || EMPTY_VALUE}
                     </p>
                   </div>
                 ) : (

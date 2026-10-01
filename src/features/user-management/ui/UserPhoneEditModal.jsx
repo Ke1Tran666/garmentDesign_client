@@ -10,12 +10,9 @@ const UserPhoneEditModal = ({
   onClose,
   onSubmit,
 }) => {
-  const [phoneValue, setPhoneValue] = useState(
-    () => phone,
-  );
+  const [phoneValue, setPhoneValue] = useState(() => phone);
 
-  const [validationError, setValidationError] =
-    useState("");
+  const [validationError, setValidationError] = useState("");
 
   const handleChange = (event) => {
     setPhoneValue(event.target.value);
@@ -25,25 +22,15 @@ const UserPhoneEditModal = ({
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const normalizedPhone = phoneValue
-      .trim()
-      .replace(/[\s.-]/g, "");
+    const normalizedPhone = phoneValue.trim().replace(/[\s.-]/g, "");
 
     if (!normalizedPhone) {
-      setValidationError(
-        "Vui lòng nhập số điện thoại.",
-      );
+      setValidationError("Vui lòng nhập số điện thoại.");
       return;
     }
 
-    if (
-      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(
-        normalizedPhone,
-      )
-    ) {
-      setValidationError(
-        "Số điện thoại không hợp lệ.",
-      );
+    if (!/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(normalizedPhone)) {
+      setValidationError("Số điện thoại không hợp lệ.");
       return;
     }
 
@@ -56,9 +43,7 @@ const UserPhoneEditModal = ({
       title="Chỉnh sửa số điện thoại"
       description="Cập nhật số điện thoại của người dùng."
       submitting={submitting}
-      errorMessage={
-        validationError || errorMessage
-      }
+      errorMessage={validationError || errorMessage}
       onClose={onClose}
       onSubmit={handleSubmit}
       submitText="Lưu thay đổi"

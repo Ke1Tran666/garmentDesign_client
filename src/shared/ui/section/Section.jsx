@@ -5,9 +5,7 @@ export const SectionCard = ({ title, desc, active, highlight, children }) => {
       <div>
         <div className="flex w-fit flex-col">
           <div className="flex items-center gap-3">
-            <h4 className="text-sm font-semibold text-text-strong">
-              {title}
-            </h4>
+            <h4 className="text-sm font-semibold text-text-strong">{title}</h4>
 
             {active && (
               <span
@@ -15,10 +13,10 @@ export const SectionCard = ({ title, desc, active, highlight, children }) => {
                   active === "active"
                     ? "bg-success-soft text-success"
                     : active === "pending"
-                    ? "bg-warning-soft text-warning"
-                    : active === "banned"
-                    ? "bg-danger-soft text-danger"
-                    : "bg-surface-muted text-text-muted"
+                      ? "bg-warning-soft text-warning"
+                      : active === "banned"
+                        ? "bg-danger-soft text-danger"
+                        : "bg-surface-muted text-text-muted"
                 }`}
               >
                 {active}

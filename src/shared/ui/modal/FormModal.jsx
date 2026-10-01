@@ -31,19 +31,11 @@ const FormModal = ({
       aria-modal="true"
       aria-labelledby="form-modal-title"
       onClick={handleBackdropClick}
-      className="
-        fixed inset-0 z-70 flex items-center
-        justify-center bg-black/40 px-4 py-6
-      "
+      className="fixed inset-0 z-70 flex items-center justify-center bg-black/40 px-4 py-6"
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className={`
-            relative w-full ${maxWidthClassName}
-            overflow-hidden rounded-2xl
-            border border-border-subtle
-            bg-surface shadow-2xl
-          `}
+        className={`relative w-full ${maxWidthClassName} overflow-hidden rounded-2xl border border-border-subtle bg-surface shadow-2xl`}
       >
         <div className="h-1 w-full bg-brand" />
 
@@ -57,9 +49,7 @@ const FormModal = ({
             </h2>
 
             {description && (
-              <p className="mt-1 text-sm text-text-muted">
-                {description}
-              </p>
+              <p className="mt-1 text-sm text-text-muted">{description}</p>
             )}
           </div>
 
@@ -68,20 +58,11 @@ const FormModal = ({
             onClick={onClose}
             disabled={submitting}
             aria-label="Đóng"
-            className="
-              group flex h-9 w-9 shrink-0
-              items-center justify-center rounded-lg
-              text-text-muted transition-colors
-              duration-300 hover:bg-danger-soft
-              hover:text-danger disabled:opacity-50
-            "
+            className="group flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors duration-300 hover:bg-danger-soft hover:text-danger disabled:opacity-50"
           >
             <X
               size={19}
-              className="
-                transition-transform duration-300
-                ease-in-out group-hover:rotate-180
-              "
+              className="transition-transform duration-300 ease-in-out group-hover:rotate-180"
             />
           </button>
         </header>
@@ -105,15 +86,7 @@ const FormModal = ({
                       key={field.name}
                       {...commonProps}
                       rows={field.rows || 4}
-                      className="
-                        w-full rounded-xl border
-                        border-input bg-surface
-                        px-4 py-3 text-sm
-                        text-text-default outline-none
-                        transition focus:border-brand
-                        focus:ring-4 focus:ring-brand/10
-                        disabled:bg-surface-muted
-                      "
+                      className="w-full rounded-xl border border-input bg-surface px-4 py-3 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-muted"
                     />
                   );
                 }
@@ -123,15 +96,7 @@ const FormModal = ({
                     key={field.name}
                     {...commonProps}
                     type={field.type || "text"}
-                    className="
-                      h-11 w-full rounded-xl
-                      border border-input bg-surface
-                      px-4 text-sm text-text-default
-                      outline-none transition
-                      focus:border-brand
-                      focus:ring-4 focus:ring-brand/10
-                      disabled:bg-surface-muted
-                    "
+                    className="h-11 w-full rounded-xl border border-input bg-surface px-4 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-muted"
                   />
                 );
               })}
@@ -148,13 +113,7 @@ const FormModal = ({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="
-                rounded-xl border border-border
-                px-4 py-2.5 text-sm font-semibold
-                text-text-muted transition
-                hover:bg-surface-muted
-                disabled:opacity-50
-              "
+              className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text-muted transition hover:bg-surface-muted disabled:opacity-50"
             >
               {cancelText}
             </button>
@@ -162,20 +121,10 @@ const FormModal = ({
             <button
               type="submit"
               disabled={submitting}
-              className="
-                inline-flex min-w-32 items-center
-                justify-center gap-2 rounded-xl
-                bg-brand! px-4 py-2.5
-                text-sm font-semibold text-white
-                transition hover:opacity-90
-                disabled:opacity-50
-              "
+              className="inline-flex min-w-32 items-center justify-center gap-2 rounded-xl bg-brand! px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
             >
               {submitting ? (
-                <LoaderCircle
-                  size={17}
-                  className="animate-spin"
-                />
+                <LoaderCircle size={17} className="animate-spin" />
               ) : (
                 <Save size={17} />
               )}

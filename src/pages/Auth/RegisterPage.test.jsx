@@ -1,26 +1,13 @@
-import {
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import RegisterPage from "./RegisterPage";
 import { authApi } from "@/features/auth/api/authApi";
 
-const { showNotificationMock } = vi.hoisted(
-  () => ({
-    showNotificationMock: vi.fn(),
-  }),
-);
+const { showNotificationMock } = vi.hoisted(() => ({
+  showNotificationMock: vi.fn(),
+}));
 
 vi.mock("@/features/auth/api/authApi", () => ({
   authApi: {
@@ -28,14 +15,11 @@ vi.mock("@/features/auth/api/authApi", () => ({
   },
 }));
 
-vi.mock(
-  "@/app/providers/NotificationProvider",
-  () => ({
-    useNotification: () => ({
-      showNotification: showNotificationMock,
-    }),
+vi.mock("@/app/providers/NotificationProvider", () => ({
+  useNotification: () => ({
+    showNotification: showNotificationMock,
   }),
-);
+}));
 
 const renderRegisterPage = () => {
   return render(
@@ -49,21 +33,13 @@ const createUser = () => userEvent.setup();
 
 const fillRegisterForm = async (user) => {
   await user.type(
-    screen.getByPlaceholderText(
-      "Email đăng nhập",
-    ),
+    screen.getByPlaceholderText("Email đăng nhập"),
     "register@example.com",
   );
 
-  await user.type(
-    screen.getByPlaceholderText("Mật Khẩu"),
-    "Password123",
-  );
+  await user.type(screen.getByPlaceholderText("Mật Khẩu"), "Password123");
 
-  await user.type(
-    screen.getByPlaceholderText("Họ và Tên"),
-    "Nguyễn Văn Test",
-  );
+  await user.type(screen.getByPlaceholderText("Họ và Tên"), "Nguyễn Văn Test");
 
   await user.click(
     screen.getByRole("button", {
@@ -77,20 +53,11 @@ const fillRegisterForm = async (user) => {
     }),
   );
 
-  await user.type(
-    screen.getByPlaceholderText("Day"),
-    "15",
-  );
+  await user.type(screen.getByPlaceholderText("Day"), "15");
 
-  await user.type(
-    screen.getByPlaceholderText("Month"),
-    "8",
-  );
+  await user.type(screen.getByPlaceholderText("Month"), "8");
 
-  await user.type(
-    screen.getByPlaceholderText("Year"),
-    "2000",
-  );
+  await user.type(screen.getByPlaceholderText("Year"), "2000");
 };
 
 describe("RegisterPage", () => {
@@ -111,31 +78,17 @@ describe("RegisterPage", () => {
       }),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByPlaceholderText(
-        "Email đăng nhập",
-      ),
-    ).toBeRequired();
+    expect(screen.getByPlaceholderText("Email đăng nhập")).toBeRequired();
 
-    expect(
-      screen.getByPlaceholderText("Mật Khẩu"),
-    ).toBeRequired();
+    expect(screen.getByPlaceholderText("Mật Khẩu")).toBeRequired();
 
-    expect(
-      screen.getByPlaceholderText("Họ và Tên"),
-    ).toBeRequired();
+    expect(screen.getByPlaceholderText("Họ và Tên")).toBeRequired();
 
-    expect(
-      screen.getByPlaceholderText("Day"),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Day")).toBeInTheDocument();
 
-    expect(
-      screen.getByPlaceholderText("Month"),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Month")).toBeInTheDocument();
 
-    expect(
-      screen.getByPlaceholderText("Year"),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Year")).toBeInTheDocument();
 
     expect(
       screen.getByRole("link", {
@@ -210,9 +163,7 @@ describe("RegisterPage", () => {
     );
 
     await waitFor(() => {
-      expect(
-        authApi.register,
-      ).toHaveBeenCalledWith({
+      expect(authApi.register).toHaveBeenCalledWith({
         email: "register@example.com",
         password: "Password123",
         fullName: "Nguyễn Văn Test",
@@ -221,9 +172,7 @@ describe("RegisterPage", () => {
       });
     });
 
-    expect(
-      authApi.register,
-    ).toHaveBeenCalledTimes(1);
+    expect(authApi.register).toHaveBeenCalledTimes(1);
   });
 
   test("thông báo khi đăng ký thành công", async () => {
@@ -244,9 +193,7 @@ describe("RegisterPage", () => {
     );
 
     await waitFor(() => {
-      expect(
-        showNotificationMock,
-      ).toHaveBeenCalledWith(
+      expect(showNotificationMock).toHaveBeenCalledWith(
         "success",
         "Đăng ký thành công",
         "Tài khoản của bạn đã được tạo",
@@ -276,9 +223,7 @@ describe("RegisterPage", () => {
     );
 
     await waitFor(() => {
-      expect(
-        showNotificationMock,
-      ).toHaveBeenCalledWith(
+      expect(showNotificationMock).toHaveBeenCalledWith(
         "error",
         "Đăng ký thất bại",
         "Email đã tồn tại",
@@ -289,9 +234,7 @@ describe("RegisterPage", () => {
   test("hiển thị lỗi mặc định khi backend không có message", async () => {
     const user = createUser();
 
-    authApi.register.mockRejectedValue(
-      new Error("Network error"),
-    );
+    authApi.register.mockRejectedValue(new Error("Network error"));
 
     renderRegisterPage();
 
@@ -304,9 +247,7 @@ describe("RegisterPage", () => {
     );
 
     await waitFor(() => {
-      expect(
-        showNotificationMock,
-      ).toHaveBeenCalledWith(
+      expect(showNotificationMock).toHaveBeenCalledWith(
         "error",
         "Đăng ký thất bại",
         "Vui lòng thử lại",
@@ -317,9 +258,7 @@ describe("RegisterPage", () => {
   test("vô hiệu hóa nút khi đang đăng ký", async () => {
     const user = createUser();
 
-    authApi.register.mockReturnValue(
-      new Promise(() => {}),
-    );
+    authApi.register.mockReturnValue(new Promise(() => {}));
 
     renderRegisterPage();
 

@@ -6,11 +6,7 @@ import Pagination from "./Pagination";
 describe("Pagination", () => {
   test("không hiển thị khi chỉ có một trang", () => {
     const { container } = render(
-      <Pagination
-        currentPage={1}
-        totalPages={1}
-        onPageChange={vi.fn()}
-      />,
+      <Pagination currentPage={1} totalPages={1} onPageChange={vi.fn()} />,
     );
 
     expect(container).toBeEmptyDOMElement();
@@ -35,38 +31,22 @@ describe("Pagination", () => {
 
   test("vô hiệu hóa nút Trước ở trang đầu", () => {
     render(
-      <Pagination
-        currentPage={1}
-        totalPages={5}
-        onPageChange={vi.fn()}
-      />,
+      <Pagination currentPage={1} totalPages={5} onPageChange={vi.fn()} />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "Trước" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Trước" })).toBeDisabled();
 
-    expect(
-      screen.getByRole("button", { name: "Sau" }),
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Sau" })).toBeEnabled();
   });
 
   test("vô hiệu hóa nút Sau ở trang cuối", () => {
     render(
-      <Pagination
-        currentPage={5}
-        totalPages={5}
-        onPageChange={vi.fn()}
-      />,
+      <Pagination currentPage={5} totalPages={5} onPageChange={vi.fn()} />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "Trước" }),
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Trước" })).toBeEnabled();
 
-    expect(
-      screen.getByRole("button", { name: "Sau" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Sau" })).toBeDisabled();
   });
 
   test("chuyển đến trang tiếp theo khi nhấn Sau", async () => {
@@ -81,9 +61,7 @@ describe("Pagination", () => {
       />,
     );
 
-    await user.click(
-      screen.getByRole("button", { name: "Sau" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Sau" }));
 
     expect(handlePageChange).toHaveBeenCalledWith(3);
     expect(handlePageChange).toHaveBeenCalledTimes(1);
@@ -101,9 +79,7 @@ describe("Pagination", () => {
       />,
     );
 
-    await user.click(
-      screen.getByRole("button", { name: "Trước" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Trước" }));
 
     expect(handlePageChange).toHaveBeenCalledWith(2);
   });
@@ -120,20 +96,14 @@ describe("Pagination", () => {
       />,
     );
 
-    await user.click(
-      screen.getByRole("button", { name: "4" }),
-    );
+    await user.click(screen.getByRole("button", { name: "4" }));
 
     expect(handlePageChange).toHaveBeenCalledWith(4);
   });
 
   test("đánh dấu trang hiện tại bằng aria-current", () => {
     render(
-      <Pagination
-        currentPage={3}
-        totalPages={5}
-        onPageChange={vi.fn()}
-      />,
+      <Pagination currentPage={3} totalPages={5} onPageChange={vi.fn()} />,
     );
 
     expect(
@@ -146,36 +116,20 @@ describe("Pagination", () => {
 
   test("rút gọn danh sách trang và hiển thị dấu ba chấm", () => {
     render(
-      <Pagination
-        currentPage={5}
-        totalPages={10}
-        onPageChange={vi.fn()}
-      />,
+      <Pagination currentPage={5} totalPages={10} onPageChange={vi.fn()} />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "1" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "1" })).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("button", { name: "4" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "4" })).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("button", { name: "5" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "5" })).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("button", { name: "6" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "6" })).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("button", { name: "10" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "10" })).toBeInTheDocument();
 
-    expect(
-      screen.queryByRole("button", { name: "2" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "2" })).not.toBeInTheDocument();
 
     expect(screen.getAllByText("...")).toHaveLength(2);
   });
@@ -196,8 +150,6 @@ describe("Pagination", () => {
       selector: "p",
     });
 
-    expect(summary).toHaveTextContent(
-      "Hiển thị 11-20 trong số 35 bản ghi",
-    );
+    expect(summary).toHaveTextContent("Hiển thị 11-20 trong số 35 bản ghi");
   });
 });

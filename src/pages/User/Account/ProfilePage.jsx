@@ -16,12 +16,8 @@ import OTPModal from "@/features/auth/ui/OTPModal";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 
 const getProfilePhone = (data) => {
-  const provider = (
-    data?.authProviders || []
-  ).find(
-    (item) =>
-      item.provider?.toLowerCase() ===
-      "phone",
+  const provider = (data?.authProviders || []).find(
+    (item) => item.provider?.toLowerCase() === "phone",
   );
 
   return provider?.phone || "";
@@ -55,13 +51,11 @@ const ProfilePage = () => {
   const [emailOtpTarget, setEmailOtpTarget] = useState("");
   const [emailOtpModalKey, setEmailOtpModalKey] = useState(0);
 
-  const [
-    emailVerificationToRemove, setEmailVerificationToRemove
-  ] = useState(null);
+  const [emailVerificationToRemove, setEmailVerificationToRemove] =
+    useState(null);
 
-  const [
-    removingEmailVerification, setRemovingEmailVerification
-  ] = useState(false);
+  const [removingEmailVerification, setRemovingEmailVerification] =
+    useState(false);
 
   // snapshot
   const createProfileSnapshot = (data) => ({
@@ -74,15 +68,12 @@ const ProfilePage = () => {
 
   const isDirty =
     originalProfile &&
-    (
-      fullName !== originalProfile.fullName ||
+    (fullName !== originalProfile.fullName ||
       gender !== originalProfile.gender ||
       birthday !== originalProfile.birthday ||
       phone !== originalProfile.phone ||
       avatarFile !== null ||
-      avatarPreview !==
-        (originalProfile.avatar || "")
-    );
+      avatarPreview !== (originalProfile.avatar || ""));
 
   useBeforeUnload(
     (event) => {
@@ -93,7 +84,7 @@ const ProfilePage = () => {
         event.returnValue = "";
       }
     },
-    { capture: true }
+    { capture: true },
   );
 
   // Default
@@ -103,7 +94,7 @@ const ProfilePage = () => {
     setFullName(originalProfile.fullName);
     setGender(originalProfile.gender);
     setBirthday(originalProfile.birthday);
-    setBirthdayResetKey((prev) => prev + 1);  
+    setBirthdayResetKey((prev) => prev + 1);
     setPhone(originalProfile.phone || "");
     setPhoneEditing(false);
 
@@ -114,7 +105,7 @@ const ProfilePage = () => {
     showNotification(
       "success",
       "Thành công",
-      "Thông tin cá nhân đã về trạng thái mặc định."
+      "Thông tin cá nhân đã về trạng thái mặc định.",
     );
   };
 
@@ -137,8 +128,7 @@ const ProfilePage = () => {
         setAvatarPreview(userData?.avatar || "");
       } catch (err) {
         setError(
-          err.response?.data?.message ||
-            "Không thể tải thông tin người dùng"
+          err.response?.data?.message || "Không thể tải thông tin người dùng",
         );
       } finally {
         setLoading(false);
@@ -155,8 +145,8 @@ const ProfilePage = () => {
   const phoneProvider = phones.length > 0 ? phones[0] : null;
 
   const phoneSectionStatus = phones.some((item) => item.phoneVerifiedAt)
-  ? "active"
-  : "inactive";
+    ? "active"
+    : "inactive";
 
   const emailSectionStatus = emails.some((item) => item.emailVerifiedAt)
     ? "active"
@@ -167,9 +157,10 @@ const ProfilePage = () => {
     const value = searchKeyword.trim().toLowerCase();
     if (!value) return false;
 
-    return keywords.some((keyword) =>
-      keyword.toLowerCase().includes(value) ||
-      value.includes(keyword.toLowerCase())
+    return keywords.some(
+      (keyword) =>
+        keyword.toLowerCase().includes(value) ||
+        value.includes(keyword.toLowerCase()),
     );
   };
 
@@ -183,9 +174,7 @@ const ProfilePage = () => {
 
   if (error) {
     return (
-      <div className="px-6 py-6 text-sm font-medium text-danger">
-        {error}
-      </div>
+      <div className="px-6 py-6 text-sm font-medium text-danger">{error}</div>
     );
   }
 
@@ -195,10 +184,7 @@ const ProfilePage = () => {
 
     if (!file) return;
 
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-    ];
+    const allowedTypes = ["image/jpeg", "image/png"];
 
     if (!allowedTypes.includes(file.type)) {
       showNotification(
@@ -243,36 +229,23 @@ const ProfilePage = () => {
 
   const validateProfile = () => {
     if (!fullName.trim()) {
-      showNotification(
-        "error",
-        "Thiếu thông tin",
-        "Vui lòng nhập họ và tên.",
-      );
+      showNotification("error", "Thiếu thông tin", "Vui lòng nhập họ và tên.");
 
       return false;
     }
 
     if (!birthday) {
-      showNotification(
-        "error",
-        "Thiếu thông tin",
-        "Vui lòng nhập ngày sinh.",
-      );
+      showNotification("error", "Thiếu thông tin", "Vui lòng nhập ngày sinh.");
 
       return false;
     }
 
-    const selectedBirthday = new Date(
-      `${birthday}T00:00:00`,
-    );
+    const selectedBirthday = new Date(`${birthday}T00:00:00`);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (
-      Number.isNaN(selectedBirthday.getTime()) ||
-      selectedBirthday >= today
-    ) {
+    if (Number.isNaN(selectedBirthday.getTime()) || selectedBirthday >= today) {
       showNotification(
         "error",
         "Ngày sinh không hợp lệ",
@@ -292,15 +265,11 @@ const ProfilePage = () => {
       return false;
     }
 
-    const normalizedPhone = phone
-      .trim()
-      .replace(/[\s.-]/g, "");
+    const normalizedPhone = phone.trim().replace(/[\s.-]/g, "");
 
     if (
       normalizedPhone &&
-      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(
-        normalizedPhone,
-      )
+      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(normalizedPhone)
     ) {
       showNotification(
         "error",
@@ -356,8 +325,7 @@ const ProfilePage = () => {
       showNotification(
         "error",
         "Thất bại",
-        error.response?.data?.message ||
-          "Không thể cập nhật thông tin.",
+        error.response?.data?.message || "Không thể cập nhật thông tin.",
       );
     }
   };
@@ -389,8 +357,7 @@ const ProfilePage = () => {
     try {
       setEmailOtpLoading(true);
 
-      const result =
-        await userApi.sendEmailVerificationOtp();
+      const result = await userApi.sendEmailVerificationOtp();
 
       setEmailOtpTarget(email);
       setEmailOtpOpen(true);
@@ -398,15 +365,13 @@ const ProfilePage = () => {
       showNotification(
         "success",
         "Đã gửi OTP",
-        result?.message ||
-          "Mã OTP đã được gửi đến email của bạn.",
+        result?.message || "Mã OTP đã được gửi đến email của bạn.",
       );
     } catch (error) {
       showNotification(
         "error",
         "Không thể gửi OTP",
-        error.response?.data?.message ||
-          "Không thể gửi mã xác thực.",
+        error.response?.data?.message || "Không thể gửi mã xác thực.",
       );
     } finally {
       setEmailOtpLoading(false);
@@ -415,11 +380,7 @@ const ProfilePage = () => {
 
   const handleVerifyEmailOtp = async (otp) => {
     if (!otp) {
-      showNotification(
-        "error",
-        "Thiếu mã OTP",
-        "Vui lòng nhập đầy đủ mã OTP.",
-      );
+      showNotification("error", "Thiếu mã OTP", "Vui lòng nhập đầy đủ mã OTP.");
 
       return;
     }
@@ -427,8 +388,7 @@ const ProfilePage = () => {
     try {
       setEmailOtpLoading(true);
 
-      const result =
-        await userApi.verifyEmailVerificationOtp(otp);
+      const result = await userApi.verifyEmailVerificationOtp(otp);
 
       setEmailOtpOpen(false);
       setEmailOtpModalKey((value) => value + 1);
@@ -439,15 +399,13 @@ const ProfilePage = () => {
       showNotification(
         "success",
         "Xác thực thành công",
-        result?.message ||
-          "Email đã được xác thực.",
+        result?.message || "Email đã được xác thực.",
       );
     } catch (error) {
       showNotification(
         "error",
         "Xác thực thất bại",
-        error.response?.data?.message ||
-          "Mã OTP không hợp lệ.",
+        error.response?.data?.message || "Mã OTP không hợp lệ.",
       );
     } finally {
       setEmailOtpLoading(false);
@@ -458,8 +416,7 @@ const ProfilePage = () => {
     try {
       setRemovingEmailVerification(true);
 
-      const result =
-        await userApi.removeEmailVerification();
+      const result = await userApi.removeEmailVerification();
 
       setEmailVerificationToRemove(null);
 
@@ -469,15 +426,13 @@ const ProfilePage = () => {
       showNotification(
         "success",
         "Đã bỏ xác thực",
-        result?.message ||
-          "Email đã được chuyển về trạng thái chưa xác thực.",
+        result?.message || "Email đã được chuyển về trạng thái chưa xác thực.",
       );
     } catch (error) {
       showNotification(
         "error",
         "Không thể bỏ xác thực",
-        error.response?.data?.message ||
-          "Không thể bỏ xác thực email.",
+        error.response?.data?.message || "Không thể bỏ xác thực email.",
       );
     } finally {
       setRemovingEmailVerification(false);
@@ -492,9 +447,7 @@ const ProfilePage = () => {
     try {
       setDeletingPhone(true);
 
-      const result = await userApi.deletePhone(
-        phoneToDelete.id,
-      );
+      const result = await userApi.deletePhone(phoneToDelete.id);
 
       setPhoneToDelete(null);
       setPhone("");
@@ -506,15 +459,13 @@ const ProfilePage = () => {
       showNotification(
         "success",
         "Xóa số điện thoại thành công",
-        result?.message ||
-          "Số điện thoại đã được xóa.",
+        result?.message || "Số điện thoại đã được xóa.",
       );
     } catch (error) {
       showNotification(
         "error",
         "Không thể xóa số điện thoại",
-        error.response?.data?.message ||
-          "Vui lòng thử lại.",
+        error.response?.data?.message || "Vui lòng thử lại.",
       );
     } finally {
       setDeletingPhone(false);
@@ -545,10 +496,11 @@ const ProfilePage = () => {
           />
 
           <div className="md:col-span-2">
-            <BirthdayField 
-              birthday={birthday} 
+            <BirthdayField
+              birthday={birthday}
               setBirthday={setBirthday}
-              birthdayResetKey={birthdayResetKey} />
+              birthdayResetKey={birthdayResetKey}
+            />
           </div>
 
           <div className="md:col-span-2">
@@ -587,12 +539,7 @@ const ProfilePage = () => {
         title="Link phone number"
         desc="Manage phone numbers linked to your account."
         active={phoneSectionStatus}
-        highlight={isSearching([
-          "phone",
-          "number",
-          "sdt",
-          "số điện thoại",
-        ])}
+        highlight={isSearching(["phone", "number", "sdt", "số điện thoại"])}
       >
         {phoneProvider ? (
           <div className="space-y-3">
@@ -604,30 +551,23 @@ const ProfilePage = () => {
               isLocked={!phoneEditing}
               inputType="tel"
               placeholder="Nhập số điện thoại"
-              badgeStatus={getPhoneStatus(
-                phoneProvider,
-              )}
-              onChange={(event) =>
-                setPhone(event.target.value)
-              }
+              badgeStatus={getPhoneStatus(phoneProvider)}
+              onChange={(event) => setPhone(event.target.value)}
               onEdit={() => {
                 setPhone(phoneProvider.phone || "");
                 setPhoneEditing(true);
               }}
               canDelete={false}
               showDeleteInSetting
-              onDelete={() =>
-                setPhoneToDelete(phoneProvider)
-              }
+              onDelete={() => setPhoneToDelete(phoneProvider)}
               verificationDisabled
               verificationDisabledText="Xác thực sắp ra mắt"
             />
 
             {phoneEditing && (
               <p className="text-xs text-text-muted">
-                Số điện thoại mới sẽ được lưu ở trạng
-                thái chưa xác thực. Nhấn Save changes
-                để hoàn tất.
+                Số điện thoại mới sẽ được lưu ở trạng thái chưa xác thực. Nhấn
+                Save changes để hoàn tất.
               </p>
             )}
           </div>
@@ -651,9 +591,7 @@ const ProfilePage = () => {
               badgeStatus="inactive"
               showSetting
               canDelete={false}
-              onChange={(event) =>
-                setPhone(event.target.value)
-              }
+              onChange={(event) => setPhone(event.target.value)}
               verificationDisabled
               verificationDisabledText="Xác thực sắp ra mắt"
             />
@@ -665,19 +603,13 @@ const ProfilePage = () => {
                   setPhone("");
                   setPhoneEditing(false);
                 }}
-                className="
-                  rounded-lg border border-input
-                  px-4 py-2 text-sm font-semibold
-                  text-text-muted transition
-                  hover:bg-surface-subtle
-                "
+                className="rounded-lg border border-input px-4 py-2 text-sm font-semibold text-text-muted transition hover:bg-surface-subtle"
               >
                 Hủy
               </button>
 
               <p className="text-xs text-text-muted">
-                Nhấn Save changes bên dưới để lưu số
-                điện thoại.
+                Nhấn Save changes bên dưới để lưu số điện thoại.
               </p>
             </div>
           </EmptyContact>
@@ -691,13 +623,7 @@ const ProfilePage = () => {
         title="Associated email"
         desc="Manage email accounts linked to your profile."
         active={emailSectionStatus}
-        highlight={isSearching([
-          "email",
-          "mail",
-          "gmail",
-          "google",
-          "local",
-        ])}
+        highlight={isSearching(["email", "mail", "gmail", "google", "local"])}
       >
         <div className="space-y-3">
           {emails.length > 0 ? (
@@ -710,22 +636,15 @@ const ProfilePage = () => {
                 isLocked
                 badgeText={getEmailStatus(item)}
                 badgeStatus={getEmailStatus(item)}
-                showSetting={
-                  item.provider?.toLowerCase() === "local"
-                }
+                showSetting={item.provider?.toLowerCase() === "local"}
                 canDelete={false}
-                onVerify={() =>
-                  handleSendEmailOtp(item.email)
-                }
-                onRemove={() =>
-                  setEmailVerificationToRemove(item)
-                }
+                onVerify={() => handleSendEmailOtp(item.email)}
+                onRemove={() => setEmailVerificationToRemove(item)}
               />
             ))
           ) : (
             <p className="text-sm text-text-muted">
-              Chưa liên kết email.
-              Chức năng liên kết đang được hoàn thiện.
+              Chưa liên kết email. Chức năng liên kết đang được hoàn thiện.
             </p>
           )}
         </div>
@@ -741,10 +660,7 @@ const ProfilePage = () => {
           Default
         </HandleButton>
 
-        <HandleButton
-          onClick={handleSaveProfile}
-          className={`bg-brand!`}
-        >
+        <HandleButton onClick={handleSaveProfile} className={`bg-brand!`}>
           Save changes
         </HandleButton>
       </div>
@@ -758,9 +674,7 @@ const ProfilePage = () => {
         loading={emailOtpLoading}
         onClose={() => setEmailOtpOpen(false)}
         onVerify={handleVerifyEmailOtp}
-        onResend={() =>
-          handleSendEmailOtp(emailOtpTarget)
-        }
+        onResend={() => handleSendEmailOtp(emailOtpTarget)}
       />
 
       <ConfirmModal
@@ -782,10 +696,9 @@ const ProfilePage = () => {
           {emailVerificationToRemove?.email}
         </span>
         ?
-
         <p className="mt-2 text-danger">
-          Nếu tài khoản không còn email hoặc số điện thoại nào
-          được xác thực, tài khoản sẽ chuyển về trạng thái pending.
+          Nếu tài khoản không còn email hoặc số điện thoại nào được xác thực,
+          tài khoản sẽ chuyển về trạng thái pending.
         </p>
       </ConfirmModal>
 
@@ -804,12 +717,10 @@ const ProfilePage = () => {
         onConfirm={handleDeletePhone}
       >
         Bạn có chắc chắn muốn xóa số điện thoại{" "}
-
         <span className="font-semibold text-text-strong">
           {phoneToDelete?.phone}
         </span>
         ?
-
         <p className="mt-2 text-danger">
           {phoneToDelete?.phoneVerifiedAt
             ? "Số đã xác thực sẽ được gỡ khỏi tài khoản và lưu lại trong lịch sử."
@@ -839,17 +750,11 @@ const Input = ({
       readOnly={readOnly}
       placeholder={placeholder || label}
       containerClassName="w-full"
-      className={`
-        border-input!
-        ${
-          readOnly
-            ? "bg-surface-muted! text-text-muted! cursor-not-allowed!"
-            : "bg-surface! text-text-default!"
-        }
-        placeholder:text-transparent!
-        focus:border-brand!
-        focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]!
-      `}
+      className={`border-input! ${
+        readOnly
+          ? "cursor-not-allowed! bg-surface-muted! text-text-muted!"
+          : "bg-surface! text-text-default!"
+      } placeholder:text-transparent! focus:border-brand! focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]!`}
       labelClassName={`
         text-text-muted!
         peer-focus:text-brand!

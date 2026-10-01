@@ -145,27 +145,14 @@ const ACTIVITY_ITEMS = [
 ];
 
 const AdminDashboardPage = () => {
-  const maxOrderValue = Math.max(
-    ...MONTHLY_ORDERS.map((item) => item.value),
-  );
+  const maxOrderValue = Math.max(...MONTHLY_ORDERS.map((item) => item.value));
 
   return (
     <div className="space-y-6">
       {/* Heading */}
-      <section
-        className="
-          flex flex-col justify-between gap-4
-          sm:flex-row sm:items-end
-        "
-      >
+      <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2
-            className="
-              font-heading text-2xl
-              font-bold text-text-strong
-              sm:text-3xl
-            "
-          >
+          <h2 className="font-heading text-2xl font-bold text-text-strong sm:text-3xl">
             Tổng quan hệ thống
           </h2>
 
@@ -174,136 +161,61 @@ const AdminDashboardPage = () => {
           </p>
         </div>
 
-        <span
-          className="
-            self-start rounded-full
-            border border-warning-border
-            bg-warning-soft
-            px-3 py-1.5
-            text-xs font-semibold text-warning
-            sm:self-auto
-          "
-        >
+        <span className="self-start rounded-full border border-warning-border bg-warning-soft px-3 py-1.5 text-xs font-semibold text-warning sm:self-auto">
           Dữ liệu minh họa
         </span>
       </section>
 
       {/* Stats */}
-      <section
-        className="
-          grid grid-cols-1 gap-4
-          sm:grid-cols-2 xl:grid-cols-4
-        "
-      >
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {DASHBOARD_STATS.map((stat) => {
           const Icon = stat.icon;
-          const TrendIcon =
-            stat.trend === "up"
-              ? ArrowUpRight
-              : ArrowDownRight;
+          const TrendIcon = stat.trend === "up" ? ArrowUpRight : ArrowDownRight;
 
           return (
             <article
               key={stat.label}
-              className="
-                rounded-2xl border
-                border-border
-                bg-surface p-5
-                shadow-sm
-              "
+              className="rounded-2xl border border-border bg-surface p-5 shadow-sm"
             >
-              <div
-                className="
-                  flex items-start
-                  justify-between gap-4
-                "
-              >
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm text-text-muted">
-                    {stat.label}
-                  </p>
+                  <p className="text-sm text-text-muted">{stat.label}</p>
 
-                  <p
-                    className="
-                      mt-2 font-heading
-                      text-3xl font-bold
-                      text-text-strong
-                    "
-                  >
+                  <p className="mt-2 font-heading text-3xl font-bold text-text-strong">
                     {stat.value}
                   </p>
                 </div>
 
                 <span
-                  className={`
-                    flex h-11 w-11
-                    items-center justify-center
-                    rounded-xl
-                    ${stat.color}
-                  `}
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${stat.color} `}
                 >
                   <Icon size={21} />
                 </span>
               </div>
 
-              <div
-                className="
-                  mt-4 flex items-center
-                  gap-1.5 text-xs
-                "
-              >
+              <div className="mt-4 flex items-center gap-1.5 text-xs">
                 <span
-                  className={`
-                    inline-flex items-center
-                    gap-0.5 font-semibold
-                    ${
-                      stat.trend === "up"
-                        ? "text-success"
-                        : "text-danger"
-                    }
-                  `}
+                  className={`inline-flex items-center gap-0.5 font-semibold ${
+                    stat.trend === "up" ? "text-success" : "text-danger"
+                  } `}
                 >
                   <TrendIcon size={14} />
                   {stat.change}
                 </span>
 
-                <span className="text-text-subtle">
-                  {stat.description}
-                </span>
+                <span className="text-text-subtle">{stat.description}</span>
               </div>
             </article>
           );
         })}
       </section>
 
-      <section
-        className="
-          grid grid-cols-1 gap-6
-          xl:grid-cols-3
-        "
-      >
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Chart */}
-        <article
-          className="
-            rounded-2xl border
-            border-border bg-surface
-            p-5 shadow-sm
-            xl:col-span-2
-          "
-        >
-          <div
-            className="
-              flex items-start
-              justify-between gap-4
-            "
-          >
+        <article className="rounded-2xl border border-border bg-surface p-5 shadow-sm xl:col-span-2">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <h3
-                className="
-                  font-heading text-lg
-                  font-semibold text-text-strong
-                "
-              >
+              <h3 className="font-heading text-lg font-semibold text-text-strong">
                 Đơn dịch vụ theo tháng
               </h3>
 
@@ -312,79 +224,34 @@ const AdminDashboardPage = () => {
               </p>
             </div>
 
-            <span
-              className="
-                flex h-10 w-10
-                items-center justify-center
-                rounded-xl bg-brand-soft
-                text-brand
-              "
-            >
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand">
               <PackageCheck size={20} />
             </span>
           </div>
 
-          <div
-            className="
-              mt-8 flex h-64
-              items-end gap-2
-              overflow-x-auto pb-1
-              sm:gap-3
-            "
-          >
+          <div className="mt-8 flex h-64 items-end gap-2 overflow-x-auto pb-1 sm:gap-3">
             {MONTHLY_ORDERS.map((item) => {
-              const height =
-                (item.value / maxOrderValue) * 100;
+              const height = (item.value / maxOrderValue) * 100;
 
               return (
                 <div
                   key={item.month}
-                  className="
-                    flex h-full min-w-8
-                    flex-1 flex-col
-                    items-center justify-end
-                    gap-2
-                  "
+                  className="flex h-full min-w-8 flex-1 flex-col items-center justify-end gap-2"
                 >
-                  <span
-                    className="
-                      text-[11px] font-semibold
-                      text-text-muted
-                    "
-                  >
+                  <span className="text-[11px] font-semibold text-text-muted">
                     {item.value}
                   </span>
 
-                  <div
-                    className="
-                      relative flex h-48
-                      w-full items-end
-                      overflow-hidden
-                      rounded-lg
-                      bg-surface-muted
-                    "
-                  >
+                  <div className="relative flex h-48 w-full items-end overflow-hidden rounded-lg bg-surface-muted">
                     <div
-                      className="
-                        w-full rounded-lg
-                        bg-linear-to-t
-                        from-brand
-                        to-indigo-400
-                        transition-all
-                        hover:opacity-80
-                      "
+                      className="w-full rounded-lg bg-linear-to-t from-brand to-indigo-400 transition-all hover:opacity-80"
                       style={{
                         height: `${height}%`,
                       }}
                     />
                   </div>
 
-                  <span
-                    className="
-                      text-[11px]
-                      text-text-subtle
-                    "
-                  >
+                  <span className="text-[11px] text-text-subtle">
                     {item.month}
                   </span>
                 </div>
@@ -394,19 +261,8 @@ const AdminDashboardPage = () => {
         </article>
 
         {/* Activity */}
-        <article
-          className="
-            rounded-2xl border
-            border-border bg-surface
-            p-5 shadow-sm
-          "
-        >
-          <h3
-            className="
-              font-heading text-lg
-              font-semibold text-text-strong
-            "
-          >
+        <article className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+          <h3 className="font-heading text-lg font-semibold text-text-strong">
             Hoạt động gần đây
           </h3>
 
@@ -420,42 +276,21 @@ const AdminDashboardPage = () => {
                   className="flex gap-3"
                 >
                   <span
-                    className={`
-                      flex h-10 w-10
-                      shrink-0 items-center
-                      justify-center rounded-xl
-                      ${activity.color}
-                    `}
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${activity.color} `}
                   >
                     <Icon size={18} />
                   </span>
 
                   <div className="min-w-0">
-                    <p
-                      className="
-                        truncate text-sm
-                        font-semibold
-                        text-text-default
-                      "
-                    >
+                    <p className="truncate text-sm font-semibold text-text-default">
                       {activity.title}
                     </p>
 
-                    <p
-                      className="
-                        mt-0.5 truncate
-                        text-xs text-text-muted
-                      "
-                    >
+                    <p className="mt-0.5 truncate text-xs text-text-muted">
                       {activity.description}
                     </p>
 
-                    <p
-                      className="
-                        mt-1 text-[11px]
-                        text-text-subtle
-                      "
-                    >
+                    <p className="mt-1 text-[11px] text-text-subtle">
                       {activity.time}
                     </p>
                   </div>
@@ -467,28 +302,10 @@ const AdminDashboardPage = () => {
       </section>
 
       {/* Recent orders */}
-      <section
-        className="
-          overflow-hidden rounded-2xl
-          border border-border
-          bg-surface shadow-sm
-        "
-      >
-        <div
-          className="
-            flex items-center
-            justify-between gap-4
-            border-b border-border
-            px-5 py-4
-          "
-        >
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+        <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
           <div>
-            <h3
-              className="
-                font-heading text-lg
-                font-semibold text-text-strong
-              "
-            >
+            <h3 className="font-heading text-lg font-semibold text-text-strong">
               Đơn dịch vụ gần đây
             </h3>
 
@@ -499,11 +316,7 @@ const AdminDashboardPage = () => {
 
           <button
             type="button"
-            className="
-              shrink-0 text-sm
-              font-semibold text-brand
-              hover:text-brand-hover
-            "
+            className="shrink-0 text-sm font-semibold text-brand hover:text-brand-hover"
           >
             Xem tất cả
           </button>
@@ -512,107 +325,53 @@ const AdminDashboardPage = () => {
         <div className="overflow-x-auto">
           <table className="w-full min-w-200">
             <thead className="bg-surface-subtle">
-              <tr
-                className="
-                  text-left text-xs
-                  uppercase tracking-wider
-                  text-text-subtle
-                "
-              >
-                <th className="px-5 py-3 font-semibold">
-                  Mã đơn
-                </th>
+              <tr className="text-left text-xs tracking-wider text-text-subtle uppercase">
+                <th className="px-5 py-3 font-semibold">Mã đơn</th>
 
-                <th className="px-5 py-3 font-semibold">
-                  Khách hàng
-                </th>
+                <th className="px-5 py-3 font-semibold">Khách hàng</th>
 
-                <th className="px-5 py-3 font-semibold">
-                  Dịch vụ
-                </th>
+                <th className="px-5 py-3 font-semibold">Dịch vụ</th>
 
-                <th className="px-5 py-3 font-semibold">
-                  Ngày tạo
-                </th>
+                <th className="px-5 py-3 font-semibold">Ngày tạo</th>
 
-                <th className="px-5 py-3 font-semibold">
-                  Giá trị
-                </th>
+                <th className="px-5 py-3 font-semibold">Giá trị</th>
 
-                <th className="px-5 py-3 font-semibold">
-                  Trạng thái
-                </th>
+                <th className="px-5 py-3 font-semibold">Trạng thái</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-border-subtle">
               {RECENT_ORDERS.map((order) => {
-                const status =
-                  ORDER_STATUS[order.status];
+                const status = ORDER_STATUS[order.status];
 
                 return (
                   <tr
                     key={order.id}
-                    className="
-                      transition-colors
-                      hover:bg-surface-subtle
-                    "
+                    className="transition-colors hover:bg-surface-subtle"
                   >
-                    <td
-                      className="
-                        px-5 py-4 text-sm
-                        font-semibold text-brand
-                      "
-                    >
+                    <td className="px-5 py-4 text-sm font-semibold text-brand">
                       {order.id}
                     </td>
 
-                    <td
-                      className="
-                        px-5 py-4 text-sm
-                        font-medium
-                        text-text-default
-                      "
-                    >
+                    <td className="px-5 py-4 text-sm font-medium text-text-default">
                       {order.customer}
                     </td>
 
-                    <td
-                      className="
-                        px-5 py-4 text-sm
-                        text-text-muted
-                      "
-                    >
+                    <td className="px-5 py-4 text-sm text-text-muted">
                       {order.service}
                     </td>
 
-                    <td
-                      className="
-                        px-5 py-4 text-sm
-                        text-text-muted
-                      "
-                    >
+                    <td className="px-5 py-4 text-sm text-text-muted">
                       {order.date}
                     </td>
 
-                    <td
-                      className="
-                        px-5 py-4 text-sm
-                        font-semibold
-                        text-text-default
-                      "
-                    >
+                    <td className="px-5 py-4 text-sm font-semibold text-text-default">
                       {order.amount}
                     </td>
 
                     <td className="px-5 py-4">
                       <span
-                        className={`
-                          inline-flex rounded-full
-                          px-2.5 py-1
-                          text-xs font-semibold
-                          ${status.className}
-                        `}
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.className} `}
                       >
                         {status.label}
                       </span>

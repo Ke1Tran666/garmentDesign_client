@@ -27,8 +27,18 @@ import { serviceOrderFileApi } from "@/entities/service-order/api/serviceOrderFi
 import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
 
 const monthLabels = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 const fileColors = ["#8b5cf6", "#38bdf8", "#14b8a6", "#f97316", "#22c55e"];
@@ -47,9 +57,7 @@ const isCancelledOrder = (order) =>
   Boolean(order?.deletedAt);
 
 const getOrderStatus = (order) => {
-  const status = String(
-    order?.status || "pending",
-  ).toLowerCase();
+  const status = String(order?.status || "pending").toLowerCase();
 
   if (isCancelledOrder(order)) {
     return {
@@ -108,15 +116,9 @@ const mapOrderToTask = (order) => {
   return {
     id: `ORD-${order.serviceOrderId}`,
     orderId: order.serviceOrderId,
-    customer:
-      order.user?.fullName || "Không rõ",
-    service:
-      order.service?.serviceName ||
-      "Không rõ dịch vụ",
-    deadline: formatDate(
-      order.completedDate ||
-        order.receivedDate,
-    ),
+    customer: order.user?.fullName || "Không rõ",
+    service: order.service?.serviceName || "Không rõ dịch vụ",
+    deadline: formatDate(order.completedDate || order.receivedDate),
     status: status.label,
     databaseStatus: status.code,
     statusClassName: status.className,
@@ -164,10 +166,7 @@ const SortableDashboardItem = ({ item, children }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className={`
-        ${getSizeClass(item.size)}
-        ${isDragging ? "z-20 opacity-70" : ""}
-      `}
+      className={` ${getSizeClass(item.size)} ${isDragging ? "z-20 opacity-70" : ""} `}
     >
       <div
         {...attributes}
@@ -183,10 +182,7 @@ const SortableDashboardItem = ({ item, children }) => {
 const Card = ({ children, className = "" }) => {
   return (
     <div
-      className={`
-        h-full rounded-2xl border border-border bg-surface p-5 shadow-sm
-        ${className}
-      `}
+      className={`h-full rounded-2xl border border-border bg-surface p-5 shadow-sm ${className} `}
     >
       {children}
     </div>
@@ -194,9 +190,7 @@ const Card = ({ children, className = "" }) => {
 };
 
 const getFileCategory = (file) => {
-  const type = String(
-    file?.fileType || "",
-  ).toLowerCase();
+  const type = String(file?.fileType || "").toLowerCase();
 
   if (type.startsWith("image/")) {
     return "Ảnh bổ sung";
@@ -206,17 +200,11 @@ const getFileCategory = (file) => {
     return "PDF";
   }
 
-  if (
-    type.includes("word") ||
-    type.includes("document")
-  ) {
+  if (type.includes("word") || type.includes("document")) {
     return "Word";
   }
 
-  if (
-    type.includes("excel") ||
-    type.includes("spreadsheet")
-  ) {
+  if (type.includes("excel") || type.includes("spreadsheet")) {
     return "Excel";
   }
 
@@ -226,10 +214,7 @@ const getFileCategory = (file) => {
 const DashboardPage = () => {
   const [orders, setOrders] = useState([]);
   const [files, setFiles] = useState([]);
-  const taskOrder = useMemo(
-    () => orders.map(mapOrderToTask),
-    [orders],
-  );
+  const taskOrder = useMemo(() => orders.map(mapOrderToTask), [orders]);
   const [loading, setLoading] = useState(true);
   const [searchValue, setSearchValue] = useState("");
   const [dashboardItems, setDashboardItems] = useState(() => {
@@ -241,11 +226,11 @@ const DashboardPage = () => {
       const parsedLayout = JSON.parse(savedLayout);
 
       const validItems = parsedLayout.filter((savedItem) =>
-        defaultDashboardItems.some((item) => item.id === savedItem.id)
+        defaultDashboardItems.some((item) => item.id === savedItem.id),
       );
 
       const missingItems = defaultDashboardItems.filter(
-        (item) => !validItems.some((savedItem) => savedItem.id === item.id)
+        (item) => !validItems.some((savedItem) => savedItem.id === item.id),
       );
 
       return [...validItems, ...missingItems];
@@ -259,7 +244,7 @@ const DashboardPage = () => {
       activationConstraint: {
         distance: 6,
       },
-    })
+    }),
   );
 
   useEffect(() => {
@@ -267,40 +252,31 @@ const DashboardPage = () => {
 
     const fetchDashboardData = async () => {
       try {
-        const [orderResult, fileResult] =
-          await Promise.allSettled([
-            serviceOrderApi.getMine(),
-            serviceOrderFileApi.getMine(),
-          ]);
+        const [orderResult, fileResult] = await Promise.allSettled([
+          serviceOrderApi.getMine(),
+          serviceOrderFileApi.getMine(),
+        ]);
 
         if (!active) return;
 
         setOrders(
-          orderResult.status === "fulfilled" &&
-            Array.isArray(orderResult.value)
+          orderResult.status === "fulfilled" && Array.isArray(orderResult.value)
             ? orderResult.value
             : [],
         );
 
         setFiles(
-          fileResult.status === "fulfilled" &&
-            Array.isArray(fileResult.value)
+          fileResult.status === "fulfilled" && Array.isArray(fileResult.value)
             ? fileResult.value
             : [],
         );
 
         if (orderResult.status === "rejected") {
-          console.error(
-            "Không thể tải đơn hàng:",
-            orderResult.reason,
-          );
+          console.error("Không thể tải đơn hàng:", orderResult.reason);
         }
 
         if (fileResult.status === "rejected") {
-          console.error(
-            "Không thể tải file đơn hàng:",
-            fileResult.reason,
-          );
+          console.error("Không thể tải file đơn hàng:", fileResult.reason);
         }
       } finally {
         if (active) {
@@ -322,11 +298,7 @@ const DashboardPage = () => {
 
   const productImageCount = useMemo(
     () =>
-      orders.reduce(
-        (total, order) =>
-          total + (order.productImage ? 1 : 0),
-        0,
-      ),
+      orders.reduce((total, order) => total + (order.productImage ? 1 : 0), 0),
     [orders],
   );
 
@@ -334,63 +306,45 @@ const DashboardPage = () => {
     const grouped = {};
 
     if (productImageCount > 0) {
-      grouped["Ảnh đại diện"] =
-        productImageCount;
+      grouped["Ảnh đại diện"] = productImageCount;
     }
 
     files.forEach((file) => {
-      const category =
-        getFileCategory(file);
+      const category = getFileCategory(file);
 
-      grouped[category] =
-        (grouped[category] || 0) + 1;
+      grouped[category] = (grouped[category] || 0) + 1;
     });
 
-    return Object.entries(grouped).map(
-      ([label, value], index) => ({
-        label,
-        value,
-        color:
-          fileColors[
-            index % fileColors.length
-          ],
-      }),
-    );
+    return Object.entries(grouped).map(([label, value], index) => ({
+      label,
+      value,
+      color: fileColors[index % fileColors.length],
+    }));
   }, [files, productImageCount]);
 
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
 
   const getOrderCreatedDate = (order) => {
-    const value =
-      order.createdAt ||
-      order.receivedDate;
+    const value = order.createdAt || order.receivedDate;
 
     if (!value) return null;
 
     const date = new Date(value);
 
-    return Number.isNaN(date.getTime())
-      ? null
-      : date;
+    return Number.isNaN(date.getTime()) ? null : date;
   };
 
   const monthlyOrders = useMemo(() => {
-    const result = monthLabels.map(
-      (month) => ({
-        month,
-        orders: 0,
-      }),
-    );
+    const result = monthLabels.map((month) => ({
+      month,
+      orders: 0,
+    }));
 
     orders.forEach((order) => {
-      const date =
-        getOrderCreatedDate(order);
+      const date = getOrderCreatedDate(order);
 
-      if (
-        !date ||
-        date.getFullYear() !== currentYear
-      ) {
+      if (!date || date.getFullYear() !== currentYear) {
         return;
       }
 
@@ -409,7 +363,7 @@ const DashboardPage = () => {
       [task.id, task.customer, task.service, task.status]
         .join(" ")
         .toLowerCase()
-        .includes(keyword)
+        .includes(keyword),
     );
   }, [taskOrder, searchValue]);
 
@@ -417,61 +371,50 @@ const DashboardPage = () => {
 
   const currentMonth = currentDate.getMonth();
 
-  const previousMonthDate = new Date(
-    currentYear,
-    currentMonth - 1,
-    1,
-  );
+  const previousMonthDate = new Date(currentYear, currentMonth - 1, 1);
 
-  const countOrdersByMonth = (orderList,year,month) =>
+  const countOrdersByMonth = (orderList, year, month) =>
     orderList.reduce((total, order) => {
-      const date =
-        getOrderCreatedDate(order);
+      const date = getOrderCreatedDate(order);
 
-      if (
-        date &&
-        date.getFullYear() === year &&
-        date.getMonth() === month
-      ) {
+      if (date && date.getFullYear() === year && date.getMonth() === month) {
         return total + 1;
       }
 
       return total;
     }, 0);
 
-  const activeOrders = useMemo(() => orders.filter(
+  const activeOrders = useMemo(
+    () =>
+      orders.filter(
         (order) =>
-          String(order.status).toLowerCase() ===
-            "active" &&
-          !order.deletedAt,
+          String(order.status).toLowerCase() === "active" && !order.deletedAt,
       ).length,
     [orders],
   );
 
-  const activePercent = orders.length === 0
-      ? 0
-      : Math.round((activeOrders / orders.length) * 100);
+  const activePercent =
+    orders.length === 0 ? 0 : Math.round((activeOrders / orders.length) * 100);
 
   const currentMonthOrders = countOrdersByMonth(
-      orders,
-      currentYear,
-      currentMonth,
-    );
+    orders,
+    currentYear,
+    currentMonth,
+  );
 
   const previousMonthOrders = countOrdersByMonth(
-      orders,
-      previousMonthDate.getFullYear(),
-      previousMonthDate.getMonth(),
-    );
+    orders,
+    previousMonthDate.getFullYear(),
+    previousMonthDate.getMonth(),
+  );
 
-  const orderPercent = previousMonthOrders === 0 
-        ? currentMonthOrders > 0
-        ? 100 
-        : 0 
-        : Math.round(
-          ((currentMonthOrders -
-            previousMonthOrders) /
-            previousMonthOrders) *
+  const orderPercent =
+    previousMonthOrders === 0
+      ? currentMonthOrders > 0
+        ? 100
+        : 0
+      : Math.round(
+          ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) *
             100,
         );
 
@@ -589,7 +532,9 @@ const DashboardPage = () => {
               <FileText className="text-brand" size={22} />
             </div>
 
-            <h2 className="text-3xl font-bold text-text-strong">{totalFiles}</h2>
+            <h2 className="text-3xl font-bold text-text-strong">
+              {totalFiles}
+            </h2>
             <p className="mt-1 text-sm text-text-muted">File đang quản lý</p>
           </Card>
         );
@@ -598,7 +543,9 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-text-strong">Đơn hàng tháng này</p>
+              <p className="font-semibold text-text-strong">
+                Đơn hàng tháng này
+              </p>
               <PackageCheck className="text-brand" size={22} />
             </div>
 
@@ -621,14 +568,9 @@ const DashboardPage = () => {
         return (
           <Card>
             <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-text-strong">
-                Đơn đang xử lý
-              </p>
+              <p className="font-semibold text-text-strong">Đơn đang xử lý</p>
 
-              <CheckCircle2
-                className="text-brand"
-                size={22}
-              />
+              <CheckCircle2 className="text-brand" size={22} />
             </div>
 
             <h2 className="text-3xl font-bold text-text-strong">
@@ -712,7 +654,10 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto" onPointerDown={(e) => e.stopPropagation()}>
+            <div
+              className="overflow-x-auto"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
               <table className="w-full min-w-200 text-left">
                 <thead>
                   <tr className="border-b border-border-subtle bg-surface-subtle text-sm text-text-muted">
@@ -762,8 +707,9 @@ const DashboardPage = () => {
                         </td>
 
                         <td className="px-4 py-4">
-                          <span 
-                            className={` inline-flex rounded-full px-3 py-1 text-xs font-semibold ${task.statusClassName}`}>
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${task.statusClassName}`}
+                          >
                             {task.status}
                           </span>
                         </td>

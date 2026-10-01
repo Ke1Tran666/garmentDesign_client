@@ -48,7 +48,7 @@ const ADMIN_GROUPS = [
         label: "Đơn dịch vụ",
         text: "Theo dõi và xử lý đơn hàng.",
         path: "/admin/service-orders",
-        available: false,
+        available: true,
       },
       {
         icon: SlidersHorizontal,

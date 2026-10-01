@@ -21,7 +21,7 @@ const serviceMeta = {
 };
 
 const ServicesTag = ({ label }) => (
-  <span className="text-[10px] font-mono tracking-wider uppercase px-3 py-1 rounded-full border border-border text-text-subtle">
+  <span className="rounded-full border border-border px-3 py-1 font-mono text-[10px] tracking-wider text-text-subtle uppercase">
     {label}
   </span>
 );
@@ -32,35 +32,35 @@ const ServiceCard = ({ service, delay, className = "" }) => {
 
   return (
     <div
-      className={`card-hover rounded-2xl bg-surface border border-border/60 p-8 group reveal ${className}`}
+      className={`card-hover group reveal rounded-2xl border border-border/60 bg-surface p-8 ${className}`}
       style={{ transitionDelay: delay }}
     >
       <div className="flex items-start gap-5">
-        <div className="service-icon w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center shrink-0">
-          <Icon className="w-6 h-6 text-brand" />
+        <div className="service-icon flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand/10">
+          <Icon className="h-6 w-6 text-brand" />
         </div>
 
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-heading font-medium text-xl text-text-strong">
+          <div className="mb-2 flex items-center gap-2">
+            <h3 className="font-heading text-xl font-medium text-text-strong">
               {service.serviceName}
             </h3>
 
-            <span className="text-[10px] font-mono px-2 py-1 rounded-full bg-brand/10 text-brand">
+            <span className="rounded-full bg-brand/10 px-2 py-1 font-mono text-[10px] text-brand">
               {service.serviceCode}
             </span>
           </div>
 
-          <p className="text-sm text-text-muted leading-relaxed mb-4">
+          <p className="mb-4 text-sm leading-relaxed text-text-muted">
             {service.description || "Chưa có mô tả dịch vụ."}
           </p>
 
           <div className="flex flex-wrap gap-2">
             {(service.tags
-            ? service.tags.split(",").map((tag) => tag.trim())
-            : [service.unitType]
+              ? service.tags.split(",").map((tag) => tag.trim())
+              : [service.unitType]
             ).map((tag) => (
-            <ServicesTag key={tag} label={tag} />
+              <ServicesTag key={tag} label={tag} />
             ))}
           </div>
         </div>
@@ -106,7 +106,7 @@ const ServicesSection = () => {
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.15 },
     );
 
     elements.forEach((el) => observer.observe(el));
@@ -115,15 +115,15 @@ const ServicesSection = () => {
   }, [activeServices]);
 
   return (
-    <section id="services" className="relative py-24 md:py-32 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <span className="text-xs font-mono tracking-widest uppercase text-brand font-medium reveal">
+    <section id="services" className="relative px-4 py-24 md:py-32">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-16 text-center">
+          <span className="reveal font-mono text-xs font-medium tracking-widest text-brand uppercase">
             Dịch vụ
           </span>
 
           <h2
-            className="font-heading text-3xl md:text-5xl font-medium tracking-tight mt-4 text-text-strong reveal"
+            className="reveal mt-4 font-heading text-3xl font-medium tracking-tight text-text-strong md:text-5xl"
             style={{ transitionDelay: "100ms" }}
           >
             {loading ? "Đang tải" : activeServices.length} dịch vụ
@@ -131,17 +131,18 @@ const ServicesSection = () => {
           </h2>
 
           <p
-            className="text-text-muted! font-body font-300 mt-4 max-w-lg mx-auto reveal"
+            className="font-body font-300 reveal mx-auto mt-4 max-w-lg text-text-muted!"
             style={{ transitionDelay: "200ms" }}
           >
-            Đầy đủ công đoạn kỹ thuật cho ngành may mặc — từ bản vẽ đến con số sản xuất.
+            Đầy đủ công đoạn kỹ thuật cho ngành may mặc — từ bản vẽ đến con số
+            sản xuất.
           </p>
         </div>
 
         {loading ? (
           <p className="text-center text-text-muted">Đang tải dịch vụ...</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {activeServices.map((service, index) => {
               const isLastOdd =
                 activeServices.length % 2 !== 0 &&

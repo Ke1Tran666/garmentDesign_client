@@ -1,27 +1,13 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  test,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import { authApi } from "@/features/auth/api/authApi";
 
-const { showNotificationMock } = vi.hoisted(
-  () => ({
-    showNotificationMock: vi.fn(),
-  }),
-);
+const { showNotificationMock } = vi.hoisted(() => ({
+  showNotificationMock: vi.fn(),
+}));
 
 vi.mock("@/features/auth/api/authApi", () => ({
   authApi: {
@@ -31,14 +17,11 @@ vi.mock("@/features/auth/api/authApi", () => ({
   },
 }));
 
-vi.mock(
-  "@/app/providers/NotificationProvider",
-  () => ({
-    useNotification: () => ({
-      showNotification: showNotificationMock,
-    }),
+vi.mock("@/app/providers/NotificationProvider", () => ({
+  useNotification: () => ({
+    showNotification: showNotificationMock,
   }),
-);
+}));
 
 const renderForgotPasswordPage = () => {
   return render(
@@ -48,14 +31,8 @@ const renderForgotPasswordPage = () => {
   );
 };
 
-const goToOtpStep = async (
-  user,
-  email = "tester@example.com",
-) => {
-  await user.type(
-    screen.getByPlaceholderText("Email"),
-    email,
-  );
+const goToOtpStep = async (user, email = "tester@example.com") => {
+  await user.type(screen.getByPlaceholderText("Email"), email);
 
   await user.click(
     screen.getByRole("button", {
@@ -71,20 +48,14 @@ const goToOtpStep = async (
 };
 
 const enterOtp = (otp = "123456") => {
-  fireEvent.change(
-    screen.getByLabelText("Số OTP thứ 1"),
-    {
-      target: {
-        value: otp,
-      },
+  fireEvent.change(screen.getByLabelText("Số OTP thứ 1"), {
+    target: {
+      value: otp,
     },
-  );
+  });
 };
 
-const goToPasswordStep = async (
-  user,
-  email = "tester@example.com",
-) => {
+const goToPasswordStep = async (user, email = "tester@example.com") => {
   await goToOtpStep(user, email);
 
   enterOtp("123456");
@@ -118,13 +89,10 @@ describe("ForgotPasswordPage", () => {
       message: "Đổi mật khẩu thành công",
     });
 
-    vi.stubGlobal(
-      "requestAnimationFrame",
-      (callback) => {
-        callback();
-        return 1;
-      },
-    );
+    vi.stubGlobal("requestAnimationFrame", (callback) => {
+      callback();
+      return 1;
+    });
   });
 
   afterEach(() => {
@@ -141,9 +109,7 @@ describe("ForgotPasswordPage", () => {
       }),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByPlaceholderText("Email"),
-    ).toBeRequired();
+    expect(screen.getByPlaceholderText("Email")).toBeRequired();
 
     expect(
       screen.getByRole("link", {
@@ -155,30 +121,21 @@ describe("ForgotPasswordPage", () => {
   test("cảnh báo khi email để trống", async () => {
     renderForgotPasswordPage();
 
-    const submitButton = screen.getByRole(
-      "button",
-      {
-        name: "Gửi mã OTP",
-      },
-    );
+    const submitButton = screen.getByRole("button", {
+      name: "Gửi mã OTP",
+    });
 
-    fireEvent.submit(
-      submitButton.closest("form"),
-    );
+    fireEvent.submit(submitButton.closest("form"));
 
     await waitFor(() => {
-      expect(
-        showNotificationMock,
-      ).toHaveBeenCalledWith(
+      expect(showNotificationMock).toHaveBeenCalledWith(
         "warning",
         "Thiếu email",
         "Vui lòng nhập email của bạn",
       );
     });
 
-    expect(
-      authApi.forgotPassword,
-    ).not.toHaveBeenCalled();
+    expect(authApi.forgotPassword).not.toHaveBeenCalled();
   });
 
   test("gửi OTP và chuyển sang bước xác thực", async () => {
@@ -186,24 +143,13 @@ describe("ForgotPasswordPage", () => {
 
     renderForgotPasswordPage();
 
-    await goToOtpStep(
-      user,
-      "tester@example.com",
-    );
+    await goToOtpStep(user, "tester@example.com");
 
-    expect(
-      authApi.forgotPassword,
-    ).toHaveBeenCalledWith(
-      "tester@example.com",
-    );
+    expect(authApi.forgotPassword).toHaveBeenCalledWith("tester@example.com");
 
-    expect(
-      screen.getByText(/tester@example.com/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/tester@example.com/)).toBeInTheDocument();
 
-    expect(
-      showNotificationMock,
-    ).toHaveBeenCalledWith(
+    expect(showNotificationMock).toHaveBeenCalledWith(
       "success",
       "Đã gửi OTP",
       "Vui lòng kiểm tra email của bạn",
@@ -235,9 +181,7 @@ describe("ForgotPasswordPage", () => {
     );
 
     await waitFor(() => {
-      expect(
-        showNotificationMock,
-      ).toHaveBeenCalledWith(
+      expect(showNotificationMock).toHaveBeenCalledWith(
         "error",
         "Thao tác thất bại",
         "Email không tồn tại",
@@ -266,13 +210,9 @@ describe("ForgotPasswordPage", () => {
       }),
     );
 
-    expect(
-      authApi.verifyForgotOtp,
-    ).not.toHaveBeenCalled();
+    expect(authApi.verifyForgotOtp).not.toHaveBeenCalled();
 
-    expect(
-      showNotificationMock,
-    ).toHaveBeenCalledWith(
+    expect(showNotificationMock).toHaveBeenCalledWith(
       "warning",
       "OTP chưa hợp lệ",
       "Vui lòng nhập đủ 6 số OTP",
@@ -284,28 +224,17 @@ describe("ForgotPasswordPage", () => {
 
     renderForgotPasswordPage();
 
-    await goToPasswordStep(
-      user,
-      "tester@example.com",
-    );
+    await goToPasswordStep(user, "tester@example.com");
 
-    expect(
-      authApi.verifyForgotOtp,
-    ).toHaveBeenCalledWith({
+    expect(authApi.verifyForgotOtp).toHaveBeenCalledWith({
       email: "tester@example.com",
       otp: "123456",
     });
 
-    expect(
-      screen.getByPlaceholderText(
-        "Mật khẩu mới",
-      ),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Mật khẩu mới")).toBeInTheDocument();
 
     expect(
-      screen.getByPlaceholderText(
-        "Nhập lại mật khẩu",
-      ),
+      screen.getByPlaceholderText("Nhập lại mật khẩu"),
     ).toBeInTheDocument();
   });
 
@@ -317,16 +246,12 @@ describe("ForgotPasswordPage", () => {
     await goToPasswordStep(user);
 
     await user.type(
-      screen.getByPlaceholderText(
-        "Mật khẩu mới",
-      ),
+      screen.getByPlaceholderText("Mật khẩu mới"),
       "NewPassword123",
     );
 
     await user.type(
-      screen.getByPlaceholderText(
-        "Nhập lại mật khẩu",
-      ),
+      screen.getByPlaceholderText("Nhập lại mật khẩu"),
       "DifferentPassword",
     );
 
@@ -336,13 +261,9 @@ describe("ForgotPasswordPage", () => {
       }),
     );
 
-    expect(
-      authApi.resetPassword,
-    ).not.toHaveBeenCalled();
+    expect(authApi.resetPassword).not.toHaveBeenCalled();
 
-    expect(
-      showNotificationMock,
-    ).toHaveBeenCalledWith(
+    expect(showNotificationMock).toHaveBeenCalledWith(
       "warning",
       "Mật khẩu không khớp",
       "Vui lòng nhập lại mật khẩu",
@@ -354,22 +275,15 @@ describe("ForgotPasswordPage", () => {
 
     renderForgotPasswordPage();
 
-    await goToPasswordStep(
-      user,
-      "tester@example.com",
-    );
+    await goToPasswordStep(user, "tester@example.com");
 
     await user.type(
-      screen.getByPlaceholderText(
-        "Mật khẩu mới",
-      ),
+      screen.getByPlaceholderText("Mật khẩu mới"),
       "NewPassword123",
     );
 
     await user.type(
-      screen.getByPlaceholderText(
-        "Nhập lại mật khẩu",
-      ),
+      screen.getByPlaceholderText("Nhập lại mật khẩu"),
       "NewPassword123",
     );
 
@@ -380,9 +294,7 @@ describe("ForgotPasswordPage", () => {
     );
 
     await waitFor(() => {
-      expect(
-        authApi.resetPassword,
-      ).toHaveBeenCalledWith({
+      expect(authApi.resetPassword).toHaveBeenCalledWith({
         email: "tester@example.com",
         newPassword: "NewPassword123",
       });
@@ -400,9 +312,7 @@ describe("ForgotPasswordPage", () => {
       }),
     ).toBeInTheDocument();
 
-    expect(
-      showNotificationMock,
-    ).toHaveBeenCalledWith(
+    expect(showNotificationMock).toHaveBeenCalledWith(
       "success",
       "Đổi mật khẩu thành công",
       "Bạn sẽ được chuyển về trang đăng nhập",
@@ -414,10 +324,7 @@ describe("ForgotPasswordPage", () => {
 
     renderForgotPasswordPage();
 
-    await goToOtpStep(
-      user,
-      "old@example.com",
-    );
+    await goToOtpStep(user, "old@example.com");
 
     await user.click(
       screen.getByRole("button", {
@@ -431,8 +338,6 @@ describe("ForgotPasswordPage", () => {
       }),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByPlaceholderText("Email"),
-    ).toHaveValue("old@example.com");
+    expect(screen.getByPlaceholderText("Email")).toHaveValue("old@example.com");
   });
 });

@@ -2,10 +2,7 @@ import httpClient from "@/shared/api/httpClient";
 
 export const serviceOrderFileApi = {
   async getMine(config = {}) {
-    const response = await httpClient.get(
-      "/service-order-files/me",
-      config,
-    );
+    const response = await httpClient.get("/service-order-files/me", config);
 
     return response.data;
   },

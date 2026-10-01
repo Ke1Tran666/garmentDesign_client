@@ -13,21 +13,16 @@ const UploadBox = ({
   const isImage = variant === "image";
 
   return (
-    <div 
-      className={`
-        overflow-hidden rounded-xl border border-border ${className}
-      `}
+    <div
+      className={`overflow-hidden rounded-xl border border-border ${className} `}
     >
       <div className="grid grid-cols-1 md:grid-cols-[1fr_220px]">
         <div
-          className={`
-            flex min-h-32 items-center justify-center
-            ${
-              isAvatar
-                ? "bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] bg-size-[18px_18px]"
-                : "bg-surface-subtle"
-            }
-          `}
+          className={`flex min-h-32 items-center justify-center ${
+            isAvatar
+              ? "bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] bg-size-[18px_18px]"
+              : "bg-surface-subtle"
+          } `}
         >
           {isAvatar && (
             <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-border bg-surface">
@@ -35,7 +30,9 @@ const UploadBox = ({
                 src={preview || fallback}
                 alt="image"
                 className={
-                    isAvatar ? "h-20 w-20 rounded-full object-cover" : "object-cover"
+                  isAvatar
+                    ? "h-20 w-20 rounded-full object-cover"
+                    : "object-cover"
                 }
                 onError={(e) => {
                   e.currentTarget.src = fallback;
@@ -56,7 +53,7 @@ const UploadBox = ({
           )}
         </div>
 
-        <div className="grid border-t border-border md:border-l md:border-t-0">
+        <div className="grid border-t border-border md:border-t-0 md:border-l">
           <label
             htmlFor="upload-box-input"
             className="flex cursor-pointer items-center justify-center border-b border-border text-sm font-semibold text-brand transition hover:bg-surface-subtle"

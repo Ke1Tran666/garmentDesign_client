@@ -11,14 +11,15 @@ import { useNotification } from "@/app/providers/NotificationProvider";
 import FloatingInput from "@/shared/ui/input/FloatingInput";
 import PasswordInput from "@/shared/ui/input/PasswordInput";
 import BrandHeader from "@/shared/ui/brand/BrandHeader";
-import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/features/auth/ui/otp";
+import {
+  createEmptyOtp,
+  isOtpComplete,
+  toOtpCode,
+} from "@/features/auth/ui/otp";
 import OtpInput from "@/features/auth/ui/OtpInput";
 import { authApi } from "@/features/auth/api/authApi";
 
-const getErrorMessage = (
-  error,
-  fallback = "Vui lòng thử lại",
-) => {
+const getErrorMessage = (error, fallback = "Vui lòng thử lại") => {
   if (error.code === "ECONNABORTED") {
     return "Máy chủ phản hồi quá lâu. Vui lòng thử lại";
   }
@@ -45,23 +46,17 @@ const ForgotPasswordSteps = ({ currentStep }) => {
             <div key={label} className="flex flex-1 items-start">
               <div className="flex min-w-16 flex-col items-center">
                 <div
-                  className={`
-                    flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300
-                    ${
-                      active || done
-                        ? "border-auth-accent bg-auth-accent text-auth-accent-foreground"
-                        : "border-white/35 bg-white/10 text-white/60"
-                    }
-                  `}
+                  className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition-all duration-300 ${
+                    active || done
+                      ? "border-auth-accent bg-auth-accent text-auth-accent-foreground"
+                      : "border-white/35 bg-white/10 text-white/60"
+                  } `}
                 >
                   {stepNumber}
                 </div>
 
                 <span
-                  className={`
-                    mt-2 text-center text-[11px] leading-4 transition-all duration-300
-                    ${active ? "text-auth-accent" : "text-white/50"}
-                  `}
+                  className={`mt-2 text-center text-[11px] leading-4 transition-all duration-300 ${active ? "text-auth-accent" : "text-white/50"} `}
                 >
                   {label}
                 </span>
@@ -69,10 +64,7 @@ const ForgotPasswordSteps = ({ currentStep }) => {
 
               {stepNumber < steps.length && (
                 <div
-                  className={`
-                    mt-3 h-px flex-1 transition-all duration-300
-                    ${done ? "bg-auth-accent" : "bg-white/25"}
-                  `}
+                  className={`mt-3 h-px flex-1 transition-all duration-300 ${done ? "bg-auth-accent" : "bg-white/25"} `}
                 />
               )}
             </div>
@@ -111,13 +103,12 @@ const ForgotPasswordPage = () => {
           showNotification(
             "warning",
             "Thiếu email",
-            "Vui lòng nhập email của bạn"
+            "Vui lòng nhập email của bạn",
           );
           return;
         }
 
-        const result =
-          await authApi.forgotPassword(email);
+        const result = await authApi.forgotPassword(email);
 
         setResetToken("");
 
@@ -147,15 +138,13 @@ const ForgotPasswordPage = () => {
         const result = await authApi.verifyForgotOtp({ email, otp: otpCode });
 
         if (!result?.resetToken) {
-          throw new Error(
-            "Không nhận được phiên đổi mật khẩu",
-          );
+          throw new Error("Không nhận được phiên đổi mật khẩu");
         }
 
         /*
-        * Chỉ giữ token trong React state.
-        * Không lưu localStorage hoặc sessionStorage.
-        */
+         * Chỉ giữ token trong React state.
+         * Không lưu localStorage hoặc sessionStorage.
+         */
         setResetToken(result.resetToken);
 
         showNotification(
@@ -173,7 +162,7 @@ const ForgotPasswordPage = () => {
           showNotification(
             "warning",
             "Thiếu mật khẩu",
-            "Vui lòng nhập đầy đủ mật khẩu"
+            "Vui lòng nhập đầy đủ mật khẩu",
           );
           return;
         }
@@ -182,7 +171,7 @@ const ForgotPasswordPage = () => {
           showNotification(
             "warning",
             "Mật khẩu không khớp",
-            "Vui lòng nhập lại mật khẩu"
+            "Vui lòng nhập lại mật khẩu",
           );
           return;
         }
@@ -208,20 +197,18 @@ const ForgotPasswordPage = () => {
           return;
         }
 
-        const result =
-          await authApi.resetPassword({
-            email,
-            newPassword,
-            resetToken,
-          });
+        const result = await authApi.resetPassword({
+          email,
+          newPassword,
+          resetToken,
+        });
 
         setResetToken("");
 
         showNotification(
           "success",
           "Đổi mật khẩu thành công",
-          result?.message
-            || "Bạn sẽ được chuyển về trang đăng nhập",
+          result?.message || "Bạn sẽ được chuyển về trang đăng nhập",
         );
 
         setStep(4);
@@ -234,10 +221,7 @@ const ForgotPasswordPage = () => {
       showNotification(
         "error",
         "Thao tác thất bại",
-        getErrorMessage(
-          error,
-          "Không thể thực hiện yêu cầu",
-        ),
+        getErrorMessage(error, "Không thể thực hiện yêu cầu"),
       );
     } finally {
       setLoading(false);
@@ -246,9 +230,9 @@ const ForgotPasswordPage = () => {
 
   return (
     <>
-      <div className="w-full max-w-115 rounded-3xl border border-white/20 bg-white/10 px-10 py-10 shadow-[0_8px_40px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px] animate-slide-up">
+      <div className="w-full max-w-115 animate-slide-up rounded-3xl border border-white/20 bg-white/10 px-10 py-10 shadow-[0_8px_40px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px]">
         {/* LOGO */}
-        <BrandHeader subtitle="Khôi phục tài khoản của bạn"/>
+        <BrandHeader subtitle="Khôi phục tài khoản của bạn" />
 
         <hr className="mb-6 border-white/10" />
 
@@ -260,12 +244,9 @@ const ForgotPasswordPage = () => {
         </h1>
 
         <p className="mb-6 text-[13px] font-light text-white/55">
-          {step === 1 &&
-            "Nhập email đã đăng ký để nhận mã xác thực OTP."}
-          {step === 2 &&
-            "Nhập mã OTP 6 số đã được gửi đến email của bạn."}
-          {step === 3 &&
-            "Tạo mật khẩu mới để tiếp tục sử dụng tài khoản."}
+          {step === 1 && "Nhập email đã đăng ký để nhận mã xác thực OTP."}
+          {step === 2 && "Nhập mã OTP 6 số đã được gửi đến email của bạn."}
+          {step === 3 && "Tạo mật khẩu mới để tiếp tục sử dụng tài khoản."}
           {step === 4 &&
             "Đổi mật khẩu thành công. Hệ thống sẽ tự chuyển về đăng nhập."}
         </p>
@@ -290,9 +271,7 @@ const ForgotPasswordPage = () => {
               <div className="mb-5">
                 <p className="mb-4 text-center text-sm text-white/60">
                   Mã OTP đã gửi đến{" "}
-                  <span className="font-medium text-auth-accent">
-                    {email}
-                  </span>
+                  <span className="font-medium text-auth-accent">{email}</span>
                 </p>
 
                 <OtpInput
@@ -328,7 +307,7 @@ const ForgotPasswordPage = () => {
                         showNotification(
                           "success",
                           "Đã gửi lại OTP",
-                          "Vui lòng kiểm tra email"
+                          "Vui lòng kiểm tra email",
                         );
 
                         setResetToken("");
@@ -341,10 +320,7 @@ const ForgotPasswordPage = () => {
                         showNotification(
                           "error",
                           "Gửi lại OTP thất bại",
-                          getErrorMessage(
-                            error,
-                            "Không thể gửi lại OTP",
-                          ),
+                          getErrorMessage(error, "Không thể gửi lại OTP"),
                         );
                       }
                     }}

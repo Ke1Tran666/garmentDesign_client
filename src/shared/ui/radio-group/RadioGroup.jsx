@@ -1,16 +1,8 @@
-const RadioGroup = ({
-  label,
-  name,
-  value,
-  options = [],
-  onChange,
-}) => {
+const RadioGroup = ({ label, name, value, options = [], onChange }) => {
   return (
     <div>
       {label && (
-        <p className="mb-3 text-sm font-semibold text-text-default">
-          {label}
-        </p>
+        <p className="mb-3 text-sm font-semibold text-text-default">{label}</p>
       )}
 
       <div className="flex flex-wrap gap-3">

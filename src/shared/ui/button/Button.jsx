@@ -15,16 +15,10 @@ export const ButtonIcon = ({
       type={type}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
-      className={`
-        flex h-10 w-10 items-center justify-center
-        rounded-full shadow-lg
-        transition-all duration-300
-        hover:scale-110
-        ${className}
-      `}
+      className={`flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-110 ${className} `}
       {...props}
     >
-      {Icon && <Icon size={sizeIcon} className={`${classNameIcon}`}/>}
+      {Icon && <Icon size={sizeIcon} className={`${classNameIcon}`} />}
 
       {children}
     </button>
@@ -32,34 +26,23 @@ export const ButtonIcon = ({
 };
 
 // Button Icon text 1
-export const ButtonIconText = ({ 
-  text, 
-  onClick, 
+export const ButtonIconText = ({
+  text,
+  onClick,
   icon: Icon,
   className,
-  classNameIcon 
+  classNameIcon,
 }) => {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`
-        inline-flex items-center gap-2
-        rounded-lg border! border-input!
-        bg-surface px-4 py-2
-        text-sm font-semibold text-text-default
-        transition-all duration-300 ease-out
-        animate-slideInRight
-        hover:border-brand hover:bg-surface-subtle hover:text-brand
-        ${className}
-      `}
+      className={`inline-flex animate-slideInRight items-center gap-2 rounded-lg border! border-input! bg-surface px-4 py-2 text-sm font-semibold text-text-default transition-all duration-300 ease-out hover:border-brand hover:bg-surface-subtle hover:text-brand ${className} `}
     >
-      <span 
-        className={`
-          flex h-5 w-5 items-center justify-center rounded-full border-2 border-brand text-brand ${classNameIcon}
-          `}
+      <span
+        className={`flex h-5 w-5 items-center justify-center rounded-full border-2 border-brand text-brand ${classNameIcon} `}
       >
-        {Icon && <Icon size={13} strokeWidth={3}/>}
+        {Icon && <Icon size={13} strokeWidth={3} />}
       </span>
 
       {text}
@@ -69,53 +52,37 @@ export const ButtonIconText = ({
 
 // Button hành động số 1
 
-export const HandleButton = ({
-    className,
-    onClick,
-    children,
-}) => {
+export const HandleButton = ({ className, onClick, children }) => {
   return (
     <button
-        type="button"
-        onClick={onClick}
-        className={`
-            flex item-center justify-center gap-3
-            rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 
-            ${className}
-            
-        `}
+      type="button"
+      onClick={onClick}
+      className={`item-center flex justify-center gap-3 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 ${className} `}
     >
-        {children}
+      {children}
     </button>
-  )
-}
+  );
+};
 
 export const HandleButtonIcon = ({
-    className,
-    classNameIcon,
-    onClick,
-    children,
-    icon:Icon,
+  className,
+  classNameIcon,
+  onClick,
+  children,
+  icon: Icon,
 }) => {
   return (
     <button
-        type="button"
-        onClick={onClick}
-        className={`
-            flex item-center justify-center gap-3
-            rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 
-            ${className}
-            
-        `}
+      type="button"
+      onClick={onClick}
+      className={`flex items-center justify-center gap-3 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 ${className} `}
     >
-        <span 
-          className={`
-            flex h-5 w-5 items-center justify-center rounded-full border-2 border-white text-white ${classNameIcon}
-            `}
-        >
-          {Icon && <Icon size={13} strokeWidth={3}/>}
-        </span>
-        {children}
+      <span
+        className={`flex h-5 w-5 items-center justify-center rounded-full border-2 border-white text-white ${classNameIcon} `}
+      >
+        {Icon && <Icon size={13} strokeWidth={3} />}
+      </span>
+      {children}
     </button>
-  )
-}
+  );
+};

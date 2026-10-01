@@ -41,7 +41,7 @@ const BirthdayInput = ({
   selectedDateClassName = "bg-brand text-white",
 }) => {
   const today = new Date();
-  
+
   const [openBirthday, setOpenBirthday] = useState(false);
   const birthdayPickerRef = useRef(null);
   const initialBirthday = parseBirthdayValue(value);
@@ -51,28 +51,35 @@ const BirthdayInput = ({
   const [birthYear, setBirthYear] = useState(initialBirthday.year);
 
   const [currentMonth, setCurrentMonth] = useState(
-    initialBirthday.month ? Number(initialBirthday.month) - 1 : today.getMonth()
+    initialBirthday.month
+      ? Number(initialBirthday.month) - 1
+      : today.getMonth(),
   );
 
   const [currentYear, setCurrentYear] = useState(
-    initialBirthday.year ? Number(initialBirthday.year) : today.getFullYear()
+    initialBirthday.year ? Number(initialBirthday.year) : today.getFullYear(),
   );
 
   const birthDayRef = useRef(birthDay);
 
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const updateBirthday = useCallback(
     (day, month, year) => {
-      if (
-        !day ||
-        !month ||
-        !year ||
-        String(year).length !== 4
-      ) {
+      if (!day || !month || !year || String(year).length !== 4) {
         onChange("");
         return;
       }
@@ -81,11 +88,7 @@ const BirthdayInput = ({
       const numericMonth = Number(month);
       const numericYear = Number(year);
 
-      const selectedDate = new Date(
-        numericYear,
-        numericMonth - 1,
-        numericDay,
-      );
+      const selectedDate = new Date(numericYear, numericMonth - 1, numericDay);
 
       const validDate =
         selectedDate.getFullYear() === numericYear &&
@@ -144,7 +147,7 @@ const BirthdayInput = ({
 
   const years = Array.from(
     { length: 101 },
-    (_, index) => today.getFullYear() - index
+    (_, index) => today.getFullYear() - index,
   );
 
   const calendarDays = useMemo(() => {
@@ -195,10 +198,7 @@ const BirthdayInput = ({
   };
 
   return (
-    <div
-      ref={birthdayPickerRef}
-      className={`relative ${containerClassName}`}
-    >
+    <div ref={birthdayPickerRef} className={`relative ${containerClassName}`}>
       <div className="flex items-end gap-3">
         <input
           type="text"
@@ -221,15 +221,7 @@ const BirthdayInput = ({
             updateBirthday(String(number), birthMonth, birthYear);
           }}
           placeholder="Day"
-          className={`
-            h-13 w-full flex-1 rounded-xl border-2 border-white/25
-            bg-transparent px-4 text-center text-sm text-white
-            outline-none transition-all duration-300
-            placeholder:text-white/45
-            focus:border-auth-accent
-            focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-            ${inputClassName}
-          `}
+          className={`h-13 w-full flex-1 rounded-xl border-2 border-white/25 bg-transparent px-4 text-center text-sm text-white transition-all duration-300 outline-none placeholder:text-white/45 focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)] ${inputClassName} `}
         />
 
         <input
@@ -253,15 +245,7 @@ const BirthdayInput = ({
             updateBirthday(birthDay, String(number), birthYear);
           }}
           placeholder="Month"
-          className={`
-            h-13 w-full flex-1 rounded-xl border-2 border-white/25
-            bg-transparent px-4 text-center text-sm text-white
-            outline-none transition-all duration-300
-            placeholder:text-white/45
-            focus:border-auth-accent
-            focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-            ${inputClassName}
-          `}
+          className={`h-13 w-full flex-1 rounded-xl border-2 border-white/25 bg-transparent px-4 text-center text-sm text-white transition-all duration-300 outline-none placeholder:text-white/45 focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)] ${inputClassName} `}
         />
 
         <input
@@ -276,15 +260,7 @@ const BirthdayInput = ({
             updateBirthday(birthDay, birthMonth, value);
           }}
           placeholder="Year"
-          className={`
-            h-13 w-full flex-2 rounded-xl border-2 border-white/25
-            bg-transparent px-4 text-center text-sm text-white
-            outline-none transition-all duration-300
-            placeholder:text-white/45
-            focus:border-auth-accent
-            focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]
-            ${inputClassName}
-          `}
+          className={`h-13 w-full flex-2 rounded-xl border-2 border-white/25 bg-transparent px-4 text-center text-sm text-white transition-all duration-300 outline-none placeholder:text-white/45 focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)] ${inputClassName} `}
         />
 
         <button
@@ -297,13 +273,7 @@ const BirthdayInput = ({
 
             setOpenBirthday(!openBirthday);
           }}
-          className={`
-            flex h-14.5 min-w-14.5 items-center justify-center
-            rounded-xl border-2 border-white/25 bg-white/10 px-4
-            text-white transition-all duration-300
-            hover:border-white/35 hover:bg-white/20
-            ${calendarButtonClassName}
-          `}
+          className={`flex h-14.5 min-w-14.5 items-center justify-center rounded-xl border-2 border-white/25 bg-white/10 px-4 text-white transition-all duration-300 hover:border-white/35 hover:bg-white/20 ${calendarButtonClassName} `}
         >
           <CalendarDays className="h-5 w-5" />
         </button>
@@ -311,19 +281,10 @@ const BirthdayInput = ({
 
       {openBirthday && (
         <div
-          className={`
-            absolute right-0 bottom-0 z-50
-            w-full overflow-hidden rounded-2xl border-2 border-[#e5d84c]
-            bg-surface text-text-strong shadow-2xl
-            ${popupClassName}
-          `}
+          className={`absolute right-0 bottom-0 z-50 w-full overflow-hidden rounded-2xl border-2 border-[#e5d84c] bg-surface text-text-strong shadow-2xl ${popupClassName} `}
         >
           <div
-            className={`
-              flex items-center justify-between gap-3
-              bg-surface-muted px-4 py-4
-              ${popupHeaderClassName}
-            `}
+            className={`flex items-center justify-between gap-3 bg-surface-muted px-4 py-4 ${popupHeaderClassName} `}
           >
             <button
               type="button"
@@ -338,12 +299,7 @@ const BirthdayInput = ({
                 <select
                   value={currentMonth}
                   onChange={(e) => setCurrentMonth(Number(e.target.value))}
-                  className="
-                    h-11 w-full appearance-none rounded-lg
-                    border border-input bg-surface
-                    px-3 pr-10 text-sm font-semibold leading-none
-                    outline-none
-                  "
+                  className="h-11 w-full appearance-none rounded-lg border border-input bg-surface px-3 pr-10 text-sm leading-none font-semibold outline-none"
                 >
                   {months.map((month, index) => (
                     <option key={month} value={index}>
@@ -352,19 +308,14 @@ const BirthdayInput = ({
                   ))}
                 </select>
 
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-text-muted" />
               </div>
 
               <div className="relative w-full">
                 <select
                   value={currentYear}
                   onChange={(e) => setCurrentYear(Number(e.target.value))}
-                  className="
-                    h-11 w-full appearance-none rounded-lg
-                    border border-input bg-surface
-                    px-3 pr-10 text-sm font-semibold leading-none
-                    outline-none
-                  "
+                  className="h-11 w-full appearance-none rounded-lg border border-input bg-surface px-3 pr-10 text-sm leading-none font-semibold outline-none"
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -373,7 +324,7 @@ const BirthdayInput = ({
                   ))}
                 </select>
 
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-text-muted" />
               </div>
             </div>
 
@@ -406,17 +357,13 @@ const BirthdayInput = ({
                   type="button"
                   key={index}
                   onClick={() => handleSelectDate(date)}
-                  className={`
-                    mx-auto flex h-9 w-9 items-center justify-center
-                    rounded-lg text-sm transition
-                    ${
-                      isSelected
-                        ? selectedDateClassName
-                        : isCurrentMonth
-                          ? "text-text-default hover:bg-surface-muted"
-                          : "text-text-subtle"
-                    }
-                  `}
+                  className={`mx-auto flex h-9 w-9 items-center justify-center rounded-lg text-sm transition ${
+                    isSelected
+                      ? selectedDateClassName
+                      : isCurrentMonth
+                        ? "text-text-default hover:bg-surface-muted"
+                        : "text-text-subtle"
+                  } `}
                 >
                   {date.getDate()}
                 </button>

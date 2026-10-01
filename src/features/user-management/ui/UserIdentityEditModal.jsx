@@ -24,11 +24,9 @@ const UserIdentityEditModal = ({
   const [validationError, setValidationError] = useState("");
 
   const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(
-    () => user?.avatar || "",
-  );
+  const [avatarPreview, setAvatarPreview] = useState(() => user?.avatar || "");
   const [avatarDeleted, setAvatarDeleted] = useState(false);
-  
+
   useEffect(() => {
     return () => {
       if (avatarPreview.startsWith("blob:")) {
@@ -55,15 +53,10 @@ const UserIdentityEditModal = ({
 
     if (!file) return;
 
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-    ];
+    const allowedTypes = ["image/jpeg", "image/png"];
 
     if (!allowedTypes.includes(file.type)) {
-      setValidationError(
-        "Chỉ chấp nhận ảnh JPEG hoặc PNG.",
-      );
+      setValidationError("Chỉ chấp nhận ảnh JPEG hoặc PNG.");
 
       event.target.value = "";
       return;
@@ -72,9 +65,7 @@ const UserIdentityEditModal = ({
     const maxFileSize = 5 * 1024 * 1024;
 
     if (file.size > maxFileSize) {
-      setValidationError(
-        "Ảnh đại diện không được vượt quá 5 MB.",
-      );
+      setValidationError("Ảnh đại diện không được vượt quá 5 MB.");
 
       event.target.value = "";
       return;
@@ -99,50 +90,33 @@ const UserIdentityEditModal = ({
     event.preventDefault();
 
     const fullName = form.fullName.trim();
-    const normalizedPhone = form.phone
-      .trim()
-      .replace(/[\s.-]/g, "");
+    const normalizedPhone = form.phone.trim().replace(/[\s.-]/g, "");
 
     if (!fullName) {
-      setValidationError(
-        "Họ tên không được để trống.",
-      );
+      setValidationError("Họ tên không được để trống.");
       return;
     }
 
     if (!form.birthday) {
-      setValidationError(
-        "Vui lòng chọn ngày sinh.",
-      );
+      setValidationError("Vui lòng chọn ngày sinh.");
       return;
     }
 
-    const birthday = new Date(
-      `${form.birthday}T00:00:00`,
-    );
+    const birthday = new Date(`${form.birthday}T00:00:00`);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (
-      Number.isNaN(birthday.getTime()) ||
-      birthday >= today
-    ) {
-      setValidationError(
-        "Ngày sinh phải nhỏ hơn ngày hiện tại.",
-      );
+    if (Number.isNaN(birthday.getTime()) || birthday >= today) {
+      setValidationError("Ngày sinh phải nhỏ hơn ngày hiện tại.");
       return;
     }
 
     if (
       normalizedPhone &&
-      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(
-        normalizedPhone,
-      )
+      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(normalizedPhone)
     ) {
-      setValidationError(
-        "Số điện thoại không hợp lệ.",
-      );
+      setValidationError("Số điện thoại không hợp lệ.");
       return;
     }
 
@@ -160,9 +134,7 @@ const UserIdentityEditModal = ({
     <FormModal
       open
       title="Chỉnh sửa danh tính"
-      description={`Cập nhật thông tin của ${
-        user.fullName || user.userCode
-      }.`}
+      description={`Cập nhật thông tin của ${user.fullName || user.userCode}.`}
       submitting={submitting}
       errorMessage={validationError || errorMessage}
       onClose={onClose}
@@ -185,19 +157,14 @@ const UserIdentityEditModal = ({
               preview={avatarPreview}
               fallback={defaultAvatar}
               accept="image/jpeg,image/png"
-              uploadText={
-                avatarPreview
-                  ? "Thay đổi ảnh"
-                  : "Chọn ảnh"
-              }
+              uploadText={avatarPreview ? "Thay đổi ảnh" : "Chọn ảnh"}
               deleteText="Xóa ảnh"
               onUpload={handleAvatarUpload}
               onDelete={handleAvatarDelete}
             />
 
             <p className="mt-2 text-xs text-text-muted">
-              Chấp nhận JPEG hoặc PNG, dung lượng tối đa
-              5 MB.
+              Chấp nhận JPEG hoặc PNG, dung lượng tối đa 5 MB.
             </p>
           </div>
 
@@ -237,29 +204,18 @@ const UserIdentityEditModal = ({
                 value={form.gender}
                 onChange={handleChange}
                 disabled={submitting}
-                className="
-                  h-11 w-full rounded-xl
-                  border border-input bg-surface
-                  px-4 text-sm text-text-default
-                  outline-none transition
-                  focus:border-brand
-                  focus:ring-4 focus:ring-brand/10
-                  disabled:cursor-not-allowed
-                  disabled:bg-surface-muted
-                "
+                className="h-11 w-full rounded-xl border border-input bg-surface px-4 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-surface-muted"
               >
                 <option value="Male">Nam</option>
                 <option value="Female">Nữ</option>
-                <option value="Unknown">
-                  Không xác định
-                </option>
+                <option value="Unknown">Không xác định</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* BÊN PHẢI */}
-        <div className="border-t border-border-subtle pt-6 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+        <div className="border-t border-border-subtle pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-6">
           <h3 className="mb-4 text-sm font-bold text-text-strong">
             Thông tin liên hệ
           </h3>

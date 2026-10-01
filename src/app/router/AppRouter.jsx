@@ -24,58 +24,62 @@ import RoleProtectedRoute from "@/app/router/RoleProtectedRoute";
 import UserManagementPage from "@/pages/Admin/Users/UserManagementPage";
 import UserDetailPage from "@/pages/Admin/Users/UserDetailPage";
 import ServiceManagementPage from "@/pages/Admin/Services/ServiceManagementPage";
+import ServiceOrderManagementPage from "@/pages/Admin/ServiceOrders/ServiceOrderManagementPage";
+import ServiceDetailPage from "@/pages/Admin/Services/ServiceDetailPage";
 
 const AppRouter = () => {
   return (
     <Routes>
-        <Route path="/" element={<Home />}/>
+      <Route path="/" element={<Home />} />
 
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<LoginPage />}/>
-          <Route path="/register" element={<RegisterPage />}/>
-          <Route path="/forgot-password" element={<ForgotPasswordPage />}/>
-        </Route>
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      </Route>
 
-        <Route 
-          path="/user" 
-          element={
-            <RoleProtectedRoute allowedRoles={["user"]}>
-              <UserLayout />
-            </RoleProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="profile" replace/>}/>
+      <Route
+        path="/user"
+        element={
+          <RoleProtectedRoute allowedRoles={["user"]}>
+            <UserLayout />
+          </RoleProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="profile" replace />} />
 
-          <Route path="dashboard" element={<DashboardPage />}/>
+        <Route path="dashboard" element={<DashboardPage />} />
 
-          <Route path="service-order" element={<ServiceOrderPage />}/>
-          <Route path="service-reviews" element={<ServiceReviewPage />}/>
+        <Route path="service-order" element={<ServiceOrderPage />} />
+        <Route path="service-reviews" element={<ServiceReviewPage />} />
 
-          <Route path="profile" element={<ProfilePage />}/>
-          <Route path="address" element={<AddressPage />}/>
-          <Route path="security" element={<SecurityPage />}/>
-          <Route path="privacy" element={<PrivacyPage />}/>
-        </Route>
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="address" element={<AddressPage />} />
+        <Route path="security" element={<SecurityPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+      </Route>
 
-        <Route 
-          path="/admin" 
-          element={
-            <RoleProtectedRoute allowedRoles={[ "admin", "staff"]}>
-              <AdminLayout />
-            </RoleProtectedRoute>
-          }
-        >
-          <Route index element={ <Navigate to="dashboard" replace/>}/>
+      <Route
+        path="/admin"
+        element={
+          <RoleProtectedRoute allowedRoles={["admin", "staff"]}>
+            <AdminLayout />
+          </RoleProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
 
-          <Route path="dashboard" element={<AdminDashboardPage />}/>
-          <Route path="users" element={<UserManagementPage />} />
-          <Route path="users/:userId" element={<UserDetailPage />} />
-          <Route path="services" element={<ServiceManagementPage />} />
-        </Route>
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="users" element={<UserManagementPage />} />
+        <Route path="users/:userId" element={<UserDetailPage />} />
+        <Route path="services" element={<ServiceManagementPage />} />
+        <Route path="services/:serviceId" element={<ServiceDetailPage />} />
+        <Route path="service-orders" element={<ServiceOrderManagementPage />} />
+      </Route>
 
-        <Route path="/not-found" element={<NotFoundPage />}/>
+      <Route path="/not-found" element={<NotFoundPage />} />
 
-        <Route path="*" element={<NotFoundPage />}/>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

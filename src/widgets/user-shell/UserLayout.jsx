@@ -31,23 +31,23 @@ const GROUPS = [
     },
     label: "Main",
     items: [
-      { 
+      {
         icon: LayoutDashboard,
         label: "Dashboard",
         text: "Tổng quan file, đơn hàng và task cần xử lý",
         path: "/user/dashboard",
       },
-      { 
-        icon: ClipboardList, 
+      {
+        icon: ClipboardList,
         label: "Service Orders",
-        text:"",
-        path: "/user/service-order"
+        text: "",
+        path: "/user/service-order",
       },
-      { 
-        icon: User, 
+      {
+        icon: User,
         label: "My Profile",
         text: "Personal Information",
-        path: "/user/profile", 
+        path: "/user/profile",
       },
       {
         icon: Star,
@@ -65,11 +65,11 @@ const GROUPS = [
     },
     label: "Service",
     items: [
-      { 
-        icon: ClipboardList, 
+      {
+        icon: ClipboardList,
         label: "Service Orders",
-        text:"",
-        path: "/user/service-order"
+        text: "",
+        path: "/user/service-order",
       },
       {
         icon: Star,
@@ -99,14 +99,14 @@ const GROUPS = [
         text: "Personal address",
         path: "/user/address",
       },
-      { 
-        icon: Shield, 
+      {
+        icon: Shield,
         label: "Security",
         text: "Personal security",
         path: "/user/security",
       },
-      { 
-        icon: Lock, 
+      {
+        icon: Lock,
         label: "Privacy",
         text: "Personal privacy",
         path: "/user/privacy",
@@ -121,7 +121,7 @@ const GROUPS = [
     },
     label: "Settings",
     items: [
-      { icon: Globe,label: "General" },
+      { icon: Globe, label: "General" },
       { icon: BellRing, label: "Notifications" },
       { icon: Monitor, label: "Display" },
       { icon: Settings2, label: "Preferences" },
@@ -131,7 +131,7 @@ const GROUPS = [
       { icon: HelpCircle, label: "Help" },
     ],
     defaultItem: 0,
-  }
+  },
 ];
 
 const UserLayout = ({ title = "My Account" }) => (

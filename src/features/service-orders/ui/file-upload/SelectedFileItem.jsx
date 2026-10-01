@@ -2,25 +2,16 @@ import { FileText, Trash2 } from "lucide-react";
 import { memo } from "react";
 import { formatFileSize } from "@/shared/lib/fileUploadUtils";
 
-const SelectedFileItem = ({
-  file,
-  disabled,
-  onRemove,
-}) => (
+const SelectedFileItem = ({ file, disabled, onRemove }) => (
   <div className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface p-3">
-    <FileText
-      size={17}
-      className="shrink-0 text-brand"
-    />
+    <FileText size={17} className="shrink-0 text-brand" />
 
     <div className="min-w-0 flex-1">
       <p className="truncate text-sm font-medium text-text-default">
         {file.name}
       </p>
 
-      <p className="text-xs text-text-subtle">
-        {formatFileSize(file.size)}
-      </p>
+      <p className="text-xs text-text-subtle">{formatFileSize(file.size)}</p>
     </div>
 
     <button

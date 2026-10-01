@@ -15,8 +15,10 @@ const FormInput = ({
 }) => {
   const inputId = id || name;
   const descriptionId = error
-    ? `${inputId}-error` 
-    : hint ? `${inputId}-hint` : undefined;
+    ? `${inputId}-error`
+    : hint
+      ? `${inputId}-hint`
+      : undefined;
 
   return (
     <div className={containerClassName}>
@@ -38,36 +40,20 @@ const FormInput = ({
         placeholder={placeholder}
         aria-invalid={Boolean(error)}
         aria-describedby={descriptionId}
-        className={`
-          h-11 w-full rounded-xl border bg-surface px-4
-          text-sm text-text-default outline-none transition
-          disabled:cursor-not-allowed disabled:bg-surface-muted
-          ${
-            error
-              ? `
-                border-danger focus:border-danger focus:ring-4 focus:ring-danger/10
-              `
-              : `
-                border-input focus:border-brand focus:ring-4 focus:ring-brand/10
-              `
-          }
-          ${inputClassName}
-        `}
+        className={`h-11 w-full rounded-xl border bg-surface px-4 text-sm text-text-default transition outline-none disabled:cursor-not-allowed disabled:bg-surface-muted ${
+          error
+            ? `border-danger focus:border-danger focus:ring-4 focus:ring-danger/10`
+            : `border-input focus:border-brand focus:ring-4 focus:ring-brand/10`
+        } ${inputClassName} `}
       />
 
       {error ? (
-        <p
-          id={`${inputId}-error`}
-          className="mt-1.5 text-xs text-danger"
-        >
+        <p id={`${inputId}-error`} className="mt-1.5 text-xs text-danger">
           {error}
         </p>
       ) : (
         hint && (
-          <p
-            id={`${inputId}-hint`}
-            className="mt-1.5 text-xs text-text-muted"
-          >
+          <p id={`${inputId}-hint`} className="mt-1.5 text-xs text-text-muted">
             {hint}
           </p>
         )

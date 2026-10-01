@@ -1,7 +1,6 @@
 export const OTP_LENGTH = 6;
 
-export const createEmptyOtp = (length = OTP_LENGTH) =>
-  Array(length).fill("");
+export const createEmptyOtp = (length = OTP_LENGTH) => Array(length).fill("");
 
 export const toOtpCode = (otp) => otp.join("");
 

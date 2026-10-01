@@ -30,12 +30,9 @@ const PrivacyPage = () => {
   };
 
   const createSheet = (rows, headers) => {
-    return XLSX.utils.json_to_sheet(
-      Array.isArray(rows) ? rows : [],
-      {
-        header: headers,
-      },
-    );
+    return XLSX.utils.json_to_sheet(Array.isArray(rows) ? rows : [], {
+      header: headers,
+    });
   };
 
   const handleDownloadData = async () => {
@@ -44,16 +41,10 @@ const PrivacyPage = () => {
 
       const exportData = await userApi.exportData();
 
-      const {
-        user,
-        addresses = [],
-        authProviders = [],
-      } = exportData;
+      const { user, addresses = [], authProviders = [] } = exportData;
 
       if (!user) {
-        throw new Error(
-          "Dữ liệu người dùng không hợp lệ",
-        );
+        throw new Error("Dữ liệu người dùng không hợp lệ");
       }
 
       const userRows = [
@@ -66,73 +57,40 @@ const PrivacyPage = () => {
           Birthday: user.birthday ?? "",
           "Role ID": user.roleId ?? "",
           "Role Name": user.roleName ?? "",
-          "Default Address ID":
-            user.defaultAddressId ?? "",
+          "Default Address ID": user.defaultAddressId ?? "",
           Status: user.status ?? "",
-          "Last Login": formatDateTime(
-            user.lastLogin,
-          ),
-          "Created At": formatDateTime(
-            user.createdAt,
-          ),
-          "Updated At": formatDateTime(
-            user.updatedAt,
-          ),
-          "Deleted At": formatDateTime(
-            user.deletedAt,
-          ),
+          "Last Login": formatDateTime(user.lastLogin),
+          "Created At": formatDateTime(user.createdAt),
+          "Updated At": formatDateTime(user.updatedAt),
+          "Deleted At": formatDateTime(user.deletedAt),
         },
       ];
 
-      const addressRows = addresses.map(
-        (address) => ({
-          "Address ID": address.addressId ?? "",
-          "ID User": address.idUser ?? "",
-          "Company Name":
-            address.companyName ?? "",
-          Address: address.address ?? "",
-          Note: address.note ?? "",
-          "Is Default": address.isDefault
-            ? "Yes"
-            : "No",
-          "Created At": formatDateTime(
-            address.createdAt,
-          ),
-          "Updated At": formatDateTime(
-            address.updatedAt,
-          ),
-          "Deleted At": formatDateTime(
-            address.deletedAt,
-          ),
-        }),
-      );
+      const addressRows = addresses.map((address) => ({
+        "Address ID": address.addressId ?? "",
+        "ID User": address.idUser ?? "",
+        "Company Name": address.companyName ?? "",
+        Address: address.address ?? "",
+        Note: address.note ?? "",
+        "Is Default": address.isDefault ? "Yes" : "No",
+        "Created At": formatDateTime(address.createdAt),
+        "Updated At": formatDateTime(address.updatedAt),
+        "Deleted At": formatDateTime(address.deletedAt),
+      }));
 
-      const providerRows = authProviders.map(
-        (provider) => ({
-          "Provider ID": provider.id ?? "",
-          "ID User": provider.idUser ?? "",
-          Provider: provider.provider ?? "",
-          Email: provider.email ?? "",
-          Phone: provider.phone ?? "",
-          "External Provider ID":
-            provider.providerId ?? "",
-          "Email Verified At": formatDateTime(
-            provider.emailVerifiedAt,
-          ),
-          "Phone Verified At": formatDateTime(
-            provider.phoneVerifiedAt,
-          ),
-          "Created At": formatDateTime(
-            provider.createdAt,
-          ),
-          "Updated At": formatDateTime(
-            provider.updatedAt,
-          ),
-          "Deleted At": formatDateTime(
-            provider.deletedAt,
-          ),
-        }),
-      );
+      const providerRows = authProviders.map((provider) => ({
+        "Provider ID": provider.id ?? "",
+        "ID User": provider.idUser ?? "",
+        Provider: provider.provider ?? "",
+        Email: provider.email ?? "",
+        Phone: provider.phone ?? "",
+        "External Provider ID": provider.providerId ?? "",
+        "Email Verified At": formatDateTime(provider.emailVerifiedAt),
+        "Phone Verified At": formatDateTime(provider.phoneVerifiedAt),
+        "Created At": formatDateTime(provider.createdAt),
+        "Updated At": formatDateTime(provider.updatedAt),
+        "Deleted At": formatDateTime(provider.deletedAt),
+      }));
 
       const userHeaders = [
         "ID User",
@@ -179,51 +137,23 @@ const PrivacyPage = () => {
 
       const workbook = XLSX.utils.book_new();
 
-      const userSheet = createSheet(
-        userRows,
-        userHeaders,
-      );
+      const userSheet = createSheet(userRows, userHeaders);
 
-      const addressSheet = createSheet(
-        addressRows,
-        addressHeaders,
-      );
+      const addressSheet = createSheet(addressRows, addressHeaders);
 
-      const providerSheet = createSheet(
-        providerRows,
-        providerHeaders,
-      );
+      const providerSheet = createSheet(providerRows, providerHeaders);
 
-      XLSX.utils.book_append_sheet(
-        workbook,
-        userSheet,
-        "User Information",
-      );
+      XLSX.utils.book_append_sheet(workbook, userSheet, "User Information");
 
-      XLSX.utils.book_append_sheet(
-        workbook,
-        addressSheet,
-        "Addresses",
-      );
+      XLSX.utils.book_append_sheet(workbook, addressSheet, "Addresses");
 
-      XLSX.utils.book_append_sheet(
-        workbook,
-        providerSheet,
-        "Auth Providers",
-      );
+      XLSX.utils.book_append_sheet(workbook, providerSheet, "Auth Providers");
 
-      const exportUserCode =
-        user.userCode || user.idUser || "me";
+      const exportUserCode = user.userCode || user.idUser || "me";
 
-      XLSX.writeFile(
-        workbook,
-        `user-data-${exportUserCode}.xlsx`,
-      );
+      XLSX.writeFile(workbook, `user-data-${exportUserCode}.xlsx`);
     } catch (error) {
-      console.error(
-        "Export user data error:",
-        error,
-      );
+      console.error("Export user data error:", error);
 
       alert(
         error?.response?.data?.message ||
@@ -256,10 +186,7 @@ const PrivacyPage = () => {
         replace: true,
       });
     } catch (error) {
-      console.error(
-        "Delete account error:",
-        error,
-      );
+      console.error("Delete account error:", error);
 
       alert(
         error?.response?.data?.message ||

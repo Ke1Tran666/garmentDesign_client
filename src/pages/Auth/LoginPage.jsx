@@ -12,7 +12,11 @@ import PrimaryButton from "@/shared/ui/button/PrimaryButton";
 import FloatingInput from "@/shared/ui/input/FloatingInput";
 import PasswordInput from "@/shared/ui/input/PasswordInput";
 import BrandHeader from "@/shared/ui/brand/BrandHeader";
-import { createEmptyOtp, isOtpComplete, toOtpCode } from "@/features/auth/ui/otp";
+import {
+  createEmptyOtp,
+  isOtpComplete,
+  toOtpCode,
+} from "@/features/auth/ui/otp";
 
 import OtpInput from "@/features/auth/ui/OtpInput";
 import { authApi } from "@/features/auth/api/authApi";
@@ -24,13 +28,7 @@ const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className="
-        mb-3 flex w-full items-center justify-center gap-2.5
-        rounded-xl border border-white/20 bg-white/10! px-5 py-3
-        text-sm font-medium text-white/85 backdrop-blur-xl
-        transition-all duration-300 hover:-translate-y-1
-        hover:bg-white/20 hover:border-white/30
-      "
+      className="mb-3 flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/20 bg-white/10! px-5 py-3 text-sm font-medium text-white/85 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/20"
     >
       <Icon className="h-5 w-5 shrink-0 text-auth-accent" />
       {children}
@@ -39,7 +37,6 @@ const SocialLoginButton = ({ icon: Icon, children, onClick }) => {
 };
 
 const LoginPage = () => {
-
   const [loginType, setLoginType] = useState("account");
   const [loginStep, setLoginStep] = useState("input");
   const [phone, setPhone] = useState("");
@@ -65,11 +62,7 @@ const LoginPage = () => {
       throw new Error("Không thể lấy phiên đăng nhập");
     }
 
-    showNotification(
-      "success",
-      "Đăng nhập thành công",
-      message,
-    );
+    showNotification("success", "Đăng nhập thành công", message);
 
     const destination = getAccountPathByRole(currentUser.role);
 
@@ -81,28 +74,19 @@ const LoginPage = () => {
   };
 
   // Xử lý đăng nhập Google
-  const handleGoogleSuccess = async (
-    credentialResponse,
-  ) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setLoading(true);
 
-      const credential =
-        credentialResponse?.credential;
+      const credential = credentialResponse?.credential;
 
       if (!credential) {
-        throw new Error(
-          "Google không trả về ID token",
-        );
+        throw new Error("Google không trả về ID token");
       }
 
-      await authApi.googleLogin(
-        credential,
-      );
+      await authApi.googleLogin(credential);
 
-      await completeLogin(
-        "Đăng nhập Google thành công",
-      );
+      await completeLogin("Đăng nhập Google thành công");
     } catch (err) {
       showNotification(
         "error",
@@ -151,7 +135,7 @@ const LoginPage = () => {
           showNotification(
             "warning",
             "Thiếu số điện thoại",
-            "Vui lòng nhập số điện thoại"
+            "Vui lòng nhập số điện thoại",
           );
           return;
         }
@@ -161,7 +145,7 @@ const LoginPage = () => {
         showNotification(
           "success",
           "Đã gửi mã OTP",
-          "Vui lòng xem OTP trong console BE"
+          "Vui lòng xem OTP trong console BE",
         );
 
         setLoginStep("otp");
@@ -177,7 +161,7 @@ const LoginPage = () => {
           showNotification(
             "warning",
             "OTP chưa hợp lệ",
-            "Vui lòng nhập đủ 6 số OTP"
+            "Vui lòng nhập đủ 6 số OTP",
           );
           return;
         }
@@ -186,13 +170,11 @@ const LoginPage = () => {
 
         await completeLogin("Xác thực OTP thành công");
       }
-
     } catch (error) {
       let message = "Không thể đăng nhập. Vui lòng thử lại";
 
       if (error.code === "ECONNABORTED") {
-        message =
-          "Máy chủ phản hồi quá lâu. Vui lòng thử lại";
+        message = "Máy chủ phản hồi quá lâu. Vui lòng thử lại";
       } else if (!error.response) {
         message =
           error.message === "Không thể lấy phiên đăng nhập"
@@ -204,33 +186,25 @@ const LoginPage = () => {
         message = error.message;
       }
 
-      showNotification(
-        "error",
-        "Đăng nhập thất bại",
-        message,
-      );
+      showNotification("error", "Đăng nhập thất bại", message);
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <>
       {/* CONTENT */}
-      <div 
-        className="w-full max-w-105 rounded-3xl border border-white/20 
-        bg-white/10 px-10 py-10 shadow-[0_8px_40px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px]
-        animate-slide-up
-        "
-      >
-        
+      <div className="w-full max-w-105 animate-slide-up rounded-3xl border border-white/20 bg-white/10 px-10 py-10 shadow-[0_8px_40px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px]">
         {/* LOGO */}
-        <BrandHeader subtitle="Giải pháp thiết kế may mặc chuyên nghiệp"/>
+        <BrandHeader subtitle="Giải pháp thiết kế may mặc chuyên nghiệp" />
 
         <hr className="mb-6 border-white/10" />
 
         <h1 className="mb-2 text-[22px] font-semibold text-white">
-          {loginType === "phone" && loginStep === "otp" ? "Xác thực OTP" : "Đăng nhập"}
+          {loginType === "phone" && loginStep === "otp"
+            ? "Xác thực OTP"
+            : "Đăng nhập"}
         </h1>
 
         <p className="mb-6 text-[13px] font-light text-white/55">
@@ -241,10 +215,7 @@ const LoginPage = () => {
 
         {/* FORM */}
         <form onSubmit={handleLogin}>
-          <div
-            key={`${loginType}-${loginStep}`}
-            className="animate-formSwitch"
-          >
+          <div key={`${loginType}-${loginStep}`} className="animate-formSwitch">
             {loginType === "account" ? (
               <>
                 {/* Email */}
@@ -268,10 +239,10 @@ const LoginPage = () => {
                   />
 
                   {/* Forgot password */}
-                  <div className="flex justify-end mb-2">
+                  <div className="mb-2 flex justify-end">
                     <Link
                       to="/forgot-password"
-                      className="text-sm text-auth-accent hover:text-white transition"
+                      className="text-sm text-auth-accent transition hover:text-white"
                     >
                       Quên mật khẩu?
                     </Link>
@@ -321,7 +292,7 @@ const LoginPage = () => {
                         showNotification(
                           "success",
                           "Đã gửi lại OTP",
-                          "Vui lòng xem OTP mới trong console BE"
+                          "Vui lòng xem OTP mới trong console BE",
                         );
 
                         setOtp(createEmptyOtp());
@@ -333,7 +304,7 @@ const LoginPage = () => {
                         showNotification(
                           "error",
                           "Gửi lại OTP thất bại",
-                          err.response?.data?.message || "Vui lòng thử lại"
+                          err.response?.data?.message || "Vui lòng thử lại",
                         );
                       }
                     }}
@@ -345,7 +316,7 @@ const LoginPage = () => {
               </div>
             )}
           </div>
-          
+
           {/* button submit */}
           <PrimaryButton
             type="submit"
@@ -366,7 +337,7 @@ const LoginPage = () => {
         {/* OR */}
         <div className="my-5 flex items-center gap-2.5">
           <div className="h-px flex-1 bg-white/15" />
-          <span className="whitespace-nowrap text-xs text-white/40">
+          <span className="text-xs whitespace-nowrap text-white/40">
             hoặc tiếp tục với
           </span>
           <div className="h-px flex-1 bg-white/15" />
@@ -386,7 +357,7 @@ const LoginPage = () => {
               : "Đăng nhập bằng tài khoản đã đăng ký"}
           </span>
         </SocialLoginButton>
-        
+
         {/* BUTTON GOOGLE */}
         <div className="mb-3 flex w-full justify-center">
           <div className="w-85 overflow-hidden rounded-xl">

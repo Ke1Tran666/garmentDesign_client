@@ -11,7 +11,7 @@ export const authStorage = {
     return localStorage.getItem(USER_ID_KEY);
   },
 
-  getRole(){
+  getRole() {
     return localStorage.getItem(ROLE_KEY);
   },
 
@@ -24,7 +24,7 @@ export const authStorage = {
       localStorage.setItem(USER_ID_KEY, String(idUser));
     }
 
-    if(role){
+    if (role) {
       localStorage.setItem(ROLE_KEY, String(role));
     }
   },

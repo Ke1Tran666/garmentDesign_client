@@ -10,7 +10,7 @@ const renderApp = (path) => {
       <MemoryRouter initialEntries={[path]}>
         <App />
       </MemoryRouter>
-    </GoogleOAuthProvider>
+    </GoogleOAuthProvider>,
   );
 };
 
@@ -18,16 +18,14 @@ describe("App main routes", () => {
   test("renders login route", () => {
     renderApp("/login");
 
-    expect(
-      screen.getByRole("button", { name: /google/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /google/i })).toBeInTheDocument();
   });
 
   test("redirects user route to profile shell", () => {
     renderApp("/user");
 
     expect(
-      screen.getByRole("heading", { name: /My Profile/i })
+      screen.getByRole("heading", { name: /My Profile/i }),
     ).toBeInTheDocument();
   });
 });

@@ -5,7 +5,6 @@ import {
   BadgeCheck,
   CalendarDays,
   ChevronDown,
-  ChevronRight,
   EllipsisVertical,
   Hash,
   LockKeyhole,
@@ -26,6 +25,11 @@ import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import { useNotification } from "@/app/providers/NotificationProvider";
 import UserIdentityEditModal from "@/features/user-management/ui/UserIdentityEditModal";
 import UserPhoneEditModal from "@/features/user-management/ui/UserPhoneEditModal";
+import AdminDetailLayout, {
+  AdminDetailInfoRow,
+  AdminDetailSection,
+  AdminDetailSummaryRow,
+} from "@/shared/ui/admin-detail/AdminDetailLayout";
 
 const EMPTY_VALUE = "Chưa có dữ liệu";
 
@@ -157,58 +161,6 @@ const getStatusInfo = (user) => {
 };
 
 const getRoleName = (user) => user?.role?.nameRole || "Chưa phân quyền";
-
-const SidebarInfoRow = ({ icon: Icon, label, children }) => (
-  <div className="grid grid-cols-[18px_105px_minmax(0,1fr)] items-start gap-3 py-2.5">
-    <Icon size={16} className="mt-0.5 text-text-subtle" />
-
-    <span className="text-sm text-text-muted">{label}</span>
-
-    <div className="text-sm font-medium wrap-break-word text-text-default">
-      {children || EMPTY_VALUE}
-    </div>
-  </div>
-);
-
-const SummaryRow = ({
-  icon: Icon,
-  title,
-  description,
-  status,
-  statusClassName,
-}) => (
-  <div className="flex items-center gap-3 border-b border-border-subtle px-4 py-3 last:border-b-0">
-    <Icon size={17} className="shrink-0 text-text-muted" />
-
-    <div className="min-w-0 flex-1">
-      <span className="text-sm font-semibold text-text-default">{title}</span>
-
-      {description && (
-        <span className="ml-2 text-xs text-text-muted">{description}</span>
-      )}
-    </div>
-
-    <span
-      className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${statusClassName} `}
-    >
-      {status}
-    </span>
-
-    <ChevronDown size={15} className="shrink-0 text-text-subtle" />
-  </div>
-);
-
-const SidebarSection = ({ title, action, children }) => (
-  <section className="border-b border-border-subtle py-5 last:border-b-0">
-    <div className="mb-2 flex items-center justify-between gap-4">
-      <h2 className="text-sm font-bold text-text-strong">{title}</h2>
-
-      {action}
-    </div>
-
-    {children}
-  </section>
-);
 
 const normalizeUserDetail = (data) => {
   const userData = data?.user;
@@ -510,458 +462,481 @@ const UserDetailPage = () => {
 
   return (
     <>
-      <div className="space-y-4">
-        <button
-          type="button"
-          onClick={() => navigate("/admin/users")}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted transition hover:text-brand"
-        >
-          <ArrowLeft size={18} />
-          Quay lại Người dùng
-        </button>
-
-        <div className="overflow-hidden rounded-2xl border border-border-subtle bg-surface shadow-sm">
-          {/* Breadcrumb */}
-          <nav className="flex h-13 items-center gap-2 border-b border-border-subtle px-5 text-sm sm:px-6">
-            <button
-              type="button"
-              onClick={() => navigate("/admin/users")}
-              className="text-text-muted transition hover:text-brand"
+      <AdminDetailLayout
+        backLabel="Quay lại Người dùng"
+        breadcrumbLabel="Người dùng"
+        breadcrumbValue={user.userCode || user.idUser}
+        title={user.fullName || "Chưa cập nhật tên"}
+        code={user.userCode || user.idUser}
+        subtitle={loginEmailProvider?.email}
+        onBack={() => navigate("/admin/users")}
+        leading={
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-soft text-sm font-semibold text-brand">
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.fullName || "Người dùng"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              getInitials(user.fullName)
+            )}
+          </div>
+        }
+        badges={
+          <>
+            <span
+              className={`rounded-lg px-3 py-2 text-xs font-semibold ${status.badgeClassName}`}
             >
-              Người dùng
-            </button>
-
-            <ChevronRight size={15} className="text-text-subtle" />
-
-            <span className="truncate font-medium text-text-default">
-              {user.userCode || user.idUser}
+              {status.label}
             </span>
-          </nav>
 
-          {/* User header */}
-          <header className="flex flex-col gap-4 border-b border-border-subtle px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
-              <h1 className="truncate text-2xl font-semibold text-text-strong">
-                {user.fullName || "Chưa cập nhật tên"}
-              </h1>
+            <span className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-default">
+              {getRoleName(user)}
+            </span>
 
-              <span className="rounded-md bg-surface-muted px-2 py-1 text-xs font-semibold text-text-default">
-                {user.userCode || user.idUser}
+            {providerNames.map((provider) => (
+              <span
+                key={provider}
+                className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-default capitalize"
+              >
+                {provider}
               </span>
-            </div>
+            ))}
+          </>
+        }
+        actions={
+          isAdmin ? (
+            <div className="relative">
+              <button
+                type="button"
+                aria-label="Mở thao tác"
+                aria-haspopup="menu"
+                aria-expanded={actionOpen}
+                onClick={() => setActionOpen((current) => !current)}
+                className="flex h-9 w-10 items-center justify-center rounded-lg border border-border bg-surface-subtle text-text-muted transition hover:bg-surface-muted hover:text-text-default"
+              >
+                <EllipsisVertical size={17} />
+              </button>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-default">
-                {getRoleName(user)}
-              </span>
-
-              {providerNames.map((provider) => (
-                <span
-                  key={provider}
-                  className="rounded-lg border border-border bg-surface-subtle px-3 py-2 text-xs font-semibold text-text-default capitalize"
+              {actionOpen && (
+                <div
+                  role="menu"
+                  className="absolute top-full right-0 z-30 mt-2 w-52 rounded-xl border border-border bg-surface p-1.5 shadow-xl"
                 >
-                  {provider}
-                </span>
-              ))}
-
-              <div className="relative">
-                <button
-                  type="button"
-                  aria-label="Mở thao tác"
-                  aria-haspopup="menu"
-                  aria-expanded={actionOpen}
-                  onClick={() => setActionOpen((current) => !current)}
-                  className="flex h-9 w-10 items-center justify-center rounded-lg border border-border bg-surface-subtle text-text-muted transition hover:bg-surface-muted hover:text-text-default"
-                >
-                  <EllipsisVertical size={17} />
-                </button>
-
-                {actionOpen && (
-                  <div
-                    role="menu"
-                    className="absolute top-full right-0 z-30 mt-2 w-52 rounded-xl border border-border bg-surface p-1.5 shadow-xl"
+                  <button
+                    type="button"
+                    role="menuitem"
+                    disabled={Boolean(user.deletedAt)}
+                    onClick={() => {
+                      setActionOpen(false);
+                      handleOpenIdentityEdit();
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-text-default transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <button
-                      type="button"
-                      role="menuitem"
-                      disabled={
-                        !isAdmin || isCurrentUser || Boolean(user.deletedAt)
-                      }
-                      onClick={() => {
-                        setActionOpen(false);
-                        setDeleteError("");
-                        setDeleteOpen(true);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-danger transition hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <Trash2 size={17} />
-                      Xóa tài khoản
-                    </button>
-                  </div>
-                )}
-              </div>
+                    <Pencil size={17} />
+                    Chỉnh sửa thông tin
+                  </button>
+
+                  <div className="my-1 border-t border-border-subtle" />
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    disabled={isCurrentUser || Boolean(user.deletedAt)}
+                    onClick={() => {
+                      setActionOpen(false);
+                      setDeleteError("");
+                      setDeleteOpen(true);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-danger transition hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Trash2 size={17} />
+                    Xóa tài khoản
+                  </button>
+                </div>
+              )}
             </div>
-          </header>
+          ) : null
+        }
+        sidebar={
+          <>
+            <AdminDetailSection title="Thông tin cơ bản">
+              <AdminDetailInfoRow icon={Hash} label="ID">
+                {user.idUser}
+              </AdminDetailInfoRow>
 
-          {/* Hai cột theo thiết kế ảnh */}
-          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.65fr)_minmax(340px,0.95fr)]">
-            {/* Cột trái */}
-            <main className="min-w-0 space-y-7 p-5 sm:p-6 xl:border-r xl:border-border-subtle">
-              {/* Trạng thái tài khoản */}
-              <section>
-                <h2 className="mb-3 text-sm font-bold text-text-strong">
-                  Tài khoản & bảo mật
-                </h2>
-
-                <div className="overflow-hidden rounded-xl border border-border bg-surface-subtle">
-                  <SummaryRow
-                    icon={BadgeCheck}
-                    title="Trạng thái tài khoản"
-                    description={formatDate(user.updatedAt)}
-                    status={status.label}
-                    statusClassName={status.badgeClassName}
-                  />
-
-                  <SummaryRow
-                    icon={ShieldCheck}
-                    title="Vai trò"
-                    status={getRoleName(user)}
-                    statusClassName="bg-info-soft text-info"
-                  />
-
-                  <SummaryRow
-                    icon={Mail}
-                    title="Xác thực email"
-                    status={
-                      loginEmailProvider
-                        ? loginEmailProvider.emailVerifiedAt
-                          ? "Đã xác thực"
-                          : "Chưa xác thực"
-                        : "Chưa có"
-                    }
-                    statusClassName={
-                      loginEmailProvider?.emailVerifiedAt
-                        ? "bg-success-soft text-success"
-                        : "bg-warning-soft text-warning"
-                    }
-                  />
-
-                  <SummaryRow
-                    icon={Phone}
-                    title="Xác thực điện thoại"
-                    status={
-                      phoneProvider
-                        ? phoneProvider.phoneVerifiedAt
-                          ? "Đã xác thực"
-                          : "Chưa xác thực"
-                        : "Chưa có"
-                    }
-                    statusClassName={
-                      phoneProvider?.phoneVerifiedAt
-                        ? "bg-success-soft text-success"
-                        : "bg-warning-soft text-warning"
-                    }
-                  />
-
-                  <SummaryRow
-                    icon={LockKeyhole}
-                    title="Xác thực hai lớp"
-                    status="Chưa hỗ trợ"
-                    statusClassName="bg-surface-muted text-text-muted"
-                  />
-                </div>
-
-                <details className="group mt-3 overflow-hidden rounded-xl border border-border bg-surface">
-                  <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-4 text-sm font-semibold text-text-default">
-                    Chi tiết xác thực
-                    <ChevronDown
-                      size={16}
-                      className="text-text-muted transition group-open:rotate-180"
-                    />
-                  </summary>
-
-                  <div className="border-t border-border-subtle px-4 py-3 text-sm text-text-muted">
-                    <p>
-                      Provider:{" "}
-                      <span className="font-semibold text-text-default">
-                        {providerNames.length > 0
-                          ? providerNames.join(", ")
-                          : EMPTY_VALUE}
-                      </span>
-                    </p>
-
-                    <p className="mt-2">
-                      Permission:{" "}
-                      <span className="font-semibold text-text-default">
-                        {permissions.length > 0
-                          ? permissions
-                              .map(
-                                (permission) =>
-                                  permission.name ||
-                                  permission.code ||
-                                  permission,
-                              )
-                              .join(", ")
-                          : EMPTY_VALUE}
-                      </span>
-                    </p>
-                  </div>
-                </details>
-              </section>
-
-              {/* Hoạt động */}
-              <section>
-                <div className="mb-3 flex items-center justify-between gap-4">
-                  <h2 className="text-sm font-bold text-text-strong">
-                    Hoạt động
-                  </h2>
-
-                  <span className="text-xs text-text-muted">
-                    {recentActivities.length} hoạt động
+              <AdminDetailInfoRow icon={Mail} label="Email">
+                <div className="flex w-full min-w-0 items-center gap-3">
+                  <span
+                    title={loginEmailProvider?.email || ""}
+                    className="block max-w-40 min-w-0 flex-1 truncate sm:max-w-48"
+                  >
+                    {loginEmailProvider?.email || EMPTY_VALUE}
                   </span>
-                </div>
 
-                <div className="space-y-3">
-                  {recentActivities.length > 0 ? (
-                    recentActivities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-center gap-4 rounded-xl border border-border bg-surface-subtle px-4 py-4"
-                      >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-muted">
-                          <Activity size={17} />
-                        </span>
-
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-text-default">
-                            {activity.title}
-                          </p>
-
-                          <p className="mt-1 text-xs text-text-muted">
-                            {formatActivityDate(activity.date)}{" "}
-                            {formatTime(activity.date)}
-                          </p>
-                        </div>
-
-                        <span className="text-xs text-text-subtle">
-                          {formatDate(activity.date)}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-text-muted">
-                      Chưa có hoạt động nào được ghi nhận.
-                    </div>
+                  {loginProviderInfo && (
+                    <span
+                      className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${loginProviderInfo.className}`}
+                    >
+                      {loginProviderInfo.label}
+                    </span>
                   )}
                 </div>
-              </section>
+              </AdminDetailInfoRow>
 
-              {/* Địa chỉ */}
-              <section>
-                <div className="mb-3 flex items-center justify-between gap-4">
-                  <h2 className="text-sm font-bold text-text-strong">
-                    Địa chỉ
-                  </h2>
+              <AdminDetailInfoRow icon={UserRound} label="Mã">
+                {user.userCode || EMPTY_VALUE}
+              </AdminDetailInfoRow>
 
-                  <span className="text-xs text-text-muted">
-                    {Array.isArray(user.addresses) ? user.addresses.length : 0}{" "}
-                    địa chỉ
-                  </span>
-                </div>
+              <AdminDetailInfoRow icon={CalendarDays} label="Ngày tạo">
+                {formatDate(user.createdAt)}
+              </AdminDetailInfoRow>
 
-                {Array.isArray(user.addresses) && user.addresses.length > 0 ? (
-                  <div className="space-y-3">
-                    {user.addresses.map((address) => (
-                      <div
-                        key={address.addressId}
-                        className="flex items-start gap-4 rounded-xl border border-border bg-surface-subtle p-4"
-                      >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-muted">
-                          <MapPin size={17} />
-                        </span>
+              <AdminDetailInfoRow icon={CalendarDays} label="Cập nhật">
+                {formatDate(user.updatedAt)}
+              </AdminDetailInfoRow>
 
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-text-default">
-                            {address.companyName || "Địa chỉ người dùng"}
-                          </p>
+              <AdminDetailInfoRow icon={BadgeCheck} label="Trạng thái">
+                <span
+                  className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${status.badgeClassName}`}
+                >
+                  {status.label}
+                </span>
+              </AdminDetailInfoRow>
+            </AdminDetailSection>
 
-                          <p className="mt-1 text-sm leading-6 text-text-muted">
-                            {address.address || EMPTY_VALUE}
-                          </p>
-                        </div>
-
-                        {user.defaultAddress?.addressId ===
-                          address.addressId && (
-                          <span className="rounded-md bg-success-soft px-2 py-1 text-xs font-semibold text-success">
-                            Mặc định
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-text-muted">
-                    Người dùng chưa có địa chỉ.
-                  </div>
-                )}
-              </section>
-            </main>
-
-            {/* Cột phải */}
-            <aside className="min-w-0 px-5 sm:px-6">
-              <SidebarSection title="Thông tin cơ bản">
-                <SidebarInfoRow icon={Hash} label="ID">
-                  {user.idUser}
-                </SidebarInfoRow>
-
-                <SidebarInfoRow icon={Mail} label="Email">
-                  <div className="flex w-full min-w-0 items-center gap-3">
-                    <span
-                      title={loginEmailProvider?.email || ""}
-                      className="block max-w-40 min-w-0 flex-1 truncate sm:max-w-48"
-                    >
-                      {loginEmailProvider?.email || EMPTY_VALUE}
-                    </span>
-
-                    {loginProviderInfo && (
-                      <span
-                        className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${loginProviderInfo.className} `}
-                      >
-                        {loginProviderInfo.label}
-                      </span>
-                    )}
-                  </div>
-                </SidebarInfoRow>
-
-                <SidebarInfoRow icon={UserRound} label="Mã">
-                  {user.userCode || EMPTY_VALUE}
-                </SidebarInfoRow>
-
-                <SidebarInfoRow icon={CalendarDays} label="Ngày tạo">
-                  {formatDate(user.createdAt)}
-                </SidebarInfoRow>
-
-                <SidebarInfoRow icon={BadgeCheck} label="Trạng thái">
-                  <span
-                    className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold ${status.badgeClassName}`}
-                  >
-                    {status.label}
-                  </span>
-                </SidebarInfoRow>
-              </SidebarSection>
-
-              <SidebarSection
-                title="Danh tính"
-                action={
+            <AdminDetailSection
+              title="Danh tính"
+              action={
+                isAdmin && !user.deletedAt ? (
                   <button
                     type="button"
                     onClick={handleOpenIdentityEdit}
-                    disabled={!isAdmin || Boolean(user.deletedAt)}
-                    className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-md p-1.5 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
                     aria-label="Chỉnh sửa danh tính"
                     title="Chỉnh sửa danh tính"
                   >
                     <Pencil size={14} />
                   </button>
-                }
-              >
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
-                    {user.avatar ? (
-                      <img
-                        src={user.avatar}
-                        alt={user.fullName || "Người dùng"}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      getInitials(user.fullName)
-                    )}
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-900">
-                      {user.fullName || "Chưa có dữ liệu"}
-                    </p>
-                    <p className="truncate text-sm text-slate-500">
-                      {user.email || "Chưa có dữ liệu"}
-                    </p>
-                  </div>
+                ) : null
+              }
+            >
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-sm font-semibold text-text-muted">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.fullName || "Người dùng"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    getInitials(user.fullName)
+                  )}
                 </div>
 
-                <SidebarInfoRow icon={UserRound} label="Họ tên">
-                  {user.fullName || EMPTY_VALUE}
-                </SidebarInfoRow>
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-text-strong">
+                    {user.fullName || EMPTY_VALUE}
+                  </p>
 
-                <SidebarInfoRow icon={CalendarDays} label="Ngày sinh">
-                  {formatDate(user.birthday)}
-                </SidebarInfoRow>
+                  <p className="truncate text-sm text-text-muted">
+                    {loginEmailProvider?.email || EMPTY_VALUE}
+                  </p>
+                </div>
+              </div>
 
-                <SidebarInfoRow icon={UserRound} label="Giới tính">
-                  {formatGender(user.gender)}
-                </SidebarInfoRow>
+              <AdminDetailInfoRow icon={UserRound} label="Họ tên">
+                {user.fullName || EMPTY_VALUE}
+              </AdminDetailInfoRow>
 
-                <SidebarInfoRow icon={Phone} label="Số điện thoại">
-                  {phoneProvider?.phone || EMPTY_VALUE}
-                </SidebarInfoRow>
+              <AdminDetailInfoRow icon={CalendarDays} label="Ngày sinh">
+                {formatDate(user.birthday)}
+              </AdminDetailInfoRow>
 
-                <SidebarInfoRow icon={MapPin} label="Địa chỉ">
-                  {user.defaultAddress?.address || EMPTY_VALUE}
-                </SidebarInfoRow>
-              </SidebarSection>
+              <AdminDetailInfoRow icon={UserRound} label="Giới tính">
+                {formatGender(user.gender)}
+              </AdminDetailInfoRow>
 
-              <SidebarSection
-                title="Số điện thoại"
-                action={
+              <AdminDetailInfoRow icon={Phone} label="Điện thoại">
+                {phoneProvider?.phone || EMPTY_VALUE}
+              </AdminDetailInfoRow>
+
+              <AdminDetailInfoRow icon={MapPin} label="Địa chỉ">
+                {user.defaultAddress?.address || EMPTY_VALUE}
+              </AdminDetailInfoRow>
+            </AdminDetailSection>
+
+            <AdminDetailSection
+              title="Số điện thoại"
+              action={
+                isAdmin && !user.deletedAt ? (
                   <button
                     type="button"
                     onClick={handleOpenPhoneEdit}
-                    disabled={!isAdmin || Boolean(user.deletedAt)}
-                    className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-md p-1.5 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
                     aria-label="Chỉnh sửa số điện thoại"
                     title="Chỉnh sửa số điện thoại"
                   >
                     <Pencil size={14} />
                   </button>
-                }
-              >
-                {phoneProvider ? (
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-subtle px-3 py-3">
-                    <span className="truncate text-sm font-medium text-text-default">
+                ) : null
+              }
+            >
+              {phoneProvider ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-subtle px-3 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-text-default">
                       {phoneProvider.phone}
-                    </span>
-
-                    <span className="shrink-0 text-xs font-semibold text-success">
-                      Chính
-                    </span>
-                  </div>
-                ) : (
-                  <p className="py-2 text-sm text-text-muted">
-                    Chưa có số điện thoại.
-                  </p>
-                )}
-              </SidebarSection>
-
-              <SidebarSection title="Địa chỉ mặc định">
-                {user.defaultAddress ? (
-                  <div className="rounded-xl border border-border bg-surface-subtle px-3 py-3">
-                    <p className="text-sm font-medium text-text-default">
-                      {user.defaultAddress.companyName || "Địa chỉ người dùng"}
                     </p>
 
-                    <p className="mt-1 text-xs leading-5 text-text-muted">
-                      {user.defaultAddress.address || EMPTY_VALUE}
+                    <p className="mt-1 text-xs text-text-muted">
+                      {phoneProvider.phoneVerifiedAt
+                        ? "Đã xác thực"
+                        : "Chưa xác thực"}
                     </p>
                   </div>
-                ) : (
-                  <p className="py-2 text-sm text-text-muted">
-                    Chưa có địa chỉ mặc định.
+
+                  <span
+                    className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${
+                      phoneProvider.phoneVerifiedAt
+                        ? "bg-success-soft text-success"
+                        : "bg-warning-soft text-warning"
+                    }`}
+                  >
+                    Chính
+                  </span>
+                </div>
+              ) : (
+                <p className="py-2 text-sm text-text-muted">
+                  Chưa có số điện thoại.
+                </p>
+              )}
+            </AdminDetailSection>
+
+            <AdminDetailSection title="Địa chỉ mặc định">
+              {user.defaultAddress ? (
+                <div className="rounded-xl border border-border bg-surface-subtle px-3 py-3">
+                  <p className="text-sm font-medium text-text-default">
+                    {user.defaultAddress.companyName || "Địa chỉ người dùng"}
                   </p>
-                )}
-              </SidebarSection>
-            </aside>
+
+                  <p className="mt-1 text-xs leading-5 text-text-muted">
+                    {user.defaultAddress.address || EMPTY_VALUE}
+                  </p>
+                </div>
+              ) : (
+                <p className="py-2 text-sm text-text-muted">
+                  Chưa có địa chỉ mặc định.
+                </p>
+              )}
+            </AdminDetailSection>
+          </>
+        }
+      >
+        {/* Tài khoản và bảo mật */}
+        <section>
+          <h2 className="mb-3 text-sm font-bold text-text-strong">
+            Tài khoản & bảo mật
+          </h2>
+
+          <div className="overflow-hidden rounded-xl border border-border bg-surface-subtle">
+            <AdminDetailSummaryRow
+              icon={BadgeCheck}
+              title="Trạng thái tài khoản"
+              description={formatDate(user.updatedAt)}
+              value={status.label}
+              valueClassName={status.badgeClassName}
+              showChevron
+            />
+
+            <AdminDetailSummaryRow
+              icon={ShieldCheck}
+              title="Vai trò"
+              value={getRoleName(user)}
+              valueClassName="bg-info-soft text-info"
+              showChevron
+            />
+
+            <AdminDetailSummaryRow
+              icon={Mail}
+              title="Xác thực email"
+              value={
+                loginEmailProvider
+                  ? loginEmailProvider.emailVerifiedAt
+                    ? "Đã xác thực"
+                    : "Chưa xác thực"
+                  : "Chưa có"
+              }
+              valueClassName={
+                loginEmailProvider?.emailVerifiedAt
+                  ? "bg-success-soft text-success"
+                  : "bg-warning-soft text-warning"
+              }
+              showChevron
+            />
+
+            <AdminDetailSummaryRow
+              icon={Phone}
+              title="Xác thực điện thoại"
+              value={
+                phoneProvider
+                  ? phoneProvider.phoneVerifiedAt
+                    ? "Đã xác thực"
+                    : "Chưa xác thực"
+                  : "Chưa có"
+              }
+              valueClassName={
+                phoneProvider?.phoneVerifiedAt
+                  ? "bg-success-soft text-success"
+                  : "bg-warning-soft text-warning"
+              }
+              showChevron
+            />
+
+            <AdminDetailSummaryRow
+              icon={LockKeyhole}
+              title="Xác thực hai lớp"
+              value="Chưa hỗ trợ"
+              valueClassName="bg-surface-muted text-text-muted"
+              showChevron
+            />
           </div>
-        </div>
-      </div>
+
+          <details className="group mt-3 overflow-hidden rounded-xl border border-border bg-surface">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-4 text-sm font-semibold text-text-default">
+              Chi tiết xác thực
+              <ChevronDown
+                size={16}
+                className="text-text-muted transition group-open:rotate-180"
+              />
+            </summary>
+
+            <div className="border-t border-border-subtle px-4 py-3 text-sm text-text-muted">
+              <p>
+                Provider:{" "}
+                <span className="font-semibold text-text-default">
+                  {providerNames.length > 0
+                    ? providerNames.join(", ")
+                    : EMPTY_VALUE}
+                </span>
+              </p>
+
+              <p className="mt-2">
+                Permission:{" "}
+                <span className="font-semibold text-text-default">
+                  {permissions.length > 0
+                    ? permissions
+                        .map(
+                          (permission) =>
+                            permission.name || permission.code || permission,
+                        )
+                        .join(", ")
+                    : EMPTY_VALUE}
+                </span>
+              </p>
+            </div>
+          </details>
+        </section>
+
+        {/* Hoạt động */}
+        <section>
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <h2 className="text-sm font-bold text-text-strong">Hoạt động</h2>
+
+            <span className="text-xs text-text-muted">
+              {recentActivities.length} hoạt động
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {recentActivities.length > 0 ? (
+              recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-center gap-4 rounded-xl border border-border bg-surface-subtle px-4 py-4"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-muted">
+                    <Activity size={17} />
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-text-default">
+                      {activity.title}
+                    </p>
+
+                    <p className="mt-1 text-xs text-text-muted">
+                      {formatActivityDate(activity.date)}{" "}
+                      {formatTime(activity.date)}
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-text-subtle">
+                    {formatDate(activity.date)}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-text-muted">
+                Chưa có hoạt động nào được ghi nhận.
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Địa chỉ */}
+        <section>
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <h2 className="text-sm font-bold text-text-strong">Địa chỉ</h2>
+
+            <span className="text-xs text-text-muted">
+              {Array.isArray(user.addresses) ? user.addresses.length : 0} địa
+              chỉ
+            </span>
+          </div>
+
+          {Array.isArray(user.addresses) && user.addresses.length > 0 ? (
+            <div className="space-y-3">
+              {user.addresses.map((address) => (
+                <div
+                  key={address.addressId}
+                  className="flex items-start gap-4 rounded-xl border border-border bg-surface-subtle p-4"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-muted">
+                    <MapPin size={17} />
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-text-default">
+                      {address.companyName || "Địa chỉ người dùng"}
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-text-muted">
+                      {address.address || EMPTY_VALUE}
+                    </p>
+
+                    {address.note && (
+                      <p className="mt-1 text-xs text-text-subtle">
+                        {address.note}
+                      </p>
+                    )}
+                  </div>
+
+                  {user.defaultAddress?.addressId === address.addressId && (
+                    <span className="shrink-0 rounded-md bg-success-soft px-2 py-1 text-xs font-semibold text-success">
+                      Mặc định
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-text-muted">
+              Người dùng chưa có địa chỉ.
+            </div>
+          )}
+        </section>
+      </AdminDetailLayout>
 
       {identityEditOpen && (
         <UserIdentityEditModal

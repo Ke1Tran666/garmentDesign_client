@@ -30,6 +30,7 @@ import AdminDetailLayout, {
   AdminDetailSection,
   AdminDetailSummaryRow,
 } from "@/shared/ui/admin-detail/AdminDetailLayout";
+import { roleApi } from "@/entities/user/api/roleApi";
 
 const EMPTY_VALUE = "Chưa có dữ liệu";
 
@@ -202,10 +203,27 @@ const UserDetailPage = () => {
   const [phoneEditOpen, setPhoneEditOpen] = useState(false);
   const [phoneSubmitting, setPhoneSubmitting] = useState(false);
   const [phoneUpdateError, setPhoneUpdateError] = useState("");
+  const [roles, setRoles] = useState([]);
 
-  const isAdmin = normalizeRole(adminUser?.role) === "admin";
+  const [rolesLoading, setRolesLoading] = useState(false);
+
+  const currentRole = normalizeRole(adminUser?.role);
+
+  const targetRole = normalizeRole(user?.role?.nameRole);
 
   const isCurrentUser = user?.idUser === adminUser?.idUser;
+
+  const isAdmin = currentRole === "admin";
+
+  const isStaff = currentRole === "staff";
+
+  const canEditUser =
+    isAdmin || (isStaff && (targetRole === "user" || isCurrentUser));
+
+  /*
+   * Chỉ Admin được cấp vai trò.
+   */
+  const canAssignRole = isAdmin;
 
   useEffect(() => {
     let active = true;
@@ -377,19 +395,18 @@ const UserDetailPage = () => {
 
   const status = getStatusInfo(user);
 
-  const handleOpenIdentityEdit = () => {
-    setIdentityUpdateError("");
-    setIdentityEditOpen(true);
-  };
-
   const handleIdentitySubmit = async ({
     fullName,
     birthday,
     gender,
-    phone,
+    roleId,
     avatarFile,
     avatarDeleted,
   }) => {
+    if (!canEditUser) {
+      return;
+    }
+
     try {
       setIdentitySubmitting(true);
       setIdentityUpdateError("");
@@ -398,13 +415,24 @@ const UserDetailPage = () => {
         fullName,
         birthday,
         gender,
-        phone,
+
+        /*
+         * Không gửi phone ở đây.
+         * Phone dùng modal riêng.
+         */
+        phone: null,
       });
 
       if (avatarDeleted) {
         await userApi.removeAvatarById(user.idUser);
       } else if (avatarFile) {
         await userApi.uploadAvatarById(user.idUser, avatarFile);
+      }
+
+      const currentRoleId = user.role?.idRole;
+
+      if (canAssignRole && roleId && Number(roleId) !== Number(currentRoleId)) {
+        await userApi.updateRole(user.idUser, roleId);
       }
 
       const refreshedData = await userApi.getById(user.idUser);
@@ -416,7 +444,9 @@ const UserDetailPage = () => {
       showNotification(
         "success",
         "Cập nhật thành công",
-        "Thông tin người dùng đã được cập nhật.",
+        canAssignRole
+          ? "Thông tin và quyền người dùng đã được cập nhật."
+          : "Thông tin người dùng đã được cập nhật.",
       );
     } catch (error) {
       setIdentityUpdateError(
@@ -458,6 +488,40 @@ const UserDetailPage = () => {
     } finally {
       setPhoneSubmitting(false);
     }
+  };
+
+  const handleOpenIdentityEdit = async () => {
+    if (!canEditUser) {
+      return;
+    }
+
+    setIdentityUpdateError("");
+
+    /*
+     * Chỉ Admin cần tải danh sách role.
+     * Staff không được gọi /api/roles.
+     */
+    if (canAssignRole && roles.length === 0) {
+      try {
+        setRolesLoading(true);
+
+        const roleData = await roleApi.getAll();
+
+        setRoles(Array.isArray(roleData) ? roleData : []);
+      } catch (error) {
+        showNotification(
+          "error",
+          "Không thể tải vai trò",
+          error.response?.data?.message || "Không thể tải danh sách vai trò.",
+        );
+
+        return;
+      } finally {
+        setRolesLoading(false);
+      }
+    }
+
+    setIdentityEditOpen(true);
   };
 
   return (
@@ -609,13 +673,13 @@ const UserDetailPage = () => {
             <AdminDetailSection
               title="Danh tính"
               action={
-                isAdmin && !user.deletedAt ? (
+                canEditUser && !user.deletedAt ? (
                   <button
                     type="button"
                     onClick={handleOpenIdentityEdit}
                     className="rounded-md p-1.5 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
-                    aria-label="Chỉnh sửa danh tính"
-                    title="Chỉnh sửa danh tính"
+                    aria-label="Chỉnh sửa người dùng"
+                    title="Chỉnh sửa người dùng"
                   >
                     <Pencil size={14} />
                   </button>
@@ -670,7 +734,7 @@ const UserDetailPage = () => {
             <AdminDetailSection
               title="Số điện thoại"
               action={
-                isAdmin && !user.deletedAt ? (
+                canEditUser && !user.deletedAt ? (
                   <button
                     type="button"
                     onClick={handleOpenPhoneEdit}
@@ -941,11 +1005,14 @@ const UserDetailPage = () => {
       {identityEditOpen && (
         <UserIdentityEditModal
           user={user}
-          phone={phoneProvider?.phone || ""}
-          submitting={identitySubmitting}
+          roles={roles}
+          canAssignRole={canAssignRole}
+          submitting={identitySubmitting || rolesLoading}
           errorMessage={identityUpdateError}
           onClose={() => {
-            if (identitySubmitting) return;
+            if (identitySubmitting || rolesLoading) {
+              return;
+            }
 
             setIdentityEditOpen(false);
             setIdentityUpdateError("");

@@ -1,31 +1,64 @@
-import { useEffect, useState } from "react";
-import UploadBox from "@/shared/ui/upload/UploadBox";
+import { useEffect, useMemo, useState } from "react";
+import { ShieldCheck, UserRound } from "lucide-react";
+
 import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
 import FormInput from "@/shared/ui/input/FormInput";
 import FormModal from "@/shared/ui/modal/FormModal";
+import AvatarPicker from "@/shared/ui/upload/AvatarPicker";
+import FilterSelect from "@/shared/ui/select/FilterSelect";
 
-const createInitialForm = (user, phone) => ({
+const createInitialForm = (user) => ({
   fullName: user?.fullName || "",
   birthday: user?.birthday || "",
   gender: user?.gender || "Unknown",
-  phone: phone || "",
+  roleId: String(user?.role?.idRole || ""),
 });
 
 const UserIdentityEditModal = ({
   user,
-  phone,
+  roles = [],
+  canAssignRole = false,
   submitting = false,
   errorMessage = "",
   onClose,
   onSubmit,
 }) => {
-  const [form, setForm] = useState(() => createInitialForm(user, phone));
+  const [form, setForm] = useState(() => createInitialForm(user));
 
+  const [fieldErrors, setFieldErrors] = useState({});
   const [validationError, setValidationError] = useState("");
 
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(() => user?.avatar || "");
   const [avatarDeleted, setAvatarDeleted] = useState(false);
+
+  const initialForm = useMemo(() => createInitialForm(user), [user]);
+
+  const hasChanges = useMemo(() => {
+    return (
+      form.fullName.trim() !== initialForm.fullName.trim() ||
+      form.birthday !== initialForm.birthday ||
+      form.gender !== initialForm.gender ||
+      form.roleId !== initialForm.roleId ||
+      Boolean(avatarFile) ||
+      avatarDeleted
+    );
+  }, [form, initialForm, avatarFile, avatarDeleted]);
+
+  const roleOptions = useMemo(
+    () => [
+      {
+        value: "",
+        label: "Chọn vai trò",
+        disabled: true,
+      },
+      ...roles.map((role) => ({
+        value: String(role.idRole),
+        label: role.nameRole,
+      })),
+    ],
+    [roles],
+  );
 
   useEffect(() => {
     return () => {
@@ -37,6 +70,15 @@ const UserIdentityEditModal = ({
 
   if (!user) return null;
 
+  const clearFieldError = (name) => {
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: "",
+    }));
+
+    setValidationError("");
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -45,20 +87,16 @@ const UserIdentityEditModal = ({
       [name]: value,
     }));
 
-    setValidationError("");
+    clearFieldError(name);
   };
 
-  const handleAvatarUpload = (event) => {
-    const file = event.target.files?.[0];
-
+  const handleAvatarUpload = (file) => {
     if (!file) return;
 
     const allowedTypes = ["image/jpeg", "image/png"];
 
     if (!allowedTypes.includes(file.type)) {
       setValidationError("Chỉ chấp nhận ảnh JPEG hoặc PNG.");
-
-      event.target.value = "";
       return;
     }
 
@@ -66,65 +104,83 @@ const UserIdentityEditModal = ({
 
     if (file.size > maxFileSize) {
       setValidationError("Ảnh đại diện không được vượt quá 5 MB.");
-
-      event.target.value = "";
       return;
+    }
+
+    if (avatarPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
     }
 
     setAvatarFile(file);
     setAvatarDeleted(false);
     setAvatarPreview(URL.createObjectURL(file));
     setValidationError("");
-
-    event.target.value = "";
   };
 
   const handleAvatarDelete = () => {
+    if (avatarPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
     setAvatarFile(null);
     setAvatarPreview("");
     setAvatarDeleted(Boolean(user.avatar));
     setValidationError("");
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
+  const validate = () => {
+    const errors = {};
     const fullName = form.fullName.trim();
-    const normalizedPhone = form.phone.trim().replace(/[\s.-]/g, "");
 
     if (!fullName) {
-      setValidationError("Họ tên không được để trống.");
-      return;
+      errors.fullName = "Họ tên không được để trống.";
     }
 
     if (!form.birthday) {
-      setValidationError("Vui lòng chọn ngày sinh.");
+      errors.birthday = "Vui lòng chọn ngày sinh.";
+    } else {
+      const birthday = new Date(`${form.birthday}T00:00:00`);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (Number.isNaN(birthday.getTime()) || birthday >= today) {
+        errors.birthday = "Ngày sinh phải nhỏ hơn ngày hiện tại.";
+      }
+    }
+
+    if (canAssignRole && !form.roleId) {
+      errors.roleId = "Vui lòng chọn vai trò.";
+    }
+
+    setFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (!hasChanges) {
+      setValidationError("Thông tin chưa có thay đổi.");
       return;
     }
 
-    const birthday = new Date(`${form.birthday}T00:00:00`);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (Number.isNaN(birthday.getTime()) || birthday >= today) {
-      setValidationError("Ngày sinh phải nhỏ hơn ngày hiện tại.");
-      return;
-    }
-
-    if (
-      normalizedPhone &&
-      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(normalizedPhone)
-    ) {
-      setValidationError("Số điện thoại không hợp lệ.");
+    if (!validate()) {
       return;
     }
 
     onSubmit?.({
-      fullName,
+      fullName: form.fullName.trim(),
       birthday: form.birthday,
       gender: form.gender,
-      phone: normalizedPhone,
+
+      /*
+       * Staff không thể thay đổi vai trò.
+       * Parent cũng cần kiểm tra lại.
+       */
+      roleId: canAssignRole ? Number(form.roleId) : undefined,
+
       avatarFile,
       avatarDeleted,
     });
@@ -133,8 +189,10 @@ const UserIdentityEditModal = ({
   return (
     <FormModal
       open
-      title="Chỉnh sửa danh tính"
-      description={`Cập nhật thông tin của ${user.fullName || user.userCode}.`}
+      title="Chỉnh sửa người dùng"
+      description={`Cập nhật thông tin của ${
+        user.fullName || user.userCode || user.idUser
+      }.`}
       submitting={submitting}
       errorMessage={validationError || errorMessage}
       onClose={onClose}
@@ -142,44 +200,46 @@ const UserIdentityEditModal = ({
       submitText="Lưu thay đổi"
       loadingText="Đang lưu..."
       cancelText="Hủy"
-      maxWidthClassName="max-w-5xl"
+      maxWidthClassName="max-w-3xl"
     >
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
-        {/* BÊN TRÁI */}
-        <div className="space-y-5">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-text-default">
-              Ảnh đại diện
-            </label>
+      <div className="space-y-6">
+        {/* Profile compact */}
+        <AvatarPicker
+          preview={avatarPreview}
+          fallback={defaultAvatar}
+          alt={user.fullName || "Người dùng"}
+          title={form.fullName || "Chưa cập nhật tên"}
+          code={user.userCode || user.idUser}
+          disabled={submitting}
+          removable={Boolean(avatarPreview || user.avatar)}
+          onSelect={handleAvatarUpload}
+          onRemove={handleAvatarDelete}
+        />
 
-            <UploadBox
-              variant="avatar"
-              preview={avatarPreview}
-              fallback={defaultAvatar}
-              accept="image/jpeg,image/png"
-              uploadText={avatarPreview ? "Thay đổi ảnh" : "Chọn ảnh"}
-              deleteText="Xóa ảnh"
-              onUpload={handleAvatarUpload}
-              onDelete={handleAvatarDelete}
-            />
+        {/* Thông tin cá nhân */}
+        <section>
+          <div className="mb-4 flex items-center gap-2">
+            <UserRound size={17} className="text-brand" />
 
-            <p className="mt-2 text-xs text-text-muted">
-              Chấp nhận JPEG hoặc PNG, dung lượng tối đa 5 MB.
-            </p>
+            <h3 className="text-sm font-bold text-text-strong">
+              Thông tin cá nhân
+            </h3>
           </div>
 
-          <FormInput
-            id="edit-full-name"
-            label="Họ tên"
-            name="fullName"
-            value={form.fullName}
-            onChange={handleChange}
-            disabled={submitting}
-            placeholder="Nhập họ tên"
-            autoComplete="name"
-          />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormInput
+              id="edit-full-name"
+              label="Họ và tên"
+              name="fullName"
+              value={form.fullName}
+              onChange={handleChange}
+              disabled={submitting}
+              error={fieldErrors.fullName}
+              placeholder="Nhập họ và tên"
+              autoComplete="name"
+              containerClassName="sm:col-span-2"
+            />
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <FormInput
               id="edit-birthday"
               label="Ngày sinh"
@@ -188,6 +248,7 @@ const UserIdentityEditModal = ({
               value={form.birthday}
               onChange={handleChange}
               disabled={submitting}
+              error={fieldErrors.birthday}
             />
 
             <div>
@@ -207,33 +268,78 @@ const UserIdentityEditModal = ({
                 className="h-11 w-full rounded-xl border border-input bg-surface px-4 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-surface-muted"
               >
                 <option value="Male">Nam</option>
+
                 <option value="Female">Nữ</option>
+
                 <option value="Unknown">Không xác định</option>
               </select>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* BÊN PHẢI */}
-        <div className="border-t border-border-subtle pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-6">
-          <h3 className="mb-4 text-sm font-bold text-text-strong">
-            Thông tin liên hệ
-          </h3>
+        {/* Phân quyền */}
+        <section className="rounded-2xl border border-border-subtle p-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-info-soft text-info">
+              <ShieldCheck size={18} />
+            </span>
 
-          <FormInput
-            id="edit-phone"
-            label="Số điện thoại"
-            type="tel"
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            disabled={submitting}
-            placeholder="Nhập số điện thoại"
-            autoComplete="tel"
-            inputMode="tel"
-            hint="Ví dụ: 0912345678"
-          />
-        </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-bold text-text-strong">
+                Vai trò và quyền truy cập
+              </h3>
+
+              <p className="mt-1 text-xs leading-5 text-text-muted">
+                Chỉ quản trị viên mới có thể thay đổi vai trò của người dùng.
+              </p>
+
+              <div className="mt-4">
+                <label
+                  htmlFor="edit-role"
+                  className="mb-2 block text-sm font-semibold text-text-default"
+                >
+                  Vai trò
+                </label>
+
+                {canAssignRole ? (
+                  <>
+                    <FilterSelect
+                      value={form.roleId}
+                      options={roleOptions}
+                      disabled={submitting}
+                      ariaLabel="Chọn vai trò người dùng"
+                      onValueChange={(value) => {
+                        setForm((current) => ({
+                          ...current,
+                          roleId: value,
+                        }));
+
+                        clearFieldError("roleId");
+                      }}
+                      className={fieldErrors.roleId ? "border-danger" : ""}
+                    />
+
+                    {fieldErrors.roleId && (
+                      <p className="mt-1.5 text-xs text-danger">
+                        {fieldErrors.roleId}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex h-11 items-center justify-between rounded-xl border border-border bg-surface-muted px-4">
+                    <span className="text-sm font-medium text-text-default">
+                      {user.role?.nameRole || "Chưa phân quyền"}
+                    </span>
+
+                    <span className="text-xs font-semibold text-text-muted">
+                      Chỉ xem
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </FormModal>
   );

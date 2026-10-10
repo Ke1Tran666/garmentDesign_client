@@ -13,6 +13,8 @@ const AvatarPicker = ({
   removable = false,
   onSelect,
   onRemove,
+  variant = "card",
+  initials = "U",
 }) => {
   const generatedId = useId();
   const inputId = `avatar-picker-${generatedId}`;
@@ -29,6 +31,66 @@ const AvatarPicker = ({
      */
     event.target.value = "";
   };
+
+  if (variant === "compact") {
+    const imageSource = preview || fallback;
+
+    return (
+      <div className="relative h-12 w-12 shrink-0">
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-sm font-semibold text-text-muted">
+          {imageSource ? (
+            <img
+              src={imageSource}
+              alt={alt}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initials
+          )}
+        </div>
+
+        {!disabled && (
+          <>
+            <label
+              htmlFor={inputId}
+              title="Thay đổi ảnh đại diện"
+              className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition focus-within:opacity-100 hover:opacity-100"
+            >
+              <Camera size={16} />
+
+              <span className="sr-only">Chọn ảnh đại diện</span>
+            </label>
+
+            <input
+              id={inputId}
+              type="file"
+              accept={accept}
+              onChange={handleChange}
+              className="sr-only"
+            />
+          </>
+        )}
+
+        {!disabled && (
+          <span className="pointer-events-none absolute -right-1 -bottom-1 z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-brand text-white">
+            <UserRound size={12} />
+          </span>
+        )}
+
+        {!disabled && removable && (
+          <button
+            type="button"
+            onClick={onRemove}
+            title="Xóa ảnh đại diện"
+            aria-label="Xóa ảnh đại diện"
+            className="absolute -top-1 -right-1 z-20 flex h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-danger text-white transition hover:opacity-85"
+          >
+            <Trash2 size={12} />
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <section className="rounded-2xl border border-border-subtle bg-surface-subtle p-4">

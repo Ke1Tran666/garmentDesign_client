@@ -23,16 +23,23 @@ import { normalizeRole } from "@/features/auth/lib/authRole";
 
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import { useNotification } from "@/app/providers/NotificationProvider";
-import UserIdentityEditModal from "@/features/user-management/ui/UserIdentityEditModal";
-import UserPhoneEditModal from "@/features/user-management/ui/UserPhoneEditModal";
 import AdminDetailLayout, {
   AdminDetailInfoRow,
   AdminDetailSection,
   AdminDetailSummaryRow,
 } from "@/shared/ui/admin-detail/AdminDetailLayout";
+import AvatarPicker from "@/shared/ui/upload/AvatarPicker";
 import { roleApi } from "@/entities/user/api/roleApi";
 
 const EMPTY_VALUE = "Chưa có dữ liệu";
+
+const createIdentityForm = (user, phone = "") => ({
+  fullName: user?.fullName || "",
+  birthday: user?.birthday ? String(user.birthday).slice(0, 10) : "",
+  gender: user?.gender || "Unknown",
+  phone,
+  roleId: String(user?.role?.idRole || ""),
+});
 
 const formatDate = (value) => {
   if (!value) return EMPTY_VALUE;
@@ -103,6 +110,11 @@ const formatActivityDate = (value) => {
     month: "2-digit",
   }).format(date);
 };
+
+const normalizePhoneInput = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/[\s.-]/g, "");
 
 const formatTime = (value) => {
   if (!value) return "";
@@ -195,17 +207,19 @@ const UserDetailPage = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [identityEditing, setIdentityEditing] = useState(false);
 
-  const [identityEditOpen, setIdentityEditOpen] = useState(false);
+  const [identityForm, setIdentityForm] = useState(() =>
+    createIdentityForm(null),
+  );
+
+  const [identityErrors, setIdentityErrors] = useState({});
   const [identitySubmitting, setIdentitySubmitting] = useState(false);
   const [identityUpdateError, setIdentityUpdateError] = useState("");
 
-  const [phoneEditOpen, setPhoneEditOpen] = useState(false);
-  const [phoneSubmitting, setPhoneSubmitting] = useState(false);
-  const [phoneUpdateError, setPhoneUpdateError] = useState("");
-  const [roles, setRoles] = useState([]);
-
-  const [rolesLoading, setRolesLoading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarDeleted, setAvatarDeleted] = useState(false);
 
   const currentRole = normalizeRole(adminUser?.role);
 
@@ -220,10 +234,16 @@ const UserDetailPage = () => {
   const canEditUser =
     isAdmin || (isStaff && (targetRole === "user" || isCurrentUser));
 
-  /*
-   * Chỉ Admin được cấp vai trò.
-   */
-  const canAssignRole = isAdmin;
+  const [roles, setRoles] = useState([]);
+  const [roleLoading, setRoleLoading] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   useEffect(() => {
     let active = true;
@@ -395,115 +415,19 @@ const UserDetailPage = () => {
 
   const status = getStatusInfo(user);
 
-  const handleIdentitySubmit = async ({
-    fullName,
-    birthday,
-    gender,
-    roleId,
-    avatarFile,
-    avatarDeleted,
-  }) => {
-    if (!canEditUser) {
-      return;
-    }
-
-    try {
-      setIdentitySubmitting(true);
-      setIdentityUpdateError("");
-
-      await userApi.updateById(user.idUser, {
-        fullName,
-        birthday,
-        gender,
-
-        /*
-         * Không gửi phone ở đây.
-         * Phone dùng modal riêng.
-         */
-        phone: null,
-      });
-
-      if (avatarDeleted) {
-        await userApi.removeAvatarById(user.idUser);
-      } else if (avatarFile) {
-        await userApi.uploadAvatarById(user.idUser, avatarFile);
-      }
-
-      const currentRoleId = user.role?.idRole;
-
-      if (canAssignRole && roleId && Number(roleId) !== Number(currentRoleId)) {
-        await userApi.updateRole(user.idUser, roleId);
-      }
-
-      const refreshedData = await userApi.getById(user.idUser);
-
-      setUser(normalizeUserDetail(refreshedData));
-
-      setIdentityEditOpen(false);
-
-      showNotification(
-        "success",
-        "Cập nhật thành công",
-        canAssignRole
-          ? "Thông tin và quyền người dùng đã được cập nhật."
-          : "Thông tin người dùng đã được cập nhật.",
-      );
-    } catch (error) {
-      setIdentityUpdateError(
-        error.response?.data?.message ||
-          "Không thể cập nhật thông tin người dùng.",
-      );
-    } finally {
-      setIdentitySubmitting(false);
-    }
-  };
-
-  const handleOpenPhoneEdit = () => {
-    setPhoneUpdateError("");
-    setPhoneEditOpen(true);
-  };
-
-  const handlePhoneSubmit = async (phone) => {
-    try {
-      setPhoneSubmitting(true);
-      setPhoneUpdateError("");
-
-      await userApi.updatePhoneById(user.idUser, phone);
-
-      const refreshedData = await userApi.getById(user.idUser);
-
-      setUser(normalizeUserDetail(refreshedData));
-
-      setPhoneEditOpen(false);
-
-      showNotification(
-        "success",
-        "Cập nhật thành công",
-        "Số điện thoại đã được cập nhật.",
-      );
-    } catch (error) {
-      setPhoneUpdateError(
-        error.response?.data?.message || "Không thể cập nhật số điện thoại.",
-      );
-    } finally {
-      setPhoneSubmitting(false);
-    }
-  };
-
-  const handleOpenIdentityEdit = async () => {
-    if (!canEditUser) {
+  const handleStartIdentityEdit = async () => {
+    if (!canEditUser || user.deletedAt || roleLoading) {
       return;
     }
 
     setIdentityUpdateError("");
 
     /*
-     * Chỉ Admin cần tải danh sách role.
-     * Staff không được gọi /api/roles.
+     * Chỉ Admin cần tải danh sách vai trò.
      */
-    if (canAssignRole && roles.length === 0) {
+    if (isAdmin && roles.length === 0) {
       try {
-        setRolesLoading(true);
+        setRoleLoading(true);
 
         const roleData = await roleApi.getAll();
 
@@ -517,11 +441,218 @@ const UserDetailPage = () => {
 
         return;
       } finally {
-        setRolesLoading(false);
+        setRoleLoading(false);
       }
     }
 
-    setIdentityEditOpen(true);
+    setIdentityForm(createIdentityForm(user, phoneProvider?.phone || ""));
+    setIdentityErrors({});
+
+    setAvatarFile(null);
+    setAvatarPreview(user.avatar || "");
+    setAvatarDeleted(false);
+
+    setIdentityEditing(true);
+  };
+
+  const handleCancelIdentityEdit = () => {
+    if (identitySubmitting) {
+      return;
+    }
+
+    setIdentityForm(createIdentityForm(user, phoneProvider?.phone || ""));
+    setIdentityErrors({});
+    setIdentityUpdateError("");
+
+    setAvatarFile(null);
+    setAvatarPreview(user.avatar || "");
+    setAvatarDeleted(false);
+
+    setIdentityEditing(false);
+  };
+
+  const handleIdentityChange = (event) => {
+    const { name, value } = event.target;
+
+    setIdentityForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+
+    setIdentityErrors((current) => ({
+      ...current,
+      [name]: "",
+    }));
+
+    setIdentityUpdateError("");
+  };
+
+  const validateIdentityForm = () => {
+    const errors = {};
+    const fullName = identityForm.fullName.trim();
+
+    if (!fullName) {
+      errors.fullName = "Họ tên không được để trống.";
+    }
+
+    if (isAdmin && !identityForm.roleId) {
+      errors.roleId = "Vui lòng chọn vai trò.";
+    }
+
+    if (!identityForm.birthday) {
+      errors.birthday = "Vui lòng chọn ngày sinh.";
+    } else {
+      const birthday = new Date(`${identityForm.birthday}T00:00:00`);
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+
+      if (Number.isNaN(birthday.getTime()) || birthday >= today) {
+        errors.birthday = "Ngày sinh phải nhỏ hơn ngày hiện tại.";
+      }
+    }
+
+    if (!["Male", "Female", "Unknown"].includes(identityForm.gender)) {
+      errors.gender = "Giới tính không hợp lệ.";
+    }
+
+    const normalizedPhone = normalizePhoneInput(identityForm.phone);
+
+    if (phoneProvider?.phone && !normalizedPhone) {
+      errors.phone = "Số điện thoại không được để trống.";
+    } else if (
+      normalizedPhone &&
+      !/^(0\d{9}|\+84\d{9}|84\d{9})$/.test(normalizedPhone)
+    ) {
+      errors.phone = "Số điện thoại không hợp lệ.";
+    }
+
+    setIdentityErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleAvatarSelect = (file) => {
+    if (!file) {
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setIdentityUpdateError("Chỉ chấp nhận ảnh JPEG hoặc PNG.");
+      return;
+    }
+
+    const maxFileSize = 5 * 1024 * 1024;
+
+    if (file.size > maxFileSize) {
+      setIdentityUpdateError("Ảnh đại diện không được vượt quá 5 MB.");
+      return;
+    }
+
+    setAvatarFile(file);
+    setAvatarDeleted(false);
+    setAvatarPreview(URL.createObjectURL(file));
+    setIdentityUpdateError("");
+  };
+
+  const handleAvatarRemove = () => {
+    setAvatarFile(null);
+    setAvatarPreview("");
+    setAvatarDeleted(Boolean(user.avatar));
+    setIdentityUpdateError("");
+  };
+
+  const handleIdentitySubmit = async (event) => {
+    event.preventDefault();
+
+    if (!canEditUser || identitySubmitting) {
+      return;
+    }
+
+    if (!validateIdentityForm()) {
+      return;
+    }
+
+    const initialForm = createIdentityForm(user, phoneProvider?.phone || "");
+
+    const normalizedPhone = normalizePhoneInput(identityForm.phone);
+
+    const initialPhone = normalizePhoneInput(initialForm.phone);
+
+    const phoneChanged = normalizedPhone !== initialPhone;
+
+    const profileChanged =
+      identityForm.fullName.trim() !== initialForm.fullName.trim() ||
+      identityForm.birthday !== initialForm.birthday ||
+      identityForm.gender !== initialForm.gender ||
+      phoneChanged;
+
+    const roleChanged =
+      isAdmin && Number(identityForm.roleId) !== Number(user.role?.idRole);
+
+    const avatarChanged = Boolean(avatarFile) || avatarDeleted;
+
+    if (!profileChanged && !avatarChanged && !roleChanged) {
+      setIdentityUpdateError("Thông tin chưa có thay đổi.");
+      return;
+    }
+
+    try {
+      setIdentitySubmitting(true);
+      setIdentityUpdateError("");
+
+      if (profileChanged) {
+        await userApi.updateById(user.idUser, {
+          fullName: identityForm.fullName.trim(),
+          birthday: identityForm.birthday,
+          gender: identityForm.gender,
+          phone: phoneChanged ? normalizedPhone : null,
+        });
+      }
+
+      if (avatarDeleted) {
+        await userApi.removeAvatarById(user.idUser);
+      } else if (avatarFile) {
+        await userApi.uploadAvatarById(user.idUser, avatarFile);
+      }
+
+      if (roleChanged) {
+        await userApi.updateRole(user.idUser, Number(identityForm.roleId));
+      }
+
+      if (roleChanged && isCurrentUser) {
+        window.location.replace("/login");
+        return;
+      }
+
+      const refreshedData = await userApi.getById(user.idUser);
+
+      const normalizedUser = normalizeUserDetail(refreshedData);
+
+      setUser(normalizedUser);
+
+      setAvatarFile(null);
+      setAvatarPreview(normalizedUser?.avatar || "");
+      setAvatarDeleted(false);
+
+      setIdentityEditing(false);
+      setIdentityErrors({});
+
+      showNotification(
+        "success",
+        "Cập nhật thành công",
+        "Thông tin danh tính đã được cập nhật.",
+      );
+    } catch (error) {
+      setIdentityUpdateError(
+        error.response?.data?.message ||
+          "Không thể cập nhật thông tin danh tính.",
+      );
+    } finally {
+      setIdentitySubmitting(false);
+    }
   };
 
   return (
@@ -594,7 +725,7 @@ const UserDetailPage = () => {
                     disabled={Boolean(user.deletedAt)}
                     onClick={() => {
                       setActionOpen(false);
-                      handleOpenIdentityEdit();
+                      handleStartIdentityEdit();
                     }}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold text-text-default transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -674,34 +805,60 @@ const UserDetailPage = () => {
               title="Danh tính"
               action={
                 canEditUser && !user.deletedAt ? (
-                  <button
-                    type="button"
-                    onClick={handleOpenIdentityEdit}
-                    className="rounded-md p-1.5 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
-                    aria-label="Chỉnh sửa người dùng"
-                    title="Chỉnh sửa người dùng"
-                  >
-                    <Pencil size={14} />
-                  </button>
+                  identityEditing ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelIdentityEdit}
+                        disabled={identitySubmitting}
+                        className="h-8 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-text-muted transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Hủy
+                      </button>
+
+                      <button
+                        type="submit"
+                        form="user-identity-inline-form"
+                        disabled={identitySubmitting}
+                        className="h-8 rounded-lg bg-brand! px-3 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {identitySubmitting ? "Đang lưu..." : "Lưu"}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleStartIdentityEdit}
+                      disabled={roleLoading}
+                      className="rounded-md p-1.5 text-text-subtle transition hover:bg-surface-muted hover:text-text-default disabled:cursor-wait disabled:opacity-50"
+                      aria-label="Chỉnh sửa danh tính"
+                      title="Chỉnh sửa danh tính"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  )
                 ) : null
               }
             >
               <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-sm font-semibold text-text-muted">
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.fullName || "Người dùng"}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    getInitials(user.fullName)
+                <AvatarPicker
+                  variant="compact"
+                  preview={identityEditing ? avatarPreview : user.avatar || ""}
+                  alt={user.fullName || "Người dùng"}
+                  initials={getInitials(
+                    identityEditing ? identityForm.fullName : user.fullName,
                   )}
-                </div>
+                  disabled={!identityEditing || identitySubmitting}
+                  removable={Boolean(avatarPreview)}
+                  onSelect={handleAvatarSelect}
+                  onRemove={handleAvatarRemove}
+                />
 
                 <div className="min-w-0">
                   <p className="truncate font-medium text-text-strong">
-                    {user.fullName || EMPTY_VALUE}
+                    {identityEditing
+                      ? identityForm.fullName || "Chưa cập nhật tên"
+                      : user.fullName || EMPTY_VALUE}
                   </p>
 
                   <p className="truncate text-sm text-text-muted">
@@ -710,72 +867,189 @@ const UserDetailPage = () => {
                 </div>
               </div>
 
-              <AdminDetailInfoRow icon={UserRound} label="Họ tên">
-                {user.fullName || EMPTY_VALUE}
-              </AdminDetailInfoRow>
+              <form
+                id="user-identity-inline-form"
+                onSubmit={handleIdentitySubmit}
+              >
+                <AdminDetailInfoRow icon={UserRound} label="Họ tên">
+                  {identityEditing ? (
+                    <div>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={identityForm.fullName}
+                        onChange={handleIdentityChange}
+                        disabled={identitySubmitting}
+                        placeholder="Nhập họ và tên"
+                        autoComplete="name"
+                        aria-label="Họ và tên"
+                        aria-invalid={Boolean(identityErrors.fullName)}
+                        className={`h-9 w-full rounded-lg border bg-surface px-3 text-sm font-medium text-text-default transition outline-none disabled:cursor-not-allowed disabled:bg-surface-muted ${
+                          identityErrors.fullName
+                            ? "border-danger focus:border-danger focus:ring-3 focus:ring-danger/10"
+                            : "border-input focus:border-brand focus:ring-3 focus:ring-brand/10"
+                        }`}
+                      />
 
-              <AdminDetailInfoRow icon={CalendarDays} label="Ngày sinh">
-                {formatDate(user.birthday)}
-              </AdminDetailInfoRow>
+                      {identityErrors.fullName && (
+                        <p className="mt-1 text-xs font-normal text-danger">
+                          {identityErrors.fullName}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    user.fullName || EMPTY_VALUE
+                  )}
+                </AdminDetailInfoRow>
 
-              <AdminDetailInfoRow icon={UserRound} label="Giới tính">
-                {formatGender(user.gender)}
-              </AdminDetailInfoRow>
+                <AdminDetailInfoRow icon={CalendarDays} label="Ngày sinh">
+                  {identityEditing ? (
+                    <div>
+                      <input
+                        type="date"
+                        name="birthday"
+                        value={identityForm.birthday}
+                        onChange={handleIdentityChange}
+                        disabled={identitySubmitting}
+                        aria-label="Ngày sinh"
+                        aria-invalid={Boolean(identityErrors.birthday)}
+                        className={`h-9 w-full rounded-lg border bg-surface px-3 text-sm font-medium text-text-default transition outline-none disabled:cursor-not-allowed disabled:bg-surface-muted ${
+                          identityErrors.birthday
+                            ? "border-danger focus:border-danger focus:ring-3 focus:ring-danger/10"
+                            : "border-input focus:border-brand focus:ring-3 focus:ring-brand/10"
+                        }`}
+                      />
 
-              <AdminDetailInfoRow icon={Phone} label="Điện thoại">
-                {phoneProvider?.phone || EMPTY_VALUE}
-              </AdminDetailInfoRow>
+                      {identityErrors.birthday && (
+                        <p className="mt-1 text-xs font-normal text-danger">
+                          {identityErrors.birthday}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    formatDate(user.birthday)
+                  )}
+                </AdminDetailInfoRow>
 
-              <AdminDetailInfoRow icon={MapPin} label="Địa chỉ">
-                {user.defaultAddress?.address || EMPTY_VALUE}
-              </AdminDetailInfoRow>
-            </AdminDetailSection>
+                <AdminDetailInfoRow icon={UserRound} label="Giới tính">
+                  {identityEditing ? (
+                    <div>
+                      <select
+                        name="gender"
+                        value={identityForm.gender}
+                        onChange={handleIdentityChange}
+                        disabled={identitySubmitting}
+                        aria-label="Giới tính"
+                        aria-invalid={Boolean(identityErrors.gender)}
+                        className={`h-9 w-full rounded-lg border bg-surface px-3 text-sm font-medium text-text-default transition outline-none disabled:cursor-not-allowed disabled:bg-surface-muted ${
+                          identityErrors.gender
+                            ? "border-danger focus:border-danger focus:ring-3 focus:ring-danger/10"
+                            : "border-input focus:border-brand focus:ring-3 focus:ring-brand/10"
+                        }`}
+                      >
+                        <option value="Male">Nam</option>
+                        <option value="Female">Nữ</option>
+                        <option value="Unknown">Không xác định</option>
+                      </select>
 
-            <AdminDetailSection
-              title="Số điện thoại"
-              action={
-                canEditUser && !user.deletedAt ? (
-                  <button
-                    type="button"
-                    onClick={handleOpenPhoneEdit}
-                    className="rounded-md p-1.5 text-text-subtle transition hover:bg-surface-muted hover:text-text-default"
-                    aria-label="Chỉnh sửa số điện thoại"
-                    title="Chỉnh sửa số điện thoại"
+                      {identityErrors.gender && (
+                        <p className="mt-1 text-xs font-normal text-danger">
+                          {identityErrors.gender}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    formatGender(user.gender)
+                  )}
+                </AdminDetailInfoRow>
+
+                <AdminDetailInfoRow icon={Phone} label="Điện thoại">
+                  {identityEditing ? (
+                    <div>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={identityForm.phone}
+                        onChange={handleIdentityChange}
+                        disabled={identitySubmitting}
+                        placeholder="Nhập số điện thoại"
+                        autoComplete="tel"
+                        inputMode="tel"
+                        aria-label="Số điện thoại"
+                        aria-invalid={Boolean(identityErrors.phone)}
+                        className={`h-9 w-full rounded-lg border bg-surface px-3 text-sm font-medium text-text-default transition outline-none disabled:cursor-not-allowed disabled:bg-surface-muted ${
+                          identityErrors.phone
+                            ? "border-danger focus:border-danger focus:ring-3 focus:ring-danger/10"
+                            : "border-input focus:border-brand focus:ring-3 focus:ring-brand/10"
+                        }`}
+                      />
+
+                      {identityErrors.phone && (
+                        <p className="mt-1 text-xs font-normal text-danger">
+                          {identityErrors.phone}
+                        </p>
+                      )}
+
+                      {!identityErrors.phone && (
+                        <p className="mt-1 text-xs font-normal text-text-muted">
+                          Ví dụ: 0912345678
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    phoneProvider?.phone || EMPTY_VALUE
+                  )}
+                </AdminDetailInfoRow>
+
+                <AdminDetailInfoRow icon={ShieldCheck} label="Vai trò">
+                  {identityEditing && isAdmin ? (
+                    <div>
+                      <select
+                        name="roleId"
+                        value={identityForm.roleId}
+                        onChange={handleIdentityChange}
+                        disabled={identitySubmitting}
+                        aria-label="Vai trò"
+                        aria-invalid={Boolean(identityErrors.roleId)}
+                        className={`h-9 w-full rounded-lg border bg-surface px-3 text-sm font-medium text-text-default transition outline-none disabled:cursor-not-allowed disabled:bg-surface-muted ${
+                          identityErrors.roleId
+                            ? "border-danger focus:border-danger focus:ring-3 focus:ring-danger/10"
+                            : "border-input focus:border-brand focus:ring-3 focus:ring-brand/10"
+                        }`}
+                      >
+                        <option value="" disabled>
+                          Chọn vai trò
+                        </option>
+
+                        {roles.map((role) => (
+                          <option key={role.idRole} value={String(role.idRole)}>
+                            {role.nameRole}
+                          </option>
+                        ))}
+                      </select>
+
+                      {identityErrors.roleId && (
+                        <p className="mt-1 text-xs font-normal text-danger">
+                          {identityErrors.roleId}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="inline-flex rounded-md bg-info-soft px-2 py-1 text-xs font-semibold text-info">
+                      {getRoleName(user)}
+                    </span>
+                  )}
+                </AdminDetailInfoRow>
+
+                {identityUpdateError && (
+                  <p
+                    role="alert"
+                    className="mt-2 rounded-lg bg-danger-soft px-3 py-2 text-sm font-normal text-danger"
                   >
-                    <Pencil size={14} />
-                  </button>
-                ) : null
-              }
-            >
-              {phoneProvider ? (
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-subtle px-3 py-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-text-default">
-                      {phoneProvider.phone}
-                    </p>
-
-                    <p className="mt-1 text-xs text-text-muted">
-                      {phoneProvider.phoneVerifiedAt
-                        ? "Đã xác thực"
-                        : "Chưa xác thực"}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`shrink-0 rounded-md px-2 py-1 text-xs font-semibold ${
-                      phoneProvider.phoneVerifiedAt
-                        ? "bg-success-soft text-success"
-                        : "bg-warning-soft text-warning"
-                    }`}
-                  >
-                    Chính
-                  </span>
-                </div>
-              ) : (
-                <p className="py-2 text-sm text-text-muted">
-                  Chưa có số điện thoại.
-                </p>
-              )}
+                    {identityUpdateError}
+                  </p>
+                )}
+              </form>
             </AdminDetailSection>
 
             <AdminDetailSection title="Địa chỉ mặc định">
@@ -811,14 +1085,6 @@ const UserDetailPage = () => {
               description={formatDate(user.updatedAt)}
               value={status.label}
               valueClassName={status.badgeClassName}
-              showChevron
-            />
-
-            <AdminDetailSummaryRow
-              icon={ShieldCheck}
-              title="Vai trò"
-              value={getRoleName(user)}
-              valueClassName="bg-info-soft text-info"
               showChevron
             />
 
@@ -1001,40 +1267,6 @@ const UserDetailPage = () => {
           )}
         </section>
       </AdminDetailLayout>
-
-      {identityEditOpen && (
-        <UserIdentityEditModal
-          user={user}
-          roles={roles}
-          canAssignRole={canAssignRole}
-          submitting={identitySubmitting || rolesLoading}
-          errorMessage={identityUpdateError}
-          onClose={() => {
-            if (identitySubmitting || rolesLoading) {
-              return;
-            }
-
-            setIdentityEditOpen(false);
-            setIdentityUpdateError("");
-          }}
-          onSubmit={handleIdentitySubmit}
-        />
-      )}
-
-      {phoneEditOpen && (
-        <UserPhoneEditModal
-          phone={phoneProvider?.phone || ""}
-          submitting={phoneSubmitting}
-          errorMessage={phoneUpdateError}
-          onClose={() => {
-            if (phoneSubmitting) return;
-
-            setPhoneEditOpen(false);
-            setPhoneUpdateError("");
-          }}
-          onSubmit={handlePhoneSubmit}
-        />
-      )}
 
       <ConfirmModal
         open={deleteOpen}

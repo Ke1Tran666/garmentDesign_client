@@ -1,3 +1,5 @@
+import Select from "./Select";
+
 const FilterSelect = ({
   value,
   options = [],
@@ -6,28 +8,15 @@ const FilterSelect = ({
   className = "",
   disabled = false,
 }) => {
-  const handleChange = (event) => {
-    onValueChange?.(event.target.value);
-  };
-
   return (
-    <select
+    <Select
       value={value}
-      onChange={handleChange}
+      options={options}
+      onValueChange={onValueChange}
+      ariaLabel={ariaLabel}
       disabled={disabled}
-      aria-label={ariaLabel}
-      className={`h-11 w-full rounded-xl border border-input bg-surface px-3 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-surface-muted disabled:opacity-60 ${className} `}
-    >
-      {options.map((option) => (
-        <option
-          key={option.value}
-          value={option.value}
-          disabled={option.disabled}
-        >
-          {option.label}
-        </option>
-      ))}
-    </select>
+      className={className}
+    />
   );
 };
 

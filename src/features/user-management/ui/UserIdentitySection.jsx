@@ -24,6 +24,7 @@ import {
   getRoleName,
   normalizeUserDetail,
 } from "../lib/userDetail";
+import Select from "@/shared/ui/select/Select";
 
 const createIdentityForm = (user, phone = "") => ({
   fullName: user?.fullName || "",
@@ -430,19 +431,29 @@ const UserIdentitySection = ({
             value={formatGender(user.gender)}
             error={errors.gender}
           >
-            <select
+            <Select
               name="gender"
               value={form.gender}
               onChange={handleChange}
               disabled={submitting}
-              aria-label="Giới tính"
-              aria-invalid={Boolean(errors.gender)}
-              className={getControlClassName(Boolean(errors.gender))}
-            >
-              <option value="Male">Nam</option>
-              <option value="Female">Nữ</option>
-              <option value="Unknown">Không xác định</option>
-            </select>
+              ariaLabel="Giới tính"
+              error={Boolean(errors.gender)}
+              size="sm"
+              options={[
+                {
+                  value: "Male",
+                  label: "Nam",
+                },
+                {
+                  value: "Female",
+                  label: "Nữ",
+                },
+                {
+                  value: "Unknown",
+                  label: "Không xác định",
+                },
+              ]}
+            />
           </EditableValue>
         </AdminDetailInfoRow>
 
@@ -472,25 +483,20 @@ const UserIdentitySection = ({
         <AdminDetailInfoRow icon={ShieldCheck} label="Vai trò">
           {editing && isAdmin ? (
             <EditableValue editing error={errors.roleId}>
-              <select
+              <Select
                 name="roleId"
                 value={form.roleId}
                 onChange={handleChange}
                 disabled={submitting}
-                aria-label="Vai trò"
-                aria-invalid={Boolean(errors.roleId)}
-                className={getControlClassName(Boolean(errors.roleId))}
-              >
-                <option value="" disabled>
-                  Chọn vai trò
-                </option>
-
-                {roles.map((role) => (
-                  <option key={role.idRole} value={String(role.idRole)}>
-                    {role.nameRole}
-                  </option>
-                ))}
-              </select>
+                ariaLabel="Vai trò"
+                error={Boolean(errors.roleId)}
+                placeholder="Chọn vai trò"
+                size="sm"
+                options={roles.map((role) => ({
+                  value: role.idRole,
+                  label: role.nameRole,
+                }))}
+              />
             </EditableValue>
           ) : (
             <span className="inline-flex rounded-md bg-info-soft px-2 py-1 text-xs font-semibold text-info">

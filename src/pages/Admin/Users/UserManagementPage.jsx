@@ -1,20 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import {
-  Download,
-  Eye,
-  RefreshCw,
-  Search,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  Trash2,
-  UserCheck,
-  UserPlus,
-  UserRound,
-  Users,
-  X,
-} from "lucide-react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Eye, MoreVertical, Trash2, UserPlus, UserRound } from "lucide-react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
 import { userApi } from "@/entities/user/api/userApi";
@@ -352,35 +338,32 @@ const UserManagementPage = () => {
         </div>
       </div>
 
-      {/* =========================================
-          TOP METRIC STAT CARDS
-          ========================================= */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Tổng người dùng
-            </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
-              <Users size={17} />
-            </div>
-          </div>
-          <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
-            {stats.total}
-          </div>
-        </div>
+  return (
+    <>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <PageHeading
+            title="Quản lý người dùng"
+            description="Xem và quản lý tài khoản trong hệ thống."
+          />
 
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Khách hàng
-            </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
-              <UserCheck size={17} />
-            </div>
-          </div>
-          <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
-            {stats.customerCount}
+          <div className="flex flex-wrap items-center gap-3">
+            <CountBadge
+              count={filteredUsers.length}
+              label="người dùng"
+              icon={UserRound}
+            />
+
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => navigate("/admin/users/create")}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand! px-4 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                <UserPlus size={18} />
+                Thêm người dùng
+              </button>
+            )}
           </div>
         </div>
 
@@ -448,25 +431,24 @@ const UserManagementPage = () => {
             )}
           </div>
 
-          {/* Role selector dropdown */}
-          <div className="flex flex-wrap items-center gap-2">
-            <select
+            <FilterSelect
               value={roleFilter}
-              onChange={(e) => {
-                setRoleFilter(e.target.value);
+              ariaLabel="Lọc người dùng theo vai trò"
+              options={[
+                {
+                  value: "all",
+                  label: "Tất cả vai trò",
+                },
+                ...availableRoles.map((role) => ({
+                  value: role,
+                  label: role,
+                })),
+              ]}
+              onValueChange={(value) => {
+                setRoleFilter(value);
                 setCurrentPage(1);
               }}
-              className="h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-            >
-              <option value="all">Tất cả vai trò</option>
-              {availableRoles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+            />
 
         {/* Status Filter Chips */}
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">

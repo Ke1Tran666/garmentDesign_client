@@ -64,12 +64,12 @@ const Select = ({
         id={id || name}
         aria-label={ariaLabel}
         aria-invalid={error || undefined}
-        className={`group flex w-full items-center justify-between gap-3 border! bg-surface text-left text-text-default shadow-xs transition outline-none ${
+        className={`group flex w-full items-center justify-between gap-3 border bg-surface text-left text-text-default transition outline-none ${
           SIZE_CLASSES[size] || SIZE_CLASSES.md
         } ${
           error
-            ? "border-danger! focus:border-danger! focus:ring-4 focus:ring-danger/10 data-[state=open]:border-danger! data-[state=open]:ring-4 data-[state=open]:ring-danger/10"
-            : "hover:border-border-strong! border-input! focus:border-brand! focus:ring-4 focus:ring-brand/10 data-[state=open]:border-brand! data-[state=open]:ring-4 data-[state=open]:ring-brand/10"
+            ? "border-danger focus:ring-4 focus:ring-danger/10"
+            : "hover:border-border-strong border-input focus:border-brand focus:ring-4 focus:ring-brand/10"
         } disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted disabled:opacity-60 ${className}`}
       >
         <RadixSelect.Value

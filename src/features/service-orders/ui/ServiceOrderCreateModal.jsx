@@ -15,6 +15,7 @@ import { useFileUpload } from "@/shared/hooks/useFileUpload";
 import ProductImagePicker from "@/features/service-orders/ui/file-upload/ProductImagePicker";
 import AttachmentPicker from "@/features/service-orders/ui/file-upload/AttachmentPicker";
 import { useAuth } from "@/features/auth/model/useAuth";
+import FormSelect from "@/shared/ui/select/FormSelect";
 
 const initialForm = {
   serviceId: "",
@@ -474,34 +475,21 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
             ) : (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="serviceId"
-                      className="mb-2 block text-xs font-semibold tracking-wide text-text-muted uppercase"
-                    >
-                      Dịch vụ
-                    </label>
-
-                    <select
-                      id="serviceId"
-                      name="serviceId"
-                      value={form.serviceId}
-                      onChange={handleChange}
-                      disabled={submitting || Boolean(createdOrder)}
-                      className="h-12 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:bg-surface-subtle"
-                    >
-                      <option value="">Chọn dịch vụ</option>
-
-                      {services.map((service) => (
-                        <option
-                          key={service.serviceId}
-                          value={service.serviceId}
-                        >
-                          {service.serviceName}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <FormSelect
+                    id="serviceId"
+                    name="serviceId"
+                    label="Dịch vụ"
+                    value={form.serviceId}
+                    onChange={handleChange}
+                    disabled={submitting || Boolean(createdOrder)}
+                    placeholder="Chọn dịch vụ"
+                    size="lg"
+                    labelClassName="text-xs tracking-wide text-text-muted uppercase"
+                    options={services.map((service) => ({
+                      value: service.serviceId,
+                      label: service.serviceName,
+                    }))}
+                  />
 
                   <div>
                     <label

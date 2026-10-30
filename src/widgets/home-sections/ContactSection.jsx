@@ -3,6 +3,7 @@ import { Clock, Mail, MapPin, Phone, Send } from "lucide-react";
 import { useNotification } from "@/app/providers/NotificationProvider";
 import { serviceApi } from "@/entities/service/api/serviceApi";
 import { contactApi } from "@/features/contact/api/contactApi";
+import FormSelect from "@/shared/ui/select/FormSelect";
 
 const CONTACT_INFO = [
   {
@@ -101,29 +102,20 @@ function ContactForm({ onSubmit, services, loadingServices, submitting }) {
         />
       </div>
 
-      <div>
-        <label className="mb-2 block font-mono text-xs tracking-wider text-text-subtle uppercase">
-          Dịch vụ cần *
-        </label>
-
-        <select
-          name="serviceCode"
-          required
-          className={`${inputCls} cursor-pointer appearance-none text-text-muted`}
-          defaultValue=""
-          disabled={loadingServices || submitting}
-        >
-          <option value="" disabled>
-            {loadingServices ? "Đang tải dịch vụ..." : "Chọn dịch vụ"}
-          </option>
-
-          {services.map((service) => (
-            <option key={service.serviceId} value={service.serviceCode}>
-              {service.serviceName} - {service.serviceCode}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FormSelect
+        name="serviceCode"
+        label="Dịch vụ cần"
+        defaultValue=""
+        required
+        disabled={loadingServices || submitting}
+        placeholder={loadingServices ? "Đang tải dịch vụ..." : "Chọn dịch vụ"}
+        size="lg"
+        labelClassName="font-mono text-xs tracking-wider text-text-subtle uppercase"
+        options={services.map((service) => ({
+          value: service.serviceCode,
+          label: `${service.serviceName} - ${service.serviceCode}`,
+        }))}
+      />
 
       <div>
         <label className="mb-2 block font-mono text-xs tracking-wider text-text-subtle uppercase">
@@ -217,6 +209,12 @@ const ContactSection = () => {
         "Có lỗi xảy ra!",
         "Vui lòng nhập email của bạn.",
       );
+      return;
+    }
+
+    if (!payload.serviceCode) {
+      showNotification("error", "Có lỗi xảy ra!", "Vui lòng chọn dịch vụ.");
+
       return;
     }
 

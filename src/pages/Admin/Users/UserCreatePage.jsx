@@ -393,7 +393,7 @@ const UserCreatePage = () => {
                         </div>
                         {isChecked && (
                           <div className="h-5 w-5 rounded-full bg-brand text-white flex items-center justify-center">
-                            <Check size={12} className="stroke-[3]" />
+                            <Check size={12} className="stroke-3" />
                           </div>
                         )}
                       </div>

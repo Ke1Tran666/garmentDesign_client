@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -95,9 +95,35 @@ const AdminLayout = () => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
 
+  const quickCreateRef = useRef(null);
+  const userDropdownRef = useRef(null);
+
   useEffect(() => {
     localStorage.setItem("admin-sidebar-collapsed", String(isCollapsed));
   }, [isCollapsed]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        quickCreateRef.current &&
+        !quickCreateRef.current.contains(event.target)
+      ) {
+        setQuickCreateOpen(false);
+      }
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = async () => {
     setUserDropdownOpen(false);
@@ -135,14 +161,14 @@ const AdminLayout = () => {
   return (
     <div className="flex min-h-screen bg-slate-50/70 font-sans text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
       {/* =========================================
-          DESKTOP SIDEBAR
+          DESKTOP SIDEBAR (COLLAPSIBLE FROM SIDEBAR BUTTON)
           ========================================= */}
       <aside
         className={`sticky top-0 z-40 hidden h-screen flex-col border-r border-slate-200/80 bg-white/95 shadow-xs backdrop-blur-md transition-all duration-300 md:flex dark:border-slate-800 dark:bg-slate-900/95 ${
           isCollapsed ? "w-20 px-3 py-5" : "w-72 px-5 py-6"
         }`}
       >
-        {/* Brand header */}
+        {/* Brand header with Sidebar-only Toggle Button */}
         {isCollapsed ? (
           <div className="flex flex-col items-center gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
             <Link
@@ -155,8 +181,9 @@ const AdminLayout = () => {
             <button
               type="button"
               onClick={() => setIsCollapsed(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:hover:bg-slate-800 dark:hover:text-slate-200"
               title="Mở rộng sidebar"
+              aria-label="Mở rộng sidebar"
             >
               <PanelLeftOpen size={18} />
             </button>
@@ -184,8 +211,9 @@ const AdminLayout = () => {
             <button
               type="button"
               onClick={() => setIsCollapsed(true)}
-              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 lg:flex dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:hover:bg-slate-800 dark:hover:text-slate-200"
               title="Thu gọn sidebar"
+              aria-label="Thu gọn sidebar"
             >
               <PanelLeftClose size={18} />
             </button>
@@ -253,7 +281,7 @@ const AdminLayout = () => {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="flex flex-col gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 dark:border-slate-800">
           {!isCollapsed && (
             <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700/50 dark:bg-slate-800/50">
               <div className="flex min-w-0 items-center gap-2.5">
@@ -262,7 +290,7 @@ const AdminLayout = () => {
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 </span>
                 <span className="truncate text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Máy chủ hoạt động
+                  Hệ thống hoạt động
                 </span>
               </div>
               <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
@@ -282,14 +310,14 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
+                className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer dark:hover:bg-rose-950/40"
                 title="Đăng xuất"
               >
                 <LogOut size={16} />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3 p-1.5 rounded-xl">
+            <div className="flex items-center gap-3 rounded-xl p-1.5">
               <img
                 src={user?.avatar || defaultAvatar}
                 alt={user?.fullName || "Admin"}
@@ -306,7 +334,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer dark:hover:bg-rose-950/40"
                 title="Đăng xuất"
               >
                 <LogOut size={16} />
@@ -340,7 +368,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 cursor-pointer dark:hover:bg-slate-800"
               >
                 <X size={18} />
               </button>
@@ -389,7 +417,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50"
+                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50 cursor-pointer"
               >
                 <LogOut size={14} />
                 <span>Thoát</span>
@@ -404,36 +432,26 @@ const AdminLayout = () => {
           ========================================= */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-200/80 bg-white/80 px-4 shadow-xs backdrop-blur-md md:px-8 dark:border-slate-800 dark:bg-slate-900/80">
-          {/* Left: Mobile hamburger & Desktop Sidebar Toggle & Breadcrumb */}
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-200/80 bg-white/90 px-4 shadow-xs backdrop-blur-md md:px-8 dark:border-slate-800 dark:bg-slate-900/90">
+          {/* Left: Mobile hamburger & Breadcrumb ONLY (No sidebar toggle in header) */}
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="-ml-2 rounded-xl p-2 text-slate-500 hover:bg-slate-100 md:hidden dark:hover:bg-slate-800"
+              className="-ml-2 rounded-xl p-2 text-slate-500 hover:bg-slate-100 md:hidden cursor-pointer dark:hover:bg-slate-800"
               aria-label="Mở menu"
             >
               <Menu size={20} />
-            </button>
-
-            {/* Desktop Toggle Button in Topbar */}
-            <button
-              type="button"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden md:flex h-8.5 w-8.5 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:text-brand hover:border-brand/40 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 transition-colors"
-              title={isCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
-            >
-              {isCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
             </button>
 
             {/* Breadcrumb Navigation */}
             <nav className="flex items-center gap-2 text-xs text-slate-500 md:text-sm dark:text-slate-400">
               <Link
                 to="/admin/dashboard"
-                className="flex items-center gap-1 transition-colors hover:text-brand"
+                className="flex items-center gap-1.5 transition-colors hover:text-brand"
               >
                 <House size={15} />
-                <span className="hidden sm:inline">Admin</span>
+                <span className="hidden sm:inline font-medium">Admin</span>
               </Link>
               <ChevronRight
                 size={14}
@@ -445,10 +463,10 @@ const AdminLayout = () => {
             </nav>
           </div>
 
-          {/* Right: Quick actions, Search, Notifications, Profile */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
+          {/* Right: Search, Quick actions, View Site, Notifications, Profile */}
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
             {/* Search Input in Topbar */}
-            <div className="relative hidden w-64 lg:block xl:w-80">
+            <div className="relative hidden w-64 lg:block xl:w-76">
               <Search
                 size={16}
                 className="absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400"
@@ -458,56 +476,89 @@ const AdminLayout = () => {
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 placeholder="Tìm kiếm dữ liệu toàn hệ thống..."
-                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pr-4 pl-9.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pr-8 pl-9.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
               />
               {searchKeyword && (
                 <button
                   type="button"
                   onClick={() => setSearchKeyword("")}
-                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X size={14} />
                 </button>
               )}
             </div>
 
-            {/* Quick Action Button */}
-            <div className="relative">
+            {/* Quick Action Button with Dropdown */}
+            <div className="relative" ref={quickCreateRef}>
               <button
                 type="button"
-                onClick={() => setQuickCreateOpen(!quickCreateOpen)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-hover"
+                onClick={() => setQuickCreateOpen((prev) => !prev)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white! shadow-sm shadow-brand/25 transition-all hover:bg-brand-hover! active:scale-95 cursor-pointer"
               >
-                <Plus size={15} />
+                <Plus size={15} className="stroke-[2.5]" />
                 <span className="hidden sm:inline">Thêm nhanh</span>
-                <ChevronDown size={14} />
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-200 ${quickCreateOpen ? "rotate-180" : ""}`}
+                />
               </button>
 
               {quickCreateOpen && (
-                <div
-                  className="animate-in fade-in slide-in-from-top-2 absolute right-0 z-50 mt-2 w-52 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl ring-1 ring-black/5 duration-150 dark:border-slate-800 dark:bg-slate-900"
-                  onClick={() => setQuickCreateOpen(false)}
-                >
+                <div className="animate-in fade-in slide-in-from-top-2 absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900">
+                  <div className="px-3 py-1.5 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                    Tác vụ nhanh
+                  </div>
                   <Link
                     to="/admin/users/create"
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
+                    onClick={() => setQuickCreateOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <UserPlus size={16} className="text-brand" />
-                    <span>Tạo người dùng mới</span>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-brand dark:bg-blue-950/50">
+                      <UserPlus size={15} />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-800 dark:text-white">
+                        Tạo người dùng
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        Thêm tài khoản mới
+                      </div>
+                    </div>
                   </Link>
                   <Link
                     to="/admin/services"
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
+                    onClick={() => setQuickCreateOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <SlidersHorizontal size={16} className="text-indigo-500" />
-                    <span>Thêm dịch vụ thiết kế</span>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+                      <SlidersHorizontal size={15} />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-800 dark:text-white">
+                        Dịch vụ thiết kế
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        Quản lý bảng giá
+                      </div>
+                    </div>
                   </Link>
                   <Link
                     to="/admin/service-orders"
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
+                    onClick={() => setQuickCreateOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
                   >
-                    <ClipboardList size={16} className="text-emerald-500" />
-                    <span>Xem đơn dịch vụ</span>
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                      <ClipboardList size={15} />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-slate-800 dark:text-white">
+                        Đơn dịch vụ
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        Theo dõi tiến độ đơn
+                      </div>
+                    </div>
                   </Link>
                 </div>
               )}
@@ -518,8 +569,8 @@ const AdminLayout = () => {
               to="/"
               target="_blank"
               rel="noreferrer"
-              className="hidden h-9 items-center gap-1.5 rounded-xl border border-slate-200 px-3 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-brand md:flex dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              title="Xem trang web khách hàng"
+              className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 text-xs font-medium text-slate-600 shadow-2xs transition-colors hover:border-brand/40 hover:bg-slate-50 hover:text-brand dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              title="Mở giao diện khách hàng"
             >
               <ExternalLink size={14} />
               <span>Xem trang web</span>
@@ -529,11 +580,11 @@ const AdminLayout = () => {
             <NotificationButton />
 
             {/* Admin User Menu Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={userDropdownRef}>
               <button
                 type="button"
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2.5 rounded-xl p-1 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                onClick={() => setUserDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-2.5 rounded-xl p-1 transition-colors hover:bg-slate-100 cursor-pointer dark:hover:bg-slate-800"
               >
                 <img
                   src={user?.avatar || defaultAvatar}
@@ -545,15 +596,12 @@ const AdminLayout = () => {
                 </span>
                 <ChevronDown
                   size={14}
-                  className="hidden text-slate-400 sm:inline"
+                  className={`hidden text-slate-400 sm:inline transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`}
                 />
               </button>
 
               {userDropdownOpen && (
-                <div
-                  className="animate-in fade-in slide-in-from-top-2 absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 duration-150 dark:border-slate-800 dark:bg-slate-900"
-                  onClick={() => setUserDropdownOpen(false)}
-                >
+                <div className="animate-in fade-in slide-in-from-top-2 absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900">
                   <div className="mb-1 border-b border-slate-100 px-3 py-2 dark:border-slate-800">
                     <p className="truncate text-xs font-bold text-slate-900 dark:text-white">
                       {user?.fullName || "Administrator"}
@@ -568,6 +616,7 @@ const AdminLayout = () => {
 
                   <Link
                     to="/user/profile"
+                    onClick={() => setUserDropdownOpen(false)}
                     className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
                   >
                     <User size={15} />
@@ -576,6 +625,7 @@ const AdminLayout = () => {
 
                   <Link
                     to="/user/dashboard"
+                    onClick={() => setUserDropdownOpen(false)}
                     className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
                   >
                     <LayoutDashboard size={15} />
@@ -587,7 +637,7 @@ const AdminLayout = () => {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer dark:hover:bg-rose-950/40"
                   >
                     <LogOut size={15} />
                     <span>Đăng xuất</span>

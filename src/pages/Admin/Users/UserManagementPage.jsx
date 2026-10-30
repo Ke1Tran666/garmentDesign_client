@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Eye, MoreVertical, Trash2, UserRound } from "lucide-react";
+import { Eye, MoreVertical, Trash2, UserPlus, UserRound } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
 import defaultAvatar from "@/shared/assets/images/avatar-default.jpg";
@@ -293,11 +293,24 @@ const UserManagementPage = () => {
             description="Xem và quản lý tài khoản trong hệ thống."
           />
 
-          <CountBadge
-            count={filteredUsers.length}
-            label="người dùng"
-            icon={UserRound}
-          />
+          <div className="flex flex-wrap items-center gap-3">
+            <CountBadge
+              count={filteredUsers.length}
+              label="người dùng"
+              icon={UserRound}
+            />
+
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => navigate("/admin/users/create")}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-brand! px-4 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                <UserPlus size={18} />
+                Thêm người dùng
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="rounded-2xl border border-border-subtle bg-surface p-5 shadow-sm">
@@ -312,22 +325,24 @@ const UserManagementPage = () => {
               className="w-full"
             />
 
-            <select
+            <FilterSelect
               value={roleFilter}
-              onChange={(event) => {
-                setRoleFilter(event.target.value);
+              ariaLabel="Lọc người dùng theo vai trò"
+              options={[
+                {
+                  value: "all",
+                  label: "Tất cả vai trò",
+                },
+                ...availableRoles.map((role) => ({
+                  value: role,
+                  label: role,
+                })),
+              ]}
+              onValueChange={(value) => {
+                setRoleFilter(value);
                 setCurrentPage(1);
               }}
-              className="h-11 rounded-xl border border-input bg-surface px-3 text-sm outline-none focus:border-brand"
-            >
-              <option value="all">Tất cả vai trò</option>
-
-              {availableRoles.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
+            />
 
             <FilterSelect
               value={statusFilter}

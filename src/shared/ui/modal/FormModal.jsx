@@ -1,4 +1,15 @@
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { LoaderCircle, Save, X } from "lucide-react";
+
+const FOCUSABLE_SELECTOR = [
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "a[href]",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
 
 const FormModal = ({
   open = true,
@@ -17,29 +28,132 @@ const FormModal = ({
   errorMessage = "",
   maxWidthClassName = "max-w-xl",
 }) => {
-  if (!open) return null;
+  const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  const submittingRef = useRef(submitting);
 
-  const handleBackdropClick = () => {
-    if (!submitting) {
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    submittingRef.current = submitting;
+  }, [submitting]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const previousActiveElement = document.activeElement;
+
+    const previousOverflow = document.body.style.overflow;
+
+    const previousPaddingRight = document.body.style.paddingRight;
+
+    const appRoot = document.getElementById("root");
+
+    const previousRootInert = appRoot?.inert ?? false;
+
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.overflow = "hidden";
+
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    if (appRoot) {
+      appRoot.inert = true;
+    }
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      const firstFocusable =
+        dialogRef.current?.querySelector(FOCUSABLE_SELECTOR);
+
+      firstFocusable?.focus();
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && !submittingRef.current) {
+        event.preventDefault();
+        onCloseRef.current?.();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const focusableElements = Array.from(
+        dialogRef.current?.querySelectorAll(FOCUSABLE_SELECTOR) || [],
+      );
+
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        dialogRef.current?.focus();
+        return;
+      }
+
+      const first = focusableElements[0];
+
+      const last = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+
+      document.removeEventListener("keydown", handleKeyDown);
+
+      document.body.style.overflow = previousOverflow;
+
+      document.body.style.paddingRight = previousPaddingRight;
+
+      if (appRoot) {
+        appRoot.inert = previousRootInert;
+      }
+
+      previousActiveElement?.focus?.();
+    };
+  }, [open]);
+
+  if (!open || typeof document === "undefined") {
+    return null;
+  }
+
+  const handleBackdropClick = (event) => {
+    if (event.target === event.currentTarget && !submitting) {
       onClose?.();
     }
   };
 
-  return (
+  const modal = (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="form-modal-title"
-      onClick={handleBackdropClick}
-      className="fixed inset-0 z-70 flex items-center justify-center bg-black/40 px-4 py-6"
+      role="presentation"
+      onMouseDown={handleBackdropClick}
+      className="fixed inset-0 z-70 flex items-center justify-center overscroll-contain bg-black/40 px-4 py-6"
     >
       <div
-        onClick={(event) => event.stopPropagation()}
-        className={`relative w-full ${maxWidthClassName} overflow-hidden rounded-2xl border border-border-subtle bg-surface shadow-2xl`}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="form-modal-title"
+        aria-describedby={description ? "form-modal-description" : undefined}
+        tabIndex={-1}
+        className={`relative flex max-h-[calc(100dvh-3rem)] w-full flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface shadow-2xl ${maxWidthClassName} `}
       >
-        <div className="h-1 w-full bg-brand" />
+        <div className="h-1 w-full shrink-0 bg-brand" />
 
-        <header className="flex items-center justify-between border-b border-border-subtle px-5 py-4 sm:px-6">
+        <header className="flex shrink-0 items-center justify-between border-b border-border-subtle px-5 py-4 sm:px-6">
           <div className="min-w-0 pr-4">
             <h2
               id="form-modal-title"
@@ -49,7 +163,12 @@ const FormModal = ({
             </h2>
 
             {description && (
-              <p className="mt-1 text-sm text-text-muted">{description}</p>
+              <p
+                id="form-modal-description"
+                className="mt-1 text-sm text-text-muted"
+              >
+                {description}
+              </p>
             )}
           </div>
 
@@ -67,8 +186,8 @@ const FormModal = ({
           </button>
         </header>
 
-        <form onSubmit={onSubmit}>
-          <div className="max-h-[70vh] space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
+        <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
             {children ??
               fields.map((field) => {
                 const commonProps = {
@@ -102,13 +221,16 @@ const FormModal = ({
               })}
 
             {errorMessage && (
-              <p className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+              <p
+                role="alert"
+                className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger"
+              >
                 {errorMessage}
               </p>
             )}
           </div>
 
-          <footer className="flex justify-end gap-3 border-t border-border-subtle px-5 py-4 sm:px-6">
+          <footer className="flex shrink-0 justify-end gap-3 border-t border-border-subtle px-5 py-4 sm:px-6">
             <button
               type="button"
               onClick={onClose}
@@ -136,6 +258,8 @@ const FormModal = ({
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 };
 
 export default FormModal;

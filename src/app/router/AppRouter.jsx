@@ -26,6 +26,7 @@ import UserDetailPage from "@/pages/Admin/Users/UserDetailPage";
 import ServiceManagementPage from "@/pages/Admin/Services/ServiceManagementPage";
 import ServiceOrderManagementPage from "@/pages/Admin/ServiceOrders/ServiceOrderManagementPage";
 import ServiceDetailPage from "@/pages/Admin/Services/ServiceDetailPage";
+import UserCreatePage from "@/pages/Admin/Users/UserCreatePage";
 
 const AppRouter = () => {
   return (
@@ -71,6 +72,14 @@ const AppRouter = () => {
 
         <Route path="dashboard" element={<AdminDashboardPage />} />
         <Route path="users" element={<UserManagementPage />} />
+        <Route
+          path="users/create"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <UserCreatePage />
+            </RoleProtectedRoute>
+          }
+        />
         <Route path="users/:userId" element={<UserDetailPage />} />
         <Route path="services" element={<ServiceManagementPage />} />
         <Route path="services/:serviceId" element={<ServiceDetailPage />} />

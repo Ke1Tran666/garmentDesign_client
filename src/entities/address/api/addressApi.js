@@ -35,4 +35,13 @@ export const addressApi = {
 
     return response.data;
   },
+
+  async createForUser(userId, payload) {
+    const response = await httpClient.post(
+      `/user-addresses/users/${userId}`,
+      payload,
+    );
+
+    return response.data;
+  },
 };

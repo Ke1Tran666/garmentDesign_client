@@ -1,5 +1,6 @@
-import { CalendarDays, ChevronDown } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Select from "../select/Select";
 
 const parseBirthdayValue = (value) => {
   if (!value || typeof value !== "string") {
@@ -295,37 +296,25 @@ const BirthdayInput = ({
             </button>
 
             <div className="flex flex-1 gap-2">
-              <div className="relative w-full">
-                <select
-                  value={currentMonth}
-                  onChange={(e) => setCurrentMonth(Number(e.target.value))}
-                  className="h-11 w-full appearance-none rounded-lg border border-input bg-surface px-3 pr-10 text-sm leading-none font-semibold outline-none"
-                >
-                  {months.map((month, index) => (
-                    <option key={month} value={index}>
-                      {month}
-                    </option>
-                  ))}
-                </select>
+              <Select
+                value={String(currentMonth)}
+                onValueChange={(value) => setCurrentMonth(Number(value))}
+                ariaLabel="Chọn tháng"
+                options={months.map((month, index) => ({
+                  value: index,
+                  label: month,
+                }))}
+              />
 
-                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-text-muted" />
-              </div>
-
-              <div className="relative w-full">
-                <select
-                  value={currentYear}
-                  onChange={(e) => setCurrentYear(Number(e.target.value))}
-                  className="h-11 w-full appearance-none rounded-lg border border-input bg-surface px-3 pr-10 text-sm leading-none font-semibold outline-none"
-                >
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-
-                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-text-muted" />
-              </div>
+              <Select
+                value={String(currentYear)}
+                onValueChange={(value) => setCurrentYear(Number(value))}
+                ariaLabel="Chọn năm"
+                options={years.map((year) => ({
+                  value: year,
+                  label: year,
+                }))}
+              />
             </div>
 
             <button

@@ -115,4 +115,10 @@ export const userApi = {
 
     return response.data;
   },
+
+  async updateRole(userId, roleId) {
+    const response = await httpClient.put(`/users/${userId}/role`, { roleId });
+
+    return response.data;
+  },
 };

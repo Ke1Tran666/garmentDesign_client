@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import FormInput from "@/shared/ui/input/FormInput";
 import FormModal from "@/shared/ui/modal/FormModal";
+import FormSelect from "@/shared/ui/select/FormSelect";
 
 const EMPTY_FORM = {
   serviceCode: "",
@@ -182,27 +183,24 @@ const ServiceFormModal = ({
         />
       </div>
 
-      <div>
-        <label
-          htmlFor="service-status"
-          className="mb-2 block text-sm font-semibold text-text-default"
-        >
-          Trạng thái
-        </label>
-
-        <select
-          id="service-status"
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          disabled={submitting}
-          className="h-11 w-full rounded-xl border border-input bg-surface px-4 text-sm text-text-default transition outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-surface-muted"
-        >
-          <option value="active">Đang hoạt động</option>
-
-          <option value="inactive">Tạm ngừng</option>
-        </select>
-      </div>
+      <FormSelect
+        id="service-status"
+        name="status"
+        label="Trạng thái"
+        value={form.status}
+        onChange={handleChange}
+        disabled={submitting}
+        options={[
+          {
+            value: "active",
+            label: "Đang hoạt động",
+          },
+          {
+            value: "inactive",
+            label: "Tạm ngừng",
+          },
+        ]}
+      />
     </FormModal>
   );
 };

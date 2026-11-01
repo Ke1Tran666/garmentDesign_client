@@ -521,7 +521,7 @@ const ServiceOrderManagementPage = () => {
               }}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                 statusFilter === chip.id
-                  ? "bg-brand text-white shadow-xs"
+                  ? "bg-brand! text-white! shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               }`}
             >

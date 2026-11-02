@@ -1293,6 +1293,7 @@ const ServiceManagementPage = () => {
           key={`${editingService?.serviceId ?? "create"}-${modalMode}`}
           open={formOpen}
           service={editingService}
+          allServices={services}
           initialMode={modalMode}
           isAdmin={isAdmin}
           submitting={submitting}

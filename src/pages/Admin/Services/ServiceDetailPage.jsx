@@ -16,7 +16,6 @@ import {
   Ruler,
   Save,
   Sparkles,
-  Tag,
   Trash2,
   TrendingUp,
   Wrench,
@@ -28,37 +27,17 @@ import { normalizeRole } from "@/features/auth/lib/authRole";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import { useNotification } from "@/app/providers/NotificationProvider";
 
-const POPULAR_UNITS = [
-  "Sản phẩm",
-  "Bộ",
-  "Mẫu rập",
-  "Bản vẽ 3D",
-  "Giờ thiết kế",
-  "Gói dịch vụ",
-];
-
-const SUGGESTED_TAGS = [
-  "May đo cao cấp",
-  "Thiết kế 3D",
-  "Làm rập",
-  "May mẫu thử",
-  "Vest nam",
-  "Đầm dạ hội",
-  "Đồng phục",
-  "Chỉnh sửa phom",
-  "Thời trang trẻ em",
-  "Áo dài",
-];
-
-const QUICK_PRICE_PRESETS = [
-  { label: "300K", value: 300000 },
-  { label: "500K", value: 500000 },
-  { label: "800K", value: 800000 },
-  { label: "1.2 Tr", value: 1200000 },
-  { label: "1.8 Tr", value: 1800000 },
-  { label: "2.5 Tr", value: 2500000 },
-  { label: "3.5 Tr", value: 3500000 },
-];
+const formatPriceLabel = (val) => {
+  if (val >= 1000000) {
+    const tr = val / 1000000;
+    return Number.isInteger(tr) ? `${tr} Tr` : `${tr.toFixed(1).replace(".0", "")} Tr`;
+  }
+  if (val >= 1000) {
+    const k = val / 1000;
+    return Number.isInteger(k) ? `${k}K` : `${k.toFixed(1).replace(".0", "")}K`;
+  }
+  return `${val} ₫`;
+};
 
 const FALLBACK_SERVICES = [
   {
@@ -159,7 +138,10 @@ const ServiceDetailPage = () => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Load service by ID
+  // Full dataset for suggestions
+  const [allServices, setAllServices] = useState([]);
+
+  // Load service by ID and all services for dynamic suggestions
   useEffect(() => {
     let active = true;
 
@@ -167,8 +149,20 @@ const ServiceDetailPage = () => {
       try {
         setLoading(true);
         setErrorMessage("");
-        const data = await serviceApi.getAdminById(serviceId);
-        if (active) {
+
+        const [detailRes, allRes] = await Promise.allSettled([
+          serviceApi.getAdminById(serviceId),
+          serviceApi.getAdminAll(),
+        ]);
+
+        if (!active) return;
+
+        if (allRes.status === "fulfilled" && Array.isArray(allRes.value)) {
+          setAllServices(allRes.value);
+        }
+
+        if (detailRes.status === "fulfilled" && detailRes.value) {
+          const data = detailRes.value;
           setService(data);
           setForm({
             serviceCode: data.serviceCode || "",
@@ -179,6 +173,8 @@ const ServiceDetailPage = () => {
             tags: data.tags || "",
             status: data.status || "active",
           });
+        } else {
+          throw new Error("Service not found");
         }
       } catch {
         if (!active) return;
@@ -187,6 +183,7 @@ const ServiceDetailPage = () => {
         );
         if (fallback) {
           setService(fallback);
+          setAllServices(FALLBACK_SERVICES);
           setForm({
             serviceCode: fallback.serviceCode || "",
             serviceName: fallback.serviceName || "",
@@ -213,14 +210,54 @@ const ServiceDetailPage = () => {
     };
   }, [serviceId]);
 
-  const tagList = useMemo(() => {
-    const raw = isEditing ? form.tags : service?.tags;
-    if (!raw) return [];
-    return String(raw)
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-  }, [isEditing, form.tags, service?.tags]);
+  // Gợi ý Đơn vị tính: Lấy trực tiếp từ các giá trị thực tế trong data
+  const unitSuggestions = useMemo(() => {
+    const set = new Set();
+    allServices.forEach((s) => {
+      if (s?.unitType && typeof s.unitType === "string") {
+        const trimmed = s.unitType.trim();
+        if (trimmed) set.add(trimmed);
+      }
+    });
+    if (service?.unitType && typeof service.unitType === "string") {
+      const trimmed = service.unitType.trim();
+      if (trimmed) set.add(trimmed);
+    }
+    if (set.size === 0) {
+      return ["Sản phẩm", "Bộ", "Mẫu rập", "Bản vẽ 3D", "Giờ thiết kế", "Gói dịch vụ"];
+    }
+    return Array.from(set);
+  }, [allServices, service]);
+
+  // Gợi ý Giá cơ bản: Lấy trực tiếp từ các mức giá thực tế trong data
+  const priceSuggestions = useMemo(() => {
+    const set = new Set();
+    allServices.forEach((s) => {
+      const p = Number(s?.basePrice);
+      if (Number.isFinite(p) && p > 0) {
+        set.add(p);
+      }
+    });
+    if (service?.basePrice) {
+      const p = Number(service.basePrice);
+      if (Number.isFinite(p) && p > 0) set.add(p);
+    }
+    if (set.size === 0) {
+      return [
+        { label: "300K", value: 300000 },
+        { label: "500K", value: 500000 },
+        { label: "800K", value: 800000 },
+        { label: "1.2 Tr", value: 1200000 },
+        { label: "1.8 Tr", value: 1800000 },
+        { label: "2.5 Tr", value: 2500000 },
+      ];
+    }
+    const sorted = Array.from(set).sort((a, b) => a - b);
+    return sorted.slice(0, 10).map((val) => ({
+      label: formatPriceLabel(val),
+      value: val,
+    }));
+  }, [allServices, service]);
 
   // Estimated stats
   const estimatedOrders = useMemo(() => {
@@ -261,27 +298,6 @@ const ServiceDetailPage = () => {
       serviceCode: `DES-${randomSuffix}`,
     }));
     setValidationError("");
-  };
-
-  const handleToggleTag = (tagToToggle) => {
-    const tags = form.tags
-      ? form.tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
-
-    let updated;
-    if (tags.includes(tagToToggle)) {
-      updated = tags.filter((t) => t !== tagToToggle);
-    } else {
-      updated = [...tags, tagToToggle];
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      tags: updated.join(", "),
-    }));
   };
 
   const handleCancelEdit = () => {
@@ -725,8 +741,9 @@ const ServiceDetailPage = () => {
                       disabled={submitting}
                       className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
+                    {/* Quick pills from data */}
                     <div className="flex flex-wrap gap-1">
-                      {POPULAR_UNITS.map((unit) => (
+                      {unitSuggestions.map((unit) => (
                         <button
                           key={unit}
                           type="button"
@@ -780,8 +797,9 @@ const ServiceDetailPage = () => {
                       </div>
                     )}
 
+                    {/* Price Presets from data */}
                     <div className="flex flex-wrap gap-1">
-                      {QUICK_PRICE_PRESETS.map((p) => (
+                      {priceSuggestions.map((p) => (
                         <button
                           key={p.label}
                           type="button"
@@ -813,75 +831,7 @@ const ServiceDetailPage = () => {
             </div>
           </div>
 
-          {/* Card 2: Thẻ phân loại (Tags) */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-slate-800">
-              <div className="flex items-center gap-2.5 text-sm font-bold text-slate-900 dark:text-white">
-                <Tag size={17} className="text-brand" />
-                <span>Thẻ phân loại dịch vụ</span>
-              </div>
-              <span className="text-xs text-slate-400">{tagList.length} thẻ</span>
-            </div>
-
-            {isEditing ? (
-              <div className="space-y-3">
-                <input
-                  type="text"
-                  name="tags"
-                  value={form.tags}
-                  onChange={handleFormChange}
-                  placeholder="Nhập thẻ phân loại cách nhau bởi dấu phẩy..."
-                  disabled={submitting}
-                  className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-1.5">
-                    Gợi ý thẻ phổ biến (bấm để thêm/bỏ nhanh):
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {SUGGESTED_TAGS.map((tag) => {
-                      const selected = tagList.includes(tag);
-                      return (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => handleToggleTag(tag)}
-                          className={`rounded-xl px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
-                            selected
-                              ? "bg-brand! text-white!"
-                              : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300"
-                          }`}
-                        >
-                          {selected ? `✓ ${tag}` : `+ ${tag}`}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2 min-h-9 items-center">
-                {tagList.length > 0 ? (
-                  tagList.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 border border-slate-200/80 shadow-2xs dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                      {tag}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-xs text-slate-400 italic">
-                    Chưa có thẻ phân loại nào.
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Card 3: Mô tả chi tiết dịch vụ */}
+          {/* Card 2: Mô tả chi tiết dịch vụ */}
           <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-slate-800">
               <div className="flex items-center gap-2.5 text-sm font-bold text-slate-900 dark:text-white">

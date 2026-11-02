@@ -18,45 +18,25 @@ import {
   Save,
   ShoppingBag,
   Sparkles,
-  Tag,
   Trash2,
   TrendingUp,
   Wrench,
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { serviceApi } from "@/entities/service/api/serviceApi";
 
-const POPULAR_UNITS = [
-  "Sản phẩm",
-  "Bộ",
-  "Mẫu rập",
-  "Bản vẽ 3D",
-  "Giờ thiết kế",
-  "Gói dịch vụ",
-];
-
-const SUGGESTED_TAGS = [
-  "May đo cao cấp",
-  "Thiết kế 3D",
-  "Làm rập",
-  "May mẫu thử",
-  "Vest nam",
-  "Đầm dạ hội",
-  "Đồng phục",
-  "Chỉnh sửa phom",
-  "Thời trang trẻ em",
-  "Áo dài",
-];
-
-const QUICK_PRICE_PRESETS = [
-  { label: "300K", value: 300000 },
-  { label: "500K", value: 500000 },
-  { label: "800K", value: 800000 },
-  { label: "1.2 Tr", value: 1200000 },
-  { label: "1.8 Tr", value: 1800000 },
-  { label: "2.5 Tr", value: 2500000 },
-  { label: "3.5 Tr", value: 3500000 },
-];
+const formatPriceLabel = (val) => {
+  if (val >= 1000000) {
+    const tr = val / 1000000;
+    return Number.isInteger(tr) ? `${tr} Tr` : `${tr.toFixed(1).replace(".0", "")} Tr`;
+  }
+  if (val >= 1000) {
+    const k = val / 1000;
+    return Number.isInteger(k) ? `${k}K` : `${k.toFixed(1).replace(".0", "")}K`;
+  }
+  return `${val} ₫`;
+};
 
 const formatVND = (value) => {
   const num = Number(value);
@@ -112,6 +92,7 @@ const createInitialForm = (service) => {
 const ServiceDetailEditModal = ({
   open = true,
   service = null,
+  allServices = [],
   initialMode = "view", // 'view' | 'edit' | 'create'
   isAdmin = true,
   submitting = false,
@@ -120,10 +101,82 @@ const ServiceDetailEditModal = ({
   onSubmit,
   onDelete,
 }) => {
+  const [fetchedServices, setFetchedServices] = useState([]);
   const [mode, setMode] = useState(initialMode); // 'view' | 'edit' | 'create'
   const [form, setForm] = useState(() => createInitialForm(service));
   const [validationError, setValidationError] = useState("");
   const [copiedCode, setCopiedCode] = useState(false);
+
+  // Fetch full services dataset from backend if not provided as prop
+  useEffect(() => {
+    if (Array.isArray(allServices) && allServices.length > 0) return;
+    let active = true;
+    serviceApi
+      .getAdminAll()
+      .then((data) => {
+        if (active && Array.isArray(data)) {
+          setFetchedServices(data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [allServices]);
+
+  const sourceServices =
+    Array.isArray(allServices) && allServices.length > 0
+      ? allServices
+      : fetchedServices;
+
+  // Gợi ý Đơn vị tính: Lấy trực tiếp từ các giá trị thực tế trong data
+  const unitSuggestions = useMemo(() => {
+    const set = new Set();
+    sourceServices.forEach((s) => {
+      if (s?.unitType && typeof s.unitType === "string") {
+        const trimmed = s.unitType.trim();
+        if (trimmed) set.add(trimmed);
+      }
+    });
+    if (service?.unitType && typeof service.unitType === "string") {
+      const trimmed = service.unitType.trim();
+      if (trimmed) set.add(trimmed);
+    }
+    if (set.size === 0) {
+      return ["Sản phẩm", "Bộ", "Mẫu rập", "Bản vẽ 3D", "Giờ thiết kế", "Gói dịch vụ"];
+    }
+    return Array.from(set);
+  }, [sourceServices, service]);
+
+  // Gợi ý Giá cơ bản: Lấy trực tiếp từ các mức giá thực tế trong data
+  const priceSuggestions = useMemo(() => {
+    const set = new Set();
+    sourceServices.forEach((s) => {
+      const p = Number(s?.basePrice);
+      if (Number.isFinite(p) && p > 0) {
+        set.add(p);
+      }
+    });
+    if (service?.basePrice) {
+      const p = Number(service.basePrice);
+      if (Number.isFinite(p) && p > 0) set.add(p);
+    }
+    if (set.size === 0) {
+      return [
+        { label: "300K", value: 300000 },
+        { label: "500K", value: 500000 },
+        { label: "800K", value: 800000 },
+        { label: "1.2 Tr", value: 1200000 },
+        { label: "1.8 Tr", value: 1800000 },
+        { label: "2.5 Tr", value: 2500000 },
+      ];
+    }
+    const sorted = Array.from(set).sort((a, b) => a - b);
+    return sorted.slice(0, 10).map((val) => ({
+      label: formatPriceLabel(val),
+      value: val,
+    }));
+  }, [sourceServices, service]);
 
   // Sync state when props change (Adjusting state during rendering pattern)
   const [prevProps, setPrevProps] = useState({ service, initialMode, open });
@@ -154,15 +207,6 @@ const ServiceDetailEditModal = ({
   const isViewMode = mode === "view";
   const isEditMode = mode === "edit";
   const isCreateMode = mode === "create";
-
-  const currentTagsList = useMemo(() => {
-    const raw = isViewMode ? service?.tags : form.tags;
-    if (!raw) return [];
-    return String(raw)
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-  }, [isViewMode, service?.tags, form.tags]);
 
   // Estimated stats
   const estimatedOrders = useMemo(() => {
@@ -203,27 +247,6 @@ const ServiceDetailEditModal = ({
       serviceCode: `DES-${randomSuffix}`,
     }));
     setValidationError("");
-  };
-
-  const handleToggleTag = (tagToToggle) => {
-    const tags = form.tags
-      ? form.tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
-
-    let updatedTags;
-    if (tags.includes(tagToToggle)) {
-      updatedTags = tags.filter((t) => t !== tagToToggle);
-    } else {
-      updatedTags = [...tags, tagToToggle];
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      tags: updatedTags.join(", "),
-    }));
   };
 
   const handleCancelEdit = () => {
@@ -527,9 +550,9 @@ const ServiceDetailEditModal = ({
                           disabled={submitting}
                           className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
-                        {/* Quick pills */}
+                        {/* Quick pills from data */}
                         <div className="flex flex-wrap gap-1">
-                          {POPULAR_UNITS.map((unit) => (
+                          {unitSuggestions.map((unit) => (
                             <button
                               key={unit}
                               type="button"
@@ -591,9 +614,9 @@ const ServiceDetailEditModal = ({
                           </div>
                         )}
 
-                        {/* Price Presets */}
+                        {/* Price Presets from data */}
                         <div className="flex flex-wrap gap-1">
-                          {QUICK_PRICE_PRESETS.map((p) => (
+                          {priceSuggestions.map((p) => (
                             <button
                               key={p.label}
                               type="button"
@@ -725,77 +748,6 @@ const ServiceDetailEditModal = ({
               </div>
             </div>
 
-            {/* Middle Section: Tags & Phân nhóm */}
-            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-850/50 space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-200/60 pb-2.5 dark:border-slate-800">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
-                  <Tag size={15} className="text-brand" />
-                  <span>Thẻ phân loại & Từ khóa tìm kiếm</span>
-                </div>
-                <span className="text-[11px] text-slate-400">
-                  {currentTagsList.length} thẻ
-                </span>
-              </div>
-
-              {isViewMode ? (
-                <div className="flex flex-wrap gap-1.5 min-h-8 items-center">
-                  {currentTagsList.length > 0 ? (
-                    currentTagsList.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 rounded-xl bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200/80 shadow-2xs dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-                        {tag}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-xs text-slate-400 italic">
-                      Chưa có thẻ phân loại nào.
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  <input
-                    type="text"
-                    name="tags"
-                    value={form.tags}
-                    onChange={handleFormChange}
-                    placeholder="Nhập các thẻ cách nhau bởi dấu phẩy (VD: May đo cao cấp, Vest nam, 3D...)"
-                    disabled={submitting}
-                    className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                  />
-
-                  {/* Suggestion tags picker */}
-                  <div>
-                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-1.5">
-                      Gợi ý thẻ phổ biến (bấm để thêm/bỏ nhanh):
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {SUGGESTED_TAGS.map((tag) => {
-                        const selected = currentTagsList.includes(tag);
-                        return (
-                          <button
-                            key={tag}
-                            type="button"
-                            onClick={() => handleToggleTag(tag)}
-                            className={`rounded-xl px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
-                              selected
-                                ? "bg-brand! text-white!"
-                                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300"
-                            }`}
-                          >
-                            {selected ? `✓ ${tag}` : `+ ${tag}`}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Bottom Section: Description */}
             <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-850/50 space-y-3">
               <div className="flex items-center justify-between border-b border-slate-200/60 pb-2.5 dark:border-slate-800">
@@ -833,7 +785,7 @@ const ServiceDetailEditModal = ({
 
             {/* View Mode: Extra KPIs & Overview Banner */}
             {isViewMode && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
                   <div className="flex items-center justify-between text-slate-500 mb-1.5">
                     <span className="text-xs font-medium">Doanh số ước tính</span>
@@ -857,19 +809,6 @@ const ServiceDetailEditModal = ({
                   </div>
                   <span className="text-[10px] text-slate-400">
                     Tỷ lệ hoàn tất 96%
-                  </span>
-                </div>
-
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-center justify-between text-slate-500 mb-1.5">
-                    <span className="text-xs font-medium">Đánh giá khách hàng</span>
-                    <Sparkles size={15} className="text-amber-500" />
-                  </div>
-                  <div className="font-heading text-lg font-bold text-slate-900 dark:text-white">
-                    4.9 / 5.0 ⭐
-                  </div>
-                  <span className="text-[10px] text-slate-400">
-                    Độ hài lòng rất cao
                   </span>
                 </div>
               </div>

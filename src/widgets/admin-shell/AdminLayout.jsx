@@ -181,7 +181,7 @@ const AdminLayout = () => {
             <button
               type="button"
               onClick={() => setIsCollapsed(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               title="Mở rộng sidebar"
               aria-label="Mở rộng sidebar"
             >
@@ -211,7 +211,7 @@ const AdminLayout = () => {
             <button
               type="button"
               onClick={() => setIsCollapsed(true)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               title="Thu gọn sidebar"
               aria-label="Thu gọn sidebar"
             >
@@ -310,7 +310,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer dark:hover:bg-rose-950/40"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
                 title="Đăng xuất"
               >
                 <LogOut size={16} />
@@ -334,7 +334,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer dark:hover:bg-rose-950/40"
+                className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
                 title="Đăng xuất"
               >
                 <LogOut size={16} />
@@ -368,7 +368,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 cursor-pointer dark:hover:bg-slate-800"
+                className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <X size={18} />
               </button>
@@ -417,7 +417,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50 cursor-pointer"
+                className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50"
               >
                 <LogOut size={14} />
                 <span>Thoát</span>
@@ -438,7 +438,7 @@ const AdminLayout = () => {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="-ml-2 rounded-xl p-2 text-slate-500 hover:bg-slate-100 md:hidden cursor-pointer dark:hover:bg-slate-800"
+              className="-ml-2 cursor-pointer rounded-xl p-2 text-slate-500 hover:bg-slate-100 md:hidden dark:hover:bg-slate-800"
               aria-label="Mở menu"
             >
               <Menu size={20} />
@@ -451,7 +451,7 @@ const AdminLayout = () => {
                 className="flex items-center gap-1.5 transition-colors hover:text-brand"
               >
                 <House size={15} />
-                <span className="hidden sm:inline font-medium">Admin</span>
+                <span className="hidden font-medium sm:inline">Admin</span>
               </Link>
               <ChevronRight
                 size={14}
@@ -482,7 +482,7 @@ const AdminLayout = () => {
                 <button
                   type="button"
                   onClick={() => setSearchKeyword("")}
-                  className="absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-slate-600"
                 >
                   <X size={14} />
                 </button>
@@ -494,7 +494,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={() => setQuickCreateOpen((prev) => !prev)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white! shadow-sm shadow-brand/25 transition-all hover:bg-brand-hover! active:scale-95 cursor-pointer"
+                className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white! shadow-sm shadow-brand/25 transition-all hover:bg-brand-hover! active:scale-95"
               >
                 <Plus size={15} className="stroke-[2.5]" />
                 <span className="hidden sm:inline">Thêm nhanh</span>
@@ -505,7 +505,7 @@ const AdminLayout = () => {
               </button>
 
               {quickCreateOpen && (
-                <div className="animate-in fade-in slide-in-from-top-2 absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900">
+                <div className="absolute right-0 z-50 mt-2 w-56 animate-in rounded-2xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 fade-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900">
                   <div className="px-3 py-1.5 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
                     Tác vụ nhanh
                   </div>
@@ -569,7 +569,7 @@ const AdminLayout = () => {
               to="/"
               target="_blank"
               rel="noreferrer"
-              className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 text-xs font-medium text-slate-600 shadow-2xs transition-colors hover:border-brand/40 hover:bg-slate-50 hover:text-brand dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              className="hidden h-9 items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 text-xs font-medium text-slate-600 shadow-2xs transition-colors hover:border-brand/40 hover:bg-slate-50 hover:text-brand sm:inline-flex dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
               title="Mở giao diện khách hàng"
             >
               <ExternalLink size={14} />
@@ -584,7 +584,7 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={() => setUserDropdownOpen((prev) => !prev)}
-                className="flex items-center gap-2.5 rounded-xl p-1 transition-colors hover:bg-slate-100 cursor-pointer dark:hover:bg-slate-800"
+                className="flex cursor-pointer items-center gap-2.5 rounded-xl p-1 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <img
                   src={user?.avatar || defaultAvatar}
@@ -596,12 +596,12 @@ const AdminLayout = () => {
                 </span>
                 <ChevronDown
                   size={14}
-                  className={`hidden text-slate-400 sm:inline transition-transform duration-200 ${userDropdownOpen ? "rotate-180" : ""}`}
+                  className={`hidden text-slate-400 transition-transform duration-200 sm:inline ${userDropdownOpen ? "rotate-180" : ""}`}
                 />
               </button>
 
               {userDropdownOpen && (
-                <div className="animate-in fade-in slide-in-from-top-2 absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 dark:border-slate-800 dark:bg-slate-900">
+                <div className="absolute right-0 z-50 mt-2 w-56 animate-in rounded-2xl border border-slate-100 bg-white p-2 shadow-xl ring-1 ring-black/5 fade-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900">
                   <div className="mb-1 border-b border-slate-100 px-3 py-2 dark:border-slate-800">
                     <p className="truncate text-xs font-bold text-slate-900 dark:text-white">
                       {user?.fullName || "Administrator"}
@@ -637,7 +637,7 @@ const AdminLayout = () => {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer dark:hover:bg-rose-950/40"
+                    className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:hover:bg-rose-950/40"
                   >
                     <LogOut size={15} />
                     <span>Đăng xuất</span>

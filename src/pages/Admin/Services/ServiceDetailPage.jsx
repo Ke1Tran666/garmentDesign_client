@@ -30,7 +30,9 @@ import { useNotification } from "@/app/providers/NotificationProvider";
 const formatPriceLabel = (val) => {
   if (val >= 1000000) {
     const tr = val / 1000000;
-    return Number.isInteger(tr) ? `${tr} Tr` : `${tr.toFixed(1).replace(".0", "")} Tr`;
+    return Number.isInteger(tr)
+      ? `${tr} Tr`
+      : `${tr.toFixed(1).replace(".0", "")} Tr`;
   }
   if (val >= 1000) {
     const k = val / 1000;
@@ -224,7 +226,14 @@ const ServiceDetailPage = () => {
       if (trimmed) set.add(trimmed);
     }
     if (set.size === 0) {
-      return ["Sản phẩm", "Bộ", "Mẫu rập", "Bản vẽ 3D", "Giờ thiết kế", "Gói dịch vụ"];
+      return [
+        "Sản phẩm",
+        "Bộ",
+        "Mẫu rập",
+        "Bản vẽ 3D",
+        "Giờ thiết kế",
+        "Gói dịch vụ",
+      ];
     }
     return Array.from(set);
   }, [allServices, service]);
@@ -262,7 +271,7 @@ const ServiceDetailPage = () => {
   // Estimated stats
   const estimatedOrders = useMemo(() => {
     const seed = Number(serviceId) || 1;
-    return (seed * 17) % 64 + 8;
+    return ((seed * 17) % 64) + 8;
   }, [serviceId]);
 
   const estimatedRevenue = useMemo(() => {
@@ -449,11 +458,11 @@ const ServiceDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6 animate-pulse">
+      <div className="animate-pulse space-y-6">
         <div className="h-6 w-44 rounded bg-slate-200 dark:bg-slate-800" />
         <div className="h-32 rounded-3xl bg-slate-200 dark:bg-slate-800" />
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="xl:col-span-2 h-96 rounded-3xl bg-slate-200 dark:bg-slate-800" />
+          <div className="h-96 rounded-3xl bg-slate-200 xl:col-span-2 dark:bg-slate-800" />
           <div className="h-96 rounded-3xl bg-slate-200 dark:bg-slate-800" />
         </div>
       </div>
@@ -466,7 +475,7 @@ const ServiceDetailPage = () => {
         <button
           type="button"
           onClick={() => navigate("/admin/services")}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-brand cursor-pointer"
+          className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-brand"
         >
           <ArrowLeft size={18} />
           <span>Quay lại Dịch vụ</span>
@@ -489,7 +498,7 @@ const ServiceDetailPage = () => {
   const currentStatus = isEditing ? form.status : service.status;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="animate-in space-y-6 duration-200 fade-in">
       {/* Top Navigation Row */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Back button & Breadcrumb */}
@@ -497,7 +506,7 @@ const ServiceDetailPage = () => {
           <button
             type="button"
             onClick={() => navigate("/admin/services")}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-brand cursor-pointer"
+            className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-brand"
           >
             <ArrowLeft size={16} />
             <span>Quay lại Quản lý Dịch vụ</span>
@@ -519,7 +528,7 @@ const ServiceDetailPage = () => {
                   type="button"
                   onClick={handleCancelEdit}
                   disabled={submitting}
-                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                 >
                   <RotateCcw size={14} />
                   <span>Hủy bỏ</span>
@@ -529,9 +538,12 @@ const ServiceDetailPage = () => {
                   type="button"
                   onClick={handleSave}
                   disabled={submitting}
-                  className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-brand! hover:bg-brand-hover! text-white! text-xs font-bold shadow-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-brand! px-4 text-xs font-bold text-white! shadow-xs transition-all hover:bg-brand-hover! active:scale-95 disabled:opacity-50"
                 >
-                  <Save size={14} className={submitting ? "animate-spin" : ""} />
+                  <Save
+                    size={14}
+                    className={submitting ? "animate-spin" : ""}
+                  />
                   <span>{submitting ? "Đang lưu..." : "Lưu thay đổi"}</span>
                 </button>
               </>
@@ -540,7 +552,7 @@ const ServiceDetailPage = () => {
                 <button
                   type="button"
                   onClick={handleToggleStatus}
-                  className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border px-3.5 text-xs font-semibold transition-colors ${
                     service.status === "active"
                       ? "border-amber-200 bg-amber-50/70 text-amber-700 hover:bg-amber-100 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-400"
                       : "border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-400"
@@ -548,14 +560,16 @@ const ServiceDetailPage = () => {
                 >
                   <Activity size={14} />
                   <span>
-                    {service.status === "active" ? "Tạm ngừng dịch vụ" : "Kích hoạt lại"}
+                    {service.status === "active"
+                      ? "Tạm ngừng dịch vụ"
+                      : "Kích hoạt lại"}
                   </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                  className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-brand/10 px-4 text-xs font-bold text-brand shadow-2xs transition-all hover:bg-brand/20"
                 >
                   <Edit3 size={14} />
                   <span>Chỉnh sửa thông tin</span>
@@ -569,28 +583,32 @@ const ServiceDetailPage = () => {
       {/* Main Header Banner Card */}
       <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-5 border-b border-slate-100 p-6 lg:flex-row lg:items-center lg:justify-between dark:border-slate-800">
-          <div className="flex items-center gap-4 min-w-0">
+          <div className="flex min-w-0 items-center gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand shadow-xs dark:bg-brand/20">
               <Wrench size={26} />
             </div>
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate">
-                  {isEditing ? form.serviceName || "Đang chỉnh sửa..." : service.serviceName}
+                <span className="truncate font-heading text-xl font-extrabold text-slate-900 sm:text-2xl dark:text-white">
+                  {isEditing
+                    ? form.serviceName || "Đang chỉnh sửa..."
+                    : service.serviceName}
                 </span>
 
                 {/* Service Code Monospace Badge */}
                 <div className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  <span>{isEditing ? form.serviceCode : service.serviceCode}</span>
+                  <span>
+                    {isEditing ? form.serviceCode : service.serviceCode}
+                  </span>
                   <button
                     type="button"
                     onClick={handleCopyCode}
-                    className="text-slate-400 hover:text-brand cursor-pointer p-0.5 transition-colors"
+                    className="cursor-pointer p-0.5 text-slate-400 transition-colors hover:text-brand"
                     title={copiedCode ? "Đã sao chép!" : "Sao chép mã dịch vụ"}
                   >
                     {copiedCode ? (
-                      <Check size={12} className="text-emerald-500 stroke-3" />
+                      <Check size={12} className="stroke-3 text-emerald-500" />
                     ) : (
                       <Copy size={12} />
                     )}
@@ -605,7 +623,7 @@ const ServiceDetailPage = () => {
                   </span>
                 ) : currentStatus === "active" ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                     Đang hoạt động
                   </span>
                 ) : (
@@ -625,14 +643,16 @@ const ServiceDetailPage = () => {
                 >
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      isEditing ? "bg-amber-500 animate-pulse" : "bg-slate-400"
+                      isEditing ? "animate-pulse bg-amber-500" : "bg-slate-400"
                     }`}
                   />
-                  {isEditing ? "Chế độ chỉnh sửa trực tiếp" : "Chế độ xem chi tiết"}
+                  {isEditing
+                    ? "Chế độ chỉnh sửa trực tiếp"
+                    : "Chế độ xem chi tiết"}
                 </span>
               </div>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Giá niêm yết:{" "}
                 <span className="font-bold text-brand">
                   {formatVND(isEditing ? form.basePrice : service.basePrice)}
@@ -646,7 +666,7 @@ const ServiceDetailPage = () => {
 
       {/* Validation Error Alert if any */}
       {validationError && (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-xs text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 animate-in fade-in duration-150">
+        <div className="flex animate-in items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-xs text-rose-700 duration-150 fade-in dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300">
           <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
           <div className="flex-1 font-semibold">{validationError}</div>
         </div>
@@ -655,9 +675,9 @@ const ServiceDetailPage = () => {
       {/* SHARED UNIFIED CONTENT GRID (VIEW & EDIT USE THE EXACT SAME LAYOUT) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* LEFT 2 COLUMNS: CORE DETAILS & EDIT FIELDS */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           {/* Card 1: Thông tin cơ bản & Đơn vị tính */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-5">
+          <div className="space-y-5 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-slate-800">
               <div className="flex items-center gap-2.5 text-sm font-bold text-slate-900 dark:text-white">
                 <Layers size={17} className="text-brand" />
@@ -669,10 +689,10 @@ const ServiceDetailPage = () => {
             </div>
 
             {/* Service Code & Name row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Code */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Mã dịch vụ <span className="text-rose-500">*</span>
                 </label>
                 {isEditing ? (
@@ -683,28 +703,30 @@ const ServiceDetailPage = () => {
                       value={form.serviceCode}
                       onChange={handleFormChange}
                       disabled={submitting}
-                      className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white font-mono text-xs font-bold uppercase tracking-wider text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 font-mono text-xs font-bold tracking-wider text-slate-900 uppercase focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                     <button
                       type="button"
                       onClick={handleGenerateCode}
-                      className="h-10 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors shrink-0 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                      className="h-10 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                       title="Tạo mã ngẫu nhiên"
                     >
-                      <RefreshCw size={13} className="inline mr-1" />
+                      <RefreshCw size={13} className="mr-1 inline" />
                       Tự tạo
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 font-mono text-xs font-bold text-slate-800 dark:text-slate-200">
-                    <span>{service.serviceCode || `SRV-${service.serviceId}`}</span>
+                    <span>
+                      {service.serviceCode || `SRV-${service.serviceId}`}
+                    </span>
                   </div>
                 )}
               </div>
 
               {/* Name */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Tên dịch vụ thiết kế <span className="text-rose-500">*</span>
                 </label>
                 {isEditing ? (
@@ -714,7 +736,7 @@ const ServiceDetailPage = () => {
                     value={form.serviceName}
                     onChange={handleFormChange}
                     disabled={submitting}
-                    className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-xs font-semibold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 ) : (
                   <div className="text-xs font-bold text-slate-900 dark:text-white">
@@ -725,10 +747,10 @@ const ServiceDetailPage = () => {
             </div>
 
             {/* Unit Type & Price Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-2 sm:grid-cols-2 dark:border-slate-800">
               {/* Unit Type */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Đơn vị tính <span className="text-rose-500">*</span>
                 </label>
                 {isEditing ? (
@@ -739,7 +761,7 @@ const ServiceDetailPage = () => {
                       value={form.unitType}
                       onChange={handleFormChange}
                       disabled={submitting}
-                      className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                     {/* Quick pills from data */}
                     <div className="flex flex-wrap gap-1">
@@ -747,11 +769,13 @@ const ServiceDetailPage = () => {
                         <button
                           key={unit}
                           type="button"
-                          onClick={() => setForm((p) => ({ ...p, unitType: unit }))}
-                          className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer ${
+                          onClick={() =>
+                            setForm((p) => ({ ...p, unitType: unit }))
+                          }
+                          className={`cursor-pointer rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors ${
                             form.unitType === unit
                               ? "bg-brand! text-white!"
-                              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300"
+                              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                           }`}
                         >
                           {unit}
@@ -760,7 +784,7 @@ const ServiceDetailPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-1.5 border border-slate-200/80 text-xs font-bold text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
+                  <div className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                     <Ruler size={13} className="text-brand" />
                     <span>{service.unitType || "Chưa thiết lập"}</span>
                   </div>
@@ -769,8 +793,9 @@ const ServiceDetailPage = () => {
 
               {/* Base Price */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Giá cơ bản niêm yết (VNĐ) <span className="text-rose-500">*</span>
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Giá cơ bản niêm yết (VNĐ){" "}
+                  <span className="text-rose-500">*</span>
                 </label>
                 {isEditing ? (
                   <div className="space-y-2">
@@ -783,9 +808,9 @@ const ServiceDetailPage = () => {
                         value={form.basePrice}
                         onChange={handleFormChange}
                         disabled={submitting}
-                        className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        className="h-10 w-full rounded-xl border border-slate-300 bg-white pr-10 pl-3.5 text-xs font-bold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       />
-                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-xs font-bold text-slate-400">
+                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-slate-400">
                         ₫
                       </div>
                     </div>
@@ -806,10 +831,10 @@ const ServiceDetailPage = () => {
                           onClick={() =>
                             setForm((prev) => ({ ...prev, basePrice: p.value }))
                           }
-                          className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer ${
+                          className={`cursor-pointer rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors ${
                             Number(form.basePrice) === p.value
                               ? "bg-brand! text-white!"
-                              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300"
+                              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                           }`}
                         >
                           {p.label}
@@ -819,7 +844,7 @@ const ServiceDetailPage = () => {
                   </div>
                 ) : (
                   <div>
-                    <div className="font-heading text-2xl font-extrabold text-brand tracking-tight">
+                    <div className="font-heading text-2xl font-extrabold tracking-tight text-brand">
                       {formatVND(service.basePrice)}
                     </div>
                     <span className="text-[11px] text-slate-400">
@@ -832,7 +857,7 @@ const ServiceDetailPage = () => {
           </div>
 
           {/* Card 2: Mô tả chi tiết dịch vụ */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+          <div className="space-y-4 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-slate-800">
               <div className="flex items-center gap-2.5 text-sm font-bold text-slate-900 dark:text-white">
                 <Sparkles size={17} className="text-brand" />
@@ -853,10 +878,10 @@ const ServiceDetailPage = () => {
                 onChange={handleFormChange}
                 placeholder="Mô tả chi tiết các giai đoạn thiết kế, chất liệu tư vấn, phương thức bàn giao..."
                 disabled={submitting}
-                className="w-full p-4 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white resize-y"
+                className="w-full resize-y rounded-xl border border-slate-300 bg-white p-4 text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             ) : (
-              <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+              <div className="text-xs leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
                 {service.description || (
                   <span className="text-slate-400 italic">
                     Chưa có mô tả chi tiết cho dịch vụ này.
@@ -867,45 +892,47 @@ const ServiceDetailPage = () => {
           </div>
 
           {/* Card 4: Standard Workflow Steps Highlight */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-3.5 dark:border-slate-800">
+          <div className="space-y-4 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3.5 text-sm font-bold text-slate-900 dark:border-slate-800 dark:text-white">
               <CheckCircle2 size={17} className="text-brand" />
               <span>Quy trình cung cấp dịch vụ tiêu chuẩn</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 gap-3.5 md:grid-cols-3">
               <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                <span className="text-[11px] font-bold text-brand uppercase tracking-wider">
+                <span className="text-[11px] font-bold tracking-wider text-brand uppercase">
                   Bước 1
                 </span>
-                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">
+                <h4 className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">
                   Tiếp nhận & Đo đạc
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                  Thu thập yêu cầu thiết kế, thông số cơ thể và sở thích phom dáng.
+                <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                  Thu thập yêu cầu thiết kế, thông số cơ thể và sở thích phom
+                  dáng.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                <span className="text-[11px] font-bold text-brand uppercase tracking-wider">
+                <span className="text-[11px] font-bold tracking-wider text-brand uppercase">
                   Bước 2
                 </span>
-                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">
+                <h4 className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">
                   Dựng 3D & May mẫu thử
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                  Lên rập chuẩn xác, mô phỏng 3D trước khi duyệt chất liệu may mẫu.
+                <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                  Lên rập chuẩn xác, mô phỏng 3D trước khi duyệt chất liệu may
+                  mẫu.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                <span className="text-[11px] font-bold text-brand uppercase tracking-wider">
+                <span className="text-[11px] font-bold tracking-wider text-brand uppercase">
                   Bước 3
                 </span>
-                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">
+                <h4 className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">
                   Hoàn thiện & Bàn giao
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
                   Thử đồ hoàn thiện, tinh chỉnh chi tiết và bàn giao thành phẩm.
                 </p>
               </div>
@@ -916,8 +943,8 @@ const ServiceDetailPage = () => {
         {/* RIGHT COLUMN: STATUS, METRICS & AUDIT SIDEBAR */}
         <div className="space-y-6">
           {/* Card: Status & Quick Control */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-3.5 dark:border-slate-800">
+          <div className="space-y-4 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3.5 text-sm font-bold text-slate-900 dark:border-slate-800 dark:text-white">
               <Activity size={17} className="text-brand" />
               <span>Trạng thái hoạt động</span>
             </div>
@@ -927,7 +954,7 @@ const ServiceDetailPage = () => {
                 <button
                   type="button"
                   onClick={() => setForm((p) => ({ ...p, status: "active" }))}
-                  className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-all ${
                     form.status === "active"
                       ? "bg-emerald-600 text-white shadow-xs"
                       : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
@@ -940,7 +967,7 @@ const ServiceDetailPage = () => {
                 <button
                   type="button"
                   onClick={() => setForm((p) => ({ ...p, status: "inactive" }))}
-                  className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-all ${
                     form.status === "inactive"
                       ? "bg-amber-600 text-white shadow-xs"
                       : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
@@ -955,7 +982,9 @@ const ServiceDetailPage = () => {
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-500">Tình trạng:</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200">
-                    {service.status === "active" ? "Đang cung cấp" : "Đang tạm dừng"}
+                    {service.status === "active"
+                      ? "Đang cung cấp"
+                      : "Đang tạm dừng"}
                   </span>
                 </div>
 
@@ -963,7 +992,7 @@ const ServiceDetailPage = () => {
                   <button
                     type="button"
                     onClick={() => setDeleteOpen(true)}
-                    className="w-full flex items-center justify-center gap-1.5 h-9 rounded-xl border border-rose-200 bg-rose-50/70 text-xs font-bold text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
+                    className="flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50/70 text-xs font-bold text-rose-600 transition-colors hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
                   >
                     <Trash2 size={14} />
                     <span>Ngừng cung cấp (Xóa)</span>
@@ -974,22 +1003,24 @@ const ServiceDetailPage = () => {
           </div>
 
           {/* Card: Metrics KPI */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-3.5 dark:border-slate-800">
+          <div className="space-y-4 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3.5 text-sm font-bold text-slate-900 dark:border-slate-800 dark:text-white">
               <TrendingUp size={17} className="text-brand" />
               <span>Chỉ số kinh doanh ước tính</span>
             </div>
 
             <div className="space-y-3">
               <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                <span className="text-[11px] text-slate-500 block">Doanh số ước tính</span>
+                <span className="block text-[11px] text-slate-500">
+                  Doanh số ước tính
+                </span>
                 <span className="font-heading text-lg font-bold text-slate-900 dark:text-white">
                   {formatVND(estimatedRevenue)}
                 </span>
               </div>
 
               <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-                <span className="text-[11px] text-slate-500 block">
+                <span className="block text-[11px] text-slate-500">
                   Tổng lượt tiếp nhận dịch vụ
                 </span>
                 <span className="font-heading text-lg font-bold text-slate-900 dark:text-white">
@@ -1000,27 +1031,27 @@ const ServiceDetailPage = () => {
           </div>
 
           {/* Card: Audit & System Metadata */}
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3 text-xs">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 pb-3.5 dark:border-slate-800">
+          <div className="space-y-3 rounded-3xl border border-slate-200/90 bg-white p-6 text-xs shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-3.5 text-sm font-bold text-slate-900 dark:border-slate-800 dark:text-white">
               <Calendar size={17} className="text-brand" />
               <span>Thông tin hệ thống</span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-500 py-1 border-b border-slate-100/70 dark:border-slate-800/60">
+            <div className="flex items-center justify-between border-b border-slate-100/70 py-1 text-slate-500 dark:border-slate-800/60">
               <span>Mã ID dữ liệu:</span>
               <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                 #{service.serviceId}
               </span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-500 py-1 border-b border-slate-100/70 dark:border-slate-800/60">
+            <div className="flex items-center justify-between border-b border-slate-100/70 py-1 text-slate-500 dark:border-slate-800/60">
               <span>Ngày khởi tạo:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
                 {formatDate(service.createdAt, false)}
               </span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-500 py-1">
+            <div className="flex items-center justify-between py-1 text-slate-500">
               <span>Cập nhật gần nhất:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
                 {formatDate(service.updatedAt || service.createdAt)}
@@ -1045,7 +1076,8 @@ const ServiceDetailPage = () => {
           <strong className="text-slate-900 dark:text-white">
             {service.serviceName}
           </strong>{" "}
-          (Mã: {service.serviceCode})? Khách hàng sẽ không thể đặt mới dịch vụ này nữa.
+          (Mã: {service.serviceCode})? Khách hàng sẽ không thể đặt mới dịch vụ
+          này nữa.
         </p>
       </ConfirmModal>
     </div>

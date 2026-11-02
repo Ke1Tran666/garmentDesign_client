@@ -17,7 +17,8 @@ const INITIAL_NOTIFICATIONS = [
     id: "notif-1",
     type: "order",
     title: "Đơn dịch vụ mới #ORD-9821",
-    content: "Khách hàng Nguyễn Hoàng Mai đã đặt dịch vụ May đo Áo Vest Cao Cấp.",
+    content:
+      "Khách hàng Nguyễn Hoàng Mai đã đặt dịch vụ May đo Áo Vest Cao Cấp.",
     time: "5 phút trước",
     unread: true,
     link: "/admin/service-orders",
@@ -26,7 +27,8 @@ const INITIAL_NOTIFICATIONS = [
     id: "notif-2",
     type: "design",
     title: "Bản vẽ 3D đã sẵn sàng",
-    content: "Kỹ thuật viên đã tải lên mô phỏng 3D hoàn chỉnh cho đơn #ORD-9810.",
+    content:
+      "Kỹ thuật viên đã tải lên mô phỏng 3D hoàn chỉnh cho đơn #ORD-9810.",
     time: "25 phút trước",
     unread: true,
     link: "/admin/service-orders",
@@ -35,7 +37,8 @@ const INITIAL_NOTIFICATIONS = [
     id: "notif-3",
     type: "user",
     title: "Thành viên mới đăng ký",
-    content: "Khách hàng tran.van.nam@gmail.com vừa khởi tạo tài khoản thành viên.",
+    content:
+      "Khách hàng tran.van.nam@gmail.com vừa khởi tạo tài khoản thành viên.",
     time: "1 giờ trước",
     unread: true,
     link: "/admin/users",
@@ -44,7 +47,8 @@ const INITIAL_NOTIFICATIONS = [
     id: "notif-4",
     type: "order",
     title: "Xác nhận đặt cọc thành công",
-    content: "Đã ghi nhận thanh toán đặt cọc 1.500.000đ cho đơn hàng #ORD-9790.",
+    content:
+      "Đã ghi nhận thanh toán đặt cọc 1.500.000đ cho đơn hàng #ORD-9790.",
     time: "3 giờ trước",
     unread: false,
     link: "/admin/service-orders",
@@ -77,18 +81,21 @@ const getNotificationMeta = (type) => {
     case "design":
       return {
         icon: Layers,
-        iconWrap: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400",
+        iconWrap:
+          "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400",
       };
     case "user":
       return {
         icon: UserPlus,
-        iconWrap: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
+        iconWrap:
+          "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
       };
     case "system":
     default:
       return {
         icon: Sparkles,
-        iconWrap: "bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400",
+        iconWrap:
+          "bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400",
       };
   }
 };
@@ -111,7 +118,10 @@ const NotificationButton = ({ onClick }) => {
   // Sync notifications to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem("app-user-notifications", JSON.stringify(notifications));
+      localStorage.setItem(
+        "app-user-notifications",
+        JSON.stringify(notifications),
+      );
     } catch {
       // ignore storage errors
     }
@@ -191,9 +201,9 @@ const NotificationButton = ({ onClick }) => {
         onClick={handleToggle}
         aria-label="Xem thông báo hệ thống"
         aria-expanded={isOpen}
-        className={`relative flex h-9.5 w-9.5 items-center justify-center rounded-xl border transition-all cursor-pointer ${
+        className={`relative flex h-9.5 w-9.5 cursor-pointer items-center justify-center rounded-xl border transition-all ${
           isOpen
-            ? "border-brand bg-brand/10 text-brand dark:bg-brand/20 dark:border-brand"
+            ? "border-brand bg-brand/10 text-brand dark:border-brand dark:bg-brand/20"
             : "border-slate-200/90 bg-white text-slate-600 hover:border-brand/40 hover:bg-slate-50 hover:text-brand dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
         } shadow-2xs active:scale-95`}
       >
@@ -209,7 +219,7 @@ const NotificationButton = ({ onClick }) => {
 
       {/* Notification Dropdown Popover */}
       {isOpen && (
-        <div className="animate-in fade-in slide-in-from-top-2 absolute right-0 top-full z-50 mt-2 w-88 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200/90 bg-white shadow-2xl ring-1 ring-black/5 sm:w-96 dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+        <div className="absolute top-full right-0 z-50 mt-2 w-88 max-w-[calc(100vw-2rem)] animate-in overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl ring-1 ring-black/5 fade-in slide-in-from-top-2 sm:w-96 dark:border-slate-800 dark:bg-slate-900">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 p-4 pb-3 dark:border-slate-800">
             <div className="flex items-center gap-2">
@@ -232,7 +242,7 @@ const NotificationButton = ({ onClick }) => {
                 <button
                   type="button"
                   onClick={handleMarkAllAsRead}
-                  className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-brand cursor-pointer dark:text-slate-400 dark:hover:bg-slate-800"
+                  className="flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-brand dark:text-slate-400 dark:hover:bg-slate-800"
                   title="Đánh dấu tất cả là đã đọc"
                 >
                   <CheckCheck size={14} />
@@ -243,7 +253,7 @@ const NotificationButton = ({ onClick }) => {
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 cursor-pointer dark:hover:bg-rose-950/50"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50"
                   title="Xóa tất cả thông báo"
                 >
                   <Trash2 size={14} />
@@ -253,7 +263,7 @@ const NotificationButton = ({ onClick }) => {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex border-b border-slate-100 px-3 py-1.5 dark:border-slate-800 gap-1 bg-slate-50/50 dark:bg-slate-800/40">
+          <div className="flex gap-1 border-b border-slate-100 bg-slate-50/50 px-3 py-1.5 dark:border-slate-800 dark:bg-slate-800/40">
             {FILTER_TABS.map((tab) => {
               const isActive = activeTab === tab.key;
               return (
@@ -261,7 +271,7 @@ const NotificationButton = ({ onClick }) => {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                  className={`cursor-pointer rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
                     isActive
                       ? "bg-white text-brand shadow-xs dark:bg-slate-800 dark:text-brand"
                       : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
@@ -274,7 +284,7 @@ const NotificationButton = ({ onClick }) => {
           </div>
 
           {/* Notification Items List */}
-          <div className="max-h-84 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+          <div className="max-h-84 divide-y divide-slate-100 overflow-y-auto dark:divide-slate-800/60">
             {filteredNotifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 text-center">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
@@ -298,7 +308,7 @@ const NotificationButton = ({ onClick }) => {
                   <div
                     key={notif.id}
                     onClick={() => handleItemClick(notif)}
-                    className={`group relative flex items-start gap-3 p-3.5 transition-colors cursor-pointer ${
+                    className={`group relative flex cursor-pointer items-start gap-3 p-3.5 transition-colors ${
                       notif.unread
                         ? "bg-sky-50/30 hover:bg-sky-50/60 dark:bg-sky-950/20 dark:hover:bg-sky-950/30"
                         : "hover:bg-slate-50 dark:hover:bg-slate-800/60"
@@ -333,7 +343,7 @@ const NotificationButton = ({ onClick }) => {
                     <button
                       type="button"
                       onClick={(e) => handleDeleteItem(e, notif.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-rose-500 transition-opacity cursor-pointer"
+                      className="cursor-pointer p-1 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-rose-500"
                       title="Xóa thông báo này"
                     >
                       <X size={13} />
@@ -352,7 +362,7 @@ const NotificationButton = ({ onClick }) => {
                 setIsOpen(false);
                 navigate("/admin/service-orders");
               }}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand transition-colors hover:text-brand-hover cursor-pointer"
+              className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-brand transition-colors hover:text-brand-hover"
             >
               <span>Xem danh sách đơn dịch vụ</span>
               <ChevronRight size={13} />

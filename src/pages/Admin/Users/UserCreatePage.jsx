@@ -39,9 +39,26 @@ const getPasswordStrength = (pwd) => {
   if (/[0-9]/.test(pwd)) score++;
   if (/[^A-Za-z0-9]/.test(pwd)) score++;
 
-  if (score <= 1) return { score: 1, label: "Yếu", color: "bg-rose-500", text: "text-rose-600" };
-  if (score <= 3) return { score: 2, label: "Trung bình", color: "bg-amber-500", text: "text-amber-600" };
-  return { score: 3, label: "Mạnh", color: "bg-emerald-500", text: "text-emerald-600" };
+  if (score <= 1)
+    return {
+      score: 1,
+      label: "Yếu",
+      color: "bg-rose-500",
+      text: "text-rose-600",
+    };
+  if (score <= 3)
+    return {
+      score: 2,
+      label: "Trung bình",
+      color: "bg-amber-500",
+      text: "text-amber-600",
+    };
+  return {
+    score: 3,
+    label: "Mạnh",
+    color: "bg-emerald-500",
+    text: "text-emerald-600",
+  };
 };
 
 const UserCreatePage = () => {
@@ -71,7 +88,11 @@ const UserCreatePage = () => {
           const defaultRole =
             roleList.find((r) => r.nameRole?.toLowerCase().includes("user")) ||
             roleList[0];
-          setForm((prev) => (prev.roleId ? prev : { ...prev, roleId: String(defaultRole.idRole) }));
+          setForm((prev) =>
+            prev.roleId
+              ? prev
+              : { ...prev, roleId: String(defaultRole.idRole) },
+          );
         }
       })
       .catch(() => {
@@ -100,7 +121,7 @@ const UserCreatePage = () => {
 
   const passwordStrength = useMemo(
     () => getPasswordStrength(form.password),
-    [form.password]
+    [form.password],
   );
 
   const validate = () => {
@@ -186,7 +207,7 @@ const UserCreatePage = () => {
     } catch (error) {
       setSubmitError(
         error.response?.data?.message ||
-          "Không thể tạo người dùng. Vui lòng kiểm tra lại thông tin."
+          "Không thể tạo người dùng. Vui lòng kiểm tra lại thông tin.",
       );
     } finally {
       setSubmitting(false);
@@ -194,40 +215,41 @@ const UserCreatePage = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-200">
+    <div className="mx-auto max-w-5xl animate-in space-y-6 duration-200 fade-in">
       {/* Header with back navigation */}
-      <div className="flex items-center gap-3 pb-3 border-b border-slate-200/60 dark:border-slate-800">
+      <div className="flex items-center gap-3 border-b border-slate-200/60 pb-3 dark:border-slate-800">
         <Link
           to="/admin/users"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-brand hover:border-brand/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 transition-colors shadow-2xs"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-2xs transition-colors hover:border-brand/40 hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
           title="Quay lại danh sách"
         >
           <ArrowLeft size={16} />
         </Link>
         <div>
-          <h1 className="font-heading text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Thêm tài khoản người dùng
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Khởi tạo người dùng mới hoặc gán quyền nhân sự trực tiếp vào hệ thống.
+            Khởi tạo người dùng mới hoặc gán quyền nhân sự trực tiếp vào hệ
+            thống.
           </p>
         </div>
       </div>
 
       {submitError && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-400 flex items-center gap-2">
+        <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400">
           <ShieldAlert size={16} className="shrink-0" />
           <span>{submitError}</span>
         </div>
       )}
 
       {/* Main 2-Column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Column: Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 lg:col-span-2">
           {/* Card 1: Thông tin cá nhân */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3 dark:border-slate-800">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-brand dark:bg-blue-950/50">
                 <User size={18} />
               </div>
@@ -236,9 +258,9 @@ const UserCreatePage = () => {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Họ và tên <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -247,19 +269,21 @@ const UserCreatePage = () => {
                   value={form.fullName}
                   onChange={handleChange}
                   placeholder="Ví dụ: Nguyễn Văn An"
-                  className={`w-full h-10 px-3.5 rounded-xl border text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden transition-all dark:bg-slate-800/60 dark:text-slate-100 ${
+                  className={`h-10 w-full rounded-xl border px-3.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:outline-hidden dark:bg-slate-800/60 dark:text-slate-100 ${
                     errors.fullName
                       ? "border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 bg-slate-50/50 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
+                      : "border-slate-200 bg-slate-50/50 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
                   }`}
                 />
                 {errors.fullName && (
-                  <p className="mt-1 text-[11px] text-rose-600">{errors.fullName}</p>
+                  <p className="mt-1 text-[11px] text-rose-600">
+                    {errors.fullName}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Địa chỉ Email <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -268,19 +292,21 @@ const UserCreatePage = () => {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="user@garment.vn"
-                  className={`w-full h-10 px-3.5 rounded-xl border text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden transition-all dark:bg-slate-800/60 dark:text-slate-100 ${
+                  className={`h-10 w-full rounded-xl border px-3.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:outline-hidden dark:bg-slate-800/60 dark:text-slate-100 ${
                     errors.email
                       ? "border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 bg-slate-50/50 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
+                      : "border-slate-200 bg-slate-50/50 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
                   }`}
                 />
                 {errors.email && (
-                  <p className="mt-1 text-[11px] text-rose-600">{errors.email}</p>
+                  <p className="mt-1 text-[11px] text-rose-600">
+                    {errors.email}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Số điện thoại
                 </label>
                 <input
@@ -289,19 +315,21 @@ const UserCreatePage = () => {
                   value={form.phone}
                   onChange={handleChange}
                   placeholder="0912 345 678"
-                  className={`w-full h-10 px-3.5 rounded-xl border text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden transition-all dark:bg-slate-800/60 dark:text-slate-100 ${
+                  className={`h-10 w-full rounded-xl border px-3.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:outline-hidden dark:bg-slate-800/60 dark:text-slate-100 ${
                     errors.phone
                       ? "border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 bg-slate-50/50 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
+                      : "border-slate-200 bg-slate-50/50 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
                   }`}
                 />
                 {errors.phone && (
-                  <p className="mt-1 text-[11px] text-rose-600">{errors.phone}</p>
+                  <p className="mt-1 text-[11px] text-rose-600">
+                    {errors.phone}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Ngày sinh
                 </label>
                 <input
@@ -309,22 +337,24 @@ const UserCreatePage = () => {
                   name="birthday"
                   value={form.birthday}
                   onChange={handleChange}
-                  className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 text-xs text-slate-800 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                 />
                 {errors.birthday && (
-                  <p className="mt-1 text-[11px] text-rose-600">{errors.birthday}</p>
+                  <p className="mt-1 text-[11px] text-rose-600">
+                    {errors.birthday}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Giới tính
                 </label>
                 <select
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
-                  className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 text-xs text-slate-800 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                 >
                   <option value="Male">Nam</option>
                   <option value="Female">Nữ</option>
@@ -335,8 +365,8 @@ const UserCreatePage = () => {
           </div>
 
           {/* Card 2: Vai trò & Phân quyền */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3 dark:border-slate-800">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50">
                 <ShieldCheck size={18} />
               </div>
@@ -347,11 +377,14 @@ const UserCreatePage = () => {
 
             {rolesLoading ? (
               <div className="py-4 text-center text-xs text-slate-400">
-                <LoaderCircle size={20} className="animate-spin mx-auto mb-1 text-brand" />
+                <LoaderCircle
+                  size={20}
+                  className="mx-auto mb-1 animate-spin text-brand"
+                />
                 Đang nạp danh mục vai trò...
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {roles.map((r) => {
                   const isChecked = String(form.roleId) === String(r.idRole);
                   const isAdm = r.nameRole?.toLowerCase().includes("admin");
@@ -359,9 +392,9 @@ const UserCreatePage = () => {
                   return (
                     <label
                       key={r.idRole}
-                      className={`relative flex flex-col p-4 rounded-2xl border cursor-pointer transition-all ${
+                      className={`relative flex cursor-pointer flex-col rounded-2xl border p-4 transition-all ${
                         isChecked
-                          ? "border-brand bg-brand/5 dark:bg-brand/15 shadow-xs"
+                          ? "border-brand bg-brand/5 shadow-xs dark:bg-brand/15"
                           : "border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600"
                       }`}
                     >
@@ -373,7 +406,7 @@ const UserCreatePage = () => {
                         onChange={handleChange}
                         className="sr-only"
                       />
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="mb-2 flex items-center justify-between">
                         <div
                           className={`flex h-8 w-8 items-center justify-center rounded-xl ${
                             isAdm
@@ -392,16 +425,17 @@ const UserCreatePage = () => {
                           )}
                         </div>
                         {isChecked && (
-                          <div className="h-5 w-5 rounded-full bg-brand text-white flex items-center justify-center">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white">
                             <Check size={12} className="stroke-3" />
                           </div>
                         )}
                       </div>
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">
                         {r.nameRole}
                       </span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-                        {r.descriptionRole || "Quyền hạn tài khoản trong hệ thống"}
+                      <span className="mt-1 line-clamp-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        {r.descriptionRole ||
+                          "Quyền hạn tài khoản trong hệ thống"}
                       </span>
                     </label>
                   );
@@ -414,8 +448,8 @@ const UserCreatePage = () => {
           </div>
 
           {/* Card 3: Mật khẩu khởi tạo */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3 dark:border-slate-800">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/50">
                 <Lock size={18} />
               </div>
@@ -424,9 +458,9 @@ const UserCreatePage = () => {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Mật khẩu <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -436,18 +470,20 @@ const UserCreatePage = () => {
                     value={form.password}
                     onChange={handleChange}
                     placeholder="Tối thiểu 8 ký tự"
-                    className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pr-10 pl-3.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="mt-1 text-[11px] text-rose-600">{errors.password}</p>
+                  <p className="mt-1 text-[11px] text-rose-600">
+                    {errors.password}
+                  </p>
                 )}
 
                 {/* Password strength indicator */}
@@ -459,20 +495,26 @@ const UserCreatePage = () => {
                         {passwordStrength.label}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex gap-1">
+                    <div className="flex h-1.5 w-full gap-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                       <div
                         className={`h-full flex-1 rounded-full ${
-                          passwordStrength.score >= 1 ? passwordStrength.color : "bg-slate-200"
+                          passwordStrength.score >= 1
+                            ? passwordStrength.color
+                            : "bg-slate-200"
                         }`}
                       />
                       <div
                         className={`h-full flex-1 rounded-full ${
-                          passwordStrength.score >= 2 ? passwordStrength.color : "bg-slate-200"
+                          passwordStrength.score >= 2
+                            ? passwordStrength.color
+                            : "bg-slate-200"
                         }`}
                       />
                       <div
                         className={`h-full flex-1 rounded-full ${
-                          passwordStrength.score >= 3 ? passwordStrength.color : "bg-slate-200"
+                          passwordStrength.score >= 3
+                            ? passwordStrength.color
+                            : "bg-slate-200"
                         }`}
                       />
                     </div>
@@ -481,7 +523,7 @@ const UserCreatePage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Xác nhận mật khẩu <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -491,18 +533,24 @@ const UserCreatePage = () => {
                     value={form.confirmPassword}
                     onChange={handleChange}
                     placeholder="Nhập lại mật khẩu"
-                    className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pr-10 pl-3.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                   >
-                    {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={15} />
+                    ) : (
+                      <Eye size={15} />
+                    )}
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="mt-1 text-[11px] text-rose-600">{errors.confirmPassword}</p>
+                  <p className="mt-1 text-[11px] text-rose-600">
+                    {errors.confirmPassword}
+                  </p>
                 )}
               </div>
             </div>
@@ -512,14 +560,14 @@ const UserCreatePage = () => {
           <div className="flex items-center justify-end gap-3 pt-2">
             <Link
               to="/admin/users"
-              className="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+              className="rounded-xl border border-slate-200 px-5 py-2.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               Hủy bỏ
             </Link>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-brand text-white text-xs font-semibold hover:bg-brand-hover disabled:opacity-50 transition-colors shadow-xs"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-hover disabled:opacity-50"
             >
               {submitting ? (
                 <>
@@ -539,8 +587,8 @@ const UserCreatePage = () => {
         {/* Right Column: Live Profile Preview Card */}
         <div className="space-y-6">
           <div className="sticky top-24 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                 Xem trước hồ sơ
               </span>
               <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand">
@@ -549,26 +597,26 @@ const UserCreatePage = () => {
               </span>
             </div>
 
-            <div className="pt-6 flex flex-col items-center text-center">
-              <div className="h-20 w-20 rounded-2xl bg-linear-to-tr from-brand to-sky-400 text-white flex items-center justify-center font-heading text-2xl font-black shadow-lg shadow-brand/20">
+            <div className="flex flex-col items-center pt-6 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-linear-to-tr from-brand to-sky-400 font-heading text-2xl font-black text-white shadow-lg shadow-brand/20">
                 {form.fullName ? form.fullName.charAt(0).toUpperCase() : "U"}
               </div>
 
               <h3 className="mt-4 font-heading text-base font-extrabold text-slate-900 dark:text-white">
                 {form.fullName || "Tên người dùng mới"}
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5 truncate max-w-full">
+              <p className="mt-0.5 max-w-full truncate text-xs text-slate-400">
                 {form.email || "email@garment.vn"}
               </p>
 
               <div className="mt-3">
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-brand-soft text-brand dark:bg-brand/20">
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand dark:bg-brand/20">
                   <ShieldCheck size={14} />
                   {selectedRole?.nameRole || "Chưa chọn vai trò"}
                 </span>
               </div>
 
-              <div className="w-full mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2.5 text-left text-xs">
+              <div className="mt-6 w-full space-y-2.5 border-t border-slate-100 pt-4 text-left text-xs dark:border-slate-800">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Số điện thoại:</span>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">

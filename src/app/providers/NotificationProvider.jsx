@@ -37,7 +37,8 @@ export const NotificationProvider = ({ children }) => {
 
   const showNotification = useCallback(
     (typeOrConfig, maybeMessage, maybeDescription) => {
-      const isObject = typeof typeOrConfig === "object" && typeOrConfig !== null;
+      const isObject =
+        typeof typeOrConfig === "object" && typeOrConfig !== null;
       const type = (isObject ? typeOrConfig.type : typeOrConfig) || "success";
       const message =
         (isObject
@@ -81,7 +82,7 @@ export const NotificationProvider = ({ children }) => {
     <NotificationContext.Provider value={{ showNotification }}>
       {children}
       {toasts.length > 0 && (
-        <div className="fixed right-4 bottom-4 z-9999 flex flex-col items-end gap-3 pointer-events-none md:right-6 md:bottom-6">
+        <div className="pointer-events-none fixed right-4 bottom-4 z-9999 flex flex-col items-end gap-3 md:right-6 md:bottom-6">
           {toasts.map((toast) => (
             <div key={toast.id} className="pointer-events-auto">
               <Notification

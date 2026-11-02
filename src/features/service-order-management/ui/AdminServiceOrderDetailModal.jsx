@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  MapPin,
-  Package,
-  UserRound,
-  Wrench,
-  X,
-} from "lucide-react";
+import { MapPin, Package, UserRound, Wrench, X } from "lucide-react";
 import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
 import { useNotification } from "@/app/providers/NotificationProvider";
 
@@ -32,38 +26,45 @@ const formatDate = (value, includeTime = false) => {
 };
 
 const getStatusInfo = (statusString) => {
-  const status = String(statusString || "").trim().toLowerCase();
+  const status = String(statusString || "")
+    .trim()
+    .toLowerCase();
   if (status === "inactive" || status === "deleted") {
     return {
       label: "Đã hủy",
-      className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900",
+      className:
+        "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900",
       dot: "bg-rose-500",
     };
   }
   if (status === "pending") {
     return {
       label: "Chờ tiếp nhận",
-      className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
+      className:
+        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
       dot: "bg-amber-500",
     };
   }
   if (status === "active") {
     return {
       label: "Đang xử lý",
-      className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
+      className:
+        "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
       dot: "bg-blue-500",
     };
   }
   if (status === "completed") {
     return {
       label: "Hoàn tất",
-      className: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
+      className:
+        "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
       dot: "bg-emerald-500",
     };
   }
   return {
     label: "Ngừng xử lý",
-    className: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+    className:
+      "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
     dot: "bg-slate-400",
   };
 };
@@ -85,7 +86,7 @@ const DetailSection = ({ icon: Icon, title, children }) => (
       <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-brand">
         <Icon size={14} />
       </div>
-      <h3 className="font-heading text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+      <h3 className="font-heading text-xs font-bold tracking-wider text-slate-900 uppercase dark:text-white">
         {title}
       </h3>
     </div>
@@ -95,13 +96,17 @@ const DetailSection = ({ icon: Icon, title, children }) => (
 
 const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
   const { showNotification } = useNotification();
-  const [currentStatus, setCurrentStatus] = useState(order?.status || "pending");
+  const [currentStatus, setCurrentStatus] = useState(
+    order?.status || "pending",
+  );
   const [updating, setUpdating] = useState(false);
 
   if (!open || !order) return null;
 
   const status = getStatusInfo(currentStatus);
-  const address = [order.address?.companyName, order.address?.address].filter(Boolean).join(" - ");
+  const address = [order.address?.companyName, order.address?.address]
+    .filter(Boolean)
+    .join(" - ");
   const quantity = [order.quantity, order.unitType].filter(Boolean).join(" ");
 
   // Step indicator state
@@ -123,7 +128,11 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
         type: "success",
         title: "Cập nhật thành công",
         message: `Đơn ORD-${order.serviceOrderId} đã chuyển sang "${
-          newStatus === "active" ? "Đang xử lý" : newStatus === "completed" ? "Hoàn tất" : newStatus
+          newStatus === "active"
+            ? "Đang xử lý"
+            : newStatus === "completed"
+              ? "Hoàn tất"
+              : newStatus
         }".`,
       });
     } catch {
@@ -142,11 +151,11 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
       role="dialog"
       aria-modal="true"
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs px-4 py-6 animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-slate-900/60 px-4 py-6 backdrop-blur-xs duration-150 fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 flex flex-col max-h-[90vh]"
+        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900"
       >
         {/* Top accent line */}
         <div className="h-1.5 w-full bg-linear-to-r from-brand via-sky-400 to-indigo-500" />
@@ -154,7 +163,7 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
         {/* Modal Header */}
         <header className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand font-bold text-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-sm font-bold text-brand">
               ORD
             </div>
             <div>
@@ -163,13 +172,13 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
                   Đơn dịch vụ #{order.serviceOrderId}
                 </h2>
                 <span
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${status.className}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${status.className}`}
                 >
                   <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
                   {status.label}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="mt-0.5 text-xs text-slate-400">
                 Khởi tạo ngày {formatDate(order.createdAt, true)}
               </p>
             </div>
@@ -178,15 +187,15 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="h-8 w-8 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 flex items-center justify-center transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
           >
             <X size={18} />
           </button>
         </header>
 
         {/* Workflow Progress Stepper */}
-        <div className="px-6 py-4 bg-slate-50/70 border-b border-slate-100 dark:bg-slate-800/40 dark:border-slate-800">
-          <div className="flex items-center justify-between max-w-xl mx-auto">
+        <div className="border-b border-slate-100 bg-slate-50/70 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div className="mx-auto flex max-w-xl items-center justify-between">
             {[
               { num: 1, label: "Tiếp nhận đơn" },
               { num: 2, label: "Đang thiết kế" },
@@ -195,7 +204,10 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
               const isPast = stepIndex >= step.num;
               const isCurrent = stepIndex === step.num;
               return (
-                <div key={idx} className="flex items-center flex-1 last:flex-none">
+                <div
+                  key={idx}
+                  className="flex flex-1 items-center last:flex-none"
+                >
                   <div className="flex flex-col items-center">
                     <div
                       className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
@@ -209,7 +221,7 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
                     <span
                       className={`mt-1 text-[11px] font-medium ${
                         isCurrent
-                          ? "text-brand font-bold"
+                          ? "font-bold text-brand"
                           : isPast
                             ? "text-slate-700 dark:text-slate-200"
                             : "text-slate-400"
@@ -220,8 +232,10 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
                   </div>
                   {idx < 2 && (
                     <div
-                      className={`h-0.5 flex-1 mx-2 transition-all ${
-                        stepIndex > step.num ? "bg-brand" : "bg-slate-200 dark:bg-slate-700"
+                      className={`mx-2 h-0.5 flex-1 transition-all ${
+                        stepIndex > step.num
+                          ? "bg-brand"
+                          : "bg-slate-200 dark:bg-slate-700"
                       }`}
                     />
                   )}
@@ -232,9 +246,9 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-6">
           {/* Section: Khách hàng & Dịch vụ */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <DetailSection icon={UserRound} title="Khách hàng">
               <div className="space-y-2">
                 <DetailItem label="Họ và tên" value={order.user?.fullName} />
@@ -248,8 +262,14 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
 
             <DetailSection icon={Wrench} title="Dịch vụ & Sản phẩm">
               <div className="space-y-2">
-                <DetailItem label="Tên dịch vụ" value={order.service?.serviceName} />
-                <DetailItem label="Tên sản phẩm / Mẫu" value={order.productName} />
+                <DetailItem
+                  label="Tên dịch vụ"
+                  value={order.service?.serviceName}
+                />
+                <DetailItem
+                  label="Tên sản phẩm / Mẫu"
+                  value={order.productName}
+                />
                 <DetailItem label="Số lượng yêu cầu" value={quantity} />
               </div>
             </DetailSection>
@@ -258,8 +278,14 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
           {/* Section: Chi phí & Thanh toán */}
           <DetailSection icon={Package} title="Chi tiết giá trị đơn hàng">
             <div className="grid grid-cols-3 gap-4">
-              <DetailItem label="Đơn giá" value={formatPrice(order.unitPrice)} />
-              <DetailItem label="Giảm giá" value={formatPrice(order.discountAmount || 0)} />
+              <DetailItem
+                label="Đơn giá"
+                value={formatPrice(order.unitPrice)}
+              />
+              <DetailItem
+                label="Giảm giá"
+                value={formatPrice(order.discountAmount || 0)}
+              />
               <div>
                 <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                   Tổng tiền
@@ -273,9 +299,16 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
 
           {/* Section: Địa chỉ giao nhận */}
           <DetailSection icon={MapPin} title="Địa chỉ giao nhận">
-            <DetailItem label="Địa chỉ" value={address || "Nhận file kỹ thuật số trực tuyến"} />
+            <DetailItem
+              label="Địa chỉ"
+              value={address || "Nhận file kỹ thuật số trực tuyến"}
+            />
             {order.address?.note && (
-              <DetailItem label="Ghi chú giao hàng" value={order.address.note} className="mt-2" />
+              <DetailItem
+                label="Ghi chú giao hàng"
+                value={order.address.note}
+                className="mt-2"
+              />
             )}
           </DetailSection>
 
@@ -283,20 +316,25 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
           <section className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
             <DetailItem
               label="Yêu cầu kỹ thuật từ khách hàng"
-              value={order.customerRequest || "Khách hàng không nhập ghi chú bổ sung."}
+              value={
+                order.customerRequest ||
+                "Khách hàng không nhập ghi chú bổ sung."
+              }
             />
           </section>
         </div>
 
         {/* Modal Footer with Status Change Dropdown */}
-        <footer className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 px-6 py-4 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs font-semibold text-slate-500">Đổi trạng thái:</span>
+        <footer className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/50 px-6 py-4 sm:flex-row dark:border-slate-800 dark:bg-slate-900/50">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <span className="text-xs font-semibold text-slate-500">
+              Đổi trạng thái:
+            </span>
             <select
               value={currentStatus}
               disabled={updating}
               onChange={(e) => handleUpdateStatus(e.target.value)}
-              className="h-8.5 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="h-8.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <option value="pending">Chờ tiếp nhận</option>
               <option value="active">Đang xử lý</option>
@@ -305,11 +343,11 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-colors shadow-2xs"
+              className="rounded-xl border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               Đóng
             </button>

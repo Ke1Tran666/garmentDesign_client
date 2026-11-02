@@ -50,7 +50,9 @@ const formatDate = (value) => {
 };
 
 const getOrderStatusValue = (order) => {
-  const status = String(order?.status || "").trim().toLowerCase();
+  const status = String(order?.status || "")
+    .trim()
+    .toLowerCase();
   if (status === "inactive" && order?.deletedAt) return "cancelled";
   if (status === "completed" || status === "done") return "completed";
   return status;
@@ -62,7 +64,8 @@ const getStatusInfo = (order) => {
   if (status === "pending") {
     return {
       label: "Chờ tiếp nhận",
-      className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
+      className:
+        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
       dot: "bg-amber-500",
     };
   }
@@ -70,7 +73,8 @@ const getStatusInfo = (order) => {
   if (status === "active") {
     return {
       label: "Đang xử lý",
-      className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
+      className:
+        "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
       dot: "bg-blue-500",
     };
   }
@@ -78,7 +82,8 @@ const getStatusInfo = (order) => {
   if (status === "completed") {
     return {
       label: "Hoàn tất",
-      className: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
+      className:
+        "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
       dot: "bg-emerald-500",
     };
   }
@@ -86,14 +91,16 @@ const getStatusInfo = (order) => {
   if (status === "cancelled") {
     return {
       label: "Đã hủy",
-      className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900",
+      className:
+        "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900",
       dot: "bg-rose-500",
     };
   }
 
   return {
     label: "Ngừng xử lý",
-    className: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+    className:
+      "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
     dot: "bg-slate-400",
   };
 };
@@ -131,7 +138,9 @@ const ServiceOrderManagementPage = () => {
         showNotification({
           type: "error",
           title: "Lỗi tải dữ liệu",
-          message: error.response?.data?.message || "Không thể tải danh sách đơn dịch vụ.",
+          message:
+            error.response?.data?.message ||
+            "Không thể tải danh sách đơn dịch vụ.",
         });
       })
       .finally(() => {
@@ -203,7 +212,8 @@ const ServiceOrderManagementPage = () => {
           .includes(keyword);
 
       const orderStatus = getOrderStatusValue(order);
-      const matchesStatus = statusFilter === "all" || orderStatus === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || orderStatus === statusFilter;
 
       return matchesKeyword && matchesStatus;
     });
@@ -225,14 +235,20 @@ const ServiceOrderManagementPage = () => {
       });
       setOrders((prev) =>
         prev.map((o) =>
-          o.serviceOrderId === order.serviceOrderId ? { ...o, status: targetStatus } : o
-        )
+          o.serviceOrderId === order.serviceOrderId
+            ? { ...o, status: targetStatus }
+            : o,
+        ),
       );
       showNotification({
         type: "success",
         title: "Cập nhật tiến độ đơn",
         message: `Đơn ORD-${order.serviceOrderId} đã chuyển trạng thái sang "${
-          targetStatus === "active" ? "Đang xử lý" : targetStatus === "completed" ? "Hoàn tất" : targetStatus
+          targetStatus === "active"
+            ? "Đang xử lý"
+            : targetStatus === "completed"
+              ? "Hoàn tất"
+              : targetStatus
         }".`,
       });
     } catch {
@@ -257,7 +273,11 @@ const ServiceOrderManagementPage = () => {
       "Ngày tạo": formatDate(o.createdAt),
     }));
 
-    const success = exportToExcel(exportData, "Danh_Sach_Don_Dich_Vu", "Orders");
+    const success = exportToExcel(
+      exportData,
+      "Danh_Sach_Don_Dich_Vu",
+      "Orders",
+    );
     if (success) {
       showNotification({
         type: "success",
@@ -274,7 +294,9 @@ const ServiceOrderManagementPage = () => {
       setRemoving(true);
       await serviceOrderApi.removeByAdmin(removingOrder.serviceOrderId);
       setOrders((current) =>
-        current.filter((o) => o.serviceOrderId !== removingOrder.serviceOrderId)
+        current.filter(
+          (o) => o.serviceOrderId !== removingOrder.serviceOrderId,
+        ),
       );
       showNotification({
         type: "success",
@@ -299,53 +321,66 @@ const ServiceOrderManagementPage = () => {
       {
         id: "pending",
         title: "Chờ tiếp nhận",
-        orders: filteredOrders.filter((o) => getOrderStatusValue(o) === "pending"),
+        orders: filteredOrders.filter(
+          (o) => getOrderStatusValue(o) === "pending",
+        ),
         color: "bg-amber-500",
-        badge: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
+        badge:
+          "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
       },
       {
         id: "active",
         title: "Đang xử lý / Thiết kế",
-        orders: filteredOrders.filter((o) => getOrderStatusValue(o) === "active"),
+        orders: filteredOrders.filter(
+          (o) => getOrderStatusValue(o) === "active",
+        ),
         color: "bg-blue-500",
-        badge: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
+        badge:
+          "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
       },
       {
         id: "completed",
         title: "Nghiệm thu & Hoàn tất",
-        orders: filteredOrders.filter((o) => getOrderStatusValue(o) === "completed"),
+        orders: filteredOrders.filter(
+          (o) => getOrderStatusValue(o) === "completed",
+        ),
         color: "bg-emerald-500",
-        badge: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
+        badge:
+          "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
       },
       {
         id: "cancelled",
         title: "Đã hủy / Tạm ngừng",
         orders: filteredOrders.filter(
-          (o) => getOrderStatusValue(o) === "cancelled" || getOrderStatusValue(o) === "inactive"
+          (o) =>
+            getOrderStatusValue(o) === "cancelled" ||
+            getOrderStatusValue(o) === "inactive",
         ),
         color: "bg-slate-400",
-        badge: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+        badge:
+          "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
       },
     ];
   }, [filteredOrders]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="animate-in space-y-6 duration-200 fade-in">
       {/* =========================================
           PAGE HEADER
           ========================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800">
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200/60 pb-2 sm:flex-row sm:items-center dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
               Quản lý đơn dịch vụ
             </h1>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
               {filteredOrders.length} đơn hàng
             </span>
           </div>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Theo dõi tiến trình thiết kế rập, nhảy size và kiểm duyệt đơn hàng dịch vụ khách hàng.
+            Theo dõi tiến trình thiết kế rập, nhảy size và kiểm duyệt đơn hàng
+            dịch vụ khách hàng.
           </p>
         </div>
 
@@ -354,17 +389,20 @@ const ServiceOrderManagementPage = () => {
             type="button"
             onClick={fetchOrders}
             disabled={loading}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors shadow-xs"
+            className="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             title="Làm mới"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin text-brand" : "text-slate-400"} />
+            <RefreshCw
+              size={14}
+              className={loading ? "animate-spin text-brand" : "text-slate-400"}
+            />
             <span className="hidden sm:inline">Làm mới</span>
           </button>
 
           <button
             type="button"
             onClick={handleExport}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors shadow-xs"
+            className="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             title="Xuất file Excel"
           >
             <Download size={14} className="text-slate-400" />
@@ -376,7 +414,7 @@ const ServiceOrderManagementPage = () => {
       {/* =========================================
           TOP METRIC STATS
           ========================================= */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -437,13 +475,13 @@ const ServiceOrderManagementPage = () => {
       {/* =========================================
           TOOLBAR & VIEW MODE (LIST vs KANBAN)
           ========================================= */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
           {/* Search box */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative max-w-md flex-1">
             <Search
               size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400"
             />
             <input
               type="text"
@@ -453,7 +491,7 @@ const ServiceOrderManagementPage = () => {
                 setCurrentPage(1);
               }}
               placeholder="Tìm theo mã đơn (ORD-xxx), khách hàng, dịch vụ, mẫu..."
-              className="w-full h-10 pl-9.5 pr-8 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100 transition-all"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pr-8 pl-9.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
             />
             {localSearch && (
               <button
@@ -462,7 +500,7 @@ const ServiceOrderManagementPage = () => {
                   setLocalSearch("");
                   setCurrentPage(1);
                 }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute top-1/2 right-2.5 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
                 <X size={14} />
               </button>
@@ -471,11 +509,11 @@ const ServiceOrderManagementPage = () => {
 
           <div className="flex items-center gap-2.5">
             {/* View Mode Toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+            <div className="flex items-center rounded-xl bg-slate-100 p-1 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
               <button
                 type="button"
                 onClick={() => setViewMode("table")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
                   viewMode === "table"
                     ? "bg-white text-brand shadow-xs dark:bg-slate-700 dark:text-white"
                     : "hover:text-slate-900"
@@ -488,7 +526,7 @@ const ServiceOrderManagementPage = () => {
               <button
                 type="button"
                 onClick={() => setViewMode("kanban")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
                   viewMode === "kanban"
                     ? "bg-white text-brand shadow-xs dark:bg-slate-700 dark:text-white"
                     : "hover:text-slate-900"
@@ -503,8 +541,10 @@ const ServiceOrderManagementPage = () => {
         </div>
 
         {/* Status Filter Chips */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <span className="text-xs font-medium text-slate-400 mr-1">Trạng thái:</span>
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-2 dark:border-slate-800">
+          <span className="mr-1 text-xs font-medium text-slate-400">
+            Trạng thái:
+          </span>
           {[
             { id: "all", label: "Tất cả" },
             { id: "pending", label: "Chờ tiếp nhận" },
@@ -519,7 +559,7 @@ const ServiceOrderManagementPage = () => {
                 setStatusFilter(chip.id);
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
                 statusFilter === chip.id
                   ? "bg-brand! text-white! shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
@@ -536,12 +576,18 @@ const ServiceOrderManagementPage = () => {
           ========================================= */}
       {loading ? (
         <div className="rounded-2xl border border-slate-200/80 bg-white p-12 text-center text-slate-400 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-brand" />
+          <RefreshCw
+            size={24}
+            className="mx-auto mb-2 animate-spin text-brand"
+          />
           Đang tải danh sách đơn dịch vụ...
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className="rounded-2xl border border-slate-200/80 bg-white p-12 text-center shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <Package size={32} className="mx-auto mb-2 text-slate-300 dark:text-slate-600" />
+          <Package
+            size={32}
+            className="mx-auto mb-2 text-slate-300 dark:text-slate-600"
+          />
           <p className="font-semibold text-slate-600 dark:text-slate-300">
             Không tìm thấy đơn hàng nào phù hợp
           </p>
@@ -558,27 +604,27 @@ const ServiceOrderManagementPage = () => {
         </div>
       ) : viewMode === "kanban" ? (
         /* KANBAN PIPELINE VIEW */
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+        <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
           {kanbanColumns.map((col) => (
             <div
               key={col.id}
-              className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-slate-800 dark:bg-slate-900/60 flex flex-col gap-3 min-h-120"
+              className="flex min-h-120 flex-col gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-3.5 dark:border-slate-800 dark:bg-slate-900/60"
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-slate-800 px-1">
+              <div className="flex items-center justify-between border-b border-slate-200/60 px-1 pb-2 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <span className={`h-2.5 w-2.5 rounded-full ${col.color}`} />
-                  <span className="font-bold text-xs text-slate-900 dark:text-white">
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">
                     {col.title}
                   </span>
                 </div>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-2xs">
+                <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-slate-600 shadow-2xs dark:bg-slate-800 dark:text-slate-300">
                   {col.orders.length}
                 </span>
               </div>
 
               {/* Cards List */}
-              <div className="space-y-3 flex-1 overflow-y-auto">
+              <div className="flex-1 space-y-3 overflow-y-auto">
                 {col.orders.length === 0 ? (
                   <div className="py-8 text-center text-xs text-slate-400">
                     Không có đơn trong bước này
@@ -589,7 +635,7 @@ const ServiceOrderManagementPage = () => {
                       <div
                         key={order.serviceOrderId}
                         onClick={() => setSelectedOrder(order)}
-                        className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-xs hover:shadow-md transition-all cursor-pointer dark:border-slate-800 dark:bg-slate-900 space-y-2.5 group"
+                        className="group cursor-pointer space-y-2.5 rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-xs transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-mono text-[11px] font-bold text-brand">
@@ -601,16 +647,16 @@ const ServiceOrderManagementPage = () => {
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-1 group-hover:text-brand transition-colors">
+                          <h4 className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors group-hover:text-brand dark:text-white">
                             {order.productName || "Sản phẩm may mặc"}
                           </h4>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                          <p className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
                             {order.service?.serviceName || "Dịch vụ rập"}
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
-                          <span className="text-[11px] text-slate-500 truncate max-w-28">
+                        <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-xs dark:border-slate-800">
+                          <span className="max-w-28 truncate text-[11px] text-slate-500">
                             {order.user?.fullName || "Khách hàng"}
                           </span>
                           <span className="font-bold text-slate-900 dark:text-white">
@@ -626,7 +672,7 @@ const ServiceOrderManagementPage = () => {
                               e.stopPropagation();
                               handleQuickAdvanceStatus(order, "active");
                             }}
-                            className="w-full mt-1 py-1 rounded-lg bg-blue-50 text-brand text-[11px] font-semibold hover:bg-brand hover:text-white transition-colors flex items-center justify-center gap-1"
+                            className="mt-1 flex w-full items-center justify-center gap-1 rounded-lg bg-blue-50 py-1 text-[11px] font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
                           >
                             <span>Tiếp nhận & Xử lý</span>
                             <ArrowRight size={12} />
@@ -639,7 +685,7 @@ const ServiceOrderManagementPage = () => {
                               e.stopPropagation();
                               handleQuickAdvanceStatus(order, "completed");
                             }}
-                            className="w-full mt-1 py-1 rounded-lg bg-emerald-50 text-emerald-600 text-[11px] font-semibold hover:bg-emerald-600 hover:text-white transition-colors flex items-center justify-center gap-1"
+                            className="mt-1 flex w-full items-center justify-center gap-1 rounded-lg bg-emerald-50 py-1 text-[11px] font-semibold text-emerald-600 transition-colors hover:bg-emerald-600 hover:text-white"
                           >
                             <span>Hoàn tất nghiệm thu</span>
                             <CheckCircle2 size={12} />
@@ -655,10 +701,10 @@ const ServiceOrderManagementPage = () => {
         </div>
       ) : (
         /* TABLE VIEW */
-        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="overflow-x-auto">
             <table className="w-full min-w-240 text-left">
-              <thead className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-800/40 dark:border-slate-800">
+              <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:border-slate-800 dark:bg-slate-800/40">
                 <tr>
                   <th className="px-5 py-3.5">Mã đơn & Mẫu</th>
                   <th className="px-4 py-3.5">Khách hàng</th>
@@ -669,28 +715,28 @@ const ServiceOrderManagementPage = () => {
                   <th className="px-4 py-3.5 text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <tbody className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
                 {visibleOrders.map((order) => {
                   const statusInfo = getStatusInfo(order);
                   return (
                     <tr
                       key={order.serviceOrderId}
-                      className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/50"
+                      className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/50"
                     >
                       <td className="px-5 py-3.5">
                         <div className="font-mono text-xs font-bold text-brand">
                           ORD-{order.serviceOrderId}
                         </div>
-                        <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 truncate max-w-50">
+                        <div className="max-w-50 truncate text-[11px] font-medium text-slate-700 dark:text-slate-300">
                           {order.productName || "Mẫu chưa đặt tên"}
                         </div>
                       </td>
 
                       <td className="px-4 py-3.5">
-                        <div className="font-bold text-slate-900 dark:text-white truncate">
+                        <div className="truncate font-bold text-slate-900 dark:text-white">
                           {order.user?.fullName || "Khách hàng"}
                         </div>
-                        <div className="text-[11px] text-slate-400 truncate">
+                        <div className="truncate text-[11px] text-slate-400">
                           {order.user?.phone || order.user?.userCode || "---"}
                         </div>
                       </td>
@@ -714,9 +760,11 @@ const ServiceOrderManagementPage = () => {
 
                       <td className="px-4 py-3.5">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusInfo.className}`}
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusInfo.className}`}
                         >
-                          <span className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot}`} />
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot}`}
+                          />
                           {statusInfo.label}
                         </span>
                       </td>
@@ -726,7 +774,7 @@ const ServiceOrderManagementPage = () => {
                           <button
                             type="button"
                             onClick={() => setSelectedOrder(order)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 hover:text-brand hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-brand dark:hover:bg-slate-800"
                             title="Xem chi tiết đơn"
                           >
                             <Eye size={16} />
@@ -734,7 +782,7 @@ const ServiceOrderManagementPage = () => {
                           <button
                             type="button"
                             onClick={() => setRemovingOrder(order)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
                             title="Xóa đơn hàng"
                           >
                             <Trash2 size={16} />
@@ -750,11 +798,14 @@ const ServiceOrderManagementPage = () => {
 
           {/* Pagination bar */}
           {!loading && filteredOrders.length > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row dark:border-slate-800">
               <span className="text-xs text-slate-500">
                 Hiển thị {(safeCurrentPage - 1) * PAGE_SIZE + 1} -{" "}
-                {Math.min(safeCurrentPage * PAGE_SIZE, filteredOrders.length)} trên tổng số{" "}
-                <strong className="text-slate-800 dark:text-white">{filteredOrders.length}</strong>
+                {Math.min(safeCurrentPage * PAGE_SIZE, filteredOrders.length)}{" "}
+                trên tổng số{" "}
+                <strong className="text-slate-800 dark:text-white">
+                  {filteredOrders.length}
+                </strong>
               </span>
 
               <Pagination

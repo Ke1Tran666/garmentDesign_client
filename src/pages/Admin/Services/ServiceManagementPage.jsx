@@ -37,7 +37,8 @@ const FALLBACK_SERVICES = [
     serviceName: "Thiết kế may đo Vest Nam Cao Cấp",
     unitType: "Bộ",
     basePrice: 1800000,
-    description: "Tư vấn phom dáng, dựng rập 3D theo số đo cá nhân hóa và may mẫu thử trước khi hoàn thiện.",
+    description:
+      "Tư vấn phom dáng, dựng rập 3D theo số đo cá nhân hóa và may mẫu thử trước khi hoàn thiện.",
     tags: "May đo cao cấp, Vest nam, Thiết kế 3D",
     status: "active",
     createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
@@ -49,7 +50,8 @@ const FALLBACK_SERVICES = [
     serviceName: "Thiết kế Đầm Dạ Hội & Váy Cưới",
     unitType: "Sản phẩm",
     basePrice: 2500000,
-    description: "Thiết kế độc bản theo yêu cầu, xử lý chất liệu ren đính kết thủ công tinh xảo.",
+    description:
+      "Thiết kế độc bản theo yêu cầu, xử lý chất liệu ren đính kết thủ công tinh xảo.",
     tags: "May đo cao cấp, Đầm dạ hội, Váy cưới",
     status: "active",
     createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
@@ -61,7 +63,8 @@ const FALLBACK_SERVICES = [
     serviceName: "Thiết kế Đồng Phục Doanh Nghiệp",
     unitType: "Bộ",
     basePrice: 650000,
-    description: "Bộ nhận diện trang phục công sở hiện đại, tiện dụng, độ bền màu cao và tối ưu chi phí may số lượng lớn.",
+    description:
+      "Bộ nhận diện trang phục công sở hiện đại, tiện dụng, độ bền màu cao và tối ưu chi phí may số lượng lớn.",
     tags: "Đồng phục, Công sở, May công nghiệp",
     status: "active",
     createdAt: new Date(Date.now() - 86400000 * 20).toISOString(),
@@ -73,7 +76,8 @@ const FALLBACK_SERVICES = [
     serviceName: "Dựng Rập & Mô Phỏng 3D CLO",
     unitType: "Mẫu rập",
     basePrice: 500000,
-    description: "Xuất file rập chuẩn công nghiệp định dạng DXF/PDF kèm mô phỏng độ rủ vải trên phần mềm CLO3D.",
+    description:
+      "Xuất file rập chuẩn công nghiệp định dạng DXF/PDF kèm mô phỏng độ rủ vải trên phần mềm CLO3D.",
     tags: "Thiết kế 3D, Làm rập, File số",
     status: "active",
     createdAt: new Date(Date.now() - 86400000 * 25).toISOString(),
@@ -85,7 +89,8 @@ const FALLBACK_SERVICES = [
     serviceName: "May Mẫu Thử & Chỉnh Phom Dáng",
     unitType: "Sản phẩm",
     basePrice: 400000,
-    description: "May thử nghiệm trên vải mộc để kiểm tra cử động, chỉnh sửa thông số rập trước khi cắt vải chính.",
+    description:
+      "May thử nghiệm trên vải mộc để kiểm tra cử động, chỉnh sửa thông số rập trước khi cắt vải chính.",
     tags: "May mẫu thử, Chỉnh sửa phom, Kỹ thuật",
     status: "inactive",
     createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
@@ -97,7 +102,8 @@ const FALLBACK_SERVICES = [
     serviceName: "Tư Vấn Phong Cách & Định Hình BST",
     unitType: "Gói dịch vụ",
     basePrice: 3000000,
-    description: "Lên moodboard xu hướng, tư vấn bảng màu, lựa chọn chất liệu vải và định hướng phong cách bộ sưu tập.",
+    description:
+      "Lên moodboard xu hướng, tư vấn bảng màu, lựa chọn chất liệu vải và định hướng phong cách bộ sưu tập.",
     tags: "Tư vấn, Moodboard, Bộ sưu tập",
     status: "active",
     createdAt: new Date(Date.now() - 86400000 * 35).toISOString(),
@@ -132,16 +138,20 @@ const getStatusInfo = (service) => {
   if (service?.deletedAt) {
     return {
       label: "Đã xóa",
-      className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900",
+      className:
+        "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900",
       dot: "bg-rose-500",
     };
   }
 
-  const status = String(service?.status || "").trim().toLowerCase();
+  const status = String(service?.status || "")
+    .trim()
+    .toLowerCase();
   if (status === "active") {
     return {
       label: "Đang hoạt động",
-      className: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
+      className:
+        "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
       dot: "bg-emerald-500",
     };
   }
@@ -149,14 +159,16 @@ const getStatusInfo = (service) => {
   if (status === "inactive") {
     return {
       label: "Tạm ngừng",
-      className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
+      className:
+        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
       dot: "bg-amber-500",
     };
   }
 
   return {
     label: status || "Chưa xác định",
-    className: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
+    className:
+      "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
     dot: "bg-slate-400",
   };
 };
@@ -332,7 +344,10 @@ const ServiceManagementPage = () => {
     return result;
   }, [services, deferredSearch, statusFilter, unitTypeFilter, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredServices.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredServices.length / PAGE_SIZE),
+  );
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const visibleServices = useMemo(() => {
@@ -454,7 +469,9 @@ const ServiceManagementPage = () => {
     } finally {
       setServices((prev) =>
         prev.map((s) =>
-          selectedIds.includes(s.serviceId) ? { ...s, status: targetStatus } : s,
+          selectedIds.includes(s.serviceId)
+            ? { ...s, status: targetStatus }
+            : s,
         ),
       );
       showNotification({
@@ -533,7 +550,11 @@ const ServiceManagementPage = () => {
       setServices((current) =>
         current.map((item) =>
           item.serviceId === removingService.serviceId
-            ? { ...item, status: "inactive", deletedAt: new Date().toISOString() }
+            ? {
+                ...item,
+                status: "inactive",
+                deletedAt: new Date().toISOString(),
+              }
             : item,
         ),
       );
@@ -548,7 +569,11 @@ const ServiceManagementPage = () => {
       setServices((current) =>
         current.map((item) =>
           item.serviceId === removingService.serviceId
-            ? { ...item, status: "inactive", deletedAt: new Date().toISOString() }
+            ? {
+                ...item,
+                status: "inactive",
+                deletedAt: new Date().toISOString(),
+              }
             : item,
         ),
       );
@@ -568,22 +593,23 @@ const ServiceManagementPage = () => {
     visibleServices.every((s) => selectedIds.includes(s.serviceId));
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="animate-in space-y-6 duration-200 fade-in">
       {/* =========================================
           PAGE HEADER
           ========================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 dark:border-slate-800">
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200/80 pb-2 sm:flex-row sm:items-center dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
               Quản lý dịch vụ thiết kế
             </h1>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand/10 text-brand dark:bg-brand/20">
+            <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand dark:bg-brand/20">
               {filteredServices.length} dịch vụ
             </span>
           </div>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Cấu hình danh mục dịch vụ may đo, đơn giá niêm yết và quy chuẩn kỹ thuật cho khách hàng.
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
+            Cấu hình danh mục dịch vụ may đo, đơn giá niêm yết và quy chuẩn kỹ
+            thuật cho khách hàng.
           </p>
         </div>
 
@@ -592,7 +618,7 @@ const ServiceManagementPage = () => {
             type="button"
             onClick={fetchServices}
             disabled={loading}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors shadow-2xs"
+            className="flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             title="Đồng bộ dữ liệu mới nhất từ máy chủ"
           >
             <RefreshCw
@@ -605,7 +631,7 @@ const ServiceManagementPage = () => {
           <button
             type="button"
             onClick={() => handleExport(filteredServices)}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors shadow-2xs"
+            className="flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             title="Xuất bảng giá ra file Excel"
           >
             <Download size={14} className="text-slate-400" />
@@ -621,7 +647,7 @@ const ServiceManagementPage = () => {
                 setFormError("");
                 setFormOpen(true);
               }}
-              className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-brand! hover:bg-brand-hover! text-white! text-xs font-semibold shadow-sm shadow-brand/25 transition-all active:scale-95 cursor-pointer"
+              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white! shadow-sm shadow-brand/25 transition-all hover:bg-brand-hover! active:scale-95"
             >
               <Plus size={15} className="stroke-[2.5]" />
               <span>Thêm dịch vụ mới</span>
@@ -633,11 +659,11 @@ const ServiceManagementPage = () => {
       {/* =========================================
           TOP METRIC STATS CARDS
           ========================================= */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {/* Card 1: Total */}
         <div
           onClick={() => setStatusFilter("all")}
-          className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs hover:border-brand/40 hover:shadow-md transition-all cursor-pointer dark:border-slate-800 dark:bg-slate-900"
+          className="cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-brand/40 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -660,7 +686,7 @@ const ServiceManagementPage = () => {
         {/* Card 2: Active */}
         <div
           onClick={() => setStatusFilter("active")}
-          className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer dark:border-slate-800 dark:bg-slate-900"
+          className="cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-emerald-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -674,7 +700,7 @@ const ServiceManagementPage = () => {
             <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
               {stats.activeCount}
             </span>
-            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded dark:bg-emerald-950/50">
+            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-950/50">
               {stats.activeRate}% hoạt động
             </span>
           </div>
@@ -683,7 +709,7 @@ const ServiceManagementPage = () => {
         {/* Card 3: Inactive */}
         <div
           onClick={() => setStatusFilter("inactive")}
-          className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs hover:border-amber-300 hover:shadow-md transition-all cursor-pointer dark:border-slate-800 dark:bg-slate-900"
+          className="cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-amber-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -714,7 +740,7 @@ const ServiceManagementPage = () => {
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-xl font-black text-brand tracking-tight">
+            <span className="text-xl font-black tracking-tight text-brand">
               {formatPrice(stats.avgPrice)}
             </span>
             <span className="text-[10px] text-slate-400">/ đơn vị</span>
@@ -725,13 +751,13 @@ const ServiceManagementPage = () => {
       {/* =========================================
           TOOLBAR, FILTERS & VIEW MODE SWITCHER
           ========================================= */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3.5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      <div className="space-y-3.5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
           {/* Search box */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative max-w-md flex-1">
             <Search
               size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400"
             />
             <input
               type="text"
@@ -741,7 +767,7 @@ const ServiceManagementPage = () => {
                 setCurrentPage(1);
               }}
               placeholder="Tìm theo mã dịch vụ, tên, đơn vị tính hoặc thẻ..."
-              className="w-full h-10 pl-9.5 pr-8 rounded-xl border border-slate-200 bg-slate-50/70 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100 transition-all"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/70 pr-8 pl-9.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
             />
             {localSearch && (
               <button
@@ -750,7 +776,7 @@ const ServiceManagementPage = () => {
                   setLocalSearch("");
                   setCurrentPage(1);
                 }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-slate-600"
               >
                 <X size={14} />
               </button>
@@ -765,7 +791,7 @@ const ServiceManagementPage = () => {
                 setUnitTypeFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              className="h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <option value="all">Tất cả đơn vị tính</option>
               {availableUnitTypes.map((unit) => (
@@ -779,7 +805,7 @@ const ServiceManagementPage = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <option value="default">Sắp xếp: Mặc định</option>
               <option value="price-asc">Giá: Thấp đến cao</option>
@@ -789,11 +815,11 @@ const ServiceManagementPage = () => {
             </select>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+            <div className="flex items-center rounded-xl bg-slate-100 p-1 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                className={`cursor-pointer rounded-lg p-1.5 transition-colors ${
                   viewMode === "grid"
                     ? "bg-white text-brand shadow-xs dark:bg-slate-700 dark:text-white"
                     : "hover:text-slate-900"
@@ -805,7 +831,7 @@ const ServiceManagementPage = () => {
               <button
                 type="button"
                 onClick={() => setViewMode("table")}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                className={`cursor-pointer rounded-lg p-1.5 transition-colors ${
                   viewMode === "table"
                     ? "bg-white text-brand shadow-xs dark:bg-slate-700 dark:text-white"
                     : "hover:text-slate-900"
@@ -819,9 +845,9 @@ const ServiceManagementPage = () => {
         </div>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2 dark:border-slate-800">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs font-medium text-slate-400 mr-1">
+            <span className="mr-1 text-xs font-medium text-slate-400">
               Trạng thái:
             </span>
             {[
@@ -837,7 +863,7 @@ const ServiceManagementPage = () => {
                   setStatusFilter(chip.id);
                   setCurrentPage(1);
                 }}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`cursor-pointer rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
                   statusFilter === chip.id
                     ? "bg-brand! text-white! shadow-xs"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
@@ -853,7 +879,7 @@ const ServiceManagementPage = () => {
             <button
               type="button"
               onClick={handleSelectAllCurrent}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-brand cursor-pointer dark:text-slate-400"
+              className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-brand dark:text-slate-400"
             >
               {isAllCurrentSelected ? (
                 <CheckSquare size={15} className="text-brand" />
@@ -875,7 +901,7 @@ const ServiceManagementPage = () => {
         <div className="rounded-2xl border border-slate-200/80 bg-white p-12 text-center text-slate-400 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <RefreshCw
             size={24}
-            className="animate-spin mx-auto mb-2 text-brand"
+            className="mx-auto mb-2 animate-spin text-brand"
           />
           Đang tải danh mục dịch vụ từ máy chủ...
         </div>
@@ -888,7 +914,7 @@ const ServiceManagementPage = () => {
           <p className="font-semibold text-slate-700 dark:text-slate-300">
             Không tìm thấy dịch vụ nào phù hợp với bộ lọc
           </p>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="mt-1 text-xs text-slate-400">
             Thử thay đổi từ khóa tìm kiếm hoặc đặt lại các bộ lọc.
           </p>
           <button
@@ -898,14 +924,14 @@ const ServiceManagementPage = () => {
               setStatusFilter("all");
               setUnitTypeFilter("all");
             }}
-            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline cursor-pointer"
+            className="mt-3 inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-brand hover:underline"
           >
             Đặt lại tất cả bộ lọc
           </button>
         </div>
       ) : viewMode === "grid" ? (
         /* GRID VIEW */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {visibleServices.map((service) => {
             const statusInfo = getStatusInfo(service);
             const isSelected = selectedIds.includes(service.serviceId);
@@ -919,20 +945,20 @@ const ServiceManagementPage = () => {
             return (
               <div
                 key={service.serviceId}
-                className={`group relative rounded-2xl border bg-white p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between dark:bg-slate-900 ${
+                className={`group relative flex flex-col justify-between rounded-2xl border bg-white p-5 shadow-xs transition-all hover:shadow-md dark:bg-slate-900 ${
                   isSelected
                     ? "border-brand ring-2 ring-brand/10 dark:border-brand"
-                    : "border-slate-200/80 dark:border-slate-800 hover:border-slate-300"
+                    : "border-slate-200/80 hover:border-slate-300 dark:border-slate-800"
                 }`}
               >
                 <div>
                   {/* Top Header: Code, Checkbox & Status */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="mb-3 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => handleToggleSelect(service.serviceId)}
-                        className="text-slate-400 hover:text-brand cursor-pointer"
+                        className="cursor-pointer text-slate-400 hover:text-brand"
                         title={isSelected ? "Bỏ chọn" : "Chọn dịch vụ này"}
                       >
                         {isSelected ? (
@@ -941,7 +967,7 @@ const ServiceManagementPage = () => {
                           <Square size={16} />
                         )}
                       </button>
-                      <span className="font-mono text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      <span className="rounded-md bg-slate-100 px-2.5 py-0.5 font-mono text-[11px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                         {service.serviceCode || `SRV-${service.serviceId}`}
                       </span>
                     </div>
@@ -949,7 +975,7 @@ const ServiceManagementPage = () => {
                     <button
                       type="button"
                       onClick={() => toggleStatus(service)}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer hover:opacity-85 ${statusInfo.className}`}
+                      className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-all hover:opacity-85 ${statusInfo.className}`}
                       title="Nhấn để đổi trạng thái hoạt động"
                     >
                       <span
@@ -968,30 +994,30 @@ const ServiceManagementPage = () => {
                       setFormError("");
                       setFormOpen(true);
                     }}
-                    className="block text-left font-heading text-base font-bold text-slate-900 hover:text-brand dark:text-white dark:hover:text-brand transition-colors leading-snug line-clamp-2 cursor-pointer"
+                    className="line-clamp-2 block cursor-pointer text-left font-heading text-base leading-snug font-bold text-slate-900 transition-colors hover:text-brand dark:text-white dark:hover:text-brand"
                   >
                     {service.serviceName}
                   </button>
 
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                  <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                     {service.description ||
                       "Chưa có mô tả chi tiết cho dịch vụ này."}
                   </p>
 
                   {/* Tags */}
                   {tagList.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-3">
+                    <div className="mt-3 flex flex-wrap gap-1">
                       {tagList.slice(0, 3).map((tagItem) => (
                         <span
                           key={tagItem}
-                          className="inline-flex items-center gap-0.5 text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                          className="inline-flex items-center gap-0.5 rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                         >
                           <Tag size={9} />
                           {tagItem}
                         </span>
                       ))}
                       {tagList.length > 3 && (
-                        <span className="text-[10px] text-slate-400 self-center">
+                        <span className="self-center text-[10px] text-slate-400">
                           +{tagList.length - 3}
                         </span>
                       )}
@@ -1000,12 +1026,12 @@ const ServiceManagementPage = () => {
                 </div>
 
                 {/* Footer: Price & Actions */}
-                <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3.5 dark:border-slate-800">
                   <div>
-                    <span className="text-[10px] text-slate-400 block font-medium">
+                    <span className="block text-[10px] font-medium text-slate-400">
                       Đơn giá / {service.unitType || "sản phẩm"}
                     </span>
-                    <span className="text-base font-extrabold text-brand tracking-tight">
+                    <span className="text-base font-extrabold tracking-tight text-brand">
                       {formatPrice(service.basePrice)}
                     </span>
                   </div>
@@ -1019,7 +1045,7 @@ const ServiceManagementPage = () => {
                         setFormError("");
                         setFormOpen(true);
                       }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-brand hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                      className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand dark:hover:bg-slate-800"
                       title="Xem chi tiết dịch vụ"
                     >
                       <Eye size={16} />
@@ -1034,7 +1060,7 @@ const ServiceManagementPage = () => {
                           setFormError("");
                           setFormOpen(true);
                         }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer"
+                        className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/40"
                         title="Chỉnh sửa dịch vụ"
                       >
                         <Pencil size={16} />
@@ -1045,7 +1071,7 @@ const ServiceManagementPage = () => {
                       <button
                         type="button"
                         onClick={() => setRemovingService(service)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                        className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
                         title="Xóa dịch vụ"
                       >
                         <Trash2 size={16} />
@@ -1059,16 +1085,16 @@ const ServiceManagementPage = () => {
         </div>
       ) : (
         /* TABLE VIEW */
-        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="overflow-x-auto">
             <table className="w-full min-w-220 text-left">
-              <thead className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-800/40 dark:border-slate-800">
+              <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:border-slate-800 dark:bg-slate-800/40">
                 <tr>
-                  <th className="px-4 py-3.5 w-10">
+                  <th className="w-10 px-4 py-3.5">
                     <button
                       type="button"
                       onClick={handleSelectAllCurrent}
-                      className="text-slate-400 hover:text-brand cursor-pointer"
+                      className="cursor-pointer text-slate-400 hover:text-brand"
                     >
                       {isAllCurrentSelected ? (
                         <CheckSquare size={15} className="text-brand" />
@@ -1086,7 +1112,7 @@ const ServiceManagementPage = () => {
                   <th className="px-4 py-3.5 text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <tbody className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
                 {visibleServices.map((service) => {
                   const statusInfo = getStatusInfo(service);
                   const isSelected = selectedIds.includes(service.serviceId);
@@ -1094,7 +1120,7 @@ const ServiceManagementPage = () => {
                   return (
                     <tr
                       key={service.serviceId}
-                      className={`hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/50 ${
+                      className={`transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/50 ${
                         isSelected ? "bg-brand/5 dark:bg-brand/10" : ""
                       }`}
                     >
@@ -1102,7 +1128,7 @@ const ServiceManagementPage = () => {
                         <button
                           type="button"
                           onClick={() => handleToggleSelect(service.serviceId)}
-                          className="text-slate-400 hover:text-brand cursor-pointer"
+                          className="cursor-pointer text-slate-400 hover:text-brand"
                         >
                           {isSelected ? (
                             <CheckSquare size={15} className="text-brand" />
@@ -1123,19 +1149,19 @@ const ServiceManagementPage = () => {
                             setFormError("");
                             setFormOpen(true);
                           }}
-                          className="font-bold text-left text-slate-900 hover:text-brand dark:text-white dark:hover:text-brand transition-colors block cursor-pointer"
+                          className="block cursor-pointer text-left font-bold text-slate-900 transition-colors hover:text-brand dark:text-white dark:hover:text-brand"
                         >
                           {service.serviceName}
                         </button>
                         {service.tags && (
-                          <div className="flex flex-wrap gap-1 mt-1">
+                          <div className="mt-1 flex flex-wrap gap-1">
                             {service.tags
                               .split(",")
                               .slice(0, 2)
                               .map((t) => (
                                 <span
                                   key={t}
-                                  className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                                  className="py-0.2 rounded bg-slate-100 px-1.5 text-[9px] text-slate-500 dark:bg-slate-800 dark:text-slate-400"
                                 >
                                   {t.trim()}
                                 </span>
@@ -1143,7 +1169,7 @@ const ServiceManagementPage = () => {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3.5 text-slate-600 dark:text-slate-300 font-medium">
+                      <td className="px-4 py-3.5 font-medium text-slate-600 dark:text-slate-300">
                         {service.unitType || "---"}
                       </td>
                       <td className="px-4 py-3.5 font-extrabold text-brand">
@@ -1153,7 +1179,7 @@ const ServiceManagementPage = () => {
                         <button
                           type="button"
                           onClick={() => toggleStatus(service)}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all cursor-pointer ${statusInfo.className}`}
+                          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-all ${statusInfo.className}`}
                         >
                           <span
                             className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot}`}
@@ -1161,7 +1187,7 @@ const ServiceManagementPage = () => {
                           {statusInfo.label}
                         </button>
                       </td>
-                      <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400 text-[11px]">
+                      <td className="px-4 py-3.5 text-[11px] text-slate-500 dark:text-slate-400">
                         {formatDate(service.updatedAt || service.createdAt)}
                       </td>
                       <td className="px-4 py-3.5 text-right">
@@ -1174,7 +1200,7 @@ const ServiceManagementPage = () => {
                               setFormError("");
                               setFormOpen(true);
                             }}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 hover:text-brand hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-brand dark:hover:bg-slate-800"
                             title="Xem chi tiết"
                           >
                             <Eye size={15} />
@@ -1188,7 +1214,7 @@ const ServiceManagementPage = () => {
                                 setFormError("");
                                 setFormOpen(true);
                               }}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer"
+                              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/40"
                               title="Chỉnh sửa"
                             >
                               <Pencil size={15} />
@@ -1198,7 +1224,7 @@ const ServiceManagementPage = () => {
                             <button
                               type="button"
                               onClick={() => setRemovingService(service)}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40"
                               title="Xóa dịch vụ"
                             >
                               <Trash2 size={15} />
@@ -1217,10 +1243,11 @@ const ServiceManagementPage = () => {
 
       {/* Pagination */}
       {!loading && filteredServices.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4 rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 shadow-xs sm:flex-row dark:border-slate-800 dark:bg-slate-900">
           <span className="text-xs text-slate-500">
             Hiển thị {(safeCurrentPage - 1) * PAGE_SIZE + 1} -{" "}
-            {Math.min(safeCurrentPage * PAGE_SIZE, filteredServices.length)} trên tổng số{" "}
+            {Math.min(safeCurrentPage * PAGE_SIZE, filteredServices.length)}{" "}
+            trên tổng số{" "}
             <strong className="text-slate-800 dark:text-white">
               {filteredServices.length}
             </strong>{" "}
@@ -1237,9 +1264,10 @@ const ServiceManagementPage = () => {
 
       {/* Floating Batch Action Bar */}
       {selectedIds.length > 0 && (
-        <div className="animate-in fade-in slide-in-from-bottom-3 fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900 px-5 py-3 text-white shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+        <div className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 animate-in items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900 px-5 py-3 text-white shadow-2xl fade-in slide-in-from-bottom-3 dark:border-slate-700 dark:bg-slate-800">
           <span className="text-xs font-semibold">
-            Đã chọn <strong className="text-brand">{selectedIds.length}</strong> dịch vụ
+            Đã chọn <strong className="text-brand">{selectedIds.length}</strong>{" "}
+            dịch vụ
           </span>
 
           <div className="h-4 w-px bg-slate-700" />
@@ -1247,7 +1275,7 @@ const ServiceManagementPage = () => {
           <button
             type="button"
             onClick={() => handleBatchStatus("active")}
-            className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold hover:bg-emerald-500 transition-colors cursor-pointer"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-emerald-500"
           >
             <CheckCircle2 size={14} />
             <span>Kích hoạt</span>
@@ -1256,7 +1284,7 @@ const ServiceManagementPage = () => {
           <button
             type="button"
             onClick={() => handleBatchStatus("inactive")}
-            className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-semibold hover:bg-amber-500 transition-colors cursor-pointer"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-amber-500"
           >
             <SlidersHorizontal size={14} />
             <span>Tạm ngừng</span>
@@ -1270,7 +1298,7 @@ const ServiceManagementPage = () => {
               );
               handleExport(selectedServices);
             }}
-            className="flex items-center gap-1.5 rounded-xl bg-slate-800 px-3 py-1.5 text-xs font-semibold hover:bg-slate-700 transition-colors cursor-pointer border border-slate-700"
+            className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-slate-700"
           >
             <Download size={14} />
             <span>Xuất Excel ({selectedIds.length})</span>
@@ -1279,7 +1307,7 @@ const ServiceManagementPage = () => {
           <button
             type="button"
             onClick={() => setSelectedIds([])}
-            className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+            className="cursor-pointer rounded-lg p-1 text-slate-400 hover:text-white"
             title="Bỏ chọn tất cả"
           >
             <X size={16} />
@@ -1326,7 +1354,8 @@ const ServiceManagementPage = () => {
           <strong className="text-slate-900 dark:text-white">
             {removingService?.serviceName}
           </strong>{" "}
-          (Mã: {removingService?.serviceCode})? Dịch vụ này sẽ chuyển sang trạng thái ngưng hoạt động và không hiển thị cho khách hàng đặt mới.
+          (Mã: {removingService?.serviceCode})? Dịch vụ này sẽ chuyển sang trạng
+          thái ngưng hoạt động và không hiển thị cho khách hàng đặt mới.
         </p>
       </ConfirmModal>
     </div>

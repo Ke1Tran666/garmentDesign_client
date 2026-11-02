@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  X,
+} from "lucide-react";
 import "@/shared/styles/notification.css";
 
 const NOTIFICATION_CONFIGS = {
   success: {
     icon: CheckCircle2,
-    wrapClass: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 ring-1 ring-emerald-500/20",
+    wrapClass:
+      "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 ring-1 ring-emerald-500/20",
     borderClass: "border-emerald-200/80 dark:border-emerald-900/50",
     barColor: "bg-emerald-500",
     defaultTitle: "Thành công!",
@@ -13,7 +20,8 @@ const NOTIFICATION_CONFIGS = {
   },
   error: {
     icon: AlertCircle,
-    wrapClass: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 ring-1 ring-rose-500/20",
+    wrapClass:
+      "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400 ring-1 ring-rose-500/20",
     borderClass: "border-rose-200/80 dark:border-rose-900/50",
     barColor: "bg-rose-500",
     defaultTitle: "Đã xảy ra lỗi!",
@@ -21,7 +29,8 @@ const NOTIFICATION_CONFIGS = {
   },
   warning: {
     icon: AlertTriangle,
-    wrapClass: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 ring-1 ring-amber-500/20",
+    wrapClass:
+      "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 ring-1 ring-amber-500/20",
     borderClass: "border-amber-200/80 dark:border-amber-900/50",
     barColor: "bg-amber-500",
     defaultTitle: "Cảnh báo",
@@ -29,7 +38,8 @@ const NOTIFICATION_CONFIGS = {
   },
   info: {
     icon: Info,
-    wrapClass: "bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400 ring-1 ring-sky-500/20",
+    wrapClass:
+      "bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400 ring-1 ring-sky-500/20",
     borderClass: "border-sky-200/80 dark:border-sky-900/50",
     barColor: "bg-sky-500",
     defaultTitle: "Thông tin",
@@ -107,7 +117,7 @@ const Notification = ({
         type="button"
         onClick={onClose}
         aria-label="Đóng thông báo"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:hover:bg-slate-800 dark:hover:text-slate-200"
+        className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
       >
         <X className="h-4 w-4" />
       </button>

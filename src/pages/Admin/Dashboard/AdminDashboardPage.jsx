@@ -30,7 +30,8 @@ const STATS_DATA = {
       subtext: "+12,5% so với tháng trước",
       trend: "up",
       icon: Users,
-      gradient: "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
+      gradient:
+        "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
       borderColor: "border-blue-200 dark:border-blue-900/50",
     },
     {
@@ -48,7 +49,8 @@ const STATS_DATA = {
       subtext: "-3,1% so với tuần trước",
       trend: "down",
       icon: Clock3,
-      gradient: "from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400",
+      gradient:
+        "from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400",
       borderColor: "border-amber-200 dark:border-amber-900/50",
     },
     {
@@ -57,7 +59,8 @@ const STATS_DATA = {
       subtext: "+18,4% so với tháng trước",
       trend: "up",
       icon: CircleDollarSign,
-      gradient: "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
+      gradient:
+        "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
       borderColor: "border-emerald-200 dark:border-emerald-900/50",
     },
   ],
@@ -68,7 +71,8 @@ const STATS_DATA = {
       subtext: "+5,4% so với tuần trước",
       trend: "up",
       icon: Users,
-      gradient: "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
+      gradient:
+        "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
       borderColor: "border-blue-200 dark:border-blue-900/50",
     },
     {
@@ -86,7 +90,8 @@ const STATS_DATA = {
       subtext: "+2 đơn mới hôm nay",
       trend: "up",
       icon: Clock3,
-      gradient: "from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400",
+      gradient:
+        "from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400",
       borderColor: "border-amber-200 dark:border-amber-900/50",
     },
     {
@@ -95,7 +100,8 @@ const STATS_DATA = {
       subtext: "+14,2% so với tuần trước",
       trend: "up",
       icon: CircleDollarSign,
-      gradient: "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
+      gradient:
+        "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
       borderColor: "border-emerald-200 dark:border-emerald-900/50",
     },
   ],
@@ -106,7 +112,8 @@ const STATS_DATA = {
       subtext: "+38,2% so với năm 2025",
       trend: "up",
       icon: Users,
-      gradient: "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
+      gradient:
+        "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
       borderColor: "border-blue-200 dark:border-blue-900/50",
     },
     {
@@ -124,7 +131,8 @@ const STATS_DATA = {
       subtext: "+2,3% độ chuẩn xác",
       trend: "up",
       icon: CheckCircle2,
-      gradient: "from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-400",
+      gradient:
+        "from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-400",
       borderColor: "border-indigo-200 dark:border-indigo-900/50",
     },
     {
@@ -133,7 +141,8 @@ const STATS_DATA = {
       subtext: "+31,5% so với cùng kỳ",
       trend: "up",
       icon: CircleDollarSign,
-      gradient: "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
+      gradient:
+        "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
       borderColor: "border-emerald-200 dark:border-emerald-900/50",
     },
   ],
@@ -190,19 +199,23 @@ const DEFAULT_RECENT_ORDERS = [
 const ORDER_STATUS_MAP = {
   pending: {
     label: "Chờ tiếp nhận",
-    className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50",
+    className:
+      "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50",
   },
   processing: {
     label: "Đang xử lý",
-    className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50",
+    className:
+      "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50",
   },
   completed: {
     label: "Hoàn thành",
-    className: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50",
+    className:
+      "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50",
   },
   cancelled: {
     label: "Đã hủy",
-    className: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/50",
+    className:
+      "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/50",
   },
 };
 
@@ -226,7 +239,8 @@ const ACTIVITIES = [
     desc: "Fashion Lab VN đã xác nhận file rập và thanh toán thành công",
     time: "45 phút trước",
     icon: CheckCircle2,
-    color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
+    color:
+      "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
   },
   {
     title: "Khách hàng mới đăng ký tài khoản",
@@ -240,7 +254,8 @@ const ACTIVITIES = [
     desc: "Admin vừa điều chỉnh mức giá cơ bản cho khổ 1.8m",
     time: "4 giờ trước",
     icon: SlidersHorizontal,
-    color: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400",
+    color:
+      "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400",
   },
 ];
 
@@ -261,10 +276,16 @@ const AdminDashboardPage = () => {
           id: `ORD-${item.id || item.orderId || "---"}`,
           customer: item.user?.fullName || item.customerName || "Khách hàng",
           phone: item.user?.phone || item.phone || "---",
-          service: item.service?.nameService || item.serviceName || "Dịch vụ may mặc",
-          date: item.createdAt ? new Date(item.createdAt).toLocaleDateString("vi-VN") : "Hôm nay",
+          service:
+            item.service?.nameService || item.serviceName || "Dịch vụ may mặc",
+          date: item.createdAt
+            ? new Date(item.createdAt).toLocaleDateString("vi-VN")
+            : "Hôm nay",
           amount: item.totalPrice
-            ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(item.totalPrice)
+            ? new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(item.totalPrice)
             : "Chưa tính",
           status: String(item.status || "pending").toLowerCase(),
         }));
@@ -301,7 +322,11 @@ const AdminDashboardPage = () => {
       "Tổng tiền": o.amount,
       "Trạng thái": ORDER_STATUS_MAP[o.status]?.label || o.status,
     }));
-    const success = exportToExcel(exportData, "Bao_Cao_Dashboard_Don_Hang", "Orders");
+    const success = exportToExcel(
+      exportData,
+      "Bao_Cao_Dashboard_Don_Hang",
+      "Orders",
+    );
     if (success) {
       showNotification({
         type: "success",
@@ -334,8 +359,18 @@ const AdminDashboardPage = () => {
       },
       xaxis: {
         categories: [
-          "T1", "T2", "T3", "T4", "T5", "T6",
-          "T7", "T8", "T9", "T10", "T11", "T12"
+          "T1",
+          "T2",
+          "T3",
+          "T4",
+          "T5",
+          "T6",
+          "T7",
+          "T8",
+          "T9",
+          "T10",
+          "T11",
+          "T12",
         ],
         labels: {
           style: { colors: "#64748b", fontSize: "12px", fontWeight: 500 },
@@ -388,7 +423,7 @@ const AdminDashboardPage = () => {
         ],
       },
     }),
-    []
+    [],
   );
 
   const revenueChartSeries = useMemo(
@@ -402,7 +437,7 @@ const AdminDashboardPage = () => {
         data: [28, 36, 32, 45, 52, 64, 58, 72, 66, 84, 76, 92],
       },
     ],
-    []
+    [],
   );
 
   const statusDonutOptions = useMemo(
@@ -441,39 +476,40 @@ const AdminDashboardPage = () => {
       },
       stroke: { width: 0 },
     }),
-    []
+    [],
   );
 
   const statusDonutSeries = [224, 92, 46, 24];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="animate-in space-y-8 duration-300 fade-in">
       {/* =========================================
           PAGE HEADER & CONTROLS
           ========================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60 dark:border-slate-800">
+      <div className="flex flex-col justify-between gap-4 border-b border-slate-200/60 pb-2 sm:flex-row sm:items-center dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="font-heading text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
               Bảng điều khiển quản trị
             </h1>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-soft text-brand dark:bg-brand/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand dark:bg-brand/20">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
               Live 2026
             </span>
           </div>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Theo dõi hiệu suất vận hành, tăng trưởng doanh thu và quản lý luồng đơn dịch vụ may mặc.
+            Theo dõi hiệu suất vận hành, tăng trưởng doanh thu và quản lý luồng
+            đơn dịch vụ may mặc.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Period Selector Tabs */}
-          <div className="inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+          <div className="inline-flex items-center rounded-xl bg-slate-100 p-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <button
               type="button"
               onClick={() => setPeriod("7days")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`rounded-lg px-3 py-1.5 transition-all ${
                 period === "7days"
                   ? "bg-white text-brand shadow-xs dark:bg-slate-700 dark:text-white"
                   : "hover:text-slate-900 dark:hover:text-white"
@@ -484,7 +520,7 @@ const AdminDashboardPage = () => {
             <button
               type="button"
               onClick={() => setPeriod("30days")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`rounded-lg px-3 py-1.5 transition-all ${
                 period === "30days"
                   ? "bg-white text-brand shadow-xs dark:bg-slate-700 dark:text-white"
                   : "hover:text-slate-900 dark:hover:text-white"
@@ -495,7 +531,7 @@ const AdminDashboardPage = () => {
             <button
               type="button"
               onClick={() => setPeriod("year")}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`rounded-lg px-3 py-1.5 transition-all ${
                 period === "year"
                   ? "bg-white text-brand shadow-xs dark:bg-slate-700 dark:text-white"
                   : "hover:text-slate-900 dark:hover:text-white"
@@ -510,12 +546,14 @@ const AdminDashboardPage = () => {
             type="button"
             onClick={handleRefresh}
             disabled={loadingRefresh}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors shadow-xs"
+            className="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             title="Làm mới dữ liệu"
           >
             <RefreshCw
               size={14}
-              className={loadingRefresh ? "animate-spin text-brand" : "text-slate-400"}
+              className={
+                loadingRefresh ? "animate-spin text-brand" : "text-slate-400"
+              }
             />
             <span className="hidden sm:inline">Làm mới</span>
           </button>
@@ -523,7 +561,7 @@ const AdminDashboardPage = () => {
           <button
             type="button"
             onClick={handleExportDashboard}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors shadow-xs"
+            className="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
             title="Xuất báo cáo Excel"
           >
             <Download size={14} className="text-slate-400" />
@@ -535,21 +573,21 @@ const AdminDashboardPage = () => {
       {/* =========================================
           KEY PERFORMANCE INDICATORS (KPI CARDS)
           ========================================= */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         {STATS_DATA[period].map((stat, i) => {
           const Icon = stat.icon;
           const isUp = stat.trend === "up";
           return (
             <div
               key={i}
-              className={`relative overflow-hidden rounded-2xl border bg-white p-5 shadow-xs hover:shadow-md transition-all duration-200 dark:bg-slate-900 ${stat.borderColor}`}
+              className={`relative overflow-hidden rounded-2xl border bg-white p-5 shadow-xs transition-all duration-200 hover:shadow-md dark:bg-slate-900 ${stat.borderColor}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400 block truncate">
+                  <span className="block truncate text-xs font-medium text-slate-500 dark:text-slate-400">
                     {stat.label}
                   </span>
-                  <div className="mt-2 text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  <div className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
                     {stat.value}
                   </div>
                 </div>
@@ -560,16 +598,22 @@ const AdminDashboardPage = () => {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800/80">
                 <span
                   className={`inline-flex items-center gap-1 font-semibold ${
-                    isUp ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                    isUp
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-rose-600 dark:text-rose-400"
                   }`}
                 >
-                  {isUp ? <ArrowUpRight size={15} /> : <ArrowDownRight size={15} />}
+                  {isUp ? (
+                    <ArrowUpRight size={15} />
+                  ) : (
+                    <ArrowDownRight size={15} />
+                  )}
                   {stat.subtext.split(" ")[0]}
                 </span>
-                <span className="text-slate-400 text-[11px] truncate">
+                <span className="truncate text-[11px] text-slate-400">
                   {stat.subtext.replace(stat.subtext.split(" ")[0], "")}
                 </span>
               </div>
@@ -581,21 +625,22 @@ const AdminDashboardPage = () => {
       {/* =========================================
           CHARTS SECTION (APEXCHARTS)
           ========================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Main Spline Area Chart */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6 lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-heading text-lg font-bold text-slate-900 dark:text-white">
                   Biểu đồ Doanh thu & Đơn dịch vụ
                 </h3>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40">
+                <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-950/40">
                   +18.4% YoY
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Biến động doanh số và số lượng đơn hàng hoàn tất qua các tháng năm 2026.
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                Biến động doanh số và số lượng đơn hàng hoàn tất qua các tháng
+                năm 2026.
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -603,7 +648,8 @@ const AdminDashboardPage = () => {
                 <span className="h-2.5 w-2.5 rounded-full bg-brand" /> Doanh thu
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Đơn hoàn thành
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Đơn
+                hoàn thành
               </span>
             </div>
           </div>
@@ -619,12 +665,12 @@ const AdminDashboardPage = () => {
         </div>
 
         {/* Donut Chart: Order Status Distribution */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between">
+        <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:p-6 dark:border-slate-800 dark:bg-slate-900">
           <div>
             <h3 className="font-heading text-lg font-bold text-slate-900 dark:text-white">
               Trạng thái đơn hàng
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
               Tỷ lệ phân bổ trạng thái các đơn dịch vụ hiện hành.
             </p>
           </div>
@@ -638,10 +684,10 @@ const AdminDashboardPage = () => {
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+          <div className="border-t border-slate-100 pt-3 text-center dark:border-slate-800">
             <Link
               to="/admin/service-orders"
-              className="text-xs font-semibold text-brand hover:underline inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
             >
               Xem chi tiết tiến độ tại Kanban Board &rarr;
             </Link>
@@ -653,7 +699,7 @@ const AdminDashboardPage = () => {
           SHORTCUT QUICK ACTIONS
           ========================================= */}
       <div className="rounded-2xl border border-brand/20 bg-linear-to-r from-brand/5 via-sky-500/5 to-indigo-500/5 p-4 sm:p-5 dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/60">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-sm">
               <TrendingUp size={20} />
@@ -663,7 +709,8 @@ const AdminDashboardPage = () => {
                 Thao tác quản trị nhanh
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Các phím tắt điều hướng nhanh giúp tối ưu thời gian thao tác hàng ngày.
+                Các phím tắt điều hướng nhanh giúp tối ưu thời gian thao tác
+                hàng ngày.
               </p>
             </div>
           </div>
@@ -671,21 +718,21 @@ const AdminDashboardPage = () => {
           <div className="flex flex-wrap items-center gap-2.5">
             <Link
               to="/admin/users/create"
-              className="inline-flex items-center gap-1.5 h-8.5 px-3 rounded-xl bg-white text-slate-700 hover:text-brand border border-slate-200 text-xs font-semibold shadow-2xs hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition-colors"
+              className="inline-flex h-8.5 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 hover:text-brand dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <UserPlus size={14} className="text-brand" />
               <span>Thêm người dùng</span>
             </Link>
             <Link
               to="/admin/services"
-              className="inline-flex items-center gap-1.5 h-8.5 px-3 rounded-xl bg-white text-slate-700 hover:text-brand border border-slate-200 text-xs font-semibold shadow-2xs hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 transition-colors"
+              className="inline-flex h-8.5 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 hover:text-brand dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <SlidersHorizontal size={14} className="text-indigo-500" />
               <span>Cập nhật bảng giá</span>
             </Link>
             <Link
               to="/admin/service-orders"
-              className="inline-flex items-center gap-1.5 h-8.5 px-3 rounded-xl bg-brand text-white hover:bg-brand-hover text-xs font-semibold shadow-xs transition-colors"
+              className="inline-flex h-8.5 items-center gap-1.5 rounded-xl bg-brand px-3 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-hover"
             >
               <PackageCheck size={14} />
               <span>Xử lý đơn mới</span>
@@ -697,21 +744,21 @@ const AdminDashboardPage = () => {
       {/* =========================================
           RECENT ORDERS & LIVE ACTIVITY FEED
           ========================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Orders Table */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
             <div>
               <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white">
                 Đơn dịch vụ gần đây
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                 Các đơn thiết kế rập và may mẫu được tạo mới nhất
               </p>
             </div>
             <Link
               to="/admin/service-orders"
-              className="text-xs font-semibold text-brand hover:text-brand-hover inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:text-brand-hover"
             >
               Xem tất cả đơn &rarr;
             </Link>
@@ -719,7 +766,7 @@ const AdminDashboardPage = () => {
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-160 text-left">
-              <thead className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-800/40 dark:border-slate-800">
+              <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:border-slate-800 dark:bg-slate-800/40">
                 <tr>
                   <th className="px-5 py-3">Mã đơn</th>
                   <th className="px-5 py-3">Khách hàng</th>
@@ -730,13 +777,14 @@ const AdminDashboardPage = () => {
                   <th className="px-5 py-3 text-right">Chi tiết</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              <tbody className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
                 {orders.map((order) => {
-                  const statusInfo = ORDER_STATUS_MAP[order.status] || ORDER_STATUS_MAP.pending;
+                  const statusInfo =
+                    ORDER_STATUS_MAP[order.status] || ORDER_STATUS_MAP.pending;
                   return (
                     <tr
                       key={order.id}
-                      className="hover:bg-slate-50/70 transition-colors dark:hover:bg-slate-800/50"
+                      className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/50"
                     >
                       <td className="px-5 py-3.5 font-bold text-brand">
                         {order.id}
@@ -749,7 +797,7 @@ const AdminDashboardPage = () => {
                           {order.phone}
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-slate-700 dark:text-slate-300 font-medium">
+                      <td className="px-5 py-3.5 font-medium text-slate-700 dark:text-slate-300">
                         {order.service}
                       </td>
                       <td className="px-5 py-3.5 text-slate-500 dark:text-slate-400">
@@ -760,7 +808,7 @@ const AdminDashboardPage = () => {
                       </td>
                       <td className="px-5 py-3.5">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${statusInfo.className}`}
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${statusInfo.className}`}
                         >
                           {statusInfo.label}
                         </span>
@@ -768,7 +816,7 @@ const AdminDashboardPage = () => {
                       <td className="px-5 py-3.5 text-right">
                         <Link
                           to="/admin/service-orders"
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-brand hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand dark:hover:bg-slate-800"
                           title="Xem chi tiết đơn"
                         >
                           <Eye size={15} />
@@ -786,10 +834,10 @@ const AdminDashboardPage = () => {
         <div className="space-y-6">
           {/* Top Services ranking */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white mb-1">
+            <h3 className="mb-1 font-heading text-base font-bold text-slate-900 dark:text-white">
               Top Dịch vụ thịnh hành
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
               Theo khối lượng đơn đặt hàng
             </p>
 
@@ -800,9 +848,11 @@ const AdminDashboardPage = () => {
                     <span className="font-semibold text-slate-800 dark:text-slate-200">
                       {srv.name}
                     </span>
-                    <span className="font-bold text-brand">{srv.count} đơn</span>
+                    <span className="font-bold text-brand">
+                      {srv.count} đơn
+                    </span>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                     <div
                       className="h-full rounded-full bg-linear-to-r from-brand to-sky-400 transition-all duration-500"
                       style={{ width: `${srv.percent}%` }}
@@ -819,10 +869,10 @@ const AdminDashboardPage = () => {
 
           {/* Activity Timeline */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="font-heading text-base font-bold text-slate-900 dark:text-white mb-1">
+            <h3 className="mb-1 font-heading text-base font-bold text-slate-900 dark:text-white">
               Nhật ký hoạt động gần đây
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
               Sự kiện hệ thống ghi nhận tức thời
             </p>
 
@@ -837,13 +887,13 @@ const AdminDashboardPage = () => {
                       <Icon size={16} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+                      <p className="text-xs leading-tight font-semibold text-slate-800 dark:text-slate-200">
                         {act.title}
                       </p>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
+                      <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 dark:text-slate-400">
                         {act.desc}
                       </p>
-                      <span className="text-[10px] text-slate-400 mt-1 block">
+                      <span className="mt-1 block text-[10px] text-slate-400">
                         {act.time}
                       </span>
                     </div>

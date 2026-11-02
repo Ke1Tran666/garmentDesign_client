@@ -29,7 +29,9 @@ import { serviceApi } from "@/entities/service/api/serviceApi";
 const formatPriceLabel = (val) => {
   if (val >= 1000000) {
     const tr = val / 1000000;
-    return Number.isInteger(tr) ? `${tr} Tr` : `${tr.toFixed(1).replace(".0", "")} Tr`;
+    return Number.isInteger(tr)
+      ? `${tr} Tr`
+      : `${tr.toFixed(1).replace(".0", "")} Tr`;
   }
   if (val >= 1000) {
     const k = val / 1000;
@@ -143,7 +145,14 @@ const ServiceDetailEditModal = ({
       if (trimmed) set.add(trimmed);
     }
     if (set.size === 0) {
-      return ["Sản phẩm", "Bộ", "Mẫu rập", "Bản vẽ 3D", "Giờ thiết kế", "Gói dịch vụ"];
+      return [
+        "Sản phẩm",
+        "Bộ",
+        "Mẫu rập",
+        "Bản vẽ 3D",
+        "Giờ thiết kế",
+        "Gói dịch vụ",
+      ];
     }
     return Array.from(set);
   }, [sourceServices, service]);
@@ -211,7 +220,7 @@ const ServiceDetailEditModal = ({
   // Estimated stats
   const estimatedOrders = useMemo(() => {
     const seed = service?.serviceId || 1;
-    return (seed * 17) % 64 + 8;
+    return ((seed * 17) % 64) + 8;
   }, [service?.serviceId]);
 
   const estimatedRevenue = useMemo(() => {
@@ -316,7 +325,7 @@ const ServiceDetailEditModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-5"
       role="dialog"
       aria-modal="true"
     >
@@ -327,17 +336,17 @@ const ServiceDetailEditModal = ({
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl border border-slate-200/90 dark:bg-slate-900 dark:border-slate-800 overflow-hidden my-auto max-h-[92vh] flex flex-col z-10 transition-all duration-200 animate-in fade-in zoom-in-95">
+      <div className="relative z-10 my-auto flex max-h-[92vh] w-full max-w-4xl animate-in flex-col overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-2xl transition-all duration-200 zoom-in-95 fade-in dark:border-slate-800 dark:bg-slate-900">
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6 dark:border-slate-800 dark:bg-slate-850">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="dark:bg-slate-850 flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6 dark:border-slate-800">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand shadow-xs dark:bg-brand/20">
               <Wrench size={20} />
             </div>
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                   {isCreateMode
                     ? "Tạo dịch vụ mới"
                     : isEditMode
@@ -356,7 +365,9 @@ const ServiceDetailEditModal = ({
                   >
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${
-                        isEditMode ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
+                        isEditMode
+                          ? "animate-pulse bg-amber-500"
+                          : "bg-emerald-500"
                       }`}
                     />
                     {isEditMode ? "Chế độ chỉnh sửa" : "Chế độ xem"}
@@ -364,7 +375,7 @@ const ServiceDetailEditModal = ({
                 )}
               </div>
 
-              <h2 className="truncate font-heading text-base font-bold text-slate-900 sm:text-lg dark:text-white mt-0.5">
+              <h2 className="mt-0.5 truncate font-heading text-base font-bold text-slate-900 sm:text-lg dark:text-white">
                 {isCreateMode
                   ? "Thêm dịch vụ thiết kế mới"
                   : (isViewMode ? service?.serviceName : form.serviceName) ||
@@ -374,14 +385,14 @@ const ServiceDetailEditModal = ({
           </div>
 
           {/* Action buttons on header */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex shrink-0 items-center gap-1.5">
             {/* View Mode Actions */}
             {isViewMode && (
               <>
                 {service?.serviceId && (
                   <Link
                     to={`/admin/services/${service.serviceId}`}
-                    className="hidden sm:inline-flex items-center gap-1.5 h-8 px-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:text-brand hover:border-brand/40 hover:bg-slate-50 transition-colors dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="hidden h-8 items-center gap-1.5 rounded-xl border border-slate-200 px-2.5 text-xs font-semibold text-slate-600 transition-colors hover:border-brand/40 hover:bg-slate-50 hover:text-brand sm:inline-flex dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                     title="Mở toàn trang"
                   >
                     <ExternalLink size={13} />
@@ -396,7 +407,7 @@ const ServiceDetailEditModal = ({
                       setForm(createInitialForm(service));
                       setMode("edit");
                     }}
-                    className="inline-flex items-center gap-1.5 h-8 px-3 rounded-xl bg-brand/10 hover:bg-brand/20 text-brand text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                    className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xl bg-brand/10 px-3 text-xs font-bold text-brand shadow-2xs transition-all hover:bg-brand/20"
                   >
                     <Pencil size={13} />
                     <span>Chỉnh sửa</span>
@@ -411,7 +422,7 @@ const ServiceDetailEditModal = ({
                 type="button"
                 onClick={handleCancelEdit}
                 disabled={submitting}
-                className="inline-flex items-center gap-1 h-8 px-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-xl border border-slate-200 px-2.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 <RotateCcw size={13} />
                 <span>Hủy sửa</span>
@@ -423,7 +434,7 @@ const ServiceDetailEditModal = ({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer ml-1"
+              className="ml-1 cursor-pointer rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               title="Đóng cửa sổ (Esc)"
             >
               <X size={18} />
@@ -432,11 +443,14 @@ const ServiceDetailEditModal = ({
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-6 space-y-6">
+        <div className="flex-1 space-y-6 overflow-y-auto px-5 py-6 sm:px-6">
           {/* Error Banner if any */}
           {(errorMessage || validationError) && (
-            <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 p-3.5 text-xs text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 animate-in fade-in duration-150">
-              <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-500" />
+            <div className="flex animate-in items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/80 p-3.5 text-xs text-rose-700 duration-150 fade-in dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300">
+              <AlertCircle
+                size={16}
+                className="mt-0.5 shrink-0 text-rose-500"
+              />
               <div className="flex-1 font-medium">
                 {validationError || errorMessage}
               </div>
@@ -446,9 +460,9 @@ const ServiceDetailEditModal = ({
           {/* Form wrapper for Edit/Create mode */}
           <form id="service-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Top Grid: Service Core Info & Status */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
               {/* Left 2 Cols: Main Info Card */}
-              <div className="lg:col-span-2 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-850/50 space-y-4">
+              <div className="dark:bg-slate-850/50 space-y-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 lg:col-span-2 dark:border-slate-800">
                 <div className="flex items-center justify-between border-b border-slate-200/60 pb-3 dark:border-slate-800">
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
                     <Layers size={15} className="text-brand" />
@@ -457,16 +471,23 @@ const ServiceDetailEditModal = ({
 
                   {/* Service Code Display / Copy */}
                   {isViewMode ? (
-                    <div className="flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 font-mono text-xs font-bold text-slate-800 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 shadow-2xs">
-                      <span>{service?.serviceCode || `SRV-${service?.serviceId}`}</span>
+                    <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-mono text-xs font-bold text-slate-800 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      <span>
+                        {service?.serviceCode || `SRV-${service?.serviceId}`}
+                      </span>
                       <button
                         type="button"
                         onClick={handleCopyCode}
-                        className="text-slate-400 hover:text-brand cursor-pointer p-0.5 transition-colors"
-                        title={copiedCode ? "Đã sao chép!" : "Sao chép mã dịch vụ"}
+                        className="cursor-pointer p-0.5 text-slate-400 transition-colors hover:text-brand"
+                        title={
+                          copiedCode ? "Đã sao chép!" : "Sao chép mã dịch vụ"
+                        }
                       >
                         {copiedCode ? (
-                          <Check size={12} className="text-emerald-500 stroke-3" />
+                          <Check
+                            size={12}
+                            className="stroke-3 text-emerald-500"
+                          />
                         ) : (
                           <Copy size={12} />
                         )}
@@ -478,7 +499,7 @@ const ServiceDetailEditModal = ({
                 {/* Service Code (Edit / Create) */}
                 {!isViewMode && (
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                       Mã dịch vụ <span className="text-rose-500">*</span>
                     </label>
                     <div className="flex items-center gap-2">
@@ -489,16 +510,16 @@ const ServiceDetailEditModal = ({
                         onChange={handleFormChange}
                         placeholder="VD: DES-VEST01"
                         disabled={submitting}
-                        className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white font-mono text-xs font-bold uppercase tracking-wider text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 font-mono text-xs font-bold tracking-wider text-slate-900 uppercase focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                       />
                       <button
                         type="button"
                         onClick={handleGenerateCode}
                         disabled={submitting}
-                        className="h-10 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors shrink-0 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                        className="h-10 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                         title="Tạo mã dịch vụ tự động"
                       >
-                        <RefreshCw size={13} className="inline mr-1" />
+                        <RefreshCw size={13} className="mr-1 inline" />
                         Tự tạo
                       </button>
                     </div>
@@ -507,8 +528,9 @@ const ServiceDetailEditModal = ({
 
                 {/* Service Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Tên dịch vụ thiết kế <span className="text-rose-500">*</span>
+                  <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Tên dịch vụ thiết kế{" "}
+                    <span className="text-rose-500">*</span>
                   </label>
                   {isViewMode ? (
                     <div className="font-heading text-lg font-bold text-slate-900 dark:text-white">
@@ -522,20 +544,20 @@ const ServiceDetailEditModal = ({
                       onChange={handleFormChange}
                       placeholder="VD: Thiết kế may đo Vest Nam Cao Cấp"
                       disabled={submitting}
-                      className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-xs font-semibold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     />
                   )}
                 </div>
 
                 {/* Unit Type & Base Price */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {/* Unit Type */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                       Đơn vị tính <span className="text-rose-500">*</span>
                     </label>
                     {isViewMode ? (
-                      <div className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 border border-slate-200 text-xs font-bold text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 shadow-2xs">
+                      <div className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                         <Ruler size={13} className="text-brand" />
                         <span>{service?.unitType || "Chưa thiết lập"}</span>
                       </div>
@@ -548,7 +570,7 @@ const ServiceDetailEditModal = ({
                           onChange={handleFormChange}
                           placeholder="VD: Sản phẩm, Bộ, Mẫu rập..."
                           disabled={submitting}
-                          className="w-full h-10 px-3.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                          className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                         {/* Quick pills from data */}
                         <div className="flex flex-wrap gap-1">
@@ -559,10 +581,10 @@ const ServiceDetailEditModal = ({
                               onClick={() =>
                                 setForm((p) => ({ ...p, unitType: unit }))
                               }
-                              className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer ${
+                              className={`cursor-pointer rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors ${
                                 form.unitType === unit
                                   ? "bg-brand! text-white!"
-                                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300"
+                                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                               }`}
                             >
                               {unit}
@@ -575,16 +597,17 @@ const ServiceDetailEditModal = ({
 
                   {/* Base Price */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                       Giá cơ bản (VNĐ) <span className="text-rose-500">*</span>
                     </label>
                     {isViewMode ? (
                       <div>
-                        <div className="font-heading text-xl font-extrabold text-brand tracking-tight">
+                        <div className="font-heading text-xl font-extrabold tracking-tight text-brand">
                           {formatVND(service?.basePrice)}
                         </div>
                         <span className="text-[11px] text-slate-400">
-                          Giá niêm yết áp dụng cho 1 {service?.unitType || "đơn vị"}
+                          Giá niêm yết áp dụng cho 1{" "}
+                          {service?.unitType || "đơn vị"}
                         </span>
                       </div>
                     ) : (
@@ -599,9 +622,9 @@ const ServiceDetailEditModal = ({
                             onChange={handleFormChange}
                             placeholder="VD: 1800000"
                             disabled={submitting}
-                            className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                            className="h-10 w-full rounded-xl border border-slate-300 bg-white pr-10 pl-3.5 text-xs font-bold text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                           />
-                          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-xs font-bold text-slate-400">
+                          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-bold text-slate-400">
                             ₫
                           </div>
                         </div>
@@ -621,12 +644,15 @@ const ServiceDetailEditModal = ({
                               key={p.label}
                               type="button"
                               onClick={() =>
-                                setForm((prev) => ({ ...prev, basePrice: p.value }))
+                                setForm((prev) => ({
+                                  ...prev,
+                                  basePrice: p.value,
+                                }))
                               }
-                              className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors cursor-pointer ${
+                              className={`cursor-pointer rounded-lg px-2 py-0.5 text-[10px] font-semibold transition-colors ${
                                 Number(form.basePrice) === p.value
                                   ? "bg-brand! text-white!"
-                                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300"
+                                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                               }`}
                             >
                               {p.label}
@@ -640,16 +666,16 @@ const ServiceDetailEditModal = ({
               </div>
 
               {/* Right Col: Status & Metadata Sidebar Card */}
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-850/50 flex flex-col justify-between space-y-4">
+              <div className="dark:bg-slate-850/50 flex flex-col justify-between space-y-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-800">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 border-b border-slate-200/60 pb-3 dark:border-slate-800">
+                  <div className="flex items-center gap-2 border-b border-slate-200/60 pb-3 text-xs font-bold text-slate-700 dark:border-slate-800 dark:text-slate-200">
                     <Activity size={15} className="text-brand" />
                     <span>Trạng thái & Kiểm toán</span>
                   </div>
 
                   {/* Status Indicator / Switch */}
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
+                    <label className="mb-1.5 block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                       Trạng thái hoạt động
                     </label>
 
@@ -662,7 +688,7 @@ const ServiceDetailEditModal = ({
                           </span>
                         ) : currentStatus === "active" ? (
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
-                            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                             Đang hoạt động
                           </span>
                         ) : (
@@ -676,8 +702,10 @@ const ServiceDetailEditModal = ({
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
-                          onClick={() => setForm((p) => ({ ...p, status: "active" }))}
-                          className={`flex items-center justify-center gap-1.5 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          onClick={() =>
+                            setForm((p) => ({ ...p, status: "active" }))
+                          }
+                          className={`flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-all ${
                             form.status === "active"
                               ? "bg-emerald-600 text-white shadow-xs"
                               : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
@@ -689,8 +717,10 @@ const ServiceDetailEditModal = ({
 
                         <button
                           type="button"
-                          onClick={() => setForm((p) => ({ ...p, status: "inactive" }))}
-                          className={`flex items-center justify-center gap-1.5 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          onClick={() =>
+                            setForm((p) => ({ ...p, status: "inactive" }))
+                          }
+                          className={`flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-xs font-bold transition-all ${
                             form.status === "inactive"
                               ? "bg-amber-600 text-white shadow-xs"
                               : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
@@ -705,7 +735,7 @@ const ServiceDetailEditModal = ({
 
                   {/* Audit Metadata */}
                   {!isCreateMode && (
-                    <div className="border-t border-slate-200/60 pt-3 dark:border-slate-800 space-y-2 text-[11px]">
+                    <div className="space-y-2 border-t border-slate-200/60 pt-3 text-[11px] dark:border-slate-800">
                       <div className="flex items-center justify-between text-slate-500">
                         <span className="flex items-center gap-1">
                           <Calendar size={12} /> Ngày tạo:
@@ -739,7 +769,7 @@ const ServiceDetailEditModal = ({
                   <button
                     type="button"
                     onClick={() => onDelete(service)}
-                    className="w-full flex items-center justify-center gap-1.5 h-8.5 rounded-xl border border-rose-200 bg-rose-50/60 text-xs font-bold text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
+                    className="flex h-8.5 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50/60 text-xs font-bold text-rose-600 transition-colors hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-400"
                   >
                     <Trash2 size={13} />
                     <span>Ngừng cung cấp (Xóa)</span>
@@ -749,7 +779,7 @@ const ServiceDetailEditModal = ({
             </div>
 
             {/* Bottom Section: Description */}
-            <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-800 dark:bg-slate-850/50 space-y-3">
+            <div className="dark:bg-slate-850/50 space-y-3 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 dark:border-slate-800">
               <div className="flex items-center justify-between border-b border-slate-200/60 pb-2.5 dark:border-slate-800">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200">
                   <Sparkles size={15} className="text-brand" />
@@ -763,7 +793,7 @@ const ServiceDetailEditModal = ({
               </div>
 
               {isViewMode ? (
-                <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line min-h-12.5">
+                <div className="min-h-12.5 text-xs leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
                   {service?.description || (
                     <span className="text-slate-400 italic">
                       Chưa có mô tả chi tiết cho dịch vụ này.
@@ -778,17 +808,19 @@ const ServiceDetailEditModal = ({
                   onChange={handleFormChange}
                   placeholder="Mô tả các công đoạn thiết kế, chất liệu tư vấn, quy trình bàn giao cho khách hàng..."
                   disabled={submitting}
-                  className="w-full p-3.5 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white resize-y"
+                  className="w-full resize-y rounded-xl border border-slate-300 bg-white p-3.5 text-xs font-medium text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 />
               )}
             </div>
 
             {/* View Mode: Extra KPIs & Overview Banner */}
             {isViewMode && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
                 <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-center justify-between text-slate-500 mb-1.5">
-                    <span className="text-xs font-medium">Doanh số ước tính</span>
+                  <div className="mb-1.5 flex items-center justify-between text-slate-500">
+                    <span className="text-xs font-medium">
+                      Doanh số ước tính
+                    </span>
                     <TrendingUp size={15} className="text-emerald-500" />
                   </div>
                   <div className="font-heading text-lg font-bold text-slate-900 dark:text-white">
@@ -800,8 +832,10 @@ const ServiceDetailEditModal = ({
                 </div>
 
                 <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-center justify-between text-slate-500 mb-1.5">
-                    <span className="text-xs font-medium">Tổng lượt tiếp nhận</span>
+                  <div className="mb-1.5 flex items-center justify-between text-slate-500">
+                    <span className="text-xs font-medium">
+                      Tổng lượt tiếp nhận
+                    </span>
                     <ShoppingBag size={15} className="text-blue-500" />
                   </div>
                   <div className="font-heading text-lg font-bold text-slate-900 dark:text-white">
@@ -817,7 +851,7 @@ const ServiceDetailEditModal = ({
         </div>
 
         {/* Bottom Footer Actions */}
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/80 px-5 py-3.5 sm:px-6 dark:border-slate-800 dark:bg-slate-850">
+        <div className="dark:bg-slate-850 flex items-center justify-between border-t border-slate-100 bg-slate-50/80 px-5 py-3.5 sm:px-6 dark:border-slate-800">
           <div className="text-xs text-slate-500 dark:text-slate-400">
             {isViewMode
               ? `Dịch vụ: ${service?.serviceCode || "Chi tiết"}`
@@ -831,7 +865,7 @@ const ServiceDetailEditModal = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="h-9 px-4 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                className="h-9 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
               >
                 Đóng
               </button>
@@ -841,7 +875,7 @@ const ServiceDetailEditModal = ({
                   type="button"
                   onClick={handleCancelEdit}
                   disabled={submitting}
-                  className="h-9 px-4 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                  className="h-9 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                 >
                   {isCreateMode ? "Hủy bỏ" : "Hủy thay đổi"}
                 </button>
@@ -850,7 +884,7 @@ const ServiceDetailEditModal = ({
                   type="submit"
                   form="service-form"
                   disabled={submitting}
-                  className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-brand! hover:bg-brand-hover! text-white! text-xs font-bold shadow-xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-brand! px-4 text-xs font-bold text-white! shadow-xs transition-all hover:bg-brand-hover! active:scale-95 disabled:opacity-50"
                 >
                   {isCreateMode ? (
                     <>
@@ -859,7 +893,10 @@ const ServiceDetailEditModal = ({
                     </>
                   ) : (
                     <>
-                      <Save size={14} className={submitting ? "animate-spin" : ""} />
+                      <Save
+                        size={14}
+                        className={submitting ? "animate-spin" : ""}
+                      />
                       <span>{submitting ? "Đang lưu..." : "Lưu thay đổi"}</span>
                     </>
                   )}

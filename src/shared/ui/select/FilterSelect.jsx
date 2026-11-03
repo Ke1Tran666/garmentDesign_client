@@ -7,6 +7,8 @@ const FilterSelect = ({
   ariaLabel = "Chọn bộ lọc",
   className = "",
   disabled = false,
+  size = "filter",
+  ...props
 }) => {
   return (
     <Select
@@ -15,7 +17,9 @@ const FilterSelect = ({
       onValueChange={onValueChange}
       ariaLabel={ariaLabel}
       disabled={disabled}
+      size={size}
       className={className}
+      {...props}
     />
   );
 };

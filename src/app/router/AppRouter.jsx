@@ -25,6 +25,7 @@ import UserManagementPage from "@/pages/Admin/Users/UserManagementPage";
 import UserDetailPage from "@/pages/Admin/Users/UserDetailPage";
 import ServiceManagementPage from "@/pages/Admin/Services/ServiceManagementPage";
 import ServiceOrderManagementPage from "@/pages/Admin/ServiceOrders/ServiceOrderManagementPage";
+import ServiceOrderDetailPage from "@/pages/Admin/ServiceOrders/ServiceOrderDetailPage";
 import ServiceDetailPage from "@/pages/Admin/Services/ServiceDetailPage";
 import UserCreatePage from "@/pages/Admin/Users/UserCreatePage";
 
@@ -84,6 +85,10 @@ const AppRouter = () => {
         <Route path="services" element={<ServiceManagementPage />} />
         <Route path="services/:serviceId" element={<ServiceDetailPage />} />
         <Route path="service-orders" element={<ServiceOrderManagementPage />} />
+        <Route
+          path="service-orders/:orderId"
+          element={<ServiceOrderDetailPage />}
+        />
       </Route>
 
       <Route path="/not-found" element={<NotFoundPage />} />

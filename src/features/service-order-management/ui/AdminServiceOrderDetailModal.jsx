@@ -1,73 +1,22 @@
 import { useState } from "react";
-import { MapPin, Package, UserRound, Wrench, X } from "lucide-react";
-import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
+import {
+  ExternalLink,
+  MapPin,
+  Package,
+  UserRound,
+  Wrench,
+  X,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import { useNotification } from "@/app/providers/NotificationProvider";
-
-const formatPrice = (value) => {
-  const price = Number(value);
-  if (!Number.isFinite(price)) return "Chưa thiết lập";
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(price);
-};
-
-const formatDate = (value, includeTime = false) => {
-  if (!value) return "Chưa có";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    ...(includeTime ? { hour: "2-digit", minute: "2-digit" } : {}),
-  }).format(date);
-};
-
-const getStatusInfo = (statusString) => {
-  const status = String(statusString || "")
-    .trim()
-    .toLowerCase();
-  if (status === "inactive" || status === "deleted") {
-    return {
-      label: "Đã hủy",
-      className:
-        "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900",
-      dot: "bg-rose-500",
-    };
-  }
-  if (status === "pending") {
-    return {
-      label: "Chờ tiếp nhận",
-      className:
-        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
-      dot: "bg-amber-500",
-    };
-  }
-  if (status === "active") {
-    return {
-      label: "Đang xử lý",
-      className:
-        "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
-      dot: "bg-blue-500",
-    };
-  }
-  if (status === "completed") {
-    return {
-      label: "Hoàn tất",
-      className:
-        "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
-      dot: "bg-emerald-500",
-    };
-  }
-  return {
-    label: "Ngừng xử lý",
-    className:
-      "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
-    dot: "bg-slate-400",
-  };
-};
+import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
+import FilterSelect from "@/shared/ui/select/FilterSelect";
+import {
+  formatDate,
+  formatPrice,
+  getStatusInfo,
+  STATUS_SELECT_OPTIONS,
+} from "../lib/serviceOrderUtils";
 
 const DetailItem = ({ label, value, className = "" }) => (
   <div className={className}>
@@ -94,15 +43,26 @@ const DetailSection = ({ icon: Icon, title, children }) => (
   </section>
 );
 
-const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
+const AdminServiceOrderDetailModal = ({
+  open,
+  order,
+  onClose,
+  onStatusChange,
+}) => {
   const { showNotification } = useNotification();
-  const [currentStatus, setCurrentStatus] = useState(
-    order?.status || "pending",
-  );
+
+  const [overrideStatus, setOverrideStatus] = useState(null);
+  const [prevOrderId, setPrevOrderId] = useState(order?.serviceOrderId);
   const [updating, setUpdating] = useState(false);
+
+  if (order?.serviceOrderId !== prevOrderId) {
+    setPrevOrderId(order?.serviceOrderId);
+    setOverrideStatus(null);
+  }
 
   if (!open || !order) return null;
 
+  const currentStatus = overrideStatus ?? (order?.status || "pending");
   const status = getStatusInfo(currentStatus);
   const address = [order.address?.companyName, order.address?.address]
     .filter(Boolean)
@@ -123,7 +83,8 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
     try {
       setUpdating(true);
       await serviceOrderApi.update(order.serviceOrderId, { status: newStatus });
-      setCurrentStatus(newStatus);
+      setOverrideStatus(newStatus);
+      onStatusChange?.(order.serviceOrderId, newStatus);
       showNotification({
         type: "success",
         title: "Cập nhật thành công",
@@ -132,7 +93,9 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
             ? "Đang xử lý"
             : newStatus === "completed"
               ? "Hoàn tất"
-              : newStatus
+              : newStatus === "cancelled"
+                ? "Đã hủy"
+                : newStatus
         }".`,
       });
     } catch {
@@ -154,6 +117,7 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
       className="fixed inset-0 z-50 flex animate-in items-center justify-center bg-slate-900/60 px-4 py-6 backdrop-blur-xs duration-150 fade-in"
     >
       <div
+        role="presentation"
         onClick={(e) => e.stopPropagation()}
         className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900"
       >
@@ -187,7 +151,7 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
           >
             <X size={18} />
           </button>
@@ -326,28 +290,33 @@ const AdminServiceOrderDetailModal = ({ open, order, onClose }) => {
 
         {/* Modal Footer with Status Change Dropdown */}
         <footer className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/50 px-6 py-4 sm:flex-row dark:border-slate-800 dark:bg-slate-900/50">
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <span className="text-xs font-semibold text-slate-500">
+          <div className="flex w-full items-center gap-2.5 sm:w-auto">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               Đổi trạng thái:
             </span>
-            <select
+            <FilterSelect
               value={currentStatus}
               disabled={updating}
-              onChange={(e) => handleUpdateStatus(e.target.value)}
-              className="h-8.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 focus:border-brand focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-            >
-              <option value="pending">Chờ tiếp nhận</option>
-              <option value="active">Đang xử lý</option>
-              <option value="completed">Hoàn tất</option>
-              <option value="cancelled">Hủy đơn hàng</option>
-            </select>
+              onValueChange={handleUpdateStatus}
+              options={STATUS_SELECT_OPTIONS}
+              ariaLabel="Đổi trạng thái đơn hàng"
+              className="h-9 w-44"
+            />
           </div>
 
           <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+            <Link
+              to={`/admin/service-orders/${order.serviceOrderId}`}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:border-brand/40 hover:bg-slate-50 hover:text-brand dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <span>Mở toàn trang</span>
+              <ExternalLink size={13} />
+            </Link>
+
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="cursor-pointer rounded-xl border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               Đóng
             </button>

@@ -1,8 +1,11 @@
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Select as RadixSelect } from "radix-ui";
 
+import { cn } from "@/shared/lib/utils";
+
 const SIZE_CLASSES = {
   sm: "h-9 rounded-lg px-3 text-sm",
+  filter: "h-10 rounded-xl px-3 text-xs font-semibold",
   md: "h-11 rounded-xl px-4 text-sm",
   lg: "h-12 rounded-xl px-4 text-sm",
 };
@@ -64,22 +67,24 @@ const Select = ({
         id={id || name}
         aria-label={ariaLabel}
         aria-invalid={error || undefined}
-        className={`group flex w-full items-center justify-between gap-3 border! bg-surface text-left text-text-default shadow-xs transition outline-none ${
-          SIZE_CLASSES[size] || SIZE_CLASSES.md
-        } ${
+        className={cn(
+          "group flex w-full items-center justify-between gap-2.5 rounded-xl border border-slate-200 bg-white text-left font-semibold text-slate-700 shadow-2xs transition-all outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200",
+          SIZE_CLASSES[size] || SIZE_CLASSES.md,
           error
             ? "border-danger! focus:border-danger! focus:ring-4 focus:ring-danger/10 data-[state=open]:border-danger! data-[state=open]:ring-4 data-[state=open]:ring-danger/10"
-            : "hover:border-border-strong! border-input! focus:border-brand! focus:ring-4 focus:ring-brand/10 data-[state=open]:border-brand! data-[state=open]:ring-4 data-[state=open]:ring-brand/10"
-        } disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted disabled:opacity-60 ${className}`}
+            : "hover:border-slate-300 focus:border-brand! focus:ring-2 focus:ring-brand/10 data-[state=open]:border-brand! data-[state=open]:ring-2 data-[state=open]:ring-brand/10 dark:hover:border-slate-600",
+          "disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:opacity-60 dark:disabled:bg-slate-800/50",
+          className,
+        )}
       >
         <RadixSelect.Value
-          placeholder={<span className="text-text-muted">{placeholder}</span>}
+          placeholder={<span className="text-slate-400 dark:text-slate-500">{placeholder}</span>}
         />
 
         <RadixSelect.Icon asChild>
           <ChevronDown
-            size={17}
-            className="shrink-0 text-text-muted transition-transform duration-200 group-data-[state=open]:rotate-180"
+            size={16}
+            className="shrink-0 text-slate-400 transition-transform duration-200 group-data-[state=open]:rotate-180 dark:text-slate-500"
           />
         </RadixSelect.Icon>
       </RadixSelect.Trigger>
@@ -89,10 +94,13 @@ const Select = ({
           position="popper"
           sideOffset={6}
           collisionPadding={12}
-          className={`z-100 max-h-72 min-w-(--radix-select-trigger-width) overflow-hidden rounded-xl border border-border-subtle bg-surface shadow-xl ${contentClassName}`}
+          className={cn(
+            "z-100 max-h-72 min-w-(--radix-select-trigger-width) overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-1 shadow-xl animate-in fade-in-0 zoom-in-95 dark:border-slate-800 dark:bg-slate-900",
+            contentClassName,
+          )}
         >
-          <RadixSelect.ScrollUpButton className="flex h-8 items-center justify-center bg-surface text-text-muted">
-            <ChevronUp size={16} />
+          <RadixSelect.ScrollUpButton className="flex h-7 items-center justify-center bg-white text-slate-400 hover:text-slate-600 dark:bg-slate-900 dark:text-slate-500">
+            <ChevronUp size={15} />
           </RadixSelect.ScrollUpButton>
 
           <RadixSelect.Viewport className="p-1">
@@ -101,19 +109,26 @@ const Select = ({
                 key={String(option.value)}
                 value={String(option.value)}
                 disabled={option.disabled}
-                className="relative flex min-h-10 cursor-pointer items-center rounded-lg py-2 pr-9 pl-3 text-sm text-text-default outline-none select-none data-highlighted:bg-brand-soft data-highlighted:text-brand data-disabled:pointer-events-none data-disabled:opacity-40"
+                className={cn(
+                  "relative flex cursor-pointer items-center rounded-xl py-2 pr-8 pl-3 outline-none select-none transition-colors",
+                  "data-highlighted:bg-brand/10 data-highlighted:text-brand",
+                  "data-[state=checked]:font-bold data-[state=checked]:text-brand",
+                  "data-disabled:pointer-events-none data-disabled:opacity-40",
+                  "dark:text-slate-200 dark:data-highlighted:bg-brand/20 dark:data-highlighted:text-brand-light dark:data-[state=checked]:text-brand-light",
+                  size === "md" || size === "lg" ? "min-h-10 text-sm font-medium" : "min-h-9 text-xs font-semibold",
+                )}
               >
                 <RadixSelect.ItemText>{option.label}</RadixSelect.ItemText>
 
-                <RadixSelect.ItemIndicator className="absolute right-3 inline-flex items-center text-brand">
-                  <Check size={16} strokeWidth={2.5} />
+                <RadixSelect.ItemIndicator className="absolute right-2.5 inline-flex items-center text-brand dark:text-brand-light">
+                  <Check size={15} strokeWidth={2.5} />
                 </RadixSelect.ItemIndicator>
               </RadixSelect.Item>
             ))}
           </RadixSelect.Viewport>
 
-          <RadixSelect.ScrollDownButton className="flex h-8 items-center justify-center bg-surface text-text-muted">
-            <ChevronDown size={16} />
+          <RadixSelect.ScrollDownButton className="flex h-7 items-center justify-center bg-white text-slate-400 hover:text-slate-600 dark:bg-slate-900 dark:text-slate-500">
+            <ChevronDown size={15} />
           </RadixSelect.ScrollDownButton>
         </RadixSelect.Content>
       </RadixSelect.Portal>

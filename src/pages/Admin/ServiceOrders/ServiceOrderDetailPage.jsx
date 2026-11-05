@@ -22,6 +22,7 @@ import {
   formatMeterCount,
   formatPrice,
   getOrderStatusValue,
+  getOrderUnitLabel,
   getStatusInfo,
   isPrintService,
   ServiceOrderBasicInfoCard,
@@ -224,7 +225,7 @@ const ServiceOrderDetailPage = () => {
         "Mã khách hàng": order.user?.userCode || "---",
         "Sản phẩm / Mẫu": order.productName || "---",
         "Dịch vụ": order.service?.serviceName || "---",
-        "Số lượng yêu cầu": `${order.quantity || 1} ${isPrint ? "bản in" : order.unitType || "mục"}`,
+        "Số lượng yêu cầu": `${order.quantity || 1} ${getOrderUnitLabel(order)}`,
         "Số mét in thực tế": order.meterCount
           ? `${formatMeterCount(order.meterCount)} mét`
           : "---",

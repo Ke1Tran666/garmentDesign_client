@@ -245,14 +245,10 @@ const AdminServiceOrderDetailModal = ({
 
             {/* Section: Chi phí & Thanh toán */}
             <DetailSection icon={Package} title="Chi tiết giá trị đơn hàng">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <DetailItem
-                  label={isPrint ? "Đơn giá / mét" : "Đơn giá"}
+                  label={isPrint ? "Đơn giá / mét" : "Đơn giá dịch vụ"}
                   value={formatPrice(currentOrder.unitPrice)}
-                />
-                <DetailItem
-                  label="Giảm giá"
-                  value={formatPrice(currentOrder.discountAmount || 0)}
                 />
                 <div>
                   <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">

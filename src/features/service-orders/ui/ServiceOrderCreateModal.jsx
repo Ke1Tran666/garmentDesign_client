@@ -16,7 +16,7 @@ import ProductImagePicker from "@/features/service-orders/ui/file-upload/Product
 import AttachmentPicker from "@/features/service-orders/ui/file-upload/AttachmentPicker";
 import { useAuth } from "@/features/auth/model/useAuth";
 import FormSelect from "@/shared/ui/select/FormSelect";
-import { isPrintService } from "@/features/service-order-management";
+import { getOrderUnitLabel, isPrintService } from "@/features/service-order-management";
 
 const initialForm = {
   serviceId: "",
@@ -517,7 +517,7 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
                       />
 
                       <span className="flex items-center border-l border-border bg-surface-subtle px-3 text-xs font-semibold text-text-muted">
-                        {isPrint ? "bản in" : selectedService?.unitType || "Đơn vị"}
+                        {getOrderUnitLabel(selectedService)}
                       </span>
                     </div>
                     {isPrint && (
@@ -678,7 +678,7 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
                         <p className="mt-2 text-base font-bold">
                           {formatCurrency(selectedService.basePrice)}
                           <span className="ml-1 text-xs font-normal text-text-subtle">
-                            / {isPrint ? "mét" : selectedService.unitType || "đơn vị"}
+                            / {isPrint ? "mét" : getOrderUnitLabel(selectedService)}
                           </span>
                         </p>
                       </div>

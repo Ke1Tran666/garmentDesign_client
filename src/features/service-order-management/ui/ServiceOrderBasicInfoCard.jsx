@@ -53,7 +53,7 @@ const ServiceOrderBasicInfoCard = ({
             <p className="mt-0.5 text-xs text-slate-500">
               Mã DV: {order.service?.serviceCode || `SRV-${order.serviceId || "---"}`}
               {" • "}Đơn giá: {formatPrice(order.unitPrice)}
-              {isPrint ? " / mét" : ` / ${order.unitType || "mục"}`}
+              {isPrint ? " / mét" : ` / ${unitLabel}`}
             </p>
           </div>
 

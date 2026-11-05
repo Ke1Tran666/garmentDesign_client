@@ -13,6 +13,7 @@ import {
   formatMeterCount,
   formatPrice,
   getOrderStatusValue,
+  getOrderUnitLabel,
   getStatusInfo,
   isPrintService,
   STATUS_SELECT_OPTIONS,
@@ -30,6 +31,7 @@ const ServiceOrderSidebarCard = ({
   const currentStatus = getOrderStatusValue(order);
   const statusInfo = getStatusInfo(currentStatus);
   const isPrint = isPrintService(order);
+  const unitLabel = getOrderUnitLabel(order);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -148,7 +150,7 @@ const ServiceOrderSidebarCard = ({
             <span>Đơn giá dịch vụ:</span>
             <span className="font-medium text-slate-800 dark:text-slate-200">
               {formatPrice(order.unitPrice)}
-              {isPrint ? " / mét" : ` / ${order.unitType || "mục"}`}
+              {isPrint ? " / mét" : ` / ${unitLabel}`}
             </span>
           </div>
 
@@ -171,18 +173,9 @@ const ServiceOrderSidebarCard = ({
             </>
           ) : (
             <div className="flex justify-between text-slate-600 dark:text-slate-400">
-              <span>Số lượng:</span>
+              <span>Số lượng yêu cầu:</span>
               <span className="font-medium text-slate-800 dark:text-slate-200">
-                {order.quantity || 1} {order.unitType || "mục"}
-              </span>
-            </div>
-          )}
-
-          {Number(order.discountAmount) > 0 && (
-            <div className="flex justify-between text-rose-500">
-              <span>Khuyến mãi / Giảm trừ:</span>
-              <span className="font-medium">
-                -{formatPrice(order.discountAmount)}
+                {order.quantity || 1} {unitLabel}
               </span>
             </div>
           )}

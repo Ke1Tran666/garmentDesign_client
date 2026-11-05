@@ -15,7 +15,6 @@ const CompletePrintOrderModal = ({
   const [error, setError] = useState("");
 
   const unitPrice = Number(order?.unitPrice || 0);
-  const discountAmount = Number(order?.discountAmount || 0);
 
   const currentKey = open && order ? `${order.serviceOrderId}_${open}` : null;
   if (currentKey && currentKey !== prevKey) {
@@ -24,10 +23,7 @@ const CompletePrintOrderModal = ({
     setMeterCount(initialMeters);
 
     if (initialMeters && Number(initialMeters) > 0) {
-      const calculated = Math.max(
-        0,
-        Number(initialMeters) * unitPrice - discountAmount,
-      );
+      const calculated = Math.round(Number(initialMeters) * unitPrice);
       setTotalPrice(String(calculated));
     } else if (order?.totalPrice) {
       setTotalPrice(String(order.totalPrice));
@@ -46,9 +42,7 @@ const CompletePrintOrderModal = ({
 
     const meters = Number(val);
     if (Number.isFinite(meters) && meters > 0) {
-      const calculated = Math.round(
-        Math.max(0, meters * unitPrice - discountAmount),
-      );
+      const calculated = Math.round(meters * unitPrice);
       setTotalPrice(String(calculated));
     }
   };

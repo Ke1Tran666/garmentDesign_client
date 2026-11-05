@@ -155,6 +155,20 @@ export const getOrderUnitLabel = (orderOrService) => {
   if (isPrintService(orderOrService)) {
     return "bản in";
   }
+
+  const rawUnit = String(
+    orderOrService?.unitType ||
+      orderOrService?.service?.unitType ||
+      "",
+  )
+    .toLowerCase()
+    .trim();
+
+  if (rawUnit === "size") return "size";
+  if (rawUnit === "product") return "sản phẩm";
+  if (rawUnit === "design") return "mẫu";
+  if (rawUnit === "meter" || rawUnit === "mét") return "mét";
+
   return orderOrService?.unitType || "sản phẩm";
 };
 

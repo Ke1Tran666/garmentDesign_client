@@ -1613,20 +1613,12 @@ const ServiceOrderDetailModal = ({
                         </dd>
                       </div>
                     ) : null}
-
-                    <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-text-subtle">Giảm giá</dt>
-
-                      <dd className="text-sm font-semibold text-success">
-                        {formatCurrency(order.discountAmount)}
-                      </dd>
-                    </div>
                   </dl>
                 </div>
 
                 <div className="flex justify-between bg-white/5 px-6 py-4">
                   <span className="text-xs text-text-subtle">
-                    Thành tiền sau giảm giá
+                    Tổng tiền thanh toán
                   </span>
 
                   <span className="text-sm font-bold">

@@ -12,6 +12,7 @@ import {
 } from "@/features/service-order-management";
 import BatchActionBar from "@/shared/ui/action-bar/BatchActionBar";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { KanbanSkeleton, TableSkeleton } from "@/shared/ui/skeleton";
 
 const ServiceOrderManagementPage = () => {
   const { searchKeyword = "" } = useOutletContext() || {};
@@ -126,13 +127,11 @@ const ServiceOrderManagementPage = () => {
           MAIN CONTENT: TABLE VIEW OR KANBAN BOARD
           ========================================= */}
       {loading ? (
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-12 text-center text-slate-400 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <RefreshCw
-            size={24}
-            className="mx-auto mb-2 animate-spin text-brand"
-          />
-          Đang tải danh sách đơn dịch vụ...
-        </div>
+        viewMode === "kanban" ? (
+          <KanbanSkeleton />
+        ) : (
+          <TableSkeleton />
+        )
       ) : viewMode === "kanban" ? (
         <ServiceOrderKanbanView
           columns={kanbanColumns}

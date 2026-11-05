@@ -30,6 +30,7 @@ import {
 } from "@/features/service-order-management";
 import { exportToExcel } from "@/shared/lib/exportUtils";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { DetailPageSkeleton } from "@/shared/ui/skeleton";
 
 const ServiceOrderDetailPage = () => {
   const { orderId } = useParams();
@@ -273,14 +274,7 @@ const ServiceOrderDetailPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center text-slate-400">
-        <RefreshCw size={28} className="mb-3 animate-spin text-brand" />
-        <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-          Đang tải thông tin chi tiết đơn dịch vụ...
-        </p>
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (errorMessage && !order) {

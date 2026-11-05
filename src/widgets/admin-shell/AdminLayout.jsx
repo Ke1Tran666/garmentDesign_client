@@ -11,8 +11,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
+  Scissors,
   Search,
-  ShieldCheck,
   SlidersHorizontal,
   User,
   UserPlus,
@@ -173,10 +173,10 @@ const AdminLayout = () => {
           <div className="flex flex-col items-center gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
             <Link
               to="/admin/dashboard"
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-tr from-brand to-sky-400 text-white shadow-md shadow-brand/20 transition-transform hover:scale-105"
-              title="Garment Admin"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-md shadow-brand/25 transition-transform hover:scale-105"
+              title="HoaTran maymac Admin"
             >
-              <ShieldCheck size={22} className="stroke-[2.2]" />
+              <Scissors size={20} className="stroke-[2.2]" />
             </Link>
             <button
               type="button"
@@ -193,18 +193,18 @@ const AdminLayout = () => {
             <Link
               to="/admin/dashboard"
               className="group flex min-w-0 items-center gap-3 overflow-hidden"
-              title="Garment Design Admin"
+              title="HoaTran maymac Admin"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-linear-to-tr from-brand to-sky-400 text-white shadow-md shadow-brand/20 transition-transform group-hover:scale-105">
-                <ShieldCheck size={22} className="stroke-[2.2]" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-md shadow-brand/25 transition-transform group-hover:scale-105">
+                <Scissors size={20} className="stroke-[2.2]" />
               </div>
               <div className="flex min-w-0 flex-col">
-                <span className="truncate font-heading text-base leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white">
-                  GARMENT ADMIN
+                <span className="truncate font-brand text-base leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  HoaTran <span className="text-brand">maymac</span>
                 </span>
-                <span className="flex items-center gap-1.5 text-[11px] font-medium tracking-wider text-brand uppercase">
+                <span className="flex items-center gap-1.5 text-[11px] font-medium tracking-wider text-slate-400 uppercase">
                   <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                  Management Suite
+                  Admin Portal
                 </span>
               </div>
             </Link>
@@ -357,12 +357,12 @@ const AdminLayout = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white">
-                  <ShieldCheck size={20} />
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white shadow-xs">
+                  <Scissors size={18} className="stroke-[2.2]" />
                 </div>
-                <span className="font-heading text-sm font-extrabold text-slate-900 dark:text-white">
-                  GARMENT ADMIN
+                <span className="font-brand text-sm font-bold text-slate-900 dark:text-white">
+                  HoaTran <span className="text-brand">maymac</span>
                 </span>
               </div>
               <button

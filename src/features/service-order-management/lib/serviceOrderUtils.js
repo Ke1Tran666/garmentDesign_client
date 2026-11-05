@@ -113,3 +113,60 @@ export const ORDER_SORT_OPTIONS = [
   { value: "price-desc", label: "Giá cao nhất" },
   { value: "price-asc", label: "Giá thấp nhất" },
 ];
+
+/**
+ * Kiểm tra xem đơn dịch vụ có phải là dịch vụ in sơ đồ hoặc in rập hay không
+ */
+export const isPrintService = (orderOrService) => {
+  if (!orderOrService) return false;
+  const name = String(
+    orderOrService.service?.serviceName ||
+      orderOrService.serviceName ||
+      "",
+  ).toLowerCase();
+  const code = String(
+    orderOrService.service?.serviceCode ||
+      orderOrService.serviceCode ||
+      "",
+  ).toUpperCase();
+  const unit = String(
+    orderOrService.unitType ||
+      orderOrService.service?.unitType ||
+      "",
+  ).toLowerCase();
+
+  return (
+    name.includes("in sơ đồ") ||
+    name.includes("in rập") ||
+    name.includes("in so do") ||
+    name.includes("in rap") ||
+    code.startsWith("MAR") ||
+    code.startsWith("PAT") ||
+    unit === "meter" ||
+    unit === "mét"
+  );
+};
+
+/**
+ * Trả về đơn vị hiển thị cho số lượng yêu cầu của khách hàng
+ * Đối với dịch vụ in sơ đồ/in rập: hiển thị là "bản in" thay vì "meter"
+ */
+export const getOrderUnitLabel = (orderOrService) => {
+  if (isPrintService(orderOrService)) {
+    return "bản in";
+  }
+  return orderOrService?.unitType || "sản phẩm";
+};
+
+/**
+ * Format số mét in thực tế, hiển thị tối đa 4 chữ số sau dấu phẩy
+ */
+export const formatMeterCount = (value) => {
+  if (value === null || value === undefined || value === "") return "";
+  const num = Number(value);
+  if (!Number.isFinite(num)) return String(value);
+  return new Intl.NumberFormat("vi-VN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4,
+  }).format(num);
+};

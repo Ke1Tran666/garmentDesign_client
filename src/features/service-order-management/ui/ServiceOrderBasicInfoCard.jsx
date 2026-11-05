@@ -1,12 +1,25 @@
-import { FileText, MapPin, Wrench } from "lucide-react";
+import { FileText, MapPin, Printer, Ruler, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  formatMeterCount,
+  formatPrice,
+  getOrderUnitLabel,
+  isPrintService,
+} from "../lib/serviceOrderUtils";
 
-const ServiceOrderBasicInfoCard = ({ order, className = "" }) => {
+const ServiceOrderBasicInfoCard = ({
+  order,
+  onOpenPrintModal,
+  className = "",
+}) => {
   if (!order) return null;
 
   const address = [order.address?.companyName, order.address?.address]
     .filter(Boolean)
     .join(" - ");
+
+  const isPrint = isPrintService(order);
+  const unitLabel = getOrderUnitLabel(order);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -38,8 +51,9 @@ const ServiceOrderBasicInfoCard = ({ order, className = "" }) => {
               {order.service?.serviceName || "Dịch vụ thiết kế rập"}
             </p>
             <p className="mt-0.5 text-xs text-slate-500">
-              Mã DV:{" "}
-              {order.service?.serviceCode || `SRV-${order.serviceId || "---"}`}
+              Mã DV: {order.service?.serviceCode || `SRV-${order.serviceId || "---"}`}
+              {" • "}Đơn giá: {formatPrice(order.unitPrice)}
+              {isPrint ? " / mét" : ` / ${order.unitType || "mục"}`}
             </p>
           </div>
 
@@ -51,13 +65,60 @@ const ServiceOrderBasicInfoCard = ({ order, className = "" }) => {
               {order.productName || "Sản phẩm may mặc"}
             </p>
             <p className="mt-0.5 text-xs text-slate-500">
-              Số lượng:{" "}
+              Số lượng yêu cầu:{" "}
               <strong className="text-slate-800 dark:text-slate-200">
-                {order.quantity || 1} {order.unitType || "sản phẩm"}
+                {order.quantity || 1} {unitLabel}
               </strong>
             </p>
           </div>
         </div>
+
+        {/* Special Banner for Printing Services (In sơ đồ / In rập) */}
+        {isPrint && (
+          <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50/60 p-4 dark:border-sky-900/60 dark:bg-sky-950/30">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-brand dark:bg-sky-900/50">
+                  <Printer size={18} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                    Thông số in sơ đồ / in rập
+                  </h4>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-slate-300">
+                    <span>
+                      Số bản cần in:{" "}
+                      <strong className="text-slate-900 dark:text-white">
+                        {order.quantity || 1} bản
+                      </strong>
+                    </span>
+                    <span>
+                      Số mét đã in thực tế:{" "}
+                      <strong className="text-brand font-bold">
+                        {order.meterCount
+                          ? `${formatMeterCount(order.meterCount)} mét`
+                          : "Chờ nhân viên in xong nhập vào"}
+                      </strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {onOpenPrintModal && order.status !== "cancelled" && (
+                <button
+                  type="button"
+                  onClick={onOpenPrintModal}
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3.5 py-1.5 text-xs font-bold text-brand shadow-2xs hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                >
+                  <Ruler size={14} />
+                  <span>
+                    {order.meterCount ? "Sửa số mét in" : "Nhập số mét in"}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Customer Specifications / Instructions */}
@@ -73,9 +134,8 @@ const ServiceOrderBasicInfoCard = ({ order, className = "" }) => {
           {order.customerRequest ? (
             <p className="whitespace-pre-wrap">{order.customerRequest}</p>
           ) : (
-            <p className="text-slate-400 italic">
-              Khách hàng không đính kèm ghi chú kỹ thuật đặc biệt cho đơn hàng
-              này.
+            <p className="italic text-slate-400">
+              Khách hàng không đính kèm ghi chú kỹ thuật đặc biệt cho đơn hàng này.
             </p>
           )}
         </div>
@@ -105,7 +165,7 @@ const ServiceOrderBasicInfoCard = ({ order, className = "" }) => {
               <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                 Ghi chú vận chuyển
               </span>
-              <p className="mt-1 text-slate-600 italic dark:text-slate-300">
+              <p className="mt-1 italic text-slate-600 dark:text-slate-300">
                 {order.address.note}
               </p>
             </div>

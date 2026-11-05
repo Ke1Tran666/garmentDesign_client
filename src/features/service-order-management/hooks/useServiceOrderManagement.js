@@ -10,9 +10,11 @@ import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
 import { exportToExcel } from "@/shared/lib/exportUtils";
 import {
   formatDate,
+  formatMeterCount,
   formatPrice,
   getOrderStatusValue,
   getStatusInfo,
+  isPrintService,
   PAGE_SIZE,
 } from "../lib/serviceOrderUtils";
 
@@ -32,6 +34,10 @@ export const useServiceOrderManagement = (searchKeyword = "") => {
 
   // Selected Order for detail modal
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Print order completion modal state (for Kanban & quick actions)
+  const [printOrderToComplete, setPrintOrderToComplete] = useState(null);
+  const [completingPrint, setCompletingPrint] = useState(false);
 
   // Delete modal state
   const [removingOrder, setRemovingOrder] = useState(null);
@@ -167,6 +173,11 @@ export const useServiceOrderManagement = (searchKeyword = "") => {
 
   // Fast status transition in Kanban
   const handleQuickAdvanceStatus = async (order, targetStatus) => {
+    if (targetStatus === "completed" && isPrintService(order)) {
+      setPrintOrderToComplete(order);
+      return;
+    }
+
     try {
       await serviceOrderApi.updateByAdmin(order.serviceOrderId, {
         status: targetStatus,
@@ -195,6 +206,39 @@ export const useServiceOrderManagement = (searchKeyword = "") => {
         title: "Thất bại",
         message: "Không thể cập nhật trạng thái đơn hàng.",
       });
+    }
+  };
+
+  const confirmCompletePrintOrder = async ({ meterCount, totalPrice }) => {
+    if (!printOrderToComplete) return;
+    try {
+      setCompletingPrint(true);
+      await serviceOrderApi.updateByAdmin(printOrderToComplete.serviceOrderId, {
+        status: "completed",
+        meterCount,
+        totalPrice,
+      });
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.serviceOrderId === printOrderToComplete.serviceOrderId
+            ? { ...o, status: "completed", meterCount, totalPrice }
+            : o,
+        ),
+      );
+      showNotification({
+        type: "success",
+        title: "Hoàn tất in sơ đồ / in rập",
+        message: `Đơn ORD-${printOrderToComplete.serviceOrderId} đã hoàn tất với ${formatMeterCount(meterCount)} mét (${formatPrice(totalPrice)}).`,
+      });
+      setPrintOrderToComplete(null);
+    } catch {
+      showNotification({
+        type: "error",
+        title: "Thất bại",
+        message: "Không thể hoàn tất đơn hàng in.",
+      });
+    } finally {
+      setCompletingPrint(false);
     }
   };
 
@@ -374,6 +418,10 @@ export const useServiceOrderManagement = (searchKeyword = "") => {
     totalPages,
     selectedOrder,
     setSelectedOrder,
+    printOrderToComplete,
+    setPrintOrderToComplete,
+    completingPrint,
+    confirmCompletePrintOrder,
     removingOrder,
     setRemovingOrder,
     removing,

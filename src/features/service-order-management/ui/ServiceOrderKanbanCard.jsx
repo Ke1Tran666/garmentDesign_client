@@ -1,5 +1,11 @@
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { formatDate, formatPrice } from "../lib/serviceOrderUtils";
+import { ArrowRight, CheckCircle2, Printer } from "lucide-react";
+import {
+  formatDate,
+  formatMeterCount,
+  formatPrice,
+  getOrderUnitLabel,
+  isPrintService,
+} from "../lib/serviceOrderUtils";
 
 const ServiceOrderKanbanCard = ({
   order,
@@ -7,6 +13,9 @@ const ServiceOrderKanbanCard = ({
   onSelectOrder,
   onQuickAdvanceStatus,
 }) => {
+  const isPrint = isPrintService(order);
+  const unitLabel = getOrderUnitLabel(order);
+
   return (
     <div
       role="button"
@@ -33,9 +42,15 @@ const ServiceOrderKanbanCard = ({
         <h4 className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors group-hover:text-brand dark:text-white">
           {order.productName || "Sản phẩm may mặc"}
         </h4>
-        <p className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
-          {order.service?.serviceName || "Dịch vụ rập"}
-        </p>
+        <div className="mt-0.5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+          <span className="truncate">{order.service?.serviceName || "Dịch vụ"}</span>
+          <span className="shrink-0 font-medium text-slate-600 dark:text-slate-300">
+            {order.quantity || 1} {unitLabel}
+            {isPrint && order.meterCount
+              ? ` (${formatMeterCount(order.meterCount)}m)`
+              : ""}
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-xs dark:border-slate-800">
@@ -69,10 +84,23 @@ const ServiceOrderKanbanCard = ({
             e.stopPropagation();
             onQuickAdvanceStatus(order, "completed");
           }}
-          className="mt-1 flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-emerald-50 py-1 text-[11px] font-semibold text-emerald-600 transition-colors hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/40 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+          className={`mt-1 flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg py-1 text-[11px] font-semibold transition-colors ${
+            isPrint
+              ? "bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-600 dark:hover:text-white"
+              : "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/40 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+          }`}
         >
-          <span>Hoàn tất nghiệm thu</span>
-          <CheckCircle2 size={12} />
+          {isPrint ? (
+            <>
+              <span>Nhập số mét & Hoàn tất</span>
+              <Printer size={12} />
+            </>
+          ) : (
+            <>
+              <span>Hoàn tất nghiệm thu</span>
+              <CheckCircle2 size={12} />
+            </>
+          )}
         </button>
       )}
     </div>

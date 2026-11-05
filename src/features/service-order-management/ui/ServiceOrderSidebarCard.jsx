@@ -2,6 +2,7 @@ import {
   Calendar,
   CreditCard,
   ExternalLink,
+  Printer,
   ShieldCheck,
   User,
 } from "lucide-react";
@@ -9,15 +10,18 @@ import { Link } from "react-router-dom";
 import FilterSelect from "@/shared/ui/select/FilterSelect";
 import {
   formatDate,
+  formatMeterCount,
   formatPrice,
   getOrderStatusValue,
   getStatusInfo,
+  isPrintService,
   STATUS_SELECT_OPTIONS,
 } from "../lib/serviceOrderUtils";
 
 const ServiceOrderSidebarCard = ({
   order,
   onStatusChange,
+  onOpenPrintModal,
   updating = false,
   className = "",
 }) => {
@@ -25,6 +29,7 @@ const ServiceOrderSidebarCard = ({
 
   const currentStatus = getOrderStatusValue(order);
   const statusInfo = getStatusInfo(currentStatus);
+  const isPrint = isPrintService(order);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -58,8 +63,7 @@ const ServiceOrderSidebarCard = ({
             className="h-10 w-full"
           />
           <p className="text-[11px] text-slate-400">
-            Hệ thống sẽ tự động cập nhật tiến độ tương ứng trong quy trình thiết
-            kế.
+            Hệ thống sẽ tự động cập nhật tiến độ tương ứng trong quy trình xử lý.
           </p>
         </div>
       </div>
@@ -120,11 +124,23 @@ const ServiceOrderSidebarCard = ({
 
       {/* Payment & Financial Card */}
       <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
-          <CreditCard size={18} className="text-brand" />
-          <h3 className="font-heading text-sm font-bold tracking-tight text-slate-900 dark:text-white">
-            Giá trị đơn hàng
-          </h3>
+        <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <CreditCard size={18} className="text-brand" />
+            <h3 className="font-heading text-sm font-bold tracking-tight text-slate-900 dark:text-white">
+              Giá trị đơn hàng
+            </h3>
+          </div>
+          {isPrint && onOpenPrintModal && order.status !== "cancelled" && (
+            <button
+              type="button"
+              onClick={onOpenPrintModal}
+              className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-brand hover:underline"
+            >
+              <Printer size={13} />
+              <span>{order.meterCount ? "Sửa số mét" : "Nhập số mét"}</span>
+            </button>
+          )}
         </div>
 
         <div className="space-y-2.5 text-xs">
@@ -132,8 +148,35 @@ const ServiceOrderSidebarCard = ({
             <span>Đơn giá dịch vụ:</span>
             <span className="font-medium text-slate-800 dark:text-slate-200">
               {formatPrice(order.unitPrice)}
+              {isPrint ? " / mét" : ` / ${order.unitType || "mục"}`}
             </span>
           </div>
+
+          {isPrint ? (
+            <>
+              <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                <span>Số bản yêu cầu:</span>
+                <span className="font-medium text-slate-800 dark:text-slate-200">
+                  {order.quantity || 1} bản in
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                <span>Số mét in thực tế:</span>
+                <span className="font-bold text-brand">
+                  {order.meterCount
+                    ? `${formatMeterCount(order.meterCount)} mét`
+                    : "Chưa nhập (đo khi in)"}
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="flex justify-between text-slate-600 dark:text-slate-400">
+              <span>Số lượng:</span>
+              <span className="font-medium text-slate-800 dark:text-slate-200">
+                {order.quantity || 1} {order.unitType || "mục"}
+              </span>
+            </div>
+          )}
 
           {Number(order.discountAmount) > 0 && (
             <div className="flex justify-between text-rose-500">

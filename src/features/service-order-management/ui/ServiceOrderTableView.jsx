@@ -4,8 +4,11 @@ import EmptyState from "@/shared/ui/empty-state/EmptyState";
 import Pagination from "@/shared/ui/table/Pagination";
 import {
   formatDate,
+  formatMeterCount,
   formatPrice,
+  getOrderUnitLabel,
   getStatusInfo,
+  isPrintService,
   PAGE_SIZE,
 } from "../lib/serviceOrderUtils";
 
@@ -128,7 +131,14 @@ const ServiceOrderTableView = ({
                       {order.service?.serviceName || "Dịch vụ may mặc"}
                     </div>
                     <div className="text-[11px] text-slate-400">
-                      {order.service?.serviceCode || order.unitType || ""}
+                      <span>
+                        {order.quantity || 1} {getOrderUnitLabel(order)}
+                      </span>
+                      {isPrintService(order) && order.meterCount ? (
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                          {" "}• {formatMeterCount(order.meterCount)}m
+                        </span>
+                      ) : null}
                     </div>
                   </td>
 

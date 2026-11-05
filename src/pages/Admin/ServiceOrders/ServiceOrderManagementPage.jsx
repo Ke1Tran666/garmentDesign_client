@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 
 import {
   AdminServiceOrderDetailModal,
+  CompletePrintOrderModal,
   ServiceOrderKanbanView,
   ServiceOrderStatsCards,
   ServiceOrderTableView,
@@ -29,6 +30,10 @@ const ServiceOrderManagementPage = () => {
     totalPages,
     selectedOrder,
     setSelectedOrder,
+    printOrderToComplete,
+    setPrintOrderToComplete,
+    completingPrint,
+    confirmCompletePrintOrder,
     removingOrder,
     setRemovingOrder,
     removing,
@@ -182,6 +187,19 @@ const ServiceOrderManagementPage = () => {
           onStatusChange={() => {
             fetchOrders();
           }}
+        />
+      )}
+
+      {/* =========================================
+          COMPLETE PRINT ORDER MODAL
+          ========================================= */}
+      {printOrderToComplete && (
+        <CompletePrintOrderModal
+          open={Boolean(printOrderToComplete)}
+          order={printOrderToComplete}
+          onClose={() => setPrintOrderToComplete(null)}
+          onConfirm={confirmCompletePrintOrder}
+          submitting={completingPrint}
         />
       )}
 

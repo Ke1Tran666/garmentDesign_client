@@ -39,15 +39,20 @@ const StatCard = ({
         )}
       </div>
 
-      <div className="mt-2.5 flex items-baseline gap-2">
-        <span className="text-2xl font-black text-slate-900 dark:text-white">
-          {value ?? 0}
-        </span>
-        {badge}
-        {subtitle && (
-          <span className="text-[11px] font-medium text-slate-400">
-            {subtitle}
+      <div className="mt-2.5">
+        <div className="flex items-baseline gap-2">
+          <span className="text-2xl font-black text-slate-900 dark:text-white">
+            {value ?? 0}
           </span>
+          {badge}
+        </div>
+        {subtitle && (
+          <p
+            className="mt-1 text-[11px] font-medium text-slate-400 truncate"
+            title={typeof subtitle === "string" ? subtitle : undefined}
+          >
+            {subtitle}
+          </p>
         )}
       </div>
     </div>

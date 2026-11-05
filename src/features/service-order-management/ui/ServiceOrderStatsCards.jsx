@@ -1,4 +1,10 @@
-import { Clock3, Package, ShoppingBag, TrendingUp } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock3,
+  Package,
+  ShoppingBag,
+  TrendingUp,
+} from "lucide-react";
 import StatCard from "@/shared/ui/stats/StatCard";
 import { formatPrice } from "../lib/serviceOrderUtils";
 
@@ -6,7 +12,7 @@ const ServiceOrderStatsCards = ({ stats, onFilterStatus }) => {
   if (!stats) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
       {/* Total Orders */}
       <StatCard
         title="Tổng số đơn"
@@ -39,6 +45,17 @@ const ServiceOrderStatsCards = ({ stats, onFilterStatus }) => {
         onClick={() => onFilterStatus?.("active")}
       />
 
+      {/* Completed Orders */}
+      <StatCard
+        title="Đơn hoàn tất"
+        value={stats.completedCount}
+        subtitle="nghiệm thu & bàn giao"
+        icon={CheckCircle2}
+        iconColorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+        hoverBorderClass="hover:border-emerald-300"
+        onClick={() => onFilterStatus?.("completed")}
+      />
+
       {/* Total Revenue */}
       <StatCard
         title="Doanh thu từ đơn"
@@ -46,6 +63,7 @@ const ServiceOrderStatsCards = ({ stats, onFilterStatus }) => {
         subtitle="tổng giá trị thực tế"
         icon={TrendingUp}
         iconColorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+        className="col-span-2 lg:col-span-1"
       />
     </div>
   );

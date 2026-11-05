@@ -24,6 +24,7 @@ import { useFileUpload } from "@/shared/hooks/useFileUpload";
 import ProductImagePicker from "@/features/service-orders/ui/file-upload/ProductImagePicker";
 import AttachmentPicker from "@/features/service-orders/ui/file-upload/AttachmentPicker";
 import { useAuth } from "@/features/auth/model/useAuth";
+import { formatMeterCount, isPrintService } from "@/features/service-order-management";
 
 const EMPTY_VALUE = "Chưa có thông tin";
 
@@ -474,7 +475,8 @@ const ServiceOrderDetailModal = ({
 
   const orderCode = `ORD-${orderId}`;
 
-  const unitType = order.unitType || service.unitType || "";
+  const isPrint = isPrintService(order);
+  const unitType = isPrint ? "bản in" : (order.unitType || service.unitType || "");
 
   const currentProductImage =
     productImagePreview || resolveBackendUrl(order.productImage);
@@ -1592,7 +1594,9 @@ const ServiceOrderDetailModal = ({
                     </div>
 
                     <div className="flex justify-between gap-4">
-                      <dt className="text-sm text-text-subtle">Số lượng</dt>
+                      <dt className="text-sm text-text-subtle">
+                        {isPrint ? "Số bản in yêu cầu" : "Số lượng"}
+                      </dt>
 
                       <dd className="text-sm font-semibold">
                         {hasValue(order.quantity)
@@ -1600,6 +1604,15 @@ const ServiceOrderDetailModal = ({
                           : EMPTY_VALUE}
                       </dd>
                     </div>
+
+                    {isPrint && order.meterCount ? (
+                      <div className="flex justify-between gap-4">
+                        <dt className="text-sm text-text-subtle">Số mét đã in</dt>
+                        <dd className="text-sm font-bold text-brand">
+                          {formatMeterCount(order.meterCount)} mét
+                        </dd>
+                      </div>
+                    ) : null}
 
                     <div className="flex justify-between gap-4">
                       <dt className="text-sm text-text-subtle">Giảm giá</dt>

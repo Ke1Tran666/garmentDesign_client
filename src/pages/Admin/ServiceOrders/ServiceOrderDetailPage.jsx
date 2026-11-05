@@ -7,6 +7,7 @@ import {
   Copy,
   Download,
   Package,
+  Printer,
   RefreshCw,
   ShoppingBag,
   Trash2,
@@ -16,10 +17,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useNotification } from "@/app/providers/NotificationProvider";
 import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
 import {
+  CompletePrintOrderModal,
   formatDate,
+  formatMeterCount,
   formatPrice,
   getOrderStatusValue,
   getStatusInfo,
+  isPrintService,
   ServiceOrderBasicInfoCard,
   ServiceOrderSidebarCard,
 } from "@/features/service-order-management";
@@ -36,6 +40,10 @@ const ServiceOrderDetailPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [updating, setUpdating] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  // Complete Print Order Modal
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [printSubmitting, setPrintSubmitting] = useState(false);
 
   // Delete modal
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -130,14 +138,23 @@ const ServiceOrderDetailPage = () => {
     }
   };
 
+  const isPrint = isPrintService(order);
+
   const handleStatusChange = async (newStatus) => {
     if (!order) return;
+
+    // Nếu là dịch vụ in sơ đồ/in rập và chuyển sang hoàn tất -> mở modal nhập số mét
+    if (newStatus === "completed" && isPrint) {
+      setPrintModalOpen(true);
+      return;
+    }
+
     try {
       setUpdating(true);
-      await serviceOrderApi.updateByAdmin(order.serviceOrderId, {
+      const updated = await serviceOrderApi.updateByAdmin(order.serviceOrderId, {
         status: newStatus,
       });
-      setOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
+      setOrder(updated || { ...order, status: newStatus });
       showNotification({
         type: "success",
         title: "Cập nhật tiến trình",
@@ -162,6 +179,41 @@ const ServiceOrderDetailPage = () => {
     }
   };
 
+  // Confirm Complete Print with actual meters
+  const handleConfirmPrintComplete = async ({ meterCount, totalPrice }) => {
+    if (!order) return;
+    try {
+      setPrintSubmitting(true);
+      const updated = await serviceOrderApi.updateByAdmin(order.serviceOrderId, {
+        status: "completed",
+        meterCount,
+        totalPrice,
+      });
+      setOrder(
+        updated || {
+          ...order,
+          status: "completed",
+          meterCount,
+          totalPrice,
+        },
+      );
+      setPrintModalOpen(false);
+      showNotification({
+        type: "success",
+        title: "Hoàn tất in đơn hàng",
+        message: `Đơn ORD-${order.serviceOrderId} đã hoàn tất với ${formatMeterCount(meterCount)} mét in (Tổng tiền: ${formatPrice(totalPrice)}).`,
+      });
+    } catch {
+      showNotification({
+        type: "error",
+        title: "Thất bại",
+        message: "Không thể cập nhật số mét và hoàn tất đơn hàng.",
+      });
+    } finally {
+      setPrintSubmitting(false);
+    }
+  };
+
   const handleExport = () => {
     if (!order) return;
     const exportData = [
@@ -172,7 +224,10 @@ const ServiceOrderDetailPage = () => {
         "Mã khách hàng": order.user?.userCode || "---",
         "Sản phẩm / Mẫu": order.productName || "---",
         "Dịch vụ": order.service?.serviceName || "---",
-        "Số lượng": `${order.quantity || 1} ${order.unitType || "mục"}`,
+        "Số lượng yêu cầu": `${order.quantity || 1} ${isPrint ? "bản in" : order.unitType || "mục"}`,
+        "Số mét in thực tế": order.meterCount
+          ? `${formatMeterCount(order.meterCount)} mét`
+          : "---",
         "Tổng tiền": formatPrice(order.totalPrice),
         "Trạng thái": getStatusInfo(order).label,
         "Ngày tạo": formatDate(order.createdAt, true),
@@ -282,15 +337,27 @@ const ServiceOrderDetailPage = () => {
           )}
 
           {currentStatus === "active" && (
-            <button
-              type="button"
-              disabled={updating}
-              onClick={() => handleStatusChange("completed")}
-              className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-emerald-500"
-            >
-              <CheckCircle2 size={14} />
-              <span>Hoàn tất nghiệm thu</span>
-            </button>
+            isPrint ? (
+              <button
+                type="button"
+                disabled={updating}
+                onClick={() => setPrintModalOpen(true)}
+                className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-emerald-500"
+              >
+                <Printer size={14} />
+                <span>Nhập số mét & Hoàn tất</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={updating}
+                onClick={() => handleStatusChange("completed")}
+                className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-emerald-500"
+              >
+                <CheckCircle2 size={14} />
+                <span>Hoàn tất nghiệm thu</span>
+              </button>
+            )
           )}
 
           <button
@@ -376,6 +443,14 @@ const ServiceOrderDetailPage = () => {
                 <span className="font-semibold text-brand">
                   {order.service?.serviceName || "Dịch vụ rập"}
                 </span>{" "}
+                {isPrint && order.meterCount ? (
+                  <>
+                    • Đã in:{" "}
+                    <span className="font-bold text-brand">
+                      {formatMeterCount(order.meterCount)} mét
+                    </span>{" "}
+                  </>
+                ) : null}
                 • Tổng giá trị:{" "}
                 <span className="font-extrabold text-brand">
                   {formatPrice(order.totalPrice)}
@@ -389,15 +464,29 @@ const ServiceOrderDetailPage = () => {
       {/* Unified Content Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left 2 Cols: Main Info Card */}
-        <ServiceOrderBasicInfoCard order={order} className="lg:col-span-2" />
+        <ServiceOrderBasicInfoCard
+          order={order}
+          onOpenPrintModal={() => setPrintModalOpen(true)}
+          className="lg:col-span-2"
+        />
 
         {/* Right Col: Sidebar Card */}
         <ServiceOrderSidebarCard
           order={order}
           onStatusChange={handleStatusChange}
+          onOpenPrintModal={() => setPrintModalOpen(true)}
           updating={updating}
         />
       </div>
+
+      {/* Complete Print Order Modal (Nhập số mét in thực tế) */}
+      <CompletePrintOrderModal
+        open={printModalOpen}
+        order={order}
+        onClose={() => setPrintModalOpen(false)}
+        onConfirm={handleConfirmPrintComplete}
+        submitting={printSubmitting}
+      />
 
       {/* Confirm Delete Modal */}
       <ConfirmModal

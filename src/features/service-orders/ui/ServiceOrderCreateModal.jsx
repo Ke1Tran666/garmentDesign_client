@@ -16,6 +16,7 @@ import ProductImagePicker from "@/features/service-orders/ui/file-upload/Product
 import AttachmentPicker from "@/features/service-orders/ui/file-upload/AttachmentPicker";
 import { useAuth } from "@/features/auth/model/useAuth";
 import FormSelect from "@/shared/ui/select/FormSelect";
+import { getOrderUnitLabel, isPrintService } from "@/features/service-order-management";
 
 const initialForm = {
   serviceId: "",
@@ -136,6 +137,8 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
       ),
     [services, form.serviceId],
   );
+
+  const isPrint = useMemo(() => isPrintService(selectedService), [selectedService]);
 
   const quantity = Number(form.quantity);
 
@@ -496,7 +499,7 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
                       htmlFor="quantity"
                       className="mb-2 block text-xs font-semibold tracking-wide text-text-muted uppercase"
                     >
-                      Số lượng
+                      {isPrint ? "Số bản in cần in" : "Số lượng"}
                     </label>
 
                     <div className="flex overflow-hidden rounded-xl border border-border focus-within:border-brand focus-within:ring-4 focus-within:ring-brand/10">
@@ -504,19 +507,24 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
                         id="quantity"
                         type="number"
                         name="quantity"
-                        min="0.01"
-                        step="0.01"
+                        min={isPrint ? "1" : "0.01"}
+                        step={isPrint ? "1" : "0.01"}
                         value={form.quantity}
                         onChange={handleChange}
                         disabled={submitting || Boolean(createdOrder)}
-                        placeholder="Nhập số lượng"
+                        placeholder={isPrint ? "Ví dụ: 1 hoặc 2 bản in" : "Nhập số lượng"}
                         className="h-12 min-w-0 flex-1 px-3.5 text-sm text-text-default outline-none disabled:bg-surface-subtle"
                       />
 
                       <span className="flex items-center border-l border-border bg-surface-subtle px-3 text-xs font-semibold text-text-muted">
-                        {selectedService?.unitType || "Đơn vị"}
+                        {getOrderUnitLabel(selectedService)}
                       </span>
                     </div>
+                    {isPrint && (
+                      <p className="mt-1 text-[11px] text-text-muted">
+                        * Số lượng bản in bạn cần in. Phí in sẽ được tính theo số mét thực tế khi in xong.
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -664,20 +672,20 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
                     <div className="flex items-start justify-between gap-5">
                       <div>
                         <p className="text-xs font-semibold tracking-wide text-text-subtle uppercase">
-                          Đơn giá
+                          Đơn giá {isPrint ? "theo mét" : ""}
                         </p>
 
                         <p className="mt-2 text-base font-bold">
                           {formatCurrency(selectedService.basePrice)}
                           <span className="ml-1 text-xs font-normal text-text-subtle">
-                            / {selectedService.unitType || "đơn vị"}
+                            / {isPrint ? "mét" : getOrderUnitLabel(selectedService)}
                           </span>
                         </p>
                       </div>
 
                       <div className="text-right">
                         <p className="text-xs font-semibold tracking-wide text-text-subtle uppercase">
-                          Tạm tính
+                          {isPrint ? "Tạm tính (ước tính)" : "Tạm tính"}
                         </p>
 
                         <p className="mt-2 text-xl font-bold">
@@ -685,6 +693,12 @@ const ServiceOrderCreateModal = ({ open, onClose, onCreated }) => {
                         </p>
                       </div>
                     </div>
+
+                    {isPrint && (
+                      <p className="mt-3 border-t border-white/10 pt-2 text-[11px] text-amber-300">
+                        * Chi phí chính xác của dịch vụ in sơ đồ/in rập sẽ được xưởng tính theo số mét in thực tế sau khi in xong.
+                      </p>
+                    )}
                   </div>
                 )}
 

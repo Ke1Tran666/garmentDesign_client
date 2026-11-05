@@ -51,6 +51,15 @@ export const serviceOrderApi = {
     return response.data;
   },
 
+  async updateByAdmin(orderId, payload) {
+    const response = await httpClient.patch(
+      `/service-orders/${orderId}`,
+      payload,
+    );
+
+    return response.data;
+  },
+
   async removeByAdmin(orderId, config = {}) {
     await httpClient.delete(`/service-orders/${orderId}`, config);
   },

@@ -134,7 +134,9 @@ const ServiceOrderDetailPage = () => {
     if (!order) return;
     try {
       setUpdating(true);
-      await serviceOrderApi.update(order.serviceOrderId, { status: newStatus });
+      await serviceOrderApi.updateByAdmin(order.serviceOrderId, {
+        status: newStatus,
+      });
       setOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
       showNotification({
         type: "success",

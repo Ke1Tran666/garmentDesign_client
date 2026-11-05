@@ -82,7 +82,9 @@ const AdminServiceOrderDetailModal = ({
   const handleUpdateStatus = async (newStatus) => {
     try {
       setUpdating(true);
-      await serviceOrderApi.update(order.serviceOrderId, { status: newStatus });
+      await serviceOrderApi.updateByAdmin(order.serviceOrderId, {
+        status: newStatus,
+      });
       setOverrideStatus(newStatus);
       onStatusChange?.(order.serviceOrderId, newStatus);
       showNotification({

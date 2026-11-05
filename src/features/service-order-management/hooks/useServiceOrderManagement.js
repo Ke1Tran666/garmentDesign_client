@@ -168,7 +168,7 @@ export const useServiceOrderManagement = (searchKeyword = "") => {
   // Fast status transition in Kanban
   const handleQuickAdvanceStatus = async (order, targetStatus) => {
     try {
-      await serviceOrderApi.update(order.serviceOrderId, {
+      await serviceOrderApi.updateByAdmin(order.serviceOrderId, {
         status: targetStatus,
       });
       setOrders((prev) =>

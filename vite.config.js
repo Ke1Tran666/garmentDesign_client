@@ -17,6 +17,40 @@ export default defineConfig({
     setupFiles: "./src/test/setup.js",
   },
 
+  build: {
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("react") || id.includes("react-dom") || id.includes("react-router-dom")) {
+              return "vendor-react";
+            }
+            if (id.includes("apexcharts") || id.includes("react-apexcharts")) {
+              return "vendor-charts";
+            }
+            if (id.includes("lucide-react") || id.includes("hugeicons") || id.includes("react-icons")) {
+              return "vendor-icons";
+            }
+            if (id.includes("motion")) {
+              return "vendor-motion";
+            }
+            if (id.includes("@dnd-kit")) {
+              return "vendor-dnd";
+            }
+            if (id.includes("xlsx")) {
+              return "vendor-xlsx";
+            }
+            if (id.includes("axios")) {
+              return "vendor-axios";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
+
   server: {
     host: true,
     allowedHosts: true,

@@ -4,7 +4,7 @@ import { BASE_URL_API } from "@/shared/config/apiConfig";
 
 const httpClient = axios.create({
   baseURL: BASE_URL_API,
-  timeout: 30000,
+  timeout: 10000,
 
   // Gửi JSESSIONID tới backend.
   withCredentials: true,

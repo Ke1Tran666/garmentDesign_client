@@ -86,6 +86,15 @@ const getOrderStatus = (order) => {
     };
   }
 
+  if (status === "completed") {
+    return {
+      code: "completed",
+      label: "Hoàn tất",
+      progress: 100,
+      className: "bg-success-soft text-success",
+    };
+  }
+
   return {
     code: status,
     label: "Không xác định",

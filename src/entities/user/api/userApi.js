@@ -1,4 +1,7 @@
+import { cacheManager } from "@/shared/api/cacheManager";
 import httpClient from "@/shared/api/httpClient";
+
+const CACHE_TTL = 10000;
 
 export const userApi = {
   async getMe(config = {}) {
@@ -14,6 +17,7 @@ export const userApi = {
   },
 
   async updateById(userId, payload) {
+    cacheManager.invalidate("users");
     const response = await httpClient.put(`/users/${userId}`, payload);
 
     return response.data;
@@ -96,27 +100,41 @@ export const userApi = {
 
     return response.data;
   },
+
   async getAll(config = {}) {
+    const cacheKey = "users:all";
+    if (!config.forceRefresh) {
+      const cached = cacheManager.get(cacheKey);
+      if (cached) return cached;
+    }
+
     const response = await httpClient.get("/users", config);
+    cacheManager.set(cacheKey, response.data, CACHE_TTL);
+
     return response.data;
   },
 
   async create(payload) {
+    cacheManager.invalidate("users");
     const response = await httpClient.post("/users", payload);
+
     return response.data;
   },
 
   async remove(userId) {
+    cacheManager.invalidate("users");
     await httpClient.delete(`/users/${userId}`);
   },
 
   async updatePhoneById(userId, phone) {
+    cacheManager.invalidate("users");
     const response = await httpClient.put(`/users/${userId}/phone`, { phone });
 
     return response.data;
   },
 
   async updateRole(userId, roleId) {
+    cacheManager.invalidate("users");
     const response = await httpClient.put(`/users/${userId}/role`, { roleId });
 
     return response.data;

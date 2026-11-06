@@ -50,20 +50,20 @@ export const AdminSidebar = ({
       </div>
 
       {/* Sidebar Footer */}
-      <div className="flex flex-col gap-2.5 border-t border-slate-100 pt-4 dark:border-slate-800">
+      <div className="flex flex-col gap-2 border-t border-slate-100 pt-3.5 dark:border-slate-800">
         {!isCollapsed && (
-          <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-700/50 dark:bg-slate-800/50">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <span className="relative flex h-2.5 w-2.5">
+          <div className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/70 px-3 py-2 text-xs transition-colors dark:border-slate-800 dark:bg-slate-850/50">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="relative flex h-2 w-2 shrink-0">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
               <span className="truncate text-xs font-medium text-slate-600 dark:text-slate-300">
                 Hệ thống hoạt động
               </span>
             </div>
-            <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
-              99.9%
+            <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+              Trực tuyến
             </span>
           </div>
         )}

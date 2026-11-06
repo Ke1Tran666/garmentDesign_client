@@ -1,5 +1,13 @@
 import { LogOut } from "lucide-react";
+import { normalizeRole } from "@/features/auth/lib/authRole";
 import AdminUserAvatar from "./AdminUserAvatar";
+
+const getRoleLabel = (role) => {
+  const normalized = normalizeRole(role);
+  if (normalized === "admin") return "Quản trị viên";
+  if (normalized === "staff") return "Nhân viên";
+  return "Quản trị viên";
+};
 
 export const AdminUserProfile = ({
   user,
@@ -8,7 +16,7 @@ export const AdminUserProfile = ({
   variant = "sidebar",
 }) => {
   const displayName = user?.fullName || user?.userCode || "Administrator";
-  const email = user?.email || "admin@garment.vn";
+  const roleLabel = getRoleLabel(user?.role || user?.roleName);
 
   if (isCollapsed) {
     return (
@@ -42,9 +50,14 @@ export const AdminUserProfile = ({
             size="xs"
             className="rounded-lg"
           />
-          <span className="truncate text-xs font-semibold text-slate-800 dark:text-white">
-            {displayName}
-          </span>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-xs font-semibold text-slate-800 dark:text-white">
+              {displayName}
+            </div>
+            <div className="truncate text-[10px] font-medium text-slate-400 dark:text-slate-500">
+              {roleLabel}
+            </div>
+          </div>
         </div>
         <button
           type="button"
@@ -70,7 +83,9 @@ export const AdminUserProfile = ({
         <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
           {displayName}
         </div>
-        <div className="truncate text-[11px] text-slate-400">{email}</div>
+        <div className="truncate text-[11px] font-medium text-slate-400 dark:text-slate-500">
+          {roleLabel}
+        </div>
       </div>
       <button
         type="button"

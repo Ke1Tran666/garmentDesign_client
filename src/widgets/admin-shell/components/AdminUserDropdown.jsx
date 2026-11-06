@@ -26,7 +26,6 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
   useClickOutside(containerRef, () => setIsOpen(false), isOpen);
 
   const displayName = user?.fullName || user?.userCode || "Administrator";
-  const email = user?.email || "admin@garment.vn";
   const roleLabel = getRoleLabel(user?.role || user?.roleName);
 
   const handleLogoutClick = () => {
@@ -59,7 +58,7 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
 
         {/* Name & Role Text Stack */}
         <div className="hidden min-w-0 flex-col text-left sm:flex">
-          <span className="max-w-[110px] truncate text-xs font-bold text-slate-800 group-hover:text-brand xl:max-w-[130px] dark:text-slate-100">
+          <span className="max-w-27.5 truncate text-xs font-bold text-slate-800 group-hover:text-brand xl:max-w-32.5 dark:text-slate-100">
             {displayName}
           </span>
           <span className="text-[10px] font-medium tracking-tight text-slate-400 dark:text-slate-500">
@@ -80,7 +79,7 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
 
       {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-64 animate-in rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl ring-1 ring-black/5 fade-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900">
+        <div className="absolute right-0 z-50 mt-2 w-60 animate-in rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl ring-1 ring-black/5 fade-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900">
           {/* Header Summary Card */}
           <div className="mb-2 flex items-center gap-3 rounded-xl bg-slate-50/80 p-2.5 dark:bg-slate-850/60">
             <AdminUserAvatar
@@ -94,11 +93,12 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
               <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
                 {displayName}
               </div>
-              <div className="truncate text-[11px] text-slate-400">{email}</div>
-              <span className="mt-1 inline-flex items-center gap-1 rounded-md bg-brand-soft px-1.5 py-0.5 text-[10px] font-semibold text-brand dark:bg-brand/20">
-                <ShieldCheck size={11} className="stroke-[2.5]" />
-                {roleLabel}
-              </span>
+              <div className="mt-1">
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-soft px-1.5 py-0.5 text-[10px] font-semibold text-brand dark:bg-brand/20">
+                  <ShieldCheck size={11} className="stroke-[2.5]" />
+                  {roleLabel}
+                </span>
+              </div>
             </div>
           </div>
 

@@ -73,7 +73,7 @@ export const AdminUserAvatar = ({
     <div className={`relative inline-flex shrink-0 ${currentSize.box}`}>
       {!imageSrc || isFailed ? (
         <div
-          className={`flex h-full w-full select-none items-center justify-center rounded-xl bg-gradient-to-tr from-brand to-sky-400 font-bold tracking-wider text-white shadow-2xs ${currentSize.text} ${ringStyle} ${className}`}
+          className={`flex h-full w-full select-none items-center justify-center rounded-xl bg-linear-to-tr from-brand to-sky-400 font-bold tracking-wider text-white shadow-2xs ${currentSize.text} ${ringStyle} ${className}`}
           title={name}
         >
           {initials}

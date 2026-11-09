@@ -75,7 +75,8 @@ export const useAdminDashboard = () => {
         type: "error",
         title: "Lỗi đồng bộ dữ liệu",
         message:
-          err.response?.data?.message || "Không thể tải dữ liệu bảng điều khiển.",
+          err.response?.data?.message ||
+          "Không thể tải dữ liệu bảng điều khiển.",
       });
     } finally {
       setRefreshing(false);
@@ -437,13 +438,14 @@ export const useAdminDashboard = () => {
 
     users.forEach((u) => {
       if (u.createdAt) {
+        const userId = u.idUser || u.userId;
         items.push({
-          id: `user-${u.userId}`,
+          id: `user-${userId || u.userCode || u.createdAt}`,
           timestamp: new Date(u.createdAt).getTime(),
           title: "Khách hàng mới đăng ký tài khoản",
-          desc: `Tài khoản ${u.fullName || u.email} đã gia nhập hệ thống.`,
+          desc: `Tài khoản ${u.fullName || u.email || u.userCode || "người dùng"} đã gia nhập hệ thống.`,
           isUser: true,
-          link: `/admin/users/${u.userId}`,
+          link: userId ? `/admin/users/${userId}` : "/admin/users",
         });
       }
     });
@@ -458,7 +460,7 @@ export const useAdminDashboard = () => {
       "Mã đơn": `ORD-${o.serviceOrderId}`,
       "Khách hàng": o.user?.fullName || "Khách vãng lai",
       "Số điện thoại": o.user?.phone || "---",
-      "Email": o.user?.email || "---",
+      Email: o.user?.email || "---",
       "Dịch vụ": o.service?.serviceName || "---",
       "Sản phẩm / Mẫu": o.productName || "---",
       "Ngày tạo": formatDate(o.createdAt, true),
@@ -476,7 +478,8 @@ export const useAdminDashboard = () => {
       showNotification({
         type: "success",
         title: "Xuất dữ liệu thành công",
-        message: "Tệp Excel báo cáo số liệu đơn hàng đã được tải về máy của bạn.",
+        message:
+          "Tệp Excel báo cáo số liệu đơn hàng đã được tải về máy của bạn.",
       });
     }
   }, [orders, showNotification]);

@@ -11,14 +11,24 @@ export const userApi = {
   },
 
   async getById(userId, config = {}) {
-    const response = await httpClient.get(`/users/${userId}`, config);
+    const cacheKey = `users:${userId}`;
+    if (!config.forceRefresh) {
+      const cached = cacheManager.get(cacheKey);
+      if (cached) return cached;
+    }
+
+    const requestConfig = { ...config };
+    delete requestConfig.forceRefresh;
+
+    const response = await httpClient.get(`/users/${userId}`, requestConfig);
+    cacheManager.set(cacheKey, response.data, CACHE_TTL);
 
     return response.data;
   },
 
   async updateById(userId, payload) {
-    cacheManager.invalidate("users");
     const response = await httpClient.put(`/users/${userId}`, payload);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -29,18 +39,21 @@ export const userApi = {
     formData.append("file", file);
 
     const response = await httpClient.put(`/users/${userId}/avatar`, formData);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async removeAvatarById(userId) {
     const response = await httpClient.delete(`/users/${userId}/avatar`);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async update(payload) {
     const response = await httpClient.put("/users/me", payload);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -53,12 +66,14 @@ export const userApi = {
 
   async removeAvatar() {
     const response = await httpClient.delete("/users/me/avatar");
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async uploadAvatar(formData) {
     const response = await httpClient.put("/users/me/avatar", formData);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -71,6 +86,7 @@ export const userApi = {
 
   async deleteAccount() {
     const response = await httpClient.delete("/users/me/delete-account");
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -85,18 +101,21 @@ export const userApi = {
     const response = await httpClient.post("/auth/me/email/verify-otp", {
       otp,
     });
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async removeEmailVerification() {
     const response = await httpClient.delete("/auth/me/email/verification");
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async deletePhone(providerId) {
     const response = await httpClient.delete(`/users/me/phone/${providerId}`);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -108,34 +127,37 @@ export const userApi = {
       if (cached) return cached;
     }
 
-    const response = await httpClient.get("/users", config);
+    const requestConfig = { ...config };
+    delete requestConfig.forceRefresh;
+
+    const response = await httpClient.get("/users", requestConfig);
     cacheManager.set(cacheKey, response.data, CACHE_TTL);
 
     return response.data;
   },
 
   async create(payload) {
-    cacheManager.invalidate("users");
     const response = await httpClient.post("/users", payload);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async remove(userId) {
-    cacheManager.invalidate("users");
     await httpClient.delete(`/users/${userId}`);
+    cacheManager.invalidate("users");
   },
 
   async updatePhoneById(userId, phone) {
-    cacheManager.invalidate("users");
     const response = await httpClient.put(`/users/${userId}/phone`, { phone });
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async updateRole(userId, roleId) {
-    cacheManager.invalidate("users");
     const response = await httpClient.put(`/users/${userId}/role`, { roleId });
+    cacheManager.invalidate("users");
 
     return response.data;
   },

@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import { Camera, Trash2, UserRound } from "lucide-react";
 
 const AvatarPicker = ({
@@ -18,6 +18,10 @@ const AvatarPicker = ({
 }) => {
   const generatedId = useId();
   const inputId = `avatar-picker-${generatedId}`;
+  const [failedSrc, setFailedSrc] = useState(null);
+
+  const imageSource = preview || fallback;
+  const isImageBroken = Boolean(imageSource) && failedSrc === imageSource;
 
   const handleChange = (event) => {
     const file = event.target.files?.[0];
@@ -33,15 +37,14 @@ const AvatarPicker = ({
   };
 
   if (variant === "compact") {
-    const imageSource = preview || fallback;
-
     return (
       <div className="relative h-12 w-12 shrink-0">
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-sm font-semibold text-text-muted">
-          {imageSource ? (
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-linear-to-tr from-brand to-sky-400 text-sm font-bold text-white shadow-2xs">
+          {imageSource && !isImageBroken ? (
             <img
               src={imageSource}
               alt={alt}
+              onError={() => setFailedSrc(imageSource)}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -97,16 +100,22 @@ const AvatarPicker = ({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative shrink-0">
           <div className="flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface text-xl font-semibold text-text-muted">
-            <img
-              src={preview || fallback}
-              alt={alt}
-              className="h-full w-full object-cover"
-              onError={(event) => {
-                if (fallback) {
-                  event.currentTarget.src = fallback;
-                }
-              }}
-            />
+            {imageSource && !isImageBroken ? (
+              <img
+                src={imageSource}
+                alt={alt}
+                className="h-full w-full object-cover"
+                onError={() => {
+                  if (fallback && imageSource !== fallback) {
+                    setFailedSrc(null);
+                  } else {
+                    setFailedSrc(imageSource);
+                  }
+                }}
+              />
+            ) : (
+              initials
+            )}
           </div>
 
           <span className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-lg border-2 border-surface bg-brand text-white">

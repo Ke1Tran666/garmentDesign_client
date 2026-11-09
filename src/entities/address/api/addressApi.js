@@ -1,3 +1,4 @@
+import { cacheManager } from "@/shared/api/cacheManager";
 import httpClient from "@/shared/api/httpClient";
 
 export const addressApi = {
@@ -9,6 +10,7 @@ export const addressApi = {
 
   async create(payload) {
     const response = await httpClient.post("/user-addresses/me", payload);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -18,12 +20,14 @@ export const addressApi = {
       `/user-addresses/me/${addressId}`,
       payload,
     );
+    cacheManager.invalidate("users");
 
     return response.data;
   },
 
   async remove(addressId) {
     const response = await httpClient.delete(`/user-addresses/me/${addressId}`);
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -32,6 +36,7 @@ export const addressApi = {
     const response = await httpClient.put(
       `/user-addresses/me/default/${addressId}`,
     );
+    cacheManager.invalidate("users");
 
     return response.data;
   },
@@ -41,6 +46,7 @@ export const addressApi = {
       `/user-addresses/users/${userId}`,
       payload,
     );
+    cacheManager.invalidate("users");
 
     return response.data;
   },

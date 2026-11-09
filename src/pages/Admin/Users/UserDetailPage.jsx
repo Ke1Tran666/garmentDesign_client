@@ -1,32 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AlertCircle, ArrowLeft, RefreshCw, Trash2 } from "lucide-react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import { useNotification } from "@/app/providers/NotificationProvider";
 import { userApi } from "@/entities/user/api/userApi";
 import { normalizeRole } from "@/features/auth/lib/authRole";
-import UserDetailContent from "@/features/user-management/ui/UserDetailContent";
-import UserDetailSidebar from "@/features/user-management/ui/UserDetailSidebar";
 import {
+  UserDetailContent,
+  UserDetailSidebar,
   createRecentActivities,
-  getInitials,
   getProviderInfo,
   getRoleName,
   getStatusInfo,
   normalizeUserDetail,
-} from "@/features/user-management/lib/userDetail";
+} from "@/features/user-management";
 import AdminDetailLayout from "@/shared/ui/admin-detail/AdminDetailLayout";
+import UserAvatar from "@/shared/ui/avatar/UserAvatar";
 import AdminActionMenu from "@/shared/ui/menu/AdminActionMenu";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { DetailPageSkeleton } from "@/shared/ui/skeleton";
 
 const UserDetailPage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { adminUser } = useOutletContext();
+  const { adminUser } = useOutletContext() || {};
   const { showNotification } = useNotification();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -68,33 +70,51 @@ const UserDetailPage = () => {
     };
   }, [userId]);
 
+  const handleRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      setErrorMessage("");
+      const data = await userApi.getById(userId, { forceRefresh: true });
+      setUser(normalizeUserDetail(data));
+      showNotification({
+        type: "success",
+        title: "Làm mới thành công",
+        message: "Thông tin người dùng đã được đồng bộ từ máy chủ.",
+      });
+    } catch (error) {
+      showNotification({
+        type: "error",
+        title: "Làm mới thất bại",
+        message:
+          error.response?.data?.message ||
+          "Không thể làm mới thông tin người dùng.",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  }, [userId, showNotification]);
+
   const activities = useMemo(() => createRecentActivities(user), [user]);
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-6 w-44 animate-pulse rounded bg-surface-muted" />
-        <div className="h-24 animate-pulse rounded-2xl bg-surface-muted" />
-        <div className="h-72 animate-pulse rounded-2xl bg-surface-muted" />
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (errorMessage || !user) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 rounded-3xl border border-rose-200 bg-rose-50/60 p-8 text-center dark:border-rose-900/60 dark:bg-rose-950/30">
+        <AlertCircle size={36} className="mx-auto text-rose-500" />
+        <h3 className="font-heading text-lg font-bold text-rose-800 dark:text-rose-300">
+          {errorMessage || "Không tìm thấy người dùng."}
+        </h3>
         <button
           type="button"
           onClick={() => navigate("/admin/users")}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted transition hover:text-brand"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
-          <ArrowLeft size={18} />
-          Quay lại Người dùng
+          <ArrowLeft size={14} />
+          <span>Về danh sách người dùng</span>
         </button>
-
-        <div className="rounded-2xl border border-danger-border bg-danger-soft p-6 text-danger">
-          {errorMessage || "Không tìm thấy người dùng."}
-        </div>
       </div>
     );
   }
@@ -142,11 +162,11 @@ const UserDetailPage = () => {
 
       await userApi.remove(user.idUser);
 
-      showNotification(
-        "success",
-        "Đã xóa người dùng",
-        "Tài khoản đã bị vô hiệu hóa.",
-      );
+      showNotification({
+        type: "success",
+        title: "Đã xóa người dùng",
+        message: "Tài khoản đã bị vô hiệu hóa.",
+      });
 
       navigate("/admin/users", {
         replace: true,
@@ -185,17 +205,12 @@ const UserDetailPage = () => {
         subtitle={loginEmailProvider?.email}
         onBack={() => navigate("/admin/users")}
         leading={
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-soft text-sm font-semibold text-brand">
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.fullName || "Người dùng"}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              getInitials(user.fullName)
-            )}
-          </div>
+          <UserAvatar
+            src={user.avatar}
+            name={user.fullName || user.userCode}
+            size="lg"
+            showStatus={status.code === "active"}
+          />
         }
         badges={
           <>
@@ -219,7 +234,26 @@ const UserDetailPage = () => {
             ))}
           </>
         }
-        actions={isAdmin ? <AdminActionMenu items={actionItems} /> : null}
+        actions={
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-surface-subtle px-3 text-xs font-semibold text-text-default transition hover:bg-surface-muted disabled:opacity-50"
+              title="Làm mới thông tin người dùng"
+            >
+              <RefreshCw
+                size={14}
+                className={
+                  refreshing ? "animate-spin text-brand" : "text-text-muted"
+                }
+              />
+              <span className="hidden sm:inline">Làm mới</span>
+            </button>
+            {isAdmin && <AdminActionMenu items={actionItems} />}
+          </div>
+        }
         sidebar={
           <UserDetailSidebar
             user={user}

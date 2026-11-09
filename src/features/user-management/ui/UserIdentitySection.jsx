@@ -14,17 +14,17 @@ import {
   AdminDetailInfoRow,
   AdminDetailSection,
 } from "@/shared/ui/admin-detail/AdminDetailLayout";
+import Select from "@/shared/ui/select/Select";
 import AvatarPicker from "@/shared/ui/upload/AvatarPicker";
 
+import { normalizeUserDetail } from "../lib/userDetail";
 import {
   EMPTY_VALUE,
   formatDate,
   formatGender,
   getInitials,
   getRoleName,
-  normalizeUserDetail,
-} from "../lib/userDetail";
-import Select from "@/shared/ui/select/Select";
+} from "../lib/userUtils";
 
 const createIdentityForm = (user, phone = "") => ({
   fullName: user?.fullName || "",
@@ -294,7 +294,9 @@ const UserIdentitySection = ({
         return;
       }
 
-      const refreshedData = await userApi.getById(user.idUser);
+      const refreshedData = await userApi.getById(user.idUser, {
+        forceRefresh: true,
+      });
       const refreshedUser = normalizeUserDetail(refreshedData);
 
       onUserChange(refreshedUser);

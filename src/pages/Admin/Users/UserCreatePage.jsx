@@ -9,16 +9,22 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
-  Sparkles,
   User,
   UserPlus,
   UserRound,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { useNotification } from "@/app/providers/NotificationProvider";
 import { roleApi } from "@/entities/user/api/roleApi";
 import { userApi } from "@/entities/user/api/userApi";
-import { useNotification } from "@/app/providers/NotificationProvider";
+import {
+  UserCreatePreviewCard,
+  getInitials,
+  getPasswordStrength,
+} from "@/features/user-management";
+import Select from "@/shared/ui/select/Select";
+import AvatarPicker from "@/shared/ui/upload/AvatarPicker";
 
 const EMPTY_FORM = {
   fullName: "",
@@ -31,35 +37,21 @@ const EMPTY_FORM = {
   roleId: "",
 };
 
-const getPasswordStrength = (pwd) => {
-  if (!pwd) return { score: 0, label: "Chưa nhập", color: "bg-slate-200" };
-  let score = 0;
-  if (pwd.length >= 8) score++;
-  if (/[A-Z]/.test(pwd)) score++;
-  if (/[0-9]/.test(pwd)) score++;
-  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+const GENDER_OPTIONS = [
+  { value: "Male", label: "Nam" },
+  { value: "Female", label: "Nữ" },
+  { value: "Unknown", label: "Chưa xác định" },
+];
 
-  if (score <= 1)
-    return {
-      score: 1,
-      label: "Yếu",
-      color: "bg-rose-500",
-      text: "text-rose-600",
-    };
-  if (score <= 3)
-    return {
-      score: 2,
-      label: "Trung bình",
-      color: "bg-amber-500",
-      text: "text-amber-600",
-    };
-  return {
-    score: 3,
-    label: "Mạnh",
-    color: "bg-emerald-500",
-    text: "text-emerald-600",
-  };
-};
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png"];
+
+const getInputClassName = (hasError) =>
+  `h-10 w-full rounded-xl border px-3.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:outline-hidden dark:bg-slate-800/60 dark:text-slate-100 ${
+    hasError
+      ? "border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
+      : "border-slate-200 bg-slate-50/50 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
+  }`;
 
 const UserCreatePage = () => {
   const navigate = useNavigate();
@@ -69,12 +61,23 @@ const UserCreatePage = () => {
   const [roles, setRoles] = useState([]);
   const [errors, setErrors] = useState({});
 
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
+
   const [rolesLoading, setRolesLoading] = useState(true);
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   useEffect(() => {
     let active = true;
@@ -115,6 +118,45 @@ const UserCreatePage = () => {
     setSubmitError("");
   };
 
+  const handleAvatarSelect = (file) => {
+    if (!file) return;
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      setErrors((prev) => ({
+        ...prev,
+        avatar: "Chỉ chấp nhận ảnh JPEG hoặc PNG.",
+      }));
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_BYTES) {
+      setErrors((prev) => ({
+        ...prev,
+        avatar: "Ảnh đại diện không được vượt quá 5 MB.",
+      }));
+      return;
+    }
+
+    if (avatarPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+    setErrors((prev) => ({ ...prev, avatar: "" }));
+    setSubmitError("");
+  };
+
+  const handleAvatarRemove = () => {
+    if (avatarPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
+    setAvatarFile(null);
+    setAvatarPreview("");
+    setErrors((prev) => ({ ...prev, avatar: "" }));
+  };
+
   const selectedRole = useMemo(() => {
     return roles.find((r) => String(r.idRole) === String(form.roleId));
   }, [roles, form.roleId]);
@@ -151,7 +193,9 @@ const UserCreatePage = () => {
       nextErrors.confirmPassword = "Mật khẩu xác nhận không khớp.";
     }
 
-    if (form.birthday) {
+    if (!form.birthday) {
+      nextErrors.birthday = "Ngày sinh không được để trống.";
+    } else {
       const birthday = new Date(`${form.birthday}T00:00:00`);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -192,16 +236,35 @@ const UserCreatePage = () => {
         email: form.email.trim().toLowerCase(),
         password: form.password,
         phone: form.phone.trim() || null,
-        birthday: form.birthday || null,
+        birthday: form.birthday,
         gender: form.gender,
         roleId: Number(form.roleId),
       });
 
-      showNotification({
-        type: "success",
-        title: "Tạo tài khoản thành công",
-        message: `Đã tạo tài khoản cho ${createdUser.fullName || form.fullName}.`,
-      });
+      let avatarWarning = "";
+      if (avatarFile && createdUser?.idUser) {
+        try {
+          await userApi.uploadAvatarById(createdUser.idUser, avatarFile);
+        } catch (avatarError) {
+          avatarWarning =
+            avatarError.response?.data?.message ||
+            "Tài khoản đã được tạo nhưng chưa thể tải ảnh đại diện lên. Bạn có thể cập nhật lại trong trang chi tiết.";
+        }
+      }
+
+      if (avatarWarning) {
+        showNotification({
+          type: "warning",
+          title: "Đã tạo tài khoản, ảnh đại diện chưa lưu",
+          message: avatarWarning,
+        });
+      } else {
+        showNotification({
+          type: "success",
+          title: "Tạo tài khoản thành công",
+          message: `Đã tạo tài khoản cho ${createdUser.fullName || form.fullName}.`,
+        });
+      }
 
       navigate(`/admin/users/${createdUser.idUser}`, { replace: true });
     } catch (error) {
@@ -258,6 +321,32 @@ const UserCreatePage = () => {
               </h2>
             </div>
 
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Ảnh đại diện{" "}
+                <span className="font-normal text-slate-400">
+                  (Không bắt buộc)
+                </span>
+              </label>
+              <AvatarPicker
+                variant="card"
+                preview={avatarPreview}
+                alt={form.fullName.trim() || "Ảnh đại diện tài khoản"}
+                title={form.fullName.trim() || "Ảnh đại diện tài khoản"}
+                hint="JPEG hoặc PNG, tối đa 5 MB. Có thể bỏ qua hoặc cập nhật sau."
+                initials={getInitials(form.fullName, "U")}
+                disabled={submitting}
+                removable={Boolean(avatarFile)}
+                onSelect={handleAvatarSelect}
+                onRemove={handleAvatarRemove}
+              />
+              {errors.avatar && (
+                <p className="mt-1.5 text-[11px] text-rose-600">
+                  {errors.avatar}
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -269,11 +358,7 @@ const UserCreatePage = () => {
                   value={form.fullName}
                   onChange={handleChange}
                   placeholder="Ví dụ: Nguyễn Văn An"
-                  className={`h-10 w-full rounded-xl border px-3.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:outline-hidden dark:bg-slate-800/60 dark:text-slate-100 ${
-                    errors.fullName
-                      ? "border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 bg-slate-50/50 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
-                  }`}
+                  className={getInputClassName(Boolean(errors.fullName))}
                 />
                 {errors.fullName && (
                   <p className="mt-1 text-[11px] text-rose-600">
@@ -292,11 +377,7 @@ const UserCreatePage = () => {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="user@garment.vn"
-                  className={`h-10 w-full rounded-xl border px-3.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:outline-hidden dark:bg-slate-800/60 dark:text-slate-100 ${
-                    errors.email
-                      ? "border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 bg-slate-50/50 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
-                  }`}
+                  className={getInputClassName(Boolean(errors.email))}
                 />
                 {errors.email && (
                   <p className="mt-1 text-[11px] text-rose-600">
@@ -315,11 +396,7 @@ const UserCreatePage = () => {
                   value={form.phone}
                   onChange={handleChange}
                   placeholder="0912 345 678"
-                  className={`h-10 w-full rounded-xl border px-3.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:outline-hidden dark:bg-slate-800/60 dark:text-slate-100 ${
-                    errors.phone
-                      ? "border-rose-300 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 bg-slate-50/50 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 dark:border-slate-700"
-                  }`}
+                  className={getInputClassName(Boolean(errors.phone))}
                 />
                 {errors.phone && (
                   <p className="mt-1 text-[11px] text-rose-600">
@@ -330,14 +407,14 @@ const UserCreatePage = () => {
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Ngày sinh
+                  Ngày sinh <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="date"
                   name="birthday"
                   value={form.birthday}
                   onChange={handleChange}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 text-xs text-slate-800 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                  className={getInputClassName(Boolean(errors.birthday))}
                 />
                 {errors.birthday && (
                   <p className="mt-1 text-[11px] text-rose-600">
@@ -350,16 +427,14 @@ const UserCreatePage = () => {
                 <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Giới tính
                 </label>
-                <select
+                <Select
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 text-xs text-slate-800 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
-                >
-                  <option value="Male">Nam</option>
-                  <option value="Female">Nữ</option>
-                  <option value="Unknown">Chưa xác định</option>
-                </select>
+                  options={GENDER_OPTIONS}
+                  ariaLabel="Giới tính"
+                  size="filter"
+                />
               </div>
             </div>
           </div>
@@ -470,12 +545,12 @@ const UserCreatePage = () => {
                     value={form.password}
                     onChange={handleChange}
                     placeholder="Tối thiểu 8 ký tự"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pr-10 pl-3.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                    className={`${getInputClassName(Boolean(errors.password))} pr-10`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-slate-600"
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -486,7 +561,6 @@ const UserCreatePage = () => {
                   </p>
                 )}
 
-                {/* Password strength indicator */}
                 {form.password && (
                   <div className="mt-2 space-y-1">
                     <div className="flex items-center justify-between text-[10px]">
@@ -533,12 +607,12 @@ const UserCreatePage = () => {
                     value={form.confirmPassword}
                     onChange={handleChange}
                     placeholder="Nhập lại mật khẩu"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/50 pr-10 pl-3.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+                    className={`${getInputClassName(Boolean(errors.confirmPassword))} pr-10`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-slate-600"
                   >
                     {showConfirmPassword ? (
                       <EyeOff size={15} />
@@ -567,7 +641,7 @@ const UserCreatePage = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-hover disabled:opacity-50"
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-brand! px-6 py-2.5 text-xs font-semibold text-white! shadow-xs transition-colors hover:bg-brand-hover! disabled:opacity-50"
             >
               {submitting ? (
                 <>
@@ -585,65 +659,15 @@ const UserCreatePage = () => {
         </form>
 
         {/* Right Column: Live Profile Preview Card */}
-        <div className="space-y-6">
-          <div className="sticky top-24 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-              <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
-                Xem trước hồ sơ
-              </span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand">
-                <Sparkles size={13} />
-                Thời gian thực
-              </span>
-            </div>
-
-            <div className="flex flex-col items-center pt-6 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-linear-to-tr from-brand to-sky-400 font-heading text-2xl font-black text-white shadow-lg shadow-brand/20">
-                {form.fullName ? form.fullName.charAt(0).toUpperCase() : "U"}
-              </div>
-
-              <h3 className="mt-4 font-heading text-base font-extrabold text-slate-900 dark:text-white">
-                {form.fullName || "Tên người dùng mới"}
-              </h3>
-              <p className="mt-0.5 max-w-full truncate text-xs text-slate-400">
-                {form.email || "email@garment.vn"}
-              </p>
-
-              <div className="mt-3">
-                <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-3 py-1 text-xs font-bold text-brand dark:bg-brand/20">
-                  <ShieldCheck size={14} />
-                  {selectedRole?.nameRole || "Chưa chọn vai trò"}
-                </span>
-              </div>
-
-              <div className="mt-6 w-full space-y-2.5 border-t border-slate-100 pt-4 text-left text-xs dark:border-slate-800">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Số điện thoại:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">
-                    {form.phone || "Chưa nhập"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Giới tính:</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">
-                    {form.gender === "Male"
-                      ? "Nam"
-                      : form.gender === "Female"
-                        ? "Nữ"
-                        : "Chưa xác định"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Trạng thái:</span>
-                  <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Kích hoạt ngay
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <UserCreatePreviewCard
+          avatar={avatarPreview}
+          fullName={form.fullName}
+          email={form.email}
+          phone={form.phone}
+          birthday={form.birthday}
+          gender={form.gender}
+          selectedRole={selectedRole}
+        />
       </div>
     </div>
   );

@@ -44,12 +44,6 @@ export const NAV_GROUPS = [
         sublabel: "Khách hàng & nhân sự",
         icon: Users,
       },
-      {
-        path: "/admin/users/create",
-        label: "Thêm tài khoản",
-        sublabel: "Khởi tạo thành viên",
-        icon: UserPlus,
-      },
     ],
   },
 ];
@@ -60,7 +54,7 @@ export const BREADCRUMB_MAP = {
   "/admin/service-orders": "Đơn dịch vụ",
   "/admin/services": "Dịch vụ thiết kế",
   "/admin/users": "Người dùng",
-  "/admin/users/create": "Thêm tài khoản",
+  "/admin/users/create": "Thêm người dùng",
 };
 
 export const QUICK_ACTIONS = [
@@ -97,8 +91,9 @@ export const isPathActive = (currentPath, targetPath) => {
 };
 
 export const getBreadcrumbTitle = (pathname) => {
-  const match = Object.keys(BREADCRUMB_MAP).find(
-    (p) => pathname === p || (p !== "/admin" && pathname.startsWith(`${p}/`)),
-  );
+  const keys = Object.keys(BREADCRUMB_MAP);
+  const match =
+    keys.find((p) => pathname === p) ||
+    keys.find((p) => p !== "/admin" && pathname.startsWith(`${p}/`));
   return BREADCRUMB_MAP[match] || "Chi tiết";
 };

@@ -1,152 +1,69 @@
-import {
-  User,
-  LayoutDashboard,
-  ClipboardList,
-  ChevronDown,
-  Shield,
-  Lock,
-  LineChart,
-  FolderDown,
-  Plug,
-  HelpCircle,
-  CircleDot,
-  MapPin,
-  ShoppingBag,
-  Star,
-  Settings,
-  BellRing,
-  Monitor,
-  Settings2,
-  Globe,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "@/features/auth/model/useAuth";
+import { PortalShellLayout } from "@/shared/ui/portal-shell";
 
-import { LAYOUT_GROUP_THEME } from "@/shared/config/layoutTheme";
-import DashboardLayout from "../dashboard-shell/DashboardLayout";
+import { UserHeader, UserMobileDrawer, UserSidebar } from "./components";
 
-const GROUPS = [
-  {
-    btn: {
-      icon: ChevronDown,
-      ...LAYOUT_GROUP_THEME.main,
-    },
-    label: "Main",
-    items: [
-      {
-        icon: LayoutDashboard,
-        label: "Dashboard",
-        text: "Tổng quan file, đơn hàng và task cần xử lý",
-        path: "/user/dashboard",
-      },
-      {
-        icon: ClipboardList,
-        label: "Service Orders",
-        text: "",
-        path: "/user/service-order",
-      },
-      {
-        icon: User,
-        label: "My Profile",
-        text: "Personal Information",
-        path: "/user/profile",
-      },
-      {
-        icon: Star,
-        label: "Service Reviews",
-        text: "",
-        path: "/user/service-reviews",
-      },
-    ],
-    defaultItem: 0,
-  },
-  {
-    btn: {
-      icon: ShoppingBag,
-      ...LAYOUT_GROUP_THEME.management,
-    },
-    label: "Service",
-    items: [
-      {
-        icon: ClipboardList,
-        label: "Service Orders",
-        text: "",
-        path: "/user/service-order",
-      },
-      {
-        icon: Star,
-        label: "Service Reviews",
-        text: "",
-        path: "/user/service-reviews",
-      },
-    ],
-    defaultItem: 0,
-  },
-  {
-    btn: {
-      icon: CircleDot,
-      ...LAYOUT_GROUP_THEME.brand,
-    },
-    label: "Account",
-    items: [
-      {
-        icon: User,
-        label: "My Profile",
-        text: "Personal Information",
-        path: "/user/profile",
-      },
-      {
-        icon: MapPin,
-        label: "My Address",
-        text: "Personal address",
-        path: "/user/address",
-      },
-      {
-        icon: Shield,
-        label: "Security",
-        text: "Personal security",
-        path: "/user/security",
-      },
-      {
-        icon: Lock,
-        label: "Privacy",
-        text: "Personal privacy",
-        path: "/user/privacy",
-      },
-    ],
-    defaultItem: 0,
-  },
-  {
-    btn: {
-      icon: Settings,
-      ...LAYOUT_GROUP_THEME.surface,
-    },
-    label: "Settings",
-    items: [
-      { icon: Globe, label: "General" },
-      { icon: BellRing, label: "Notifications" },
-      { icon: Monitor, label: "Display" },
-      { icon: Settings2, label: "Preferences" },
-      { icon: LineChart, label: "Analytics" },
-      { icon: FolderDown, label: "Export" },
-      { icon: Plug, label: "Integrations" },
-      { icon: HelpCircle, label: "Help" },
-    ],
-    defaultItem: 0,
-  },
-];
+const UserLayout = () => {
+  const navigate = useNavigate();
+  const { user, logout, refreshSession } = useAuth();
 
-const UserLayout = ({ title = "My Account" }) => (
-  <DashboardLayout
-    title={title}
-    groups={GROUPS}
-    initialGroup={2}
-    storageKey="user-aside-collapsed"
-    sidebarId="user-sidebar"
-    fallbackName="Guest"
-    profilePath="/user/profile"
-    logoutLabel="Logout"
-    LogoutIcon={Lock}
-    breadcrumbLabel="Home"
-  />
-);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem("user-sidebar-collapsed") === "true";
+  });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("user-sidebar-collapsed", String(isCollapsed));
+  }, [isCollapsed]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate("/login", { replace: true });
+    }
+  };
+
+  return (
+    <PortalShellLayout
+      sidebar={
+        <UserSidebar
+          isCollapsed={isCollapsed}
+          onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
+          user={user}
+          onLogout={handleLogout}
+        />
+      }
+      mobileDrawer={
+        <UserMobileDrawer
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          user={user}
+          onLogout={handleLogout}
+        />
+      }
+      header={
+        <UserHeader
+          user={user}
+          onLogout={handleLogout}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
+          searchKeyword={searchKeyword}
+          onSearchKeywordChange={setSearchKeyword}
+        />
+      }
+    >
+      <Outlet
+        context={{
+          searchKeyword,
+          currentUser: user,
+          refreshSession,
+        }}
+      />
+    </PortalShellLayout>
+  );
+};
 
 export default UserLayout;

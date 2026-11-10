@@ -1,18 +1,19 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import AddressPage from "./AddressPage";
 import { addressApi } from "@/entities/address/api/addressApi";
 import { userApi } from "@/entities/user/api/userApi";
-import { authStorage } from "@/features/auth/lib/authStorage";
 
-const { showNotificationMock } = vi.hoisted(() => ({
+const { showNotificationMock, refreshSessionMock } = vi.hoisted(() => ({
   showNotificationMock: vi.fn(),
+  refreshSessionMock: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/entities/address/api/addressApi", () => ({
   addressApi: {
-    getByUser: vi.fn(),
+    getMine: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     remove: vi.fn(),
@@ -26,10 +27,10 @@ vi.mock("@/entities/user/api/userApi", () => ({
   },
 }));
 
-vi.mock("@/features/auth/lib/authStorage", () => ({
-  authStorage: {
-    getUserId: vi.fn(),
-  },
+vi.mock("@/features/auth/model/useAuth", () => ({
+  useAuth: () => ({
+    refreshSession: refreshSessionMock,
+  }),
 }));
 
 vi.mock("@/app/providers/NotificationProvider", () => ({
@@ -54,7 +55,11 @@ const addresses = [
 ];
 
 const renderAddressPage = () => {
-  return render(<AddressPage />);
+  return render(
+    <MemoryRouter>
+      <AddressPage />
+    </MemoryRouter>,
+  );
 };
 
 const openCreateModal = async (user) => {
@@ -66,13 +71,11 @@ const openCreateModal = async (user) => {
     }),
   );
 
-  return screen.getByRole("heading", {
-    name: "Thêm địa chỉ",
-  }).parentElement;
+  return screen.getByRole("dialog");
 };
 
 const openAddressMenu = async (user, companyName) => {
-  await screen.findByText(companyName);
+  await screen.findByText("Công ty Alpha");
 
   await user.click(
     screen.getByRole("button", {
@@ -85,8 +88,6 @@ describe("AddressPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    authStorage.getUserId.mockReturnValue("US001");
-
     userApi.getMe.mockResolvedValue({
       user: {
         defaultAddress: {
@@ -95,7 +96,7 @@ describe("AddressPage", () => {
       },
     });
 
-    addressApi.getByUser.mockResolvedValue(addresses);
+    addressApi.getMine.mockResolvedValue(addresses);
   });
 
   afterEach(() => {
@@ -104,8 +105,7 @@ describe("AddressPage", () => {
 
   test("hiển thị loading khi đang tải dữ liệu", () => {
     userApi.getMe.mockReturnValue(new Promise(() => {}));
-
-    addressApi.getByUser.mockReturnValue(new Promise(() => {}));
+    addressApi.getMine.mockReturnValue(new Promise(() => {}));
 
     renderAddressPage();
 
@@ -114,47 +114,28 @@ describe("AddressPage", () => {
     ).toBeInTheDocument();
   });
 
-  test("hiển thị lỗi khi không tìm thấy user", async () => {
-    authStorage.getUserId.mockReturnValue(null);
-
-    renderAddressPage();
-
-    expect(
-      await screen.findByText("Không tìm thấy thông tin người dùng."),
-    ).toBeInTheDocument();
-
-    expect(userApi.getMe).not.toHaveBeenCalled();
-    expect(addressApi.getByUser).not.toHaveBeenCalled();
-  });
-
   test("gọi API và hiển thị danh sách địa chỉ", async () => {
     renderAddressPage();
 
-    expect(await screen.findByText("Công ty Alpha")).toBeInTheDocument();
+    const table = await screen.findByRole("table");
 
-    expect(screen.getByText("Công ty Beta")).toBeInTheDocument();
-
-    expect(screen.getByText("Hà Nội")).toBeInTheDocument();
-
-    expect(screen.getByText("Đà Nẵng")).toBeInTheDocument();
-
+    expect(within(table).getByText("Công ty Alpha")).toBeInTheDocument();
+    expect(within(table).getByText("Công ty Beta")).toBeInTheDocument();
+    expect(within(table).getByText("Hà Nội")).toBeInTheDocument();
+    expect(within(table).getByText("Đà Nẵng")).toBeInTheDocument();
     expect(screen.getByText("Tổng số địa chỉ: 2")).toBeInTheDocument();
-
     expect(screen.getByText("Hiển thị 2 kết quả")).toBeInTheDocument();
-
-    expect(userApi.getMe).toHaveBeenCalledWith("US001");
-
-    expect(addressApi.getByUser).toHaveBeenCalledWith("US001");
+    expect(userApi.getMe).toHaveBeenCalled();
+    expect(addressApi.getMine).toHaveBeenCalled();
   });
 
   test("đánh dấu đúng địa chỉ mặc định", async () => {
     renderAddressPage();
 
-    await screen.findByText("Công ty Beta");
+    const table = await screen.findByRole("table");
 
-    expect(screen.getByText("Active")).toBeInTheDocument();
-
-    expect(screen.getByText("Inactive")).toBeInTheDocument();
+    expect(within(table).getByText("Active")).toBeInTheDocument();
+    expect(within(table).getByText("Inactive")).toBeInTheDocument();
   });
 
   test("lọc địa chỉ theo từ khóa tìm kiếm", async () => {
@@ -162,7 +143,7 @@ describe("AddressPage", () => {
 
     renderAddressPage();
 
-    await screen.findByText("Công ty Alpha");
+    const table = await screen.findByRole("table");
 
     const searchInput = screen.getByPlaceholderText(
       "Tìm tên công ty, địa chỉ, ghi chú...",
@@ -170,10 +151,8 @@ describe("AddressPage", () => {
 
     await user.type(searchInput, "Đà Nẵng");
 
-    expect(screen.getByText("Công ty Beta")).toBeInTheDocument();
-
-    expect(screen.queryByText("Công ty Alpha")).not.toBeInTheDocument();
-
+    expect(within(table).getByText("Công ty Beta")).toBeInTheDocument();
+    expect(within(table).queryByText("Công ty Alpha")).not.toBeInTheDocument();
     expect(screen.getByText("Hiển thị 1 kết quả")).toBeInTheDocument();
   });
 
@@ -182,7 +161,7 @@ describe("AddressPage", () => {
 
     renderAddressPage();
 
-    await screen.findByText("Công ty Alpha");
+    const table = await screen.findByRole("table");
 
     const searchInput = screen.getByPlaceholderText(
       "Tìm tên công ty, địa chỉ, ghi chú...",
@@ -190,25 +169,23 @@ describe("AddressPage", () => {
 
     await user.type(searchInput, "VĂN PHÒNG MIỀN BẮC");
 
-    expect(screen.getByText("Công ty Alpha")).toBeInTheDocument();
-
-    expect(screen.queryByText("Công ty Beta")).not.toBeInTheDocument();
+    expect(within(table).getByText("Công ty Alpha")).toBeInTheDocument();
+    expect(within(table).queryByText("Công ty Beta")).not.toBeInTheDocument();
   });
 
   test("hiển thị trạng thái rỗng khi không có địa chỉ", async () => {
-    addressApi.getByUser.mockResolvedValue([]);
+    addressApi.getMine.mockResolvedValue([]);
 
     renderAddressPage();
 
     expect(await screen.findByText("Chưa có địa chỉ.")).toBeInTheDocument();
-
     expect(screen.getByText("Tổng số địa chỉ: 0")).toBeInTheDocument();
   });
 
   test("hiển thị lỗi do backend trả về", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
 
-    addressApi.getByUser.mockRejectedValue({
+    addressApi.getMine.mockRejectedValue({
       response: {
         data: {
           message: "Backend không thể tải địa chỉ.",
@@ -221,14 +198,13 @@ describe("AddressPage", () => {
     expect(
       await screen.findByText("Backend không thể tải địa chỉ."),
     ).toBeInTheDocument();
-
     expect(screen.queryByText("Công ty Alpha")).not.toBeInTheDocument();
   });
 
   test("hiển thị lỗi mặc định khi API không có message", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
 
-    addressApi.getByUser.mockRejectedValue(new Error("Network error"));
+    addressApi.getMine.mockRejectedValue(new Error("Network error"));
 
     renderAddressPage();
 
@@ -257,11 +233,9 @@ describe("AddressPage", () => {
     const modal = await openCreateModal(user);
 
     expect(within(modal).getByPlaceholderText("Tên công ty")).toHaveValue("");
-
     expect(within(modal).getByPlaceholderText("Địa chỉ công ty")).toHaveValue(
       "",
     );
-
     expect(within(modal).getByPlaceholderText("Ghi chú")).toHaveValue("");
   });
 
@@ -352,7 +326,7 @@ describe("AddressPage", () => {
     );
 
     await waitFor(() => {
-      expect(addressApi.create).toHaveBeenCalledWith("US001", {
+      expect(addressApi.create).toHaveBeenCalledWith({
         companyName: "Công ty Gamma",
         address: "TP. Hồ Chí Minh",
         note: "Văn phòng miền Nam",
@@ -360,14 +334,9 @@ describe("AddressPage", () => {
     });
 
     expect(await screen.findByText("Công ty Gamma")).toBeInTheDocument();
-
     expect(screen.getByText("Tổng số địa chỉ: 3")).toBeInTheDocument();
 
-    expect(
-      screen.queryByRole("heading", {
-        name: "Thêm địa chỉ",
-      }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     expect(showNotificationMock).toHaveBeenCalledWith(
       "success",
@@ -396,16 +365,12 @@ describe("AddressPage", () => {
       }),
     );
 
-    const modal = screen.getByRole("heading", {
-      name: "Chỉnh sửa địa chỉ",
-    }).parentElement;
+    const modal = screen.getByRole("dialog");
 
     const companyInput = within(modal).getByPlaceholderText("Tên công ty");
-
     const addressInput = within(modal).getByPlaceholderText("Địa chỉ công ty");
 
     expect(companyInput).toHaveValue("Công ty Alpha");
-
     expect(addressInput).toHaveValue("Hà Nội");
 
     await user.clear(companyInput);
@@ -429,7 +394,6 @@ describe("AddressPage", () => {
     });
 
     expect(await screen.findByText("Công ty Alpha mới")).toBeInTheDocument();
-
     expect(screen.queryByText("Công ty Alpha")).not.toBeInTheDocument();
 
     expect(showNotificationMock).toHaveBeenCalledWith(
@@ -510,6 +474,8 @@ describe("AddressPage", () => {
 
     renderAddressPage();
 
+    const table = await screen.findByRole("table");
+
     await openAddressMenu(user, "Công ty Alpha");
 
     await user.click(
@@ -529,17 +495,15 @@ describe("AddressPage", () => {
     );
 
     await waitFor(() => {
-      expect(addressApi.setDefault).toHaveBeenCalledWith("US001", 1);
+      expect(addressApi.setDefault).toHaveBeenCalledWith(1);
     });
 
     await waitFor(() => {
-      const alphaRow = screen.getByText("Công ty Alpha").closest("tr");
-
+      const alphaRow = within(table).getByText("Công ty Alpha").closest("tr");
       expect(within(alphaRow).getByText("Active")).toBeInTheDocument();
     });
 
-    const betaRow = screen.getByText("Công ty Beta").closest("tr");
-
+    const betaRow = within(table).getByText("Công ty Beta").closest("tr");
     expect(within(betaRow).getByText("Inactive")).toBeInTheDocument();
 
     expect(showNotificationMock).toHaveBeenCalledWith(

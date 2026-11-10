@@ -1,3 +1,5 @@
+export { PortalSectionCard } from "./PortalSectionCard";
+
 // SectionCard
 export const SectionCard = ({ title, desc, active, highlight, children }) => {
   return (

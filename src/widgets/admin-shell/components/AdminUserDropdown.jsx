@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import {
   ChevronDown,
   Globe,
-  LayoutDashboard,
   LogOut,
+  Settings,
   ShieldCheck,
   User,
 } from "lucide-react";
@@ -28,7 +28,10 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
   useClickOutside(containerRef, () => setIsOpen(false), isOpen);
 
   const displayName = user?.fullName || user?.userCode || "Administrator";
-  const roleLabel = getRoleLabel(user);
+  const roleLabel = getRoleLabel(user?.role || user?.roleName);
+  const profilePath = user?.idUser
+    ? `/admin/users/${encodeURIComponent(user.idUser)}`
+    : "/admin/users";
 
   const handleLogoutClick = () => {
     setIsOpen(false);
@@ -81,7 +84,7 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
 
       {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-2 w-60 animate-in rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl ring-1 ring-black/5 fade-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900">
+        <div className="absolute right-0 z-50 mt-2 w-64 animate-in rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl ring-1 ring-black/5 fade-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900">
           {/* Header Summary Card */}
           <div className="dark:bg-slate-850/60 mb-2 flex items-center gap-3 rounded-xl bg-slate-50/80 p-2.5">
             <AdminUserAvatar
@@ -107,7 +110,7 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
           {/* Menu Links */}
           <div className="space-y-0.5">
             <Link
-              to="/user/profile"
+              to={profilePath}
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
             >
@@ -115,14 +118,19 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
               <span>Hồ sơ cá nhân</span>
             </Link>
 
-            <Link
-              to="/user/dashboard"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-brand dark:text-slate-200 dark:hover:bg-slate-800"
+            <div
+              aria-disabled="true"
+              className="flex cursor-not-allowed items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 select-none dark:text-slate-400"
             >
-              <LayoutDashboard size={15} className="text-slate-400" />
-              <span>Khu vực khách hàng</span>
-            </Link>
+              <span className="flex items-center gap-2.5">
+                <Settings size={15} className="text-slate-400" />
+                <span>Cài đặt</span>
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold whitespace-nowrap text-amber-700 dark:bg-amber-950/50 dark:text-amber-400">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+                Đang phát triển
+              </span>
+            </div>
 
             <Link
               to="/"

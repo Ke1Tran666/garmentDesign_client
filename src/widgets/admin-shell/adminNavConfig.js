@@ -1,6 +1,7 @@
 import {
   ClipboardList,
   LayoutDashboard,
+  ShieldCheck,
   SlidersHorizontal,
   UserPlus,
   Users,
@@ -44,6 +45,13 @@ export const NAV_GROUPS = [
         sublabel: "Khách hàng & nhân sự",
         icon: Users,
       },
+      {
+        path: "/admin/roles",
+        label: "Quản lý vai trò",
+        sublabel: "Nhóm quyền hệ thống",
+        icon: ShieldCheck,
+        allowedRoles: ["admin"],
+      },
     ],
   },
 ];
@@ -55,6 +63,7 @@ export const BREADCRUMB_MAP = {
   "/admin/services": "Dịch vụ thiết kế",
   "/admin/users": "Người dùng",
   "/admin/users/create": "Thêm người dùng",
+  "/admin/roles": "Vai trò",
 };
 
 export const QUICK_ACTIONS = [

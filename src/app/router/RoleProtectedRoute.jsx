@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import {
   getAccountPathByRole,
   normalizeRole,
+  resolveAppRole,
 } from "@/features/auth/lib/authRole";
 import { useAuth } from "@/features/auth/model/useAuth";
 
@@ -31,12 +32,12 @@ const RoleProtectedRoute = ({ allowedRoles = [], children }) => {
     );
   }
 
-  const role = normalizeRole(user.role);
+  const role = resolveAppRole(user);
 
   const normalizedAllowedRoles = allowedRoles.map(normalizeRole);
 
   if (!normalizedAllowedRoles.includes(role)) {
-    return <Navigate to={getAccountPathByRole(role)} replace />;
+    return <Navigate to={getAccountPathByRole(user)} replace />;
   }
 
   return children;

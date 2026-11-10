@@ -2,15 +2,11 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/model/useAuth";
 
-import {
-  AdminHeader,
-  AdminMobileDrawer,
-  AdminSidebar,
-} from "./components";
+import { AdminHeader, AdminMobileDrawer, AdminSidebar } from "./components";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, refreshSession } = useAuth();
 
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem("admin-sidebar-collapsed") === "true";
@@ -65,6 +61,7 @@ const AdminLayout = () => {
             context={{
               searchKeyword,
               adminUser: user,
+              refreshSession,
             }}
           />
         </main>

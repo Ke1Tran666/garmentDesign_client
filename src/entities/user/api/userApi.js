@@ -87,6 +87,7 @@ export const userApi = {
   async deleteAccount() {
     const response = await httpClient.delete("/users/me/delete-account");
     cacheManager.invalidate("users");
+    cacheManager.invalidate("roles");
 
     return response.data;
   },
@@ -139,6 +140,7 @@ export const userApi = {
   async create(payload) {
     const response = await httpClient.post("/users", payload);
     cacheManager.invalidate("users");
+    cacheManager.invalidate("roles");
 
     return response.data;
   },
@@ -146,6 +148,7 @@ export const userApi = {
   async remove(userId) {
     await httpClient.delete(`/users/${userId}`);
     cacheManager.invalidate("users");
+    cacheManager.invalidate("roles");
   },
 
   async updatePhoneById(userId, phone) {
@@ -158,6 +161,7 @@ export const userApi = {
   async updateRole(userId, roleId) {
     const response = await httpClient.put(`/users/${userId}/role`, { roleId });
     cacheManager.invalidate("users");
+    cacheManager.invalidate("roles");
 
     return response.data;
   },

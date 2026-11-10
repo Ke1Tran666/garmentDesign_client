@@ -88,6 +88,15 @@ describe("userUtils", () => {
     expect(getRoleBadge({ role: { nameRole: "USER" } }).label).toBe(
       "Khách hàng",
     );
+    expect(
+      getRoleBadge({ role: { idRole: 1, nameRole: "SUPER_ADMIN" } }),
+    ).toMatchObject({ label: "SUPER_ADMIN" });
+    expect(
+      getRoleBadge({ role: { idRole: 3, nameRole: "CUSTOMER" } }),
+    ).toMatchObject({ label: "CUSTOMER" });
+    expect(
+      getRoleBadge({ role: { idRole: 1, nameRole: "SUPER_ADMIN" } }).className,
+    ).toContain("bg-indigo-50");
 
     expect(formatGender("Male")).toBe("Nam");
     expect(formatGender("Female")).toBe("Nữ");

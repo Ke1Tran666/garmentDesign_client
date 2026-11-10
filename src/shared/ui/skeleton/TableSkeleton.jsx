@@ -2,6 +2,7 @@ import Skeleton from "./Skeleton";
 
 export const TableSkeleton = ({ rows = 6, variant = "order" }) => {
   const isUserVariant = variant === "user";
+  const isRoleVariant = variant === "role";
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
@@ -24,6 +25,32 @@ export const TableSkeleton = ({ rows = 6, variant = "order" }) => {
                 </th>
                 <th className="px-4 py-3.5">
                   <Skeleton className="h-3.5 w-20" />
+                </th>
+                <th className="px-4 py-3.5">
+                  <Skeleton className="h-3.5 w-24" />
+                </th>
+                <th className="px-4 py-3.5 text-right">
+                  <div className="flex justify-end">
+                    <Skeleton className="h-3.5 w-16" />
+                  </div>
+                </th>
+              </tr>
+            ) : isRoleVariant ? (
+              <tr>
+                <th className="w-10 px-4 py-3.5">
+                  <Skeleton className="h-4 w-4 rounded" />
+                </th>
+                <th className="px-4 py-3.5">
+                  <Skeleton className="h-3.5 w-14" />
+                </th>
+                <th className="px-4 py-3.5">
+                  <Skeleton className="h-3.5 w-32" />
+                </th>
+                <th className="px-4 py-3.5">
+                  <Skeleton className="h-3.5 w-20" />
+                </th>
+                <th className="px-4 py-3.5">
+                  <Skeleton className="h-3.5 w-28" />
                 </th>
                 <th className="px-4 py-3.5">
                   <Skeleton className="h-3.5 w-24" />
@@ -95,6 +122,43 @@ export const TableSkeleton = ({ rows = 6, variant = "order" }) => {
                   </td>
                   <td className="px-4 py-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
+                      <Skeleton className="h-8 w-8 rounded-xl" />
+                      <Skeleton className="h-8 w-8 rounded-xl" />
+                    </div>
+                  </td>
+                </tr>
+              ) : isRoleVariant ? (
+                <tr key={index} className="transition-colors">
+                  <td className="px-4 py-4">
+                    <Skeleton className="h-4 w-4 rounded" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton className="h-6 w-12 rounded-md" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+                      <div className="space-y-1.5">
+                        <Skeleton className="h-3.5 w-28 rounded" />
+                        <Skeleton className="h-3 w-44 rounded" />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex gap-1.5">
+                      <Skeleton className="h-5 w-20 rounded-md" />
+                      <Skeleton className="h-5 w-20 rounded-md" />
+                    </div>
+                  </td>
+                  <td className="px-4 py-4">
+                    <Skeleton className="h-6 w-20 rounded-full" />
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Skeleton className="h-8 w-8 rounded-xl" />
                       <Skeleton className="h-8 w-8 rounded-xl" />
                       <Skeleton className="h-8 w-8 rounded-xl" />
                     </div>

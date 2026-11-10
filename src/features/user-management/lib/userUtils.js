@@ -1,5 +1,5 @@
 import { Shield, ShieldCheck, UserRound } from "lucide-react";
-import { normalizeRole } from "@/features/auth/lib/authRole";
+import { normalizeRole, resolveAppRole } from "@/features/auth/lib/authRole";
 export { getInitials } from "@/shared/lib/avatarUtils";
 
 export const PAGE_SIZE = 12;
@@ -85,22 +85,40 @@ export const formatGender = (gender) => {
 export const getRoleName = (user) => user?.role?.nameRole || "Chưa phân quyền";
 
 export const getRoleBadge = (roleOrUser) => {
-  const rawName =
-    typeof roleOrUser === "string" ? roleOrUser : getRoleName(roleOrUser);
-  const norm = normalizeRole(rawName);
+  const isRoleObject =
+    typeof roleOrUser === "object" &&
+    roleOrUser !== null &&
+    !("role" in roleOrUser);
 
-  if (norm === "admin") {
+  const roleId =
+    typeof roleOrUser === "object" && roleOrUser !== null
+      ? isRoleObject
+        ? (roleOrUser.idRole ?? roleOrUser.roleId)
+        : (roleOrUser.role?.idRole ?? roleOrUser.roleId ?? roleOrUser.idRole)
+      : null;
+
+  const rawName =
+    typeof roleOrUser === "string"
+      ? roleOrUser
+      : isRoleObject
+        ? roleOrUser.nameRole || ""
+        : getRoleName(roleOrUser);
+
+  const norm = normalizeRole(rawName);
+  const resolved = resolveAppRole(rawName, roleId);
+
+  if (resolved === "admin") {
     return {
-      label: "Quản trị viên",
+      label: norm === "admin" || !rawName ? "Quản trị viên" : rawName,
       className:
         "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800",
       icon: ShieldCheck,
     };
   }
 
-  if (norm === "staff") {
+  if (resolved === "staff") {
     return {
-      label: "Nhân viên",
+      label: norm === "staff" || !rawName ? "Nhân viên" : rawName,
       className:
         "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800",
       icon: Shield,
@@ -108,7 +126,10 @@ export const getRoleBadge = (roleOrUser) => {
   }
 
   return {
-    label: norm === "user" || !rawName ? "Khách hàng" : rawName,
+    label:
+      resolved === "user" && (norm === "user" || !rawName)
+        ? "Khách hàng"
+        : rawName || "Khách hàng",
     className:
       "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700",
     icon: UserRound,

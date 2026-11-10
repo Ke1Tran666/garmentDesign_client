@@ -8,15 +8,17 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
-import { normalizeRole } from "@/features/auth/lib/authRole";
+import { normalizeRole, resolveAppRole } from "@/features/auth/lib/authRole";
 import { useClickOutside } from "@/shared/hooks/useClickOutside";
 import AdminUserAvatar from "./AdminUserAvatar";
 
-const getRoleLabel = (role) => {
-  const normalized = normalizeRole(role);
+const getRoleLabel = (user) => {
+  const rawName = user?.role || user?.roleName || "";
+  const normalized = normalizeRole(rawName);
   if (normalized === "admin") return "Quản trị viên";
   if (normalized === "staff") return "Nhân viên";
-  return "Quản trị viên";
+  if (rawName) return rawName;
+  return resolveAppRole(user) === "staff" ? "Nhân viên" : "Quản trị viên";
 };
 
 export const AdminUserDropdown = ({ user, onLogout }) => {
@@ -26,7 +28,7 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
   useClickOutside(containerRef, () => setIsOpen(false), isOpen);
 
   const displayName = user?.fullName || user?.userCode || "Administrator";
-  const roleLabel = getRoleLabel(user?.role || user?.roleName);
+  const roleLabel = getRoleLabel(user);
 
   const handleLogoutClick = () => {
     setIsOpen(false);
@@ -81,7 +83,7 @@ export const AdminUserDropdown = ({ user, onLogout }) => {
       {isOpen && (
         <div className="absolute right-0 z-50 mt-2 w-60 animate-in rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xl ring-1 ring-black/5 fade-in slide-in-from-top-2 dark:border-slate-800 dark:bg-slate-900">
           {/* Header Summary Card */}
-          <div className="mb-2 flex items-center gap-3 rounded-xl bg-slate-50/80 p-2.5 dark:bg-slate-850/60">
+          <div className="dark:bg-slate-850/60 mb-2 flex items-center gap-3 rounded-xl bg-slate-50/80 p-2.5">
             <AdminUserAvatar
               src={user?.avatar}
               name={displayName}

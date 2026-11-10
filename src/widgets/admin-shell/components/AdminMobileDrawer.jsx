@@ -37,6 +37,7 @@ export const AdminMobileDrawer = ({ isOpen, onClose, user, onLogout }) => {
         <AdminUserProfile
           user={user}
           onLogout={onLogout}
+          onProfileClick={onClose}
           variant="drawer"
         />
       </div>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { normalizeRole } from "@/features/auth/lib/authRole";
 import AdminUserAvatar from "./AdminUserAvatar";
@@ -12,22 +13,41 @@ const getRoleLabel = (role) => {
 export const AdminUserProfile = ({
   user,
   onLogout,
+  onProfileClick,
   isCollapsed = false,
   variant = "sidebar",
 }) => {
   const displayName = user?.fullName || user?.userCode || "Administrator";
   const roleLabel = getRoleLabel(user?.role || user?.roleName);
+  const profilePath = user?.idUser
+    ? `/admin/users/${encodeURIComponent(user.idUser)}`
+    : null;
 
   if (isCollapsed) {
+    const avatarNode = (
+      <AdminUserAvatar
+        src={user?.avatar}
+        name={displayName}
+        size="md"
+        ring={false}
+        className="rounded-xl ring-2 ring-slate-200 dark:ring-slate-700"
+      />
+    );
+
     return (
       <div className="flex flex-col items-center gap-2 pt-1">
-        <AdminUserAvatar
-          src={user?.avatar}
-          name={displayName}
-          size="md"
-          ring={false}
-          className="rounded-xl ring-2 ring-slate-200 dark:ring-slate-700"
-        />
+        {profilePath ? (
+          <Link
+            to={profilePath}
+            onClick={onProfileClick}
+            title="Hồ sơ cá nhân"
+            className="rounded-xl transition-transform hover:scale-105"
+          >
+            {avatarNode}
+          </Link>
+        ) : (
+          avatarNode
+        )}
         <button
           type="button"
           onClick={onLogout}
@@ -41,24 +61,41 @@ export const AdminUserProfile = ({
   }
 
   if (variant === "drawer") {
-    return (
-      <div className="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <AdminUserAvatar
-            src={user?.avatar}
-            name={displayName}
-            size="xs"
-            className="rounded-lg"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-xs font-semibold text-slate-800 dark:text-white">
-              {displayName}
-            </div>
-            <div className="truncate text-[10px] font-medium text-slate-400 dark:text-slate-500">
-              {roleLabel}
-            </div>
+    const identityContent = (
+      <>
+        <AdminUserAvatar
+          src={user?.avatar}
+          name={displayName}
+          size="xs"
+          className="rounded-lg"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand dark:text-white">
+            {displayName}
+          </div>
+          <div className="truncate text-[10px] font-medium text-slate-400 dark:text-slate-500">
+            {roleLabel}
           </div>
         </div>
+      </>
+    );
+
+    return (
+      <div className="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+        {profilePath ? (
+          <Link
+            to={profilePath}
+            onClick={onProfileClick}
+            title="Hồ sơ cá nhân"
+            className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-lg p-1 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            {identityContent}
+          </Link>
+        ) : (
+          <div className="flex min-w-0 items-center gap-2.5">
+            {identityContent}
+          </div>
+        )}
         <button
           type="button"
           onClick={onLogout}
@@ -71,8 +108,8 @@ export const AdminUserProfile = ({
     );
   }
 
-  return (
-    <div className="flex items-center gap-3 rounded-xl p-1.5">
+  const sidebarIdentity = (
+    <>
       <AdminUserAvatar
         src={user?.avatar}
         name={displayName}
@@ -80,13 +117,32 @@ export const AdminUserProfile = ({
         className="rounded-xl ring-2 ring-slate-200 dark:ring-slate-700"
       />
       <div className="min-w-0 flex-1">
-        <div className="truncate text-xs font-bold text-slate-900 dark:text-white">
+        <div className="truncate text-xs font-bold text-slate-900 group-hover:text-brand dark:text-white">
           {displayName}
         </div>
         <div className="truncate text-[11px] font-medium text-slate-400 dark:text-slate-500">
           {roleLabel}
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <div className="flex items-center gap-2 rounded-xl p-1">
+      {profilePath ? (
+        <Link
+          to={profilePath}
+          onClick={onProfileClick}
+          title="Hồ sơ cá nhân"
+          className="group flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70"
+        >
+          {sidebarIdentity}
+        </Link>
+      ) : (
+        <div className="flex min-w-0 flex-1 items-center gap-3 p-1">
+          {sidebarIdentity}
+        </div>
+      )}
       <button
         type="button"
         onClick={onLogout}

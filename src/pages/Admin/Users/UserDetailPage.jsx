@@ -3,8 +3,13 @@ import { AlertCircle, ArrowLeft, RefreshCw, Trash2 } from "lucide-react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import { useNotification } from "@/app/providers/NotificationProvider";
+import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
 import { userApi } from "@/entities/user/api/userApi";
 import { normalizeRole } from "@/features/auth/lib/authRole";
+import {
+  formatPrice,
+  getStatusInfo as getOrderStatusInfo,
+} from "@/features/service-order-management/lib/serviceOrderUtils";
 import {
   UserDetailContent,
   UserDetailSidebar,
@@ -20,13 +25,58 @@ import AdminActionMenu from "@/shared/ui/menu/AdminActionMenu";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import { DetailPageSkeleton } from "@/shared/ui/skeleton";
 
+const buildRelatedOrders = (orders, targetUserId) => {
+  if (!Array.isArray(orders) || !targetUserId) return [];
+
+  return orders
+    .filter((order) => {
+      const isOwner = order?.user?.idUser === targetUserId;
+      const isHandler =
+        order?.createdBy === targetUserId || order?.updatedBy === targetUserId;
+      return isOwner || isHandler;
+    })
+    .sort((a, b) => {
+      const timeDiff =
+        new Date(b?.updatedAt || b?.createdAt || 0).getTime() -
+        new Date(a?.updatedAt || a?.createdAt || 0).getTime();
+      if (timeDiff !== 0) return timeDiff;
+      return Number(b?.serviceOrderId ?? 0) - Number(a?.serviceOrderId ?? 0);
+    })
+    .map((order) => {
+      const isOwner = order?.user?.idUser === targetUserId;
+      const isHandler =
+        order?.createdBy === targetUserId || order?.updatedBy === targetUserId;
+      const orderStatus = getOrderStatusInfo(order);
+
+      return {
+        id: order.serviceOrderId,
+        code: `ORD-${order.serviceOrderId}`,
+        productName: order.productName || "Sản phẩm may đo",
+        serviceName: order.service?.serviceName || "Dịch vụ thiết kế",
+        date: order.updatedAt || order.createdAt,
+        formattedPrice: formatPrice(order.totalPrice),
+        statusLabel: orderStatus.label,
+        statusClassName: orderStatus.className,
+        statusDot: orderStatus.dot,
+        relationLabel:
+          isOwner && isHandler
+            ? "Khách đặt & xử lý"
+            : isOwner
+              ? "Khách đặt đơn"
+              : "Phụ trách xử lý",
+      };
+    });
+};
+
 const UserDetailPage = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { adminUser } = useOutletContext() || {};
+  const { adminUser, refreshSession } = useOutletContext() || {};
+  const currentAdminUserId = adminUser?.idUser;
   const { showNotification } = useNotification();
 
   const [user, setUser] = useState(null);
+  const [relatedOrders, setRelatedOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -43,15 +93,28 @@ const UserDetailPage = () => {
         setLoading(true);
         setErrorMessage("");
 
-        const data = await userApi.getById(userId);
+        const fetchProfile =
+          userId === "me" ? userApi.getMe() : userApi.getById(userId);
+        const fetchOrders =
+          typeof serviceOrderApi?.getAll === "function"
+            ? serviceOrderApi.getAll().catch(() => [])
+            : Promise.resolve([]);
+
+        const [data, ordersData] = await Promise.all([
+          fetchProfile,
+          fetchOrders,
+        ]);
 
         if (active) {
-          setUser(normalizeUserDetail(data));
+          const normalized = normalizeUserDetail(data);
+          setUser(normalized);
+          setRelatedOrders(buildRelatedOrders(ordersData, normalized?.idUser));
         }
       } catch (error) {
         if (!active) return;
 
         setUser(null);
+        setRelatedOrders([]);
         setErrorMessage(
           error.response?.data?.message ||
             "Không thể tải thông tin người dùng.",
@@ -70,12 +133,39 @@ const UserDetailPage = () => {
     };
   }, [userId]);
 
+  const handleUserChange = useCallback(
+    (nextUser) => {
+      setUser(nextUser);
+      if (nextUser?.idUser && nextUser.idUser === currentAdminUserId) {
+        refreshSession?.().catch(() => {});
+      }
+    },
+    [currentAdminUserId, refreshSession],
+  );
+
   const handleRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
       setErrorMessage("");
-      const data = await userApi.getById(userId, { forceRefresh: true });
-      setUser(normalizeUserDetail(data));
+
+      const fetchProfile =
+        userId === "me"
+          ? userApi.getMe()
+          : userApi.getById(userId, { forceRefresh: true });
+      const fetchOrders =
+        typeof serviceOrderApi?.getAll === "function"
+          ? serviceOrderApi.getAll({ forceRefresh: true }).catch(() => [])
+          : Promise.resolve([]);
+
+      const [data, ordersData] = await Promise.all([fetchProfile, fetchOrders]);
+      const normalized = normalizeUserDetail(data);
+      setUser(normalized);
+      setRelatedOrders(buildRelatedOrders(ordersData, normalized?.idUser));
+
+      if (normalized?.idUser && normalized.idUser === currentAdminUserId) {
+        refreshSession?.().catch(() => {});
+      }
+
       showNotification({
         type: "success",
         title: "Làm mới thành công",
@@ -92,7 +182,7 @@ const UserDetailPage = () => {
     } finally {
       setRefreshing(false);
     }
-  }, [userId, showNotification]);
+  }, [userId, currentAdminUserId, refreshSession, showNotification]);
 
   const activities = useMemo(() => createRecentActivities(user), [user]);
 
@@ -224,6 +314,12 @@ const UserDetailPage = () => {
               {getRoleName(user)}
             </span>
 
+            {isCurrentUser && (
+              <span className="rounded-lg border border-brand/30 bg-brand-soft px-3 py-2 text-xs font-semibold text-brand">
+                Hồ sơ cá nhân
+              </span>
+            )}
+
             {providerNames.map((provider) => (
               <span
                 key={provider}
@@ -264,7 +360,7 @@ const UserDetailPage = () => {
             isAdmin={isAdmin}
             isCurrentUser={isCurrentUser}
             canEditUser={canEditUser}
-            onUserChange={setUser}
+            onUserChange={handleUserChange}
           />
         }
       >
@@ -276,8 +372,9 @@ const UserDetailPage = () => {
           providerNames={providerNames}
           permissions={permissions}
           activities={activities}
+          relatedOrders={relatedOrders}
           canEditUser={canEditUser}
-          onUserChange={setUser}
+          onUserChange={handleUserChange}
         />
       </AdminDetailLayout>
 

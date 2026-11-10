@@ -8,7 +8,7 @@ import {
 
 import { useNotification } from "@/app/providers/NotificationProvider";
 import { userApi } from "@/entities/user/api/userApi";
-import { normalizeRole } from "@/features/auth/lib/authRole";
+import { normalizeRole, resolveAppRole } from "@/features/auth/lib/authRole";
 import { exportToExcel } from "@/shared/lib/exportUtils";
 
 import {
@@ -21,9 +21,13 @@ import {
   PAGE_SIZE,
 } from "../lib/userUtils";
 
-export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
+export const useUserManagement = ({
+  adminUser,
+  searchKeyword = "",
+  initialRoleFilter = "all",
+} = {}) => {
   const { showNotification } = useNotification();
-  const isAdmin = normalizeRole(adminUser?.role) === "admin";
+  const isAdmin = resolveAppRole(adminUser) === "admin";
   const currentUserId = adminUser?.idUser || null;
 
   const [users, setUsers] = useState([]);
@@ -32,11 +36,20 @@ export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
   const [localSearch, setLocalSearch] = useState("");
   const deferredSearch = useDeferredValue(localSearch || searchKeyword);
 
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState(
+    () => initialRoleFilter || "all",
+  );
+  const [prevInitialRole, setPrevInitialRole] = useState(initialRoleFilter);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("table");
   const [currentPage, setCurrentPage] = useState(1);
+
+  if (prevInitialRole !== initialRoleFilter) {
+    setPrevInitialRole(initialRoleFilter);
+    setRoleFilter(initialRoleFilter || "all");
+    setCurrentPage(1);
+  }
 
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [removingUser, setRemovingUser] = useState(null);
@@ -96,6 +109,15 @@ export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
       ),
     );
 
+    if (
+      roleFilter &&
+      roleFilter !== "all" &&
+      roleFilter !== "internal" &&
+      !distinctRoles.some((r) => normalizeRole(r) === normalizeRole(roleFilter))
+    ) {
+      distinctRoles.push(roleFilter);
+    }
+
     return [
       { value: "all", label: "Tất cả vai trò" },
       { value: "internal", label: "Quản trị & Nhân viên" },
@@ -110,7 +132,7 @@ export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
         };
       }),
     ];
-  }, [users]);
+  }, [users, roleFilter]);
 
   const stats = useMemo(() => {
     const total = users.length;
@@ -121,7 +143,7 @@ export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
     let deletedCount = 0;
 
     users.forEach((u) => {
-      const normRole = normalizeRole(getRoleName(u));
+      const normRole = resolveAppRole(u?.role);
       if (normRole === "admin" || normRole === "staff") {
         staffCount += 1;
       } else {
@@ -155,7 +177,7 @@ export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
 
     const result = users.filter((user) => {
       const roleName = getRoleName(user);
-      const roleBadge = getRoleBadge(roleName);
+      const roleBadge = getRoleBadge(user);
       const statusInfo = getStatusInfo(user);
       const statusVal = statusInfo.code;
       const contact = getUserContact(user);
@@ -177,13 +199,15 @@ export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
           .toLowerCase()
           .includes(keyword);
 
+      const resolvedRole = resolveAppRole(user?.role);
       const normRole = normalizeRole(roleName);
       const matchesRole =
         roleFilter === "all"
           ? true
           : roleFilter === "internal"
-            ? normRole === "admin" || normRole === "staff"
-            : normRole === normalizeRole(roleFilter);
+            ? resolvedRole === "admin" || resolvedRole === "staff"
+            : normRole === normalizeRole(roleFilter) ||
+              (normalizeRole(roleFilter) === "user" && resolvedRole === "user");
 
       const matchesStatus =
         statusFilter === "all"
@@ -329,7 +353,7 @@ export const useUserManagement = ({ adminUser, searchKeyword = "" } = {}) => {
 
       const success = exportToExcel(
         dataToExport,
-        `Danh_Sach_Nguoi_Dung_${new Date().toISOString().slice(0, 10)}`,
+        "Danh_Sach_Nguoi_Dung",
         "Users",
       );
 

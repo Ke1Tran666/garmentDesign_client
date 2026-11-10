@@ -20,7 +20,7 @@ const FloatingButtons = () => {
 
   const isLoggedIn = Boolean(user);
 
-  const accountPath = isLoggedIn ? getAccountPathByRole(user.role) : "/login";
+  const accountPath = isLoggedIn ? getAccountPathByRole(user) : "/login";
 
   // Detect thiết bị có touch (mobile/tablet) hay không
   const isTouchDevice = () => window.matchMedia("(pointer: coarse)").matches;

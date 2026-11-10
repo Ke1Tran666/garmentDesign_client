@@ -12,10 +12,14 @@ import UserLayout from "@/widgets/user-shell/UserLayout";
 const Home = lazy(() => import("@/pages/home/HomePage"));
 const LoginPage = lazy(() => import("@/pages/Auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/Auth/RegisterPage"));
-const ForgotPasswordPage = lazy(() => import("@/pages/Auth/ForgotPasswordPage"));
+const ForgotPasswordPage = lazy(
+  () => import("@/pages/Auth/ForgotPasswordPage"),
+);
 
 // User Pages (Lazy-loaded)
-const DashboardPage = lazy(() => import("@/pages/User/dashboard/DashboardPage"));
+const DashboardPage = lazy(
+  () => import("@/pages/User/dashboard/DashboardPage"),
+);
 const ServiceOrderPage = lazy(
   () => import("@/pages/User/Services/ServiceOrderPage"),
 );
@@ -36,6 +40,9 @@ const UserManagementPage = lazy(
 );
 const UserDetailPage = lazy(() => import("@/pages/Admin/Users/UserDetailPage"));
 const UserCreatePage = lazy(() => import("@/pages/Admin/Users/UserCreatePage"));
+const RoleManagementPage = lazy(
+  () => import("@/pages/Admin/Roles/RoleManagementPage"),
+);
 const ServiceManagementPage = lazy(
   () => import("@/pages/Admin/Services/ServiceManagementPage"),
 );
@@ -106,9 +113,20 @@ const AppRouter = () => {
             }
           />
           <Route path="users/:userId" element={<UserDetailPage />} />
+          <Route
+            path="roles"
+            element={
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <RoleManagementPage />
+              </RoleProtectedRoute>
+            }
+          />
           <Route path="services" element={<ServiceManagementPage />} />
           <Route path="services/:serviceId" element={<ServiceDetailPage />} />
-          <Route path="service-orders" element={<ServiceOrderManagementPage />} />
+          <Route
+            path="service-orders"
+            element={<ServiceOrderManagementPage />}
+          />
           <Route
             path="service-orders/:orderId"
             element={<ServiceOrderDetailPage />}

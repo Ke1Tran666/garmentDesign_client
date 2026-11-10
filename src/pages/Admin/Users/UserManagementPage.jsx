@@ -1,5 +1,5 @@
 import { Download, RefreshCw, UserPlus } from "lucide-react";
-import { Link, useOutletContext } from "react-router-dom";
+import { Link, useOutletContext, useSearchParams } from "react-router-dom";
 
 import {
   PAGE_SIZE,
@@ -16,6 +16,8 @@ import Pagination from "@/shared/ui/table/Pagination";
 
 const UserManagementPage = () => {
   const { adminUser, searchKeyword = "" } = useOutletContext() || {};
+  const [searchParams] = useSearchParams();
+  const initialRoleFilter = searchParams.get("role") || "all";
 
   const {
     isAdmin,
@@ -52,7 +54,7 @@ const UserManagementPage = () => {
     resetFilters,
     handleExport,
     confirmRemove,
-  } = useUserManagement({ adminUser, searchKeyword });
+  } = useUserManagement({ adminUser, searchKeyword, initialRoleFilter });
 
   const showingStart = (currentPage - 1) * PAGE_SIZE + 1;
   const showingEnd = Math.min(currentPage * PAGE_SIZE, filteredUsers.length);

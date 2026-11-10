@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
 import { LogOut } from "lucide-react";
-import { normalizeRole } from "@/features/auth/lib/authRole";
+import { normalizeRole, resolveAppRole } from "@/features/auth/lib/authRole";
 import AdminUserAvatar from "./AdminUserAvatar";
 
-const getRoleLabel = (role) => {
-  const normalized = normalizeRole(role);
+const getRoleLabel = (user) => {
+  const rawName = user?.role || user?.roleName || "";
+  const normalized = normalizeRole(rawName);
   if (normalized === "admin") return "Quản trị viên";
   if (normalized === "staff") return "Nhân viên";
-  return "Quản trị viên";
+  if (rawName) return rawName;
+  return resolveAppRole(user) === "staff" ? "Nhân viên" : "Quản trị viên";
 };
 
 export const AdminUserProfile = ({

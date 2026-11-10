@@ -80,18 +80,97 @@ describe("userApi & roleApi caching", () => {
     expect(httpClient.get).toHaveBeenCalledTimes(4);
   });
 
-  test("roleApi.getAll và roleApi.getById cache trong 10s", async () => {
-    const roles = [{ idRole: 1, nameRole: "ADMIN" }];
-    const roleDetail = { idRole: 1, nameRole: "ADMIN" };
+  test("roleApi.getAll, getById và getPermissions cache trong 10s", async () => {
+    const roles = [{ idRole: 1, nameRole: "admin" }];
+    const roleDetail = { idRole: 1, nameRole: "admin" };
+    const permissions = [
+      { idPermission: 1, code: "SYSTEM_ADMIN", name: "Quản trị hệ thống" },
+    ];
     httpClient.get
       .mockResolvedValueOnce({ data: roles })
-      .mockResolvedValueOnce({ data: roleDetail });
+      .mockResolvedValueOnce({ data: roleDetail })
+      .mockResolvedValueOnce({ data: permissions });
 
     expect(await roleApi.getAll()).toEqual(roles);
     expect(await roleApi.getAll()).toEqual(roles);
     expect(await roleApi.getById(1)).toEqual(roleDetail);
     expect(await roleApi.getById(1)).toEqual(roleDetail);
+    expect(await roleApi.getPermissions()).toEqual(permissions);
+    expect(await roleApi.getPermissions()).toEqual(permissions);
 
+    expect(httpClient.get).toHaveBeenCalledTimes(3);
+  });
+
+  test("roleApi.create, update, remove gọi đúng endpoint và xóa cache của roles lẫn users", async () => {
+    httpClient.get.mockImplementation((url) => {
+      if (url === "/roles") return Promise.resolve({ data: [] });
+      if (url === "/users") return Promise.resolve({ data: [] });
+      return Promise.resolve({ data: {} });
+    });
+    httpClient.post.mockResolvedValue({
+      data: { idRole: 4, nameRole: "DESIGNER" },
+    });
+    httpClient.put.mockResolvedValue({
+      data: { idRole: 4, nameRole: "TAILOR" },
+    });
+    httpClient.delete.mockResolvedValue({ data: {} });
+
+    await roleApi.getAll();
+    await userApi.getAll();
     expect(httpClient.get).toHaveBeenCalledTimes(2);
+
+    const created = await roleApi.create({ nameRole: "DESIGNER" });
+    expect(created).toEqual({ idRole: 4, nameRole: "DESIGNER" });
+    expect(httpClient.post).toHaveBeenCalledWith("/roles", {
+      nameRole: "DESIGNER",
+    });
+
+    await roleApi.getAll();
+    await userApi.getAll();
+    expect(httpClient.get).toHaveBeenCalledTimes(4);
+
+    const updated = await roleApi.update(4, { nameRole: "TAILOR" });
+    expect(updated).toEqual({ idRole: 4, nameRole: "TAILOR" });
+    expect(httpClient.put).toHaveBeenCalledWith("/roles/4", {
+      nameRole: "TAILOR",
+    });
+
+    await roleApi.getAll();
+    await userApi.getAll();
+    expect(httpClient.get).toHaveBeenCalledTimes(6);
+
+    await roleApi.remove(4);
+    expect(httpClient.delete).toHaveBeenCalledWith("/roles/4");
+
+    await roleApi.remove(4, 3);
+    expect(httpClient.delete).toHaveBeenLastCalledWith("/roles/4", {
+      params: { replacementRoleId: 3 },
+    });
+
+    await roleApi.getAll();
+    await userApi.getAll();
+    expect(httpClient.get).toHaveBeenCalledTimes(8);
+  });
+
+  test("userApi.create, remove, updateRole cũng invalidate cache roles", async () => {
+    httpClient.get.mockResolvedValue({ data: [] });
+    httpClient.post.mockResolvedValue({ data: { idUser: "10001" } });
+    httpClient.put.mockResolvedValue({ data: { idUser: "10001" } });
+    httpClient.delete.mockResolvedValue({ data: {} });
+
+    await roleApi.getAll();
+    expect(httpClient.get).toHaveBeenCalledTimes(1);
+
+    await userApi.create({ fullName: "Test" });
+    await roleApi.getAll();
+    expect(httpClient.get).toHaveBeenCalledTimes(2);
+
+    await userApi.updateRole("10001", 4);
+    await roleApi.getAll();
+    expect(httpClient.get).toHaveBeenCalledTimes(3);
+
+    await userApi.remove("10001");
+    await roleApi.getAll();
+    expect(httpClient.get).toHaveBeenCalledTimes(4);
   });
 });

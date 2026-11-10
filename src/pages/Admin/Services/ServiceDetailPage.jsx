@@ -15,7 +15,7 @@ import {
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import { serviceApi } from "@/entities/service/api/serviceApi";
-import { normalizeRole } from "@/features/auth/lib/authRole";
+import { resolveAppRole } from "@/features/auth/lib/authRole";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import { useNotification } from "@/app/providers/NotificationProvider";
 import {
@@ -54,7 +54,7 @@ const ServiceDetailPage = () => {
   const navigate = useNavigate();
   const { adminUser } = useOutletContext() || {};
   const { showNotification } = useNotification();
-  const isAdmin = normalizeRole(adminUser?.role) === "admin";
+  const isAdmin = resolveAppRole(adminUser) === "admin";
 
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);

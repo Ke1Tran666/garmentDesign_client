@@ -4,6 +4,12 @@ export const APP_ROLE = {
   USER: "user",
 };
 
+export const SYSTEM_ROLE_ID = {
+  ADMIN: 1,
+  STAFF: 2,
+  USER: 3,
+};
+
 export const normalizeRole = (role) => {
   return String(role ?? "")
     .trim()
@@ -11,20 +17,46 @@ export const normalizeRole = (role) => {
     .replace(/^role[_-]?/, "");
 };
 
-export const isAdminRole = (role) => {
-  const normalizedRole = normalizeRole(role);
+export const resolveAppRole = (roleOrUser, explicitRoleId = null) => {
+  const roleId =
+    typeof roleOrUser === "object" && roleOrUser !== null
+      ? (roleOrUser.roleId ??
+        roleOrUser.idRole ??
+        roleOrUser.role?.idRole ??
+        explicitRoleId)
+      : explicitRoleId;
 
-  return normalizedRole === APP_ROLE.ADMIN || normalizedRole === APP_ROLE.STAFF;
+  const numericRoleId = Number(roleId);
+  if (numericRoleId === SYSTEM_ROLE_ID.ADMIN) return APP_ROLE.ADMIN;
+  if (numericRoleId === SYSTEM_ROLE_ID.STAFF) return APP_ROLE.STAFF;
+  if (numericRoleId === SYSTEM_ROLE_ID.USER) return APP_ROLE.USER;
+
+  const rawRole =
+    typeof roleOrUser === "object" && roleOrUser !== null
+      ? (roleOrUser.role?.nameRole ??
+        roleOrUser.role ??
+        roleOrUser.roleName ??
+        roleOrUser.nameRole ??
+        "")
+      : roleOrUser;
+
+  return normalizeRole(rawRole);
 };
 
-export const getAccountPathByRole = (role) => {
-  const normalizedRole = normalizeRole(role);
+export const isAdminRole = (roleOrUser, explicitRoleId = null) => {
+  const resolvedRole = resolveAppRole(roleOrUser, explicitRoleId);
 
-  if (normalizedRole === APP_ROLE.ADMIN || normalizedRole === APP_ROLE.STAFF) {
+  return resolvedRole === APP_ROLE.ADMIN || resolvedRole === APP_ROLE.STAFF;
+};
+
+export const getAccountPathByRole = (roleOrUser, explicitRoleId = null) => {
+  const resolvedRole = resolveAppRole(roleOrUser, explicitRoleId);
+
+  if (resolvedRole === APP_ROLE.ADMIN || resolvedRole === APP_ROLE.STAFF) {
     return "/admin";
   }
 
-  if (normalizedRole === APP_ROLE.USER) {
+  if (resolvedRole === APP_ROLE.USER) {
     return "/user";
   }
 

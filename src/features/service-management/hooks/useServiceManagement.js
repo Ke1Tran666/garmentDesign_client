@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { serviceApi } from "@/entities/service/api/serviceApi";
-import { normalizeRole } from "@/features/auth/lib/authRole";
+import { resolveAppRole } from "@/features/auth/lib/authRole";
 import { useNotification } from "@/app/providers/NotificationProvider";
 import { exportToExcel } from "@/shared/lib/exportUtils";
 import {
@@ -14,7 +14,7 @@ const PAGE_SIZE = 12;
 
 export const useServiceManagement = ({ adminUser, searchKeyword = "" } = {}) => {
   const { showNotification } = useNotification();
-  const isAdmin = normalizeRole(adminUser?.role) === "admin";
+  const isAdmin = resolveAppRole(adminUser) === "admin";
 
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);

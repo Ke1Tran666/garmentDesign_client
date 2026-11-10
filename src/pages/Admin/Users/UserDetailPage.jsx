@@ -4,7 +4,7 @@ import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 
 import { useNotification } from "@/app/providers/NotificationProvider";
 import { userApi } from "@/entities/user/api/userApi";
-import { normalizeRole } from "@/features/auth/lib/authRole";
+import { resolveAppRole } from "@/features/auth/lib/authRole";
 import {
   UserDetailContent,
   UserDetailSidebar,
@@ -143,8 +143,8 @@ const UserDetailPage = () => {
     ? user.role.permissions
     : [];
 
-  const currentRole = normalizeRole(adminUser?.role);
-  const targetRole = normalizeRole(user.role?.nameRole);
+  const currentRole = resolveAppRole(adminUser);
+  const targetRole = resolveAppRole(user.role);
 
   const isAdmin = currentRole === "admin";
   const isStaff = currentRole === "staff";

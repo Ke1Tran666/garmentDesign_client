@@ -46,13 +46,16 @@ export const AdminSidebar = ({
 
       {/* Navigation Groups */}
       <div className="scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 flex-1 space-y-6 overflow-x-hidden overflow-y-auto py-5">
-        <AdminNavList isCollapsed={isCollapsed} />
+        <AdminNavList
+          isCollapsed={isCollapsed}
+          userRole={user}
+        />
       </div>
 
       {/* Sidebar Footer */}
       <div className="flex flex-col gap-2 border-t border-slate-100 pt-3.5 dark:border-slate-800">
         {!isCollapsed && (
-          <div className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/70 px-3 py-2 text-xs transition-colors dark:border-slate-800 dark:bg-slate-850/50">
+          <div className="dark:bg-slate-850/50 flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50/70 px-3 py-2 text-xs transition-colors dark:border-slate-800">
             <div className="flex min-w-0 items-center gap-2">
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />

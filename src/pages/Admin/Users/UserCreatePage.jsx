@@ -18,6 +18,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useNotification } from "@/app/providers/NotificationProvider";
 import { roleApi } from "@/entities/user/api/roleApi";
 import { userApi } from "@/entities/user/api/userApi";
+import { resolveAppRole } from "@/features/auth/lib/authRole";
 import {
   UserCreatePreviewCard,
   getInitials,
@@ -89,6 +90,7 @@ const UserCreatePage = () => {
         setRoles(roleList);
         if (roleList.length > 0) {
           const defaultRole =
+            roleList.find((r) => resolveAppRole(r) === "user") ||
             roleList.find((r) => r.nameRole?.toLowerCase().includes("user")) ||
             roleList[0];
           setForm((prev) =>
@@ -462,8 +464,9 @@ const UserCreatePage = () => {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {roles.map((r) => {
                   const isChecked = String(form.roleId) === String(r.idRole);
-                  const isAdm = r.nameRole?.toLowerCase().includes("admin");
-                  const isStaff = r.nameRole?.toLowerCase().includes("staff");
+                  const resolvedRole = resolveAppRole(r);
+                  const isAdm = resolvedRole === "admin";
+                  const isStaff = resolvedRole === "staff";
                   return (
                     <label
                       key={r.idRole}
@@ -509,7 +512,8 @@ const UserCreatePage = () => {
                         {r.nameRole}
                       </span>
                       <span className="mt-1 line-clamp-2 text-[11px] text-slate-500 dark:text-slate-400">
-                        {r.descriptionRole ||
+                        {r.description ||
+                          r.descriptionRole ||
                           "Quyền hạn tài khoản trong hệ thống"}
                       </span>
                     </label>

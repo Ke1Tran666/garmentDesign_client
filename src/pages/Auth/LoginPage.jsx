@@ -64,7 +64,7 @@ const LoginPage = () => {
 
     showNotification("success", "Đăng nhập thành công", message);
 
-    const destination = getAccountPathByRole(currentUser.role);
+    const destination = getAccountPathByRole(currentUser);
 
     setTimeout(() => {
       navigate(destination, {

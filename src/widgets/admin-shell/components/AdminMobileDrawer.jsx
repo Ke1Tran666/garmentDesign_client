@@ -30,15 +30,15 @@ export const AdminMobileDrawer = ({ isOpen, onClose, user, onLogout }) => {
 
         {/* Scrollable Nav Items */}
         <div className="flex-1 space-y-5 overflow-y-auto py-4">
-          <AdminNavList onItemClick={onClose} showWebsiteLink={true} />
+          <AdminNavList
+            userRole={user}
+            onItemClick={onClose}
+            showWebsiteLink={true}
+          />
         </div>
 
         {/* Footer with User info & Logout */}
-        <AdminUserProfile
-          user={user}
-          onLogout={onLogout}
-          variant="drawer"
-        />
+        <AdminUserProfile user={user} onLogout={onLogout} variant="drawer" />
       </div>
     </div>
   );

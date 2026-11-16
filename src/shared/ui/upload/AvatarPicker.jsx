@@ -96,41 +96,43 @@ const AvatarPicker = ({
   }
 
   return (
-    <section className="rounded-2xl border border-border-subtle bg-surface-subtle p-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative shrink-0">
-          <div className="flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface text-xl font-semibold text-text-muted">
-            {imageSource && !isImageBroken ? (
-              <img
-                src={imageSource}
-                alt={alt}
-                className="h-full w-full object-cover"
-                onError={() => {
-                  if (fallback && imageSource !== fallback) {
-                    setFailedSrc(null);
-                  } else {
-                    setFailedSrc(imageSource);
-                  }
-                }}
-              />
-            ) : (
-              initials
-            )}
+    <section className="@container rounded-2xl border border-border-subtle bg-surface-subtle p-4">
+      <div className="flex flex-col gap-4 @md:flex-row @md:items-center">
+        <div className="flex min-w-0 flex-1 items-center gap-4">
+          <div className="relative shrink-0">
+            <div className="flex h-22 w-22 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface text-xl font-semibold text-text-muted">
+              {imageSource && !isImageBroken ? (
+                <img
+                  src={imageSource}
+                  alt={alt}
+                  className="h-full w-full object-cover"
+                  onError={() => {
+                    if (fallback && imageSource !== fallback) {
+                      setFailedSrc(null);
+                    } else {
+                      setFailedSrc(imageSource);
+                    }
+                  }}
+                />
+              ) : (
+                initials
+              )}
+            </div>
+
+            <span className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-lg border-2 border-surface bg-brand text-white">
+              <UserRound size={14} />
+            </span>
           </div>
 
-          <span className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-lg border-2 border-surface bg-brand text-white">
-            <UserRound size={14} />
-          </span>
-        </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-semibold text-text-strong">
+              {title || "Chưa cập nhật tên"}
+            </p>
 
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-text-strong">
-            {title || "Chưa cập nhật tên"}
-          </p>
+            {code && <p className="mt-1 text-sm text-text-muted">{code}</p>}
 
-          {code && <p className="mt-1 text-sm text-text-muted">{code}</p>}
-
-          <p className="mt-2 text-xs text-text-subtle">{hint}</p>
+            <p className="mt-2 text-xs text-text-subtle">{hint}</p>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">

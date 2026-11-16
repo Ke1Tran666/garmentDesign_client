@@ -1,4 +1,10 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -8,21 +14,25 @@ import {
   EyeOff,
   MessageSquare,
   PackageCheck,
+  RefreshCw,
+  Search,
   Sparkles,
   Star,
   Trash2,
   X,
   ZoomIn,
 } from "lucide-react";
+import { useOutletContext } from "react-router-dom";
 
-import { BACKEND_URL } from "@/shared/config/apiConfig";
-import { serviceReviewApi } from "@/features/service-reviews/api/serviceReviewApi";
-
-import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
-import { SectionCard } from "@/shared/ui/section/Section";
-import Switch from "@/shared/ui/switch/Switch";
 import { useNotification } from "@/app/providers/NotificationProvider";
-import { SearchInput } from "@/shared/ui/search/search-input";
+import { serviceReviewApi } from "@/features/service-reviews/api/serviceReviewApi";
+import { BACKEND_URL } from "@/shared/config/apiConfig";
+import { StatusBadge } from "@/shared/ui/badge/StatusBadge";
+import PageHeader from "@/shared/ui/heading/PageHeader";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import { GridSkeleton } from "@/shared/ui/skeleton";
+import StatCard from "@/shared/ui/stats/StatCard";
+import Switch from "@/shared/ui/switch/Switch";
 
 const EMPTY_FORM = {
   rating: 0,
@@ -32,25 +42,15 @@ const EMPTY_FORM = {
 };
 
 const FILTERS = [
-  {
-    value: "all",
-    label: "Tất cả",
-  },
-  {
-    value: "pending",
-    label: "Chưa đánh giá",
-  },
-  {
-    value: "reviewed",
-    label: "Đã đánh giá",
-  },
+  { value: "all", label: "Tất cả" },
+  { value: "pending", label: "Chưa đánh giá" },
+  { value: "reviewed", label: "Đã đánh giá" },
 ];
 
 const formatDate = (value) => {
   if (!value) return "Chưa có";
 
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) {
     return value;
   }
@@ -83,7 +83,7 @@ const resolveProductImage = (value) => {
   return `${BACKEND_URL}${value.startsWith("/") ? value : `/${value}`}`;
 };
 
-const RatingStars = ({ value, editable = false, onChange, size = 23 }) => (
+const RatingStars = ({ value, editable = false, onChange, size = 21 }) => (
   <div className="flex items-center gap-1" aria-label={`${value} trên 5 sao`}>
     {[1, 2, 3, 4, 5].map((star) => {
       const selected = star <= value;
@@ -99,12 +99,16 @@ const RatingStars = ({ value, editable = false, onChange, size = 23 }) => (
             editable
               ? "cursor-pointer hover:-translate-y-0.5 hover:scale-110"
               : "cursor-default"
-          } `}
+          }`}
         >
           <Star
             size={size}
             strokeWidth={1.8}
-            className={selected ? "fill-warning text-warning" : "text-border"}
+            className={
+              selected
+                ? "fill-amber-400 text-amber-400"
+                : "text-slate-300 dark:text-slate-700"
+            }
           />
         </button>
       );
@@ -112,75 +116,45 @@ const RatingStars = ({ value, editable = false, onChange, size = 23 }) => (
   </div>
 );
 
-const StatisticCard = ({
-  icon: Icon,
-  label,
-  value,
-  description,
-  iconClassName,
-}) => (
-  <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-    <div className="flex items-start justify-between gap-3">
-      <div>
-        <p className="text-xs font-semibold tracking-wider text-text-subtle uppercase">
-          {label}
-        </p>
-
-        <p className="mt-2 text-2xl font-bold text-text-strong">{value}</p>
-
-        <p className="mt-1 text-xs text-text-muted">{description}</p>
-      </div>
-
-      <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconClassName} `}
-      >
-        <Icon size={20} />
-      </span>
-    </div>
-  </div>
-);
-
-const LoadingState = () => (
-  <div className="space-y-5">
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {[1, 2, 3, 4].map((item) => (
-        <div
-          key={item}
-          className="h-30 animate-pulse rounded-2xl bg-surface-muted"
-        />
-      ))}
-    </div>
-
-    <div className="grid gap-5 xl:grid-cols-2">
-      {[1, 2].map((item) => (
-        <div
-          key={item}
-          className="h-72 animate-pulse rounded-2xl bg-surface-muted"
-        />
-      ))}
-    </div>
-  </div>
-);
-
 const ServiceReviewPage = () => {
   const { showNotification } = useNotification();
+  const { searchKeyword: topbarSearch = "" } = useOutletContext() || {};
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
-
   const [filter, setFilter] = useState("all");
-
   const [searchValue, setSearchValue] = useState("");
-
   const [previewImage, setPreviewImage] = useState(null);
 
-  const deferredSearchValue = useDeferredValue(searchValue);
+  const deferredSearchValue = useDeferredValue(searchValue || topbarSearch);
+
+  const reloadReviewableOrders = useCallback(async () => {
+    try {
+      setRefreshing(true);
+
+      const data = await serviceReviewApi.getReviewableOrders();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Không thể tải danh sách đánh giá:", error);
+      setOrders([]);
+
+      showNotification(
+        "error",
+        "Không thể tải dữ liệu",
+        error.response?.data?.message ||
+          "Không thể tải danh sách đơn hàng có thể đánh giá.",
+      );
+    } finally {
+      setRefreshing(false);
+    }
+  }, [showNotification]);
 
   useEffect(() => {
     let active = true;
@@ -189,14 +163,11 @@ const ServiceReviewPage = () => {
       .getReviewableOrders()
       .then((data) => {
         if (!active) return;
-
         setOrders(Array.isArray(data) ? data : []);
       })
       .catch((error) => {
         if (!active) return;
-
         console.error("Không thể tải danh sách đánh giá:", error);
-
         setOrders([]);
 
         showNotification(
@@ -218,9 +189,7 @@ const ServiceReviewPage = () => {
   }, [showNotification]);
 
   useEffect(() => {
-    if (!previewImage) {
-      return undefined;
-    }
+    if (!previewImage) return undefined;
 
     const previousOverflow = document.body.style.overflow;
 
@@ -231,19 +200,16 @@ const ServiceReviewPage = () => {
     };
 
     document.body.style.overflow = "hidden";
-
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [previewImage]);
 
   const statistics = useMemo(() => {
     const reviewed = orders.filter((order) => Boolean(order.review));
-
     const pending = orders.length - reviewed.length;
 
     const totalRating = reviewed.reduce(
@@ -273,13 +239,8 @@ const ServiceReviewPage = () => {
         (filter === "reviewed" && Boolean(order.review)) ||
         (filter === "pending" && !order.review);
 
-      if (!matchesFilter) {
-        return false;
-      }
-
-      if (!keyword) {
-        return true;
-      }
+      if (!matchesFilter) return false;
+      if (!keyword) return true;
 
       const searchableContent = [
         order.orderCode,
@@ -300,7 +261,6 @@ const ServiceReviewPage = () => {
 
   const openEditor = (order) => {
     const review = order.review;
-
     setEditingOrderId(order.serviceOrderId);
 
     setForm({
@@ -313,7 +273,6 @@ const ServiceReviewPage = () => {
 
   const closeEditor = () => {
     if (saving) return;
-
     setEditingOrderId(null);
     setForm(EMPTY_FORM);
   };
@@ -325,7 +284,6 @@ const ServiceReviewPage = () => {
         "Chưa chọn số sao",
         "Vui lòng chọn từ 1 đến 5 sao.",
       );
-
       return;
     }
 
@@ -335,7 +293,6 @@ const ServiceReviewPage = () => {
         "Thiếu nội dung",
         "Vui lòng nhập nội dung đánh giá.",
       );
-
       return;
     }
 
@@ -385,12 +342,9 @@ const ServiceReviewPage = () => {
 
   const handleDelete = async () => {
     const reviewId = deleteTarget?.review?.reviewId;
-
     const orderId = deleteTarget?.serviceOrderId;
 
-    if (!reviewId || !orderId) {
-      return;
-    }
+    if (!reviewId || !orderId) return;
 
     try {
       setDeleting(true);
@@ -427,490 +381,479 @@ const ServiceReviewPage = () => {
   };
 
   return (
-    <>
-      <SectionCard
-        title="Đánh giá đơn hàng"
-        desc="Chia sẻ trải nghiệm của bạn đối với những đơn hàng đã hoàn thành."
-        highlight
-      >
-        {loading ? (
-          <LoadingState />
-        ) : (
-          <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <StatisticCard
-                icon={PackageCheck}
-                label="Đơn hoàn thành"
-                value={statistics.total}
-                description="Đủ điều kiện đánh giá"
-                iconClassName="bg-brand-light text-brand"
-              />
+    <div className="animate-in space-y-6 duration-200 fade-in">
+      {/* 1. Page Header */}
+      <PageHeader
+        title="Đánh giá dịch vụ"
+        badge={
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            {orders.length} đơn hoàn thành
+          </span>
+        }
+        description="Chia sẻ trải nghiệm và mức độ hài lòng của bạn đối với các đơn hàng đã nghiệm thu."
+        actions={
+          <button
+            type="button"
+            onClick={reloadReviewableOrders}
+            disabled={refreshing || loading}
+            className="flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            title="Làm mới dữ liệu"
+          >
+            <RefreshCw
+              size={14}
+              className={
+                refreshing ? "animate-spin text-brand" : "text-slate-400"
+              }
+            />
+            <span className="hidden sm:inline">Làm mới</span>
+          </button>
+        }
+      />
 
-              <StatisticCard
-                icon={CheckCircle2}
-                label="Đã đánh giá"
-                value={statistics.reviewed}
-                description="Đánh giá đã gửi"
-                iconClassName="bg-success-soft text-success"
-              />
+      {/* 2. Metric Stats Cards */}
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard
+          title="Đơn hoàn thành"
+          value={statistics.total}
+          subtitle="đủ điều kiện đánh giá"
+          icon={PackageCheck}
+          iconColorClass="bg-blue-50 text-brand dark:bg-blue-950/50 dark:text-blue-400"
+          hoverBorderClass="hover:border-blue-300"
+          onClick={() => setFilter("all")}
+        />
 
-              <StatisticCard
-                icon={Clock3}
-                label="Đang chờ"
-                value={statistics.pending}
-                description="Chưa gửi đánh giá"
-                iconClassName="bg-warning-soft text-warning"
-              />
+        <StatCard
+          title="Đã đánh giá"
+          value={statistics.reviewed}
+          subtitle="đánh giá đã gửi"
+          icon={CheckCircle2}
+          iconColorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+          hoverBorderClass="hover:border-emerald-300"
+          onClick={() => setFilter("reviewed")}
+        />
 
-              <StatisticCard
-                icon={Sparkles}
-                label="Điểm trung bình"
-                value={`${statistics.average}/5`}
-                description="Mức độ hài lòng"
-                iconClassName="bg-warning-soft text-warning"
-              />
-            </div>
+        <StatCard
+          title="Chờ đánh giá"
+          value={statistics.pending}
+          subtitle="chưa gửi phản hồi"
+          icon={Clock3}
+          iconColorClass="bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
+          hoverBorderClass="hover:border-amber-300"
+          onClick={() => setFilter("pending")}
+        />
 
-            <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div className="shrink-0">
-                  <h2 className="font-semibold text-text-strong">
-                    Ds đơn hàng
-                  </h2>
+        <StatCard
+          title="Điểm trung bình"
+          value={`${statistics.average} / 5`}
+          subtitle="mức độ hài lòng"
+          icon={Sparkles}
+          iconColorClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"
+        />
+      </section>
 
-                  <p className="mt-1 text-sm text-text-muted">
-                    {filteredOrders.length} đơn hàng
-                  </p>
-                </div>
+      {/* 3. Toolbar & Filter Pills */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs lg:flex-row lg:items-center lg:justify-between dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {FILTERS.map((item) => {
+            const active = filter === item.value;
+            return (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => setFilter(item.value)}
+                className={`cursor-pointer rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
+                  active
+                    ? "bg-brand! text-white! shadow-xs"
+                    : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
 
-                <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                  <SearchInput
-                    value={searchValue}
-                    onChange={setSearchValue}
-                    placeholder="Tìm mã đơn, sản phẩm..."
-                    className="w-full sm:max-w-xs"
-                  />
+        <div className="relative w-full sm:w-72">
+          <Search
+            size={15}
+            className="absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            type="text"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Tìm mã đơn, sản phẩm..."
+            className="h-9.5 w-full rounded-xl border border-slate-200 bg-slate-50/70 pr-3 pl-9.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+          />
+        </div>
+      </div>
 
-                  <div className="flex flex-wrap gap-1">
-                    {FILTERS.map((item) => (
-                      <button
-                        key={item.value}
-                        type="button"
-                        onClick={() => setFilter(item.value)}
-                        className={`rounded-xl border px-3.5 py-2 text-sm font-semibold transition ${
-                          filter === item.value
-                            ? "border-brand bg-brand! text-white"
-                            : "border-border bg-surface text-text-muted hover:border-brand hover:text-brand"
-                        } `}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* 4. Review Cards Grid */}
+      {loading ? (
+        <GridSkeleton count={4} columns="grid-cols-1 xl:grid-cols-2" />
+      ) : filteredOrders.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center dark:border-slate-800 dark:bg-slate-900">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+            <MessageSquare size={26} />
+          </span>
 
-            {filteredOrders.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-surface px-6 py-16 text-center">
-                <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-muted text-text-subtle">
-                  <MessageSquare size={28} />
-                </span>
+          <h2 className="mt-4 font-heading text-base font-bold text-slate-900 dark:text-white">
+            {hasSearch
+              ? "Không tìm thấy đơn hàng"
+              : orders.length === 0
+                ? "Chưa có đơn hàng đủ điều kiện"
+                : "Không có đơn hàng trong mục này"}
+          </h2>
 
-                <h2 className="mt-4 font-semibold text-text-strong">
-                  {hasSearch
-                    ? "Không tìm thấy đơn hàng"
-                    : orders.length === 0
-                      ? "Chưa có đơn hàng đủ điều kiện"
-                      : "Không có đơn hàng trong mục này"}
-                </h2>
+          <p className="mx-auto mt-2 max-w-md text-xs leading-6 text-slate-500 sm:text-sm dark:text-slate-400">
+            {hasSearch
+              ? `Không có kết quả phù hợp với “${deferredSearchValue.trim()}”.`
+              : orders.length === 0
+                ? "Đơn hàng sẽ xuất hiện tại đây khi đã được hoàn thành và bàn giao."
+                : "Hãy chọn một bộ lọc khác để xem danh sách đơn hàng."}
+          </p>
 
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-text-muted">
-                  {hasSearch
-                    ? `Không có kết quả phù hợp với “${deferredSearchValue.trim()}”.`
-                    : orders.length === 0
-                      ? "Đơn hàng sẽ xuất hiện khi ngày hoàn thành nhỏ hơn hoặc bằng ngày hiện tại."
-                      : "Hãy chọn một bộ lọc khác để xem danh sách đơn hàng."}
-                </p>
-                {hasSearch && (
+          {hasSearch && (
+            <button
+              type="button"
+              onClick={() => setSearchValue("")}
+              className="mt-5 cursor-pointer rounded-xl bg-brand! px-4 py-2 text-xs font-semibold text-white! shadow-xs transition hover:bg-brand-hover!"
+            >
+              Xóa tìm kiếm
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-5 xl:grid-cols-2">
+          {filteredOrders.map((order) => {
+            const isEditing = editingOrderId === order.serviceOrderId;
+            const productImage = resolveProductImage(order.productImage);
+
+            return (
+              <article
+                key={order.serviceOrderId}
+                className={`overflow-hidden rounded-2xl border bg-white shadow-xs transition-all duration-200 dark:bg-slate-900 ${
+                  isEditing
+                    ? "border-brand ring-2 ring-brand/15"
+                    : "border-slate-200/80 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:hover:border-slate-700"
+                }`}
+              >
+                <div className="flex gap-4 border-b border-slate-100 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-800/40">
                   <button
                     type="button"
-                    onClick={() => setSearchValue("")}
-                    className="mt-5 rounded-xl bg-brand! px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                    disabled={!productImage}
+                    onClick={() => {
+                      if (!productImage) return;
+
+                      setPreviewImage({
+                        src: productImage,
+                        alt: order.productName || "Ảnh sản phẩm",
+                        orderCode: order.orderCode,
+                        productName: order.productName || "Đơn hàng dịch vụ",
+                      });
+                    }}
+                    aria-label={
+                      productImage
+                        ? `Xem ảnh ${order.productName || "sản phẩm"}`
+                        : "Đơn hàng chưa có ảnh"
+                    }
+                    className={`group relative flex h-18 w-18 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/80 bg-white dark:border-slate-700 dark:bg-slate-900 ${
+                      productImage ? "cursor-zoom-in" : "cursor-default"
+                    }`}
                   >
-                    Xóa tìm kiếm
+                    {productImage ? (
+                      <>
+                        <img
+                          src={productImage}
+                          alt={order.productName || "Sản phẩm"}
+                          className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/35 group-hover:opacity-100">
+                          <ZoomIn size={20} />
+                        </span>
+                      </>
+                    ) : (
+                      <PackageCheck size={24} className="text-slate-400" />
+                    )}
                   </button>
-                )}
-              </div>
-            ) : (
-              <div className="grid gap-5 xl:grid-cols-2">
-                {filteredOrders.map((order) => {
-                  const isEditing = editingOrderId === order.serviceOrderId;
 
-                  const productImage = resolveProductImage(order.productImage);
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-mono text-xs font-bold tracking-wider text-brand uppercase">
+                        {order.orderCode}
+                      </span>
 
-                  return (
-                    <article
-                      key={order.serviceOrderId}
-                      className={`overflow-hidden rounded-3xl border bg-surface shadow-sm transition duration-300 ${
-                        isEditing
-                          ? "border-brand shadow-lg"
-                          : "border-border hover:-translate-y-0.5 hover:shadow-md"
-                      } `}
-                    >
-                      <div className="flex gap-4 border-b border-border-subtle bg-surface-subtle p-5">
-                        <button
-                          type="button"
-                          disabled={!productImage}
-                          onClick={() => {
-                            if (!productImage) return;
+                      <StatusBadge
+                        label={order.review ? "Đã đánh giá" : "Chờ đánh giá"}
+                        tone={order.review ? "success" : "warning"}
+                      />
+                    </div>
 
-                            setPreviewImage({
-                              src: productImage,
-                              alt: order.productName || "Ảnh sản phẩm",
-                              orderCode: order.orderCode,
-                              productName:
-                                order.productName || "Đơn hàng dịch vụ",
-                            });
-                          }}
-                          aria-label={
-                            productImage
-                              ? `Xem ảnh ${order.productName || "sản phẩm"}`
-                              : "Đơn hàng chưa có ảnh"
-                          }
-                          className={`group relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface ${
-                            productImage ? "cursor-zoom-in" : "cursor-default"
-                          } `}
-                        >
-                          {productImage ? (
-                            <>
-                              <img
-                                src={productImage}
-                                alt={order.productName || "Sản phẩm"}
-                                className="h-full w-full object-cover transition duration-300 group-hover:scale-110"
-                              />
+                    <h2 className="mt-1.5 truncate font-heading text-base font-bold text-slate-900 dark:text-white">
+                      {order.productName || "Đơn hàng dịch vụ"}
+                    </h2>
 
-                              <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/35 group-hover:opacity-100">
-                                <ZoomIn size={22} />
-                              </span>
-                            </>
-                          ) : (
-                            <PackageCheck
-                              size={28}
-                              className="text-text-subtle"
-                            />
-                          )}
-                        </button>
+                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                      {order.serviceName || "Chưa có tên dịch vụ"}
+                    </p>
+                  </div>
+                </div>
 
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-xs font-bold tracking-wider text-brand uppercase">
-                              {order.orderCode}
-                            </span>
+                <div className="p-5">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <CalendarDays size={15} className="text-brand" />
+                      <span>
+                        Hoàn thành:{" "}
+                        <strong className="font-semibold text-slate-800 dark:text-slate-200">
+                          {formatDate(order.completedDate)}
+                        </strong>
+                      </span>
+                    </div>
 
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                order.review
-                                  ? "bg-success-soft text-success"
-                                  : "bg-warning-soft text-warning"
-                              } `}
-                            >
-                              {order.review ? "Đã đánh giá" : "Chờ đánh giá"}
-                            </span>
-                          </div>
+                    {order.review && (
+                      <RatingStars value={order.review.rating} size={18} />
+                    )}
+                  </div>
 
-                          <h2 className="mt-2 truncate text-lg font-bold text-text-strong">
-                            {order.productName || "Đơn hàng dịch vụ"}
-                          </h2>
-
-                          <p className="mt-1 truncate text-sm text-text-muted">
-                            {order.serviceName || "Chưa có tên dịch vụ"}
+                  {isEditing ? (
+                    <div className="rounded-2xl border border-brand/20 bg-brand-light/40 p-4 dark:bg-brand/10">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white">
+                            {order.review
+                              ? "Chỉnh sửa đánh giá"
+                              : "Đánh giá trải nghiệm"}
+                          </p>
+                          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                            Chọn số sao và chia sẻ cảm nhận của bạn.
                           </p>
                         </div>
+
+                        <button
+                          type="button"
+                          onClick={closeEditor}
+                          disabled={saving}
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-white hover:text-slate-700 disabled:opacity-50 dark:hover:bg-slate-800"
+                          aria-label="Đóng form đánh giá"
+                        >
+                          <X size={16} />
+                        </button>
                       </div>
 
-                      <div className="p-5">
-                        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-2 text-sm text-text-muted">
-                            <CalendarDays size={17} className="text-brand" />
+                      <div className="mt-4">
+                        <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                          Mức độ hài lòng
+                        </label>
 
-                            <span>
-                              Hoàn thành{" "}
-                              <strong className="font-semibold text-text-default">
-                                {formatDate(order.completedDate)}
-                              </strong>
-                            </span>
-                          </div>
+                        <RatingStars
+                          value={form.rating}
+                          editable
+                          size={26}
+                          onChange={(rating) =>
+                            setForm((current) => ({
+                              ...current,
+                              rating,
+                            }))
+                          }
+                        />
 
-                          {order.review && (
-                            <RatingStars
-                              value={order.review.rating}
-                              size={20}
-                            />
-                          )}
+                        <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                          {form.rating > 0
+                            ? `${form.rating}/5 sao`
+                            : "Chưa chọn số sao"}
+                        </p>
+                      </div>
+
+                      <div className="mt-4">
+                        <div className="mb-1.5 flex items-center justify-between gap-3">
+                          <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                            Nội dung đánh giá
+                          </label>
+                          <span className="text-[11px] text-slate-400">
+                            {form.reviewContent.length}/2000
+                          </span>
                         </div>
 
-                        {isEditing ? (
-                          <div className="rounded-2xl border border-brand/20 bg-brand-light/40 p-4">
-                            <div className="flex items-start justify-between gap-4">
-                              <div>
-                                <p className="font-semibold text-text-strong">
-                                  {order.review
-                                    ? "Chỉnh sửa đánh giá"
-                                    : "Đánh giá trải nghiệm"}
-                                </p>
+                        <textarea
+                          rows={4}
+                          maxLength={2000}
+                          value={form.reviewContent}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              reviewContent: event.target.value,
+                            }))
+                          }
+                          placeholder="Hãy chia sẻ chất lượng sản phẩm, thời gian thực hiện hoặc trải nghiệm phục vụ..."
+                          className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs leading-6 text-slate-800 transition outline-none placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                        />
+                      </div>
 
-                                <p className="mt-1 text-xs text-text-muted">
-                                  Chọn số sao và chia sẻ cảm nhận của bạn.
-                                </p>
-                              </div>
+                      <div className="mt-3.5">
+                        <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                          Tên công ty{" "}
+                          <span className="font-normal text-slate-400">
+                            (không bắt buộc)
+                          </span>
+                        </label>
 
-                              <button
-                                type="button"
-                                onClick={closeEditor}
-                                disabled={saving}
-                                className="flex h-9 w-9 items-center justify-center rounded-full text-text-muted transition hover:bg-surface hover:text-text-strong disabled:opacity-50"
-                                aria-label="Đóng form đánh giá"
-                              >
-                                <X size={18} />
-                              </button>
-                            </div>
+                        <input
+                          type="text"
+                          maxLength={150}
+                          value={form.companyName}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              companyName: event.target.value,
+                            }))
+                          }
+                          placeholder="Nhập tên công ty"
+                          className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-xs text-slate-800 transition outline-none placeholder:text-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                        />
+                      </div>
 
-                            <div className="mt-5">
-                              <label className="mb-2 block text-sm font-semibold text-text-default">
-                                Mức độ hài lòng
-                              </label>
+                      <div className="mt-3.5 flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                              form.isPublic
+                                ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+                                : "bg-slate-100 text-slate-500 dark:bg-slate-800"
+                            }`}
+                          >
+                            {form.isPublic ? (
+                              <Eye size={16} />
+                            ) : (
+                              <EyeOff size={16} />
+                            )}
+                          </span>
 
-                              <RatingStars
-                                value={form.rating}
-                                editable
-                                size={28}
-                                onChange={(rating) =>
-                                  setForm((current) => ({
-                                    ...current,
-                                    rating,
-                                  }))
-                                }
-                              />
-
-                              <p className="mt-2 text-xs text-text-muted">
-                                {form.rating > 0
-                                  ? `${form.rating}/5 sao`
-                                  : "Chưa chọn số sao"}
-                              </p>
-                            </div>
-
-                            <div className="mt-5">
-                              <div className="mb-2 flex items-center justify-between gap-3">
-                                <label className="text-sm font-semibold text-text-default">
-                                  Nội dung đánh giá
-                                </label>
-
-                                <span className="text-xs text-text-subtle">
-                                  {form.reviewContent.length}
-                                  /2000
-                                </span>
-                              </div>
-
-                              <textarea
-                                rows={5}
-                                maxLength={2000}
-                                value={form.reviewContent}
-                                onChange={(event) =>
-                                  setForm((current) => ({
-                                    ...current,
-                                    reviewContent: event.target.value,
-                                  }))
-                                }
-                                placeholder="Hãy chia sẻ chất lượng sản phẩm, thời gian thực hiện hoặc trải nghiệm phục vụ..."
-                                className="w-full resize-none rounded-xl border border-border bg-surface px-4 py-3 text-sm leading-6 text-text-default transition outline-none placeholder:text-text-subtle focus:border-brand focus:ring-2 focus:ring-brand/10"
-                              />
-                            </div>
-
-                            <div className="mt-4">
-                              <label className="mb-2 block text-sm font-semibold text-text-default">
-                                Tên công ty
-                                <span className="ml-1 font-normal text-text-subtle">
-                                  (không bắt buộc)
-                                </span>
-                              </label>
-
-                              <input
-                                type="text"
-                                maxLength={150}
-                                value={form.companyName}
-                                onChange={(event) =>
-                                  setForm((current) => ({
-                                    ...current,
-                                    companyName: event.target.value,
-                                  }))
-                                }
-                                placeholder="Nhập tên công ty"
-                                className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-default transition outline-none placeholder:text-text-subtle focus:border-brand focus:ring-2 focus:ring-brand/10"
-                              />
-                            </div>
-
-                            <div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-border bg-surface p-3">
-                              <div className="flex items-center gap-3">
-                                <span
-                                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-                                    form.isPublic
-                                      ? "bg-success-soft text-success"
-                                      : "bg-surface-muted text-text-muted"
-                                  } `}
-                                >
-                                  {form.isPublic ? (
-                                    <Eye size={18} />
-                                  ) : (
-                                    <EyeOff size={18} />
-                                  )}
-                                </span>
-
-                                <div>
-                                  <p className="text-sm font-semibold text-text-default">
-                                    Hiển thị công khai
-                                  </p>
-
-                                  <p className="text-xs text-text-muted">
-                                    Cho phép hiển thị đánh giá trên website.
-                                  </p>
-                                </div>
-                              </div>
-
-                              <Switch
-                                checked={form.isPublic}
-                                onChange={(isPublic) =>
-                                  setForm((current) => ({
-                                    ...current,
-                                    isPublic,
-                                  }))
-                                }
-                              />
-                            </div>
-
-                            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                              <button
-                                type="button"
-                                onClick={closeEditor}
-                                disabled={saving}
-                                className="rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-text-default transition hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
-                              >
-                                Hủy
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleSubmit(order)}
-                                disabled={saving}
-                                className="rounded-xl bg-brand! px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                {saving
-                                  ? "Đang lưu..."
-                                  : order.review
-                                    ? "Cập nhật đánh giá"
-                                    : "Gửi đánh giá"}
-                              </button>
-                            </div>
-                          </div>
-                        ) : order.review ? (
                           <div>
-                            <div className="rounded-2xl bg-surface-subtle p-4">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2">
-                                  <MessageSquare
-                                    size={17}
-                                    className="text-brand"
-                                  />
-
-                                  <p className="text-sm font-semibold text-text-strong">
-                                    Đánh giá của bạn
-                                  </p>
-                                </div>
-
-                                <span
-                                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                    order.review.isPublic
-                                      ? "bg-success-soft text-success"
-                                      : "bg-surface-muted text-text-muted"
-                                  } `}
-                                >
-                                  {order.review.isPublic ? (
-                                    <Eye size={13} />
-                                  ) : (
-                                    <EyeOff size={13} />
-                                  )}
-
-                                  {order.review.isPublic
-                                    ? "Công khai"
-                                    : "Riêng tư"}
-                                </span>
-                              </div>
-
-                              <p className="mt-3 text-sm leading-6 wrap-break-word whitespace-pre-wrap text-text-default">
-                                {order.review.reviewContent}
-                              </p>
-
-                              {order.review.companyName && (
-                                <p className="mt-3 border-t border-border-subtle pt-3 text-xs text-text-muted">
-                                  Công ty:{" "}
-                                  <strong className="font-semibold text-text-default">
-                                    {order.review.companyName}
-                                  </strong>
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="mt-4 flex flex-wrap justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => openEditor(order)}
-                                className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-semibold text-text-default transition hover:border-brand hover:text-brand"
-                              >
-                                <Edit3 size={16} />
-                                Chỉnh sửa
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget(order)}
-                                className="inline-flex items-center gap-2 rounded-xl bg-danger-soft px-4 py-2 text-sm font-semibold text-danger transition hover:opacity-80"
-                              >
-                                <Trash2 size={16} />
-                                Xóa đánh giá
-                              </button>
-                            </div>
+                            <p className="text-xs font-semibold text-slate-800 dark:text-white">
+                              Hiển thị công khai
+                            </p>
+                            <p className="text-[11px] text-slate-400">
+                              Cho phép hiển thị đánh giá trên trang chủ.
+                            </p>
                           </div>
-                        ) : (
-                          <div className="flex flex-col gap-4 rounded-2xl border border-dashed border-border bg-surface-subtle p-5 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                              <p className="font-semibold text-text-strong">
-                                Bạn chưa đánh giá đơn hàng này
-                              </p>
+                        </div>
 
-                              <p className="mt-1 text-sm leading-6 text-text-muted">
-                                Chia sẻ trải nghiệm để giúp chúng tôi cải thiện
-                                dịch vụ.
-                              </p>
-                            </div>
+                        <Switch
+                          checked={form.isPublic}
+                          onChange={(isPublic) =>
+                            setForm((current) => ({
+                              ...current,
+                              isPublic,
+                            }))
+                          }
+                        />
+                      </div>
 
-                            <button
-                              type="button"
-                              onClick={() => openEditor(order)}
-                              className="shrink-0 rounded-xl bg-brand! px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-                            >
-                              Đánh giá ngay
-                            </button>
+                      <div className="mt-4 flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={closeEditor}
+                          disabled={saving}
+                          className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        >
+                          Hủy
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSubmit(order)}
+                          disabled={saving}
+                          className="cursor-pointer rounded-xl bg-brand! px-4 py-2 text-xs font-semibold text-white! shadow-xs transition hover:bg-brand-hover! disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {saving
+                            ? "Đang lưu..."
+                            : order.review
+                              ? "Cập nhật đánh giá"
+                              : "Gửi đánh giá"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : order.review ? (
+                    <div>
+                      <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare size={15} className="text-brand" />
+                            <p className="text-xs font-bold text-slate-900 dark:text-white">
+                              Đánh giá của bạn
+                            </p>
                           </div>
+
+                          <StatusBadge
+                            label={
+                              order.review.isPublic ? "Công khai" : "Riêng tư"
+                            }
+                            tone={order.review.isPublic ? "success" : "neutral"}
+                          />
+                        </div>
+
+                        <p className="mt-2.5 text-xs leading-6 wrap-break-word whitespace-pre-wrap text-slate-700 dark:text-slate-300">
+                          {order.review.reviewContent}
+                        </p>
+
+                        {order.review.companyName && (
+                          <p className="mt-3 border-t border-slate-200/60 pt-2.5 text-[11px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                            Công ty:{" "}
+                            <strong className="font-semibold text-slate-800 dark:text-slate-200">
+                              {order.review.companyName}
+                            </strong>
+                          </p>
                         )}
                       </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </SectionCard>
+
+                      <div className="mt-3.5 flex flex-wrap justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEditor(order)}
+                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:border-brand hover:text-brand dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                        >
+                          <Edit3 size={14} />
+                          <span>Chỉnh sửa</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(order)}
+                          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400"
+                        >
+                          <Trash2 size={14} />
+                          <span>Xóa đánh giá</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-800/30">
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 dark:text-white">
+                          Bạn chưa đánh giá đơn hàng này
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                          Chia sẻ trải nghiệm để giúp chúng tôi nâng cao chất
+                          lượng dịch vụ.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => openEditor(order)}
+                        className="shrink-0 cursor-pointer rounded-xl bg-brand! px-4 py-2 text-xs font-semibold text-white! shadow-xs transition hover:bg-brand-hover!"
+                      >
+                        Đánh giá ngay
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
       {previewImage && (
         <div
@@ -922,15 +865,14 @@ const ServiceReviewPage = () => {
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl"
+            className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900"
           >
-            <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+            <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
               <div className="min-w-0">
-                <p className="text-xs font-bold tracking-wider text-brand uppercase">
+                <p className="font-mono text-xs font-bold tracking-wider text-brand uppercase">
                   {previewImage.orderCode}
                 </p>
-
-                <h3 className="mt-1 truncate font-semibold text-text-strong">
+                <h3 className="mt-1 truncate font-heading font-bold text-slate-900 dark:text-white">
                   {previewImage.productName}
                 </h3>
               </div>
@@ -939,13 +881,13 @@ const ServiceReviewPage = () => {
                 type="button"
                 onClick={() => setPreviewImage(null)}
                 aria-label="Đóng ảnh"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-text-muted transition hover:bg-surface-muted hover:text-text-strong"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
               >
-                <X size={21} />
+                <X size={20} />
               </button>
             </div>
 
-            <div className="flex min-h-0 flex-1 items-center justify-center bg-black/5 p-4">
+            <div className="flex min-h-0 flex-1 items-center justify-center bg-slate-950/5 p-4">
               <img
                 src={previewImage.src}
                 alt={previewImage.alt}
@@ -973,7 +915,7 @@ const ServiceReviewPage = () => {
         Đánh giá sẽ được ẩn khỏi hệ thống. Bạn vẫn có thể gửi đánh giá mới cho
         đơn hàng này sau khi xóa.
       </ConfirmModal>
-    </>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import UserAvatar from "@/shared/ui/avatar/UserAvatar";
+import { PortalUserAvatar } from "@/shared/ui/portal-shell";
 
 export const AdminUserAvatar = ({
   src,
@@ -9,7 +9,7 @@ export const AdminUserAvatar = ({
   showStatus = false,
   statusColor = "bg-emerald-500",
 }) => (
-  <UserAvatar
+  <PortalUserAvatar
     src={src}
     name={name}
     size={size}

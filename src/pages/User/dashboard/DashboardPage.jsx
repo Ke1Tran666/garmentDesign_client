@@ -1,70 +1,64 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Chart from "react-apexcharts";
 import {
-  DndContext,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  rectSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
+  ArrowRight,
   BarChart3,
   CheckCircle2,
-  Clock,
+  ClipboardList,
+  Clock3,
+  Eye,
   FileText,
-  MoreVertical,
-  PackageCheck,
+  MapPin,
+  Package,
+  PackagePlus,
+  RefreshCw,
   Search,
+  ShoppingBag,
+  Star,
+  User,
 } from "lucide-react";
-import { serviceOrderFileApi } from "@/entities/service-order/api/serviceOrderFileApi";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
+
 import { serviceOrderApi } from "@/entities/service-order/api/serviceOrderApi";
+import { serviceOrderFileApi } from "@/entities/service-order/api/serviceOrderFileApi";
+import { useAuth } from "@/features/auth/model/useAuth";
+import { StatusBadge } from "@/shared/ui/badge/StatusBadge";
+import EmptyState from "@/shared/ui/empty-state/EmptyState";
+import PageHeader from "@/shared/ui/heading/PageHeader";
+import { PortalSectionCard } from "@/shared/ui/section/Section";
+import { DashboardSkeleton } from "@/shared/ui/skeleton";
+import StatCard from "@/shared/ui/stats/StatCard";
 
-const monthLabels = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
+const MONTH_LABELS = [
+  "Th1",
+  "Th2",
+  "Th3",
+  "Th4",
+  "Th5",
+  "Th6",
+  "Th7",
+  "Th8",
+  "Th9",
+  "Th10",
+  "Th11",
+  "Th12",
 ];
 
-const fileColors = ["#8b5cf6", "#38bdf8", "#14b8a6", "#f97316", "#22c55e"];
-
-const defaultDashboardItems = [
-  { id: "total-files", size: "small" },
-  { id: "month-orders", size: "small" },
-  { id: "completed-task", size: "small" },
-  { id: "file-chart", size: "medium" },
-  { id: "order-chart", size: "large" },
-  { id: "task-table", size: "full" },
-];
+const FILE_COLORS = ["#0284c7", "#6366f1", "#10b981", "#f59e0b", "#ec4899"];
 
 const isCancelledOrder = (order) =>
   String(order?.status || "").toLowerCase() === "inactive" &&
   Boolean(order?.deletedAt);
 
-const getOrderStatus = (order) => {
+const getOrderStatusMeta = (order) => {
   const status = String(order?.status || "pending").toLowerCase();
 
   if (isCancelledOrder(order)) {
     return {
       code: "inactive",
       label: "Đã hủy đơn hàng",
+      tone: "danger",
       progress: 0,
-      className: "bg-danger-soft text-danger",
     };
   }
 
@@ -72,8 +66,8 @@ const getOrderStatus = (order) => {
     return {
       code: "pending",
       label: "Chờ tiếp nhận",
+      tone: "warning",
       progress: 35,
-      className: "bg-warning-soft text-warning",
     };
   }
 
@@ -81,8 +75,8 @@ const getOrderStatus = (order) => {
     return {
       code: "active",
       label: "Đang xử lý",
+      tone: "info",
       progress: 65,
-      className: "bg-info-soft text-info",
     };
   }
 
@@ -90,16 +84,16 @@ const getOrderStatus = (order) => {
     return {
       code: "completed",
       label: "Hoàn tất",
+      tone: "success",
       progress: 100,
-      className: "bg-success-soft text-success",
     };
   }
 
   return {
     code: status,
     label: "Không xác định",
+    tone: "neutral",
     progress: 0,
-    className: "bg-surface-muted text-text-muted",
   };
 };
 
@@ -107,7 +101,6 @@ const formatDate = (value) => {
   if (!value) return "Chưa có";
 
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) {
     return "Chưa có";
   }
@@ -119,679 +112,625 @@ const formatDate = (value) => {
   }).format(date);
 };
 
-const mapOrderToTask = (order) => {
-  const status = getOrderStatus(order);
-
-  return {
-    id: `ORD-${order.serviceOrderId}`,
-    orderId: order.serviceOrderId,
-    customer: order.user?.fullName || "Không rõ",
-    service: order.service?.serviceName || "Không rõ dịch vụ",
-    deadline: formatDate(order.completedDate || order.receivedDate),
-    status: status.label,
-    databaseStatus: status.code,
-    statusClassName: status.className,
-    progress: status.progress,
-  };
-};
-
-const getSizeClass = (size) => {
-  switch (size) {
-    case "small":
-      return "col-span-12 md:col-span-4";
-
-    case "medium":
-      return "col-span-12 lg:col-span-4";
-
-    case "large":
-      return "col-span-12 lg:col-span-8";
-
-    case "full":
-      return "col-span-12";
-
-    default:
-      return "col-span-12";
-  }
-};
-
-const SortableDashboardItem = ({ item, children }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: item.id,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={` ${getSizeClass(item.size)} ${isDragging ? "z-20 opacity-70" : ""} `}
-    >
-      <div
-        {...attributes}
-        {...listeners}
-        className="h-full cursor-grab active:cursor-grabbing"
-      >
-        {children}
-      </div>
-    </div>
-  );
-};
-
-const Card = ({ children, className = "" }) => {
-  return (
-    <div
-      className={`h-full rounded-2xl border border-border bg-surface p-5 shadow-sm ${className} `}
-    >
-      {children}
-    </div>
-  );
-};
-
 const getFileCategory = (file) => {
   const type = String(file?.fileType || "").toLowerCase();
 
-  if (type.startsWith("image/")) {
-    return "Ảnh bổ sung";
-  }
+  if (type.startsWith("image/")) return "Ảnh bổ sung";
+  if (type.includes("pdf")) return "Tài liệu PDF";
+  if (type.includes("word") || type.includes("document"))
+    return "Tài liệu Word";
+  if (type.includes("excel") || type.includes("spreadsheet"))
+    return "Bảng tính Excel";
+  return "Tệp khác";
+};
 
-  if (type.includes("pdf")) {
-    return "PDF";
-  }
-
-  if (type.includes("word") || type.includes("document")) {
-    return "Word";
-  }
-
-  if (type.includes("excel") || type.includes("spreadsheet")) {
-    return "Excel";
-  }
-
-  return "File khác";
+const getOrderCreatedDate = (order) => {
+  const value = order?.createdAt || order?.receivedDate;
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 };
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { searchKeyword: topbarSearch = "" } = useOutletContext() || {};
+
   const [orders, setOrders] = useState([]);
   const [files, setFiles] = useState([]);
-  const taskOrder = useMemo(() => orders.map(mapOrderToTask), [orders]);
   const [loading, setLoading] = useState(true);
-  const [searchValue, setSearchValue] = useState("");
-  const [dashboardItems, setDashboardItems] = useState(() => {
-    const savedLayout = localStorage.getItem("dashboard-layout");
+  const [refreshing, setRefreshing] = useState(false);
+  const [localSearch, setLocalSearch] = useState("");
 
-    if (!savedLayout) return defaultDashboardItems;
-
+  const fetchDashboardData = useCallback(async (isRefresh = false) => {
     try {
-      const parsedLayout = JSON.parse(savedLayout);
-
-      const validItems = parsedLayout.filter((savedItem) =>
-        defaultDashboardItems.some((item) => item.id === savedItem.id),
-      );
-
-      const missingItems = defaultDashboardItems.filter(
-        (item) => !validItems.some((savedItem) => savedItem.id === item.id),
-      );
-
-      return [...validItems, ...missingItems];
-    } catch {
-      return defaultDashboardItems;
-    }
-  });
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 6,
-      },
-    }),
-  );
-
-  useEffect(() => {
-    let active = true;
-
-    const fetchDashboardData = async () => {
-      try {
-        const [orderResult, fileResult] = await Promise.allSettled([
-          serviceOrderApi.getMine(),
-          serviceOrderFileApi.getMine(),
-        ]);
-
-        if (!active) return;
-
-        setOrders(
-          orderResult.status === "fulfilled" && Array.isArray(orderResult.value)
-            ? orderResult.value
-            : [],
-        );
-
-        setFiles(
-          fileResult.status === "fulfilled" && Array.isArray(fileResult.value)
-            ? fileResult.value
-            : [],
-        );
-
-        if (orderResult.status === "rejected") {
-          console.error("Không thể tải đơn hàng:", orderResult.reason);
-        }
-
-        if (fileResult.status === "rejected") {
-          console.error("Không thể tải file đơn hàng:", fileResult.reason);
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
       }
-    };
 
-    fetchDashboardData();
+      const [orderResult, fileResult] = await Promise.allSettled([
+        serviceOrderApi.getMine(),
+        serviceOrderFileApi.getMine(),
+      ]);
 
-    return () => {
-      active = false;
-    };
+      setOrders(
+        orderResult.status === "fulfilled" && Array.isArray(orderResult.value)
+          ? orderResult.value
+          : [],
+      );
+
+      setFiles(
+        fileResult.status === "fulfilled" && Array.isArray(fileResult.value)
+          ? fileResult.value
+          : [],
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("dashboard-layout", JSON.stringify(dashboardItems));
-  }, [dashboardItems]);
+    fetchDashboardData(false);
+  }, [fetchDashboardData]);
 
-  const productImageCount = useMemo(
-    () =>
-      orders.reduce((total, order) => total + (order.productImage ? 1 : 0), 0),
-    [orders],
-  );
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+
+  const metrics = useMemo(() => {
+    let pendingCount = 0;
+    let activeCount = 0;
+    let completedCount = 0;
+    let currentMonthOrders = 0;
+
+    orders.forEach((order) => {
+      if (isCancelledOrder(order)) return;
+
+      const status = String(order?.status || "pending").toLowerCase();
+      if (status === "pending") pendingCount += 1;
+      else if (status === "active") activeCount += 1;
+      else if (status === "completed") completedCount += 1;
+
+      const createdDate = getOrderCreatedDate(order);
+      if (
+        createdDate &&
+        createdDate.getFullYear() === currentYear &&
+        createdDate.getMonth() === currentMonth
+      ) {
+        currentMonthOrders += 1;
+      }
+    });
+
+    const productImageCount = orders.reduce(
+      (total, order) => total + (order.productImage ? 1 : 0),
+      0,
+    );
+
+    return {
+      totalOrders: orders.length,
+      pendingCount,
+      activeCount,
+      inProgressCount: pendingCount + activeCount,
+      completedCount,
+      currentMonthOrders,
+      productImageCount,
+      totalFiles: files.length + productImageCount,
+    };
+  }, [orders, files.length, currentYear, currentMonth]);
 
   const fileStats = useMemo(() => {
     const grouped = {};
 
-    if (productImageCount > 0) {
-      grouped["Ảnh đại diện"] = productImageCount;
+    if (metrics.productImageCount > 0) {
+      grouped["Ảnh sản phẩm"] = metrics.productImageCount;
     }
 
     files.forEach((file) => {
       const category = getFileCategory(file);
-
       grouped[category] = (grouped[category] || 0) + 1;
     });
 
     return Object.entries(grouped).map(([label, value], index) => ({
       label,
       value,
-      color: fileColors[index % fileColors.length],
+      color: FILE_COLORS[index % FILE_COLORS.length],
     }));
-  }, [files, productImageCount]);
-
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-
-  const getOrderCreatedDate = (order) => {
-    const value = order.createdAt || order.receivedDate;
-
-    if (!value) return null;
-
-    const date = new Date(value);
-
-    return Number.isNaN(date.getTime()) ? null : date;
-  };
+  }, [files, metrics.productImageCount]);
 
   const monthlyOrders = useMemo(() => {
-    const result = monthLabels.map((month) => ({
+    const result = MONTH_LABELS.map((month) => ({
       month,
       orders: 0,
     }));
 
     orders.forEach((order) => {
       const date = getOrderCreatedDate(order);
-
-      if (!date || date.getFullYear() !== currentYear) {
-        return;
-      }
-
+      if (!date || date.getFullYear() !== currentYear) return;
       result[date.getMonth()].orders += 1;
     });
 
     return result;
   }, [orders, currentYear]);
 
-  const filteredTasks = useMemo(() => {
-    const keyword = searchValue.trim().toLowerCase();
+  const recentTasks = useMemo(() => {
+    const effectiveKeyword = (localSearch || topbarSearch).trim().toLowerCase();
 
-    if (!keyword) return taskOrder;
+    const mapped = [...orders]
+      .sort(
+        (a, b) =>
+          Number(b?.serviceOrderId ?? 0) - Number(a?.serviceOrderId ?? 0),
+      )
+      .map((order) => {
+        const statusMeta = getOrderStatusMeta(order);
+        return {
+          id: `ORD-${order.serviceOrderId}`,
+          orderId: order.serviceOrderId,
+          productName: order.productName || "Sản phẩm may đo",
+          serviceName: order.service?.serviceName || "Dịch vụ thiết kế",
+          deadline: formatDate(order.completedDate || order.receivedDate),
+          statusLabel: statusMeta.label,
+          statusTone: statusMeta.tone,
+          progress: statusMeta.progress,
+        };
+      });
 
-    return taskOrder.filter((task) =>
-      [task.id, task.customer, task.service, task.status]
-        .join(" ")
-        .toLowerCase()
-        .includes(keyword),
-    );
-  }, [taskOrder, searchValue]);
+    if (!effectiveKeyword) return mapped.slice(0, 8);
 
-  const totalFiles = files.length + productImageCount;
+    return mapped
+      .filter((task) =>
+        [task.id, task.productName, task.serviceName, task.statusLabel]
+          .join(" ")
+          .toLowerCase()
+          .includes(effectiveKeyword),
+      )
+      .slice(0, 8);
+  }, [orders, localSearch, topbarSearch]);
 
-  const currentMonth = currentDate.getMonth();
-
-  const previousMonthDate = new Date(currentYear, currentMonth - 1, 1);
-
-  const countOrdersByMonth = (orderList, year, month) =>
-    orderList.reduce((total, order) => {
-      const date = getOrderCreatedDate(order);
-
-      if (date && date.getFullYear() === year && date.getMonth() === month) {
-        return total + 1;
-      }
-
-      return total;
-    }, 0);
-
-  const activeOrders = useMemo(
-    () =>
-      orders.filter(
-        (order) =>
-          String(order.status).toLowerCase() === "active" && !order.deletedAt,
-      ).length,
-    [orders],
+  const orderChartOptions = useMemo(
+    () => ({
+      chart: {
+        type: "bar",
+        toolbar: { show: false },
+        fontFamily: "inherit",
+      },
+      colors: ["#0284c7"],
+      dataLabels: { enabled: false },
+      grid: {
+        borderColor: "rgba(148, 163, 184, 0.2)",
+        strokeDashArray: 4,
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 8,
+          columnWidth: "44%",
+        },
+      },
+      xaxis: {
+        categories: monthlyOrders.map((item) => item.month),
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        labels: {
+          style: {
+            colors: "#94a3b8",
+            fontSize: "12px",
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: "#94a3b8",
+            fontSize: "12px",
+          },
+        },
+      },
+      tooltip: {
+        y: {
+          formatter: (value) => `${value} đơn hàng`,
+        },
+      },
+    }),
+    [monthlyOrders],
   );
 
-  const activePercent =
-    orders.length === 0 ? 0 : Math.round((activeOrders / orders.length) * 100);
-
-  const currentMonthOrders = countOrdersByMonth(
-    orders,
-    currentYear,
-    currentMonth,
+  const orderChartSeries = useMemo(
+    () => [
+      {
+        name: "Đơn dịch vụ",
+        data: monthlyOrders.map((item) => item.orders),
+      },
+    ],
+    [monthlyOrders],
   );
 
-  const previousMonthOrders = countOrdersByMonth(
-    orders,
-    previousMonthDate.getFullYear(),
-    previousMonthDate.getMonth(),
-  );
-
-  const orderPercent =
-    previousMonthOrders === 0
-      ? currentMonthOrders > 0
-        ? 100
-        : 0
-      : Math.round(
-          ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) *
-            100,
-        );
-
-  const fileChartOptions = {
-    chart: {
-      type: "donut",
-    },
-    labels: fileStats.map((item) => item.label),
-    colors: fileStats.map((item) => item.color),
-    legend: {
-      position: "bottom",
-      fontSize: "13px",
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      width: 0,
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: "72%",
-          labels: {
-            show: true,
-            total: {
+  const fileChartOptions = useMemo(
+    () => ({
+      chart: {
+        type: "donut",
+        fontFamily: "inherit",
+      },
+      labels: fileStats.map((item) => item.label),
+      colors: fileStats.map((item) => item.color),
+      legend: {
+        position: "bottom",
+        fontSize: "12px",
+        labels: { colors: "#64748b" },
+      },
+      dataLabels: { enabled: false },
+      stroke: { width: 0 },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: "72%",
+            labels: {
               show: true,
-              label: "Files",
-              formatter: () => totalFiles,
+              total: {
+                show: true,
+                label: "Tổng tệp",
+                formatter: () => metrics.totalFiles,
+              },
             },
           },
         },
       },
-    },
-  };
+    }),
+    [fileStats, metrics.totalFiles],
+  );
 
-  const fileChartSeries = fileStats.map((item) => item.value);
-
-  const orderChartOptions = {
-    chart: {
-      type: "bar",
-      toolbar: {
-        show: false,
-      },
-    },
-    colors: ["var(--chart-1)"],
-    dataLabels: {
-      enabled: false,
-    },
-    grid: {
-      borderColor: "var(--border-subtle)",
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 8,
-        columnWidth: "45%",
-      },
-    },
-    xaxis: {
-      categories: monthlyOrders.map((item) => item.month),
-      labels: {
-        style: {
-          colors: "var(--text-muted)",
-          fontSize: "12px",
-        },
-      },
-    },
-    yaxis: {
-      labels: {
-        style: {
-          colors: "var(--text-muted)",
-          fontSize: "12px",
-        },
-      },
-    },
-    tooltip: {
-      y: {
-        formatter: (value) => `${value} đơn hàng`,
-      },
-    },
-  };
-
-  const orderChartSeries = [
-    {
-      name: "Đơn hàng",
-      data: monthlyOrders.map((item) => item.orders),
-    },
-  ];
-
-  const handleDashboardDragEnd = (event) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    setDashboardItems((items) => {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-
-      return arrayMove(items, oldIndex, newIndex);
-    });
-  };
-
-  const handleResetLayout = () => {
-    setDashboardItems(defaultDashboardItems);
-    localStorage.removeItem("dashboard-layout");
-  };
-
-  const renderWidget = (id) => {
-    switch (id) {
-      case "total-files":
-        return (
-          <Card>
-            <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-text-strong">Tổng file</p>
-              <FileText className="text-brand" size={22} />
-            </div>
-
-            <h2 className="text-3xl font-bold text-text-strong">
-              {totalFiles}
-            </h2>
-            <p className="mt-1 text-sm text-text-muted">File đang quản lý</p>
-          </Card>
-        );
-
-      case "month-orders":
-        return (
-          <Card>
-            <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-text-strong">
-                Đơn hàng tháng này
-              </p>
-              <PackageCheck className="text-brand" size={22} />
-            </div>
-
-            <h2 className="text-3xl font-bold text-text-strong">
-              {currentMonthOrders}
-            </h2>
-
-            <p
-              className={`mt-1 text-sm ${
-                orderPercent >= 0 ? "text-success" : "text-danger"
-              }`}
-            >
-              {orderPercent >= 0 ? "+" : ""}
-              {orderPercent}% so với tháng trước
-            </p>
-          </Card>
-        );
-
-      case "completed-task":
-        return (
-          <Card>
-            <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold text-text-strong">Đơn đang xử lý</p>
-
-              <CheckCircle2 className="text-brand" size={22} />
-            </div>
-
-            <h2 className="text-3xl font-bold text-text-strong">
-              {activeOrders}
-            </h2>
-
-            <p className="mt-1 text-sm text-text-muted">
-              Chiếm {activePercent}% tổng số đơn hàng
-            </p>
-          </Card>
-        );
-
-      case "file-chart":
-        return (
-          <Card>
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-semibold text-text-strong">Thống kê file</h2>
-              <MoreVertical size={18} className="text-text-subtle" />
-            </div>
-
-            {fileStats.length > 0 ? (
-              <Chart
-                options={fileChartOptions}
-                series={fileChartSeries}
-                type="donut"
-                height={320}
-              />
-            ) : (
-              <div className="flex h-80 items-center justify-center text-sm text-text-muted">
-                Chưa có file
-              </div>
-            )}
-          </Card>
-        );
-
-      case "order-chart":
-        return (
-          <Card>
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h2 className="font-semibold text-text-strong">
-                  Thống kê đơn hàng theo tháng
-                </h2>
-
-                <p className="text-sm text-text-muted">
-                  Số lượng đơn hàng mỗi tháng
-                </p>
-              </div>
-
-              <BarChart3 size={22} className="text-brand" />
-            </div>
-
-            <Chart
-              options={orderChartOptions}
-              series={orderChartSeries}
-              type="bar"
-              height={320}
-            />
-          </Card>
-        );
-
-      case "task-table":
-        return (
-          <Card>
-            <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <h2 className="font-semibold text-text-strong">Task đơn hàng</h2>
-
-              <div
-                className="flex items-center gap-2 rounded-xl border border-border px-3 py-2"
-                onPointerDown={(e) => e.stopPropagation()}
-              >
-                <Search size={18} className="text-text-subtle" />
-
-                <input
-                  type="text"
-                  placeholder="Tìm task..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  className="text-sm outline-none"
-                />
-              </div>
-            </div>
-
-            <div
-              className="overflow-x-auto"
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              <table className="w-full min-w-200 text-left">
-                <thead>
-                  <tr className="border-b border-border-subtle bg-surface-subtle text-sm text-text-muted">
-                    <th className="px-4 py-3">Mã đơn</th>
-                    <th className="px-4 py-3">Khách hàng</th>
-                    <th className="px-4 py-3">Dịch vụ</th>
-                    <th className="px-4 py-3">Deadline</th>
-                    <th className="px-4 py-3">Tiến độ</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                    <th className="px-4 py-3">Action</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredTasks.length > 0 ? (
-                    filteredTasks.map((task) => (
-                      <tr
-                        key={task.id}
-                        className="border-b border-border-subtle text-sm transition hover:bg-surface-subtle"
-                      >
-                        <td className="px-4 py-4 font-semibold text-text-strong">
-                          {task.id}
-                        </td>
-
-                        <td className="px-4 py-4 text-text-default">
-                          {task.customer}
-                        </td>
-
-                        <td className="px-4 py-4 text-text-default">
-                          {task.service}
-                        </td>
-
-                        <td className="px-4 py-4 text-text-default">
-                          <div className="flex items-center gap-2">
-                            <Clock size={16} className="text-text-subtle" />
-                            {task.deadline}
-                          </div>
-                        </td>
-
-                        <td className="px-4 py-4">
-                          <div className="h-2 w-32 rounded-full bg-surface-muted">
-                            <div
-                              className="h-2 rounded-full bg-brand"
-                              style={{ width: `${task.progress}%` }}
-                            />
-                          </div>
-                        </td>
-
-                        <td className="px-4 py-4">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${task.statusClassName}`}
-                          >
-                            {task.status}
-                          </span>
-                        </td>
-
-                        <td className="px-4 py-4">
-                          <button className="rounded-lg border border-border p-2 hover:bg-surface-subtle">
-                            <MoreVertical size={18} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={7}
-                        className="px-4 py-8 text-center text-sm text-text-muted"
-                      >
-                        Chưa có đơn hàng
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const fileChartSeries = useMemo(
+    () => fileStats.map((item) => item.value),
+    [fileStats],
+  );
 
   if (loading) {
-    return (
-      <div className="flex min-h-100 items-center justify-center">
-        <p className="text-sm text-text-muted">Đang tải dashboard...</p>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
-  return (
-    <div className="min-h-screen">
-      <div className="mb-6 flex items-center justify-end gap-3">
-        <button
-          onClick={handleResetLayout}
-          className="rounded-xl border border-border bg-surface px-5 py-3 text-sm font-semibold text-text-default shadow-sm hover:bg-surface-subtle"
-        >
-          Reset layout
-        </button>
+  const displayName = user?.fullName || user?.userCode || "Khách hàng";
 
-        <button className="rounded-xl bg-brand! px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-brand-dark!">
-          Export Data
-        </button>
+  return (
+    <div className="animate-in space-y-6 duration-200 fade-in">
+      {/* 1. Page Header */}
+      <PageHeader
+        title="Bảng điều khiển"
+        badge={<StatusBadge label="Cổng khách hàng" tone="brand" />}
+        description={`Xin chào ${displayName}, theo dõi tiến độ đơn dịch vụ may mặc và quản lý tài khoản của bạn.`}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => fetchDashboardData(true)}
+              disabled={refreshing}
+              className="flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              title="Làm mới dữ liệu"
+            >
+              <RefreshCw
+                size={14}
+                className={
+                  refreshing ? "animate-spin text-brand" : "text-slate-400"
+                }
+              />
+              <span className="hidden sm:inline">Làm mới</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/user/service-order?create=1")}
+              className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-brand! px-3.5 text-xs font-semibold text-white! shadow-sm shadow-brand/25 transition-all hover:bg-brand-hover! active:scale-95"
+            >
+              <PackagePlus size={15} />
+              <span>Tạo đơn dịch vụ</span>
+            </button>
+          </>
+        }
+      />
+
+      {/* 2. Top KPI Metric Cards */}
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard
+          title="Tổng đơn dịch vụ"
+          value={metrics.totalOrders}
+          subtitle={`${metrics.currentMonthOrders} đơn trong tháng ${currentMonth + 1}`}
+          icon={ShoppingBag}
+          iconColorClass="bg-blue-50 text-brand dark:bg-blue-950/50 dark:text-blue-400"
+          hoverBorderClass="hover:border-blue-300"
+          onClick={() => navigate("/user/service-order")}
+        />
+
+        <StatCard
+          title="Đang xử lý"
+          value={metrics.inProgressCount}
+          subtitle={`${metrics.pendingCount} chờ tiếp nhận, ${metrics.activeCount} đang làm`}
+          icon={Clock3}
+          iconColorClass="bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400"
+          hoverBorderClass="hover:border-amber-300"
+          onClick={() => navigate("/user/service-order")}
+        />
+
+        <StatCard
+          title="Đơn hoàn tất"
+          value={metrics.completedCount}
+          subtitle="đã nghiệm thu & bàn giao"
+          icon={CheckCircle2}
+          iconColorClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+          hoverBorderClass="hover:border-emerald-300"
+          onClick={() => navigate("/user/service-reviews")}
+        />
+
+        <StatCard
+          title="Tệp tin & hình ảnh"
+          value={metrics.totalFiles}
+          subtitle="ảnh mẫu & tài liệu đính kèm"
+          icon={FileText}
+          iconColorClass="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"
+          hoverBorderClass="hover:border-indigo-300"
+          onClick={() => navigate("/user/service-order")}
+        />
+      </section>
+
+      {/* 3. Analytics Charts */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <PortalSectionCard
+          title="Thống kê đơn hàng theo tháng"
+          description={`Biểu đồ số lượng đơn dịch vụ của bạn trong năm ${currentYear}`}
+          icon={BarChart3}
+          className="lg:col-span-2"
+        >
+          <Chart
+            options={orderChartOptions}
+            series={orderChartSeries}
+            type="bar"
+            height={295}
+          />
+        </PortalSectionCard>
+
+        <PortalSectionCard
+          title="Phân loại tệp đính kèm"
+          description="Ảnh sản phẩm và tài liệu kỹ thuật đã tải lên"
+          icon={FileText}
+          iconClassName="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"
+        >
+          {fileStats.length > 0 ? (
+            <Chart
+              options={fileChartOptions}
+              series={fileChartSeries}
+              type="donut"
+              height={295}
+            />
+          ) : (
+            <div className="flex h-72 items-center justify-center">
+              <EmptyState
+                icon={FileText}
+                title="Chưa có tệp đính kèm"
+                description="Hình ảnh sản phẩm và tài liệu thiết kế sẽ thống kê tại đây."
+              />
+            </div>
+          )}
+        </PortalSectionCard>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDashboardDragEnd}
-      >
-        <SortableContext
-          items={dashboardItems.map((item) => item.id)}
-          strategy={rectSortingStrategy}
+      {/* 4. Quick Shortcuts */}
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Link
+          to="/user/service-order?create=1"
+          className="group flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-brand/40 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
-          <div className="grid grid-cols-12 gap-5">
-            {dashboardItems.map((item) => (
-              <SortableDashboardItem key={item.id} item={item}>
-                {renderWidget(item.id)}
-              </SortableDashboardItem>
-            ))}
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-brand dark:bg-blue-950/50">
+              <PackagePlus size={19} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900 group-hover:text-brand dark:text-white">
+                Đặt đơn dịch vụ
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Thiết kế rập & in sơ đồ
+              </p>
+            </div>
           </div>
-        </SortableContext>
-      </DndContext>
+          <ArrowRight
+            size={15}
+            className="text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-brand"
+          />
+        </Link>
+
+        <Link
+          to="/user/service-reviews"
+          className="group flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-amber-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+              <Star size={19} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900 group-hover:text-amber-600 dark:text-white">
+                Đánh giá dịch vụ
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Nhận xét đơn đã hoàn thành
+              </p>
+            </div>
+          </div>
+          <ArrowRight
+            size={15}
+            className="text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-amber-600"
+          />
+        </Link>
+
+        <Link
+          to="/user/address"
+          className="group flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-emerald-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+              <MapPin size={19} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-600 dark:text-white">
+                Sổ địa chỉ
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Địa chỉ giao nhận mặc định
+              </p>
+            </div>
+          </div>
+          <ArrowRight
+            size={15}
+            className="text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-emerald-600"
+          />
+        </Link>
+
+        <Link
+          to="/user/profile"
+          className="group flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs transition-all hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400">
+              <User size={19} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 dark:text-white">
+                Hồ sơ cá nhân
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Thông tin & xác thực tài khoản
+              </p>
+            </div>
+          </div>
+          <ArrowRight
+            size={15}
+            className="text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-indigo-600"
+          />
+        </Link>
+      </section>
+
+      {/* 5. Recent Service Orders */}
+      <PortalSectionCard
+        title="Đơn dịch vụ gần đây"
+        description="Danh sách đơn hàng dịch vụ mới nhất và tiến độ xử lý"
+        icon={ClipboardList}
+        action={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="relative w-56">
+              <Search
+                size={15}
+                className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                placeholder="Lọc mã đơn, dịch vụ..."
+                className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50/70 pr-3 pl-8.5 text-xs text-slate-800 transition-all placeholder:text-slate-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10 focus:outline-hidden dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-100"
+              />
+            </div>
+
+            <Link
+              to="/user/service-order"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
+            >
+              Xem tất cả &rarr;
+            </Link>
+          </div>
+        }
+      >
+        {recentTasks.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title="Chưa có đơn dịch vụ nào"
+            description="Bắt đầu đặt đơn thiết kế rập hoặc in sơ đồ may mặc ngay hôm nay."
+            action={
+              <button
+                type="button"
+                onClick={() => navigate("/user/service-order?create=1")}
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-brand! px-4 py-2 text-xs font-semibold text-white! shadow-xs transition hover:bg-brand-hover!"
+              >
+                <PackagePlus size={15} />
+                <span>Tạo đơn dịch vụ đầu tiên</span>
+              </button>
+            }
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-180 text-left">
+              <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:border-slate-800 dark:bg-slate-800/40">
+                <tr>
+                  <th className="px-4 py-3 whitespace-nowrap">Mã đơn</th>
+                  <th className="px-4 py-3 whitespace-nowrap">
+                    Dịch vụ & Sản phẩm
+                  </th>
+                  <th className="px-4 py-3 whitespace-nowrap">
+                    Ngày hẹn / Hoàn thành
+                  </th>
+                  <th className="px-4 py-3 whitespace-nowrap">Tiến độ</th>
+                  <th className="px-4 py-3 whitespace-nowrap">Trạng thái</th>
+                  <th className="px-4 py-3 text-right whitespace-nowrap">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
+                {recentTasks.map((task) => (
+                  <tr
+                    key={task.id}
+                    className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/50"
+                  >
+                    <td className="px-4 py-3.5 font-bold whitespace-nowrap text-brand">
+                      <Link
+                        to="/user/service-order"
+                        className="hover:underline"
+                      >
+                        {task.id}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="font-semibold text-slate-900 dark:text-white">
+                        {task.serviceName}
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        {task.productName}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                      {task.deadline}
+                    </td>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                          <div
+                            className="h-full rounded-full bg-brand transition-all"
+                            style={{ width: `${task.progress}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                          {task.progress}%
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <StatusBadge
+                        label={task.statusLabel}
+                        tone={task.statusTone}
+                      />
+                    </td>
+                    <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                      <Link
+                        to="/user/service-order"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-brand dark:hover:bg-slate-800"
+                        title="Xem danh sách đơn"
+                      >
+                        <Eye size={15} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </PortalSectionCard>
     </div>
   );
 };

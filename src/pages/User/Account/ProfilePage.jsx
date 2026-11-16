@@ -24,7 +24,7 @@ import PageHeader from "@/shared/ui/heading/PageHeader";
 import BirthdayInput from "@/shared/ui/input/BirthdayInput";
 import FloatingInput from "@/shared/ui/input/FloatingInput";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
-import RadioGroup from "@/shared/ui/radio-group/RadioGroup";
+import Select from "@/shared/ui/select/Select";
 import { PortalSectionCard } from "@/shared/ui/section/Section";
 import { DetailPageSkeleton } from "@/shared/ui/skeleton";
 import AvatarPicker from "@/shared/ui/upload/AvatarPicker";
@@ -661,20 +661,21 @@ const ProfilePage = () => {
                 readOnly
               />
 
-              <div className="md:col-span-2">
-                <BirthdayField
-                  birthday={birthday}
-                  setBirthday={setBirthday}
-                  birthdayResetKey={birthdayResetKey}
-                />
-              </div>
+              <BirthdayField
+                birthday={birthday}
+                setBirthday={setBirthday}
+                birthdayResetKey={birthdayResetKey}
+              />
 
-              <div className="md:col-span-2">
-                <RadioGroup
-                  label="Giới tính"
-                  name="gender"
+              <div>
+                <label className="mb-2 block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Giới tính
+                </label>
+                <Select
                   value={gender}
-                  onChange={setGender}
+                  onValueChange={setGender}
+                  ariaLabel="Giới tính"
+                  placeholder="Chọn giới tính"
                   options={[
                     { label: "Nam", value: "Male" },
                     { label: "Nữ", value: "Female" },
@@ -685,139 +686,150 @@ const ProfilePage = () => {
             </div>
           </PortalSectionCard>
 
-          {/* Phone Section */}
-          <PortalSectionCard
-            title="Số điện thoại liên kết"
-            description="Quản lý số điện thoại nhận thông báo đơn hàng"
-            icon={Phone}
-            iconClassName="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
-            badge={
-              <StatusBadge
-                label={phoneSectionVerified ? "Đã xác thực" : "Chưa xác thực"}
-                tone={phoneSectionVerified ? "success" : "neutral"}
-              />
-            }
-            highlight={isSearching(["phone", "number", "sdt", "số điện thoại"])}
-          >
-            {phoneProvider ? (
-              <div className="space-y-3">
-                <ContactRow
-                  value={phone}
-                  provider={phoneProvider.provider}
-                  showProvider
-                  editable={phoneEditing}
-                  isLocked={!phoneEditing}
-                  inputType="tel"
-                  placeholder="Nhập số điện thoại"
-                  badgeStatus={getPhoneStatus(phoneProvider)}
-                  onChange={(event) => setPhone(event.target.value)}
-                  onEdit={() => {
-                    setPhone(phoneProvider.phone || "");
+          {/* Phone & Email Sections */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Phone Section */}
+            <PortalSectionCard
+              title="Số điện thoại liên kết"
+              description="Quản lý số điện thoại nhận thông báo đơn hàng"
+              icon={Phone}
+              className="h-full"
+              iconClassName="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+              badge={
+                <StatusBadge
+                  label={phoneSectionVerified ? "Đã xác thực" : "Chưa xác thực"}
+                  tone={phoneSectionVerified ? "success" : "neutral"}
+                />
+              }
+              highlight={isSearching([
+                "phone",
+                "number",
+                "sdt",
+                "số điện thoại",
+              ])}
+            >
+              {phoneProvider ? (
+                <div className="space-y-3">
+                  <ContactRow
+                    value={phone}
+                    provider={phoneProvider.provider}
+                    showProvider
+                    editable={phoneEditing}
+                    isLocked={!phoneEditing}
+                    inputType="tel"
+                    placeholder="Nhập số điện thoại"
+                    badgeStatus={getPhoneStatus(phoneProvider)}
+                    onChange={(event) => setPhone(event.target.value)}
+                    onEdit={() => {
+                      setPhone(phoneProvider.phone || "");
+                      setPhoneEditing(true);
+                    }}
+                    canDelete={false}
+                    showDeleteInSetting
+                    onDelete={() => setPhoneToDelete(phoneProvider)}
+                    verificationDisabled
+                    verificationDisabledText="Xác thực sắp ra mắt"
+                  />
+
+                  {phoneEditing && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Số điện thoại mới sẽ được lưu ở trạng thái chưa xác thực.
+                      Nhấn <strong>Lưu thay đổi</strong> để hoàn tất.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <EmptyContact
+                  message="Chưa liên kết số điện thoại."
+                  buttonText="Thêm số điện thoại"
+                  showForm={phoneEditing}
+                  onAdd={() => {
+                    setPhone("");
                     setPhoneEditing(true);
                   }}
-                  canDelete={false}
-                  showDeleteInSetting
-                  onDelete={() => setPhoneToDelete(phoneProvider)}
-                  verificationDisabled
-                  verificationDisabledText="Xác thực sắp ra mắt"
-                />
+                >
+                  <ContactRow
+                    value={phone}
+                    provider="phone"
+                    showProvider
+                    editable
+                    inputType="tel"
+                    placeholder="Nhập số điện thoại"
+                    badgeStatus="inactive"
+                    showSetting
+                    canDelete={false}
+                    onChange={(event) => setPhone(event.target.value)}
+                    verificationDisabled
+                    verificationDisabledText="Xác thực sắp ra mắt"
+                  />
 
-                {phoneEditing && (
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhone("");
+                        setPhoneEditing(false);
+                      }}
+                      className="cursor-pointer rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      Hủy
+                    </button>
+
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Nhấn <strong>Lưu thay đổi</strong> để lưu số điện thoại.
+                    </p>
+                  </div>
+                </EmptyContact>
+              )}
+            </PortalSectionCard>
+
+            {/* Email Section */}
+            <PortalSectionCard
+              title="Email liên kết & Xác thực"
+              description="Quản lý địa chỉ email đăng nhập và xác thực OTP"
+              icon={Mail}
+              className="h-full"
+              iconClassName="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"
+              badge={
+                <StatusBadge
+                  label={emailSectionVerified ? "Đã xác thực" : "Chưa xác thực"}
+                  tone={emailSectionVerified ? "success" : "warning"}
+                />
+              }
+              highlight={isSearching([
+                "email",
+                "mail",
+                "gmail",
+                "google",
+                "local",
+              ])}
+            >
+              <div className="space-y-3">
+                {emails.length > 0 ? (
+                  emails.map((item, idx) => (
+                    <ContactRow
+                      key={item.id ?? `${item.provider}-${item.email}-${idx}`}
+                      value={item.email}
+                      provider={item.provider}
+                      showProvider
+                      isLocked
+                      badgeText={getEmailStatus(item)}
+                      badgeStatus={getEmailStatus(item)}
+                      showSetting={item.provider?.toLowerCase() === "local"}
+                      canDelete={false}
+                      onVerify={() => handleSendEmailOtp(item.email)}
+                      onRemove={() => setEmailVerificationToRemove(item)}
+                    />
+                  ))
+                ) : (
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Số điện thoại mới sẽ được lưu ở trạng thái chưa xác thực.
-                    Nhấn <strong>Lưu thay đổi</strong> để hoàn tất.
+                    Chưa liên kết email. Chức năng liên kết đang được hoàn
+                    thiện.
                   </p>
                 )}
               </div>
-            ) : (
-              <EmptyContact
-                message="Chưa liên kết số điện thoại."
-                buttonText="Thêm số điện thoại"
-                showForm={phoneEditing}
-                onAdd={() => {
-                  setPhone("");
-                  setPhoneEditing(true);
-                }}
-              >
-                <ContactRow
-                  value={phone}
-                  provider="phone"
-                  showProvider
-                  editable
-                  inputType="tel"
-                  placeholder="Nhập số điện thoại"
-                  badgeStatus="inactive"
-                  showSetting
-                  canDelete={false}
-                  onChange={(event) => setPhone(event.target.value)}
-                  verificationDisabled
-                  verificationDisabledText="Xác thực sắp ra mắt"
-                />
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPhone("");
-                      setPhoneEditing(false);
-                    }}
-                    className="cursor-pointer rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
-                  >
-                    Hủy
-                  </button>
-
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Nhấn <strong>Lưu thay đổi</strong> để lưu số điện thoại.
-                  </p>
-                </div>
-              </EmptyContact>
-            )}
-          </PortalSectionCard>
-
-          {/* Email Section */}
-          <PortalSectionCard
-            title="Email liên kết & Xác thực"
-            description="Quản lý địa chỉ email đăng nhập và xác thực OTP"
-            icon={Mail}
-            iconClassName="bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"
-            badge={
-              <StatusBadge
-                label={emailSectionVerified ? "Đã xác thực" : "Chưa xác thực"}
-                tone={emailSectionVerified ? "success" : "warning"}
-              />
-            }
-            highlight={isSearching([
-              "email",
-              "mail",
-              "gmail",
-              "google",
-              "local",
-            ])}
-          >
-            <div className="space-y-3">
-              {emails.length > 0 ? (
-                emails.map((item, idx) => (
-                  <ContactRow
-                    key={item.id ?? `${item.provider}-${item.email}-${idx}`}
-                    value={item.email}
-                    provider={item.provider}
-                    showProvider
-                    isLocked
-                    badgeText={getEmailStatus(item)}
-                    badgeStatus={getEmailStatus(item)}
-                    showSetting={item.provider?.toLowerCase() === "local"}
-                    canDelete={false}
-                    onVerify={() => handleSendEmailOtp(item.email)}
-                    onRemove={() => setEmailVerificationToRemove(item)}
-                  />
-                ))
-              ) : (
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Chưa liên kết email. Chức năng liên kết đang được hoàn thiện.
-                </p>
-              )}
-            </div>
-          </PortalSectionCard>
+            </PortalSectionCard>
+          </div>
 
           {/* Bottom Save Bar */}
           <div className="flex items-center justify-end gap-3 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
@@ -954,22 +966,6 @@ const BirthdayField = ({ birthday, setBirthday, birthdayResetKey }) => {
         key={birthdayResetKey}
         value={birthday}
         onChange={setBirthday}
-        inputClassName="
-          border-input!
-          bg-surface!
-          text-text-default!
-          placeholder:text-text-subtle!
-          focus:border-brand!
-          focus:shadow-[0_0_0_3px_rgba(1,146,245,0.12)]!
-        "
-        calendarButtonClassName="
-          border-input!
-          bg-surface!
-          text-text-muted!
-          hover:border-brand!
-          hover:bg-surface-subtle!
-        "
-        popupClassName="border-border! translate-y-24!"
       />
     </div>
   );

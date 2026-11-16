@@ -1,155 +1,242 @@
-import { CalendarDays } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Select from "../select/Select";
+import { cn } from "@/shared/lib/utils";
 
-const parseBirthdayValue = (value) => {
-  if (!value || typeof value !== "string") {
-    return {
-      day: "",
-      month: "",
-      year: "",
-    };
+const VIETNAMESE_MONTHS = [
+  "Tháng 1",
+  "Tháng 2",
+  "Tháng 3",
+  "Tháng 4",
+  "Tháng 5",
+  "Tháng 6",
+  "Tháng 7",
+  "Tháng 8",
+  "Tháng 9",
+  "Tháng 10",
+  "Tháng 11",
+  "Tháng 12",
+];
+
+const WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+/**
+ * Chuyển YYYY-MM-DD -> DD/MM/YYYY
+ */
+const isoToDisplay = (isoStr) => {
+  if (!isoStr || typeof isoStr !== "string") return "";
+  const parts = isoStr.trim().split("-");
+  if (parts.length !== 3) return "";
+  const [y, m, d] = parts;
+  if (!y || !m || !d) return "";
+  const cleanD = String(Number(d)).padStart(2, "0");
+  const cleanM = String(Number(m)).padStart(2, "0");
+  const cleanY = String(y).padStart(4, "0");
+  return `${cleanD}/${cleanM}/${cleanY}`;
+};
+
+/**
+ * Kiểm tra và chuyển DD/MM/YYYY -> YYYY-MM-DD (ISO)
+ */
+const displayToIso = (displayStr) => {
+  if (!displayStr || typeof displayStr !== "string") return "";
+  const parts = displayStr.trim().split("/");
+  if (parts.length !== 3) return "";
+  const [dStr, mStr, yStr] = parts;
+  if (dStr.length !== 2 || mStr.length !== 2 || yStr.length !== 4) return "";
+
+  const d = Number(dStr);
+  const m = Number(mStr);
+  const y = Number(yStr);
+
+  if (isNaN(d) || isNaN(m) || isNaN(y)) return "";
+  if (m < 1 || m > 12) return "";
+  if (y < 1900) return "";
+
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  if (y > today.getFullYear()) return "";
+
+  const maxDays = new Date(y, m, 0).getDate();
+  if (d < 1 || d > maxDays) return "";
+
+  const dateObj = new Date(y, m - 1, d);
+  if (
+    dateObj.getFullYear() !== y ||
+    dateObj.getMonth() !== m - 1 ||
+    dateObj.getDate() !== d
+  ) {
+    return "";
   }
 
-  const parts = value.split("-");
+  if (dateObj > today) return ""; // Ngày sinh không được ở tương lai
 
-  if (parts.length !== 3) {
-    return {
-      day: "",
-      month: "",
-      year: "",
-    };
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+};
+
+/**
+ * Định dạng mask cho ngày tháng: DD/MM/YYYY
+ */
+const formatMask = (value) => {
+  if (!value) return "";
+  const endsWithSlash = value.endsWith("/") || value.endsWith(".");
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+
+  if (!digits) return "";
+
+  if (digits.length === 1) {
+    return endsWithSlash ? `0${digits}/` : digits;
+  }
+  if (digits.length === 2) {
+    return endsWithSlash ? `${digits}/` : digits;
+  }
+  if (digits.length === 3) {
+    const d = digits.slice(0, 2);
+    const m = digits.slice(2);
+    return endsWithSlash ? `${d}/0${m}/` : `${d}/${m}`;
+  }
+  if (digits.length === 4) {
+    const d = digits.slice(0, 2);
+    const m = digits.slice(2);
+    return endsWithSlash ? `${d}/${m}/` : `${d}/${m}`;
   }
 
-  const [year, month, day] = parts;
-
-  return {
-    day: String(Number(day)),
-    month: String(Number(month)),
-    year,
-  };
+  const d = digits.slice(0, 2);
+  const m = digits.slice(2, 4);
+  const y = digits.slice(4);
+  return `${d}/${m}/${y}`;
 };
 
 const BirthdayInput = ({
   value = "",
   onChange = () => {},
 
+  label = "",
+  placeholder = "DD/MM/YYYY",
+  variant = "default", // "default" | "auth"
+  disabled = false,
+  readOnly = false,
+  error = "",
+  name = "birthday",
+  id,
+  ariaLabel,
+
   containerClassName = "",
   inputClassName = "",
   calendarButtonClassName = "",
   popupClassName = "",
   popupHeaderClassName = "",
-  selectedDateClassName = "bg-brand text-white",
+  selectedDateClassName = "",
+  ...restProps
 }) => {
-  const today = new Date();
+  const today = useMemo(() => new Date(), []);
+  const containerRef = useRef(null);
+  const inputRef = useRef(null);
+  const inputId = id || name;
 
-  const [openBirthday, setOpenBirthday] = useState(false);
-  const birthdayPickerRef = useRef(null);
-  const initialBirthday = parseBirthdayValue(value);
+  const [openCalendar, setOpenCalendar] = useState(false);
+  const [displayValue, setDisplayValue] = useState(() => isoToDisplay(value));
 
-  const [birthDay, setBirthDay] = useState(initialBirthday.day);
-  const [birthMonth, setBirthMonth] = useState(initialBirthday.month);
-  const [birthYear, setBirthYear] = useState(initialBirthday.year);
-
-  const [currentMonth, setCurrentMonth] = useState(
-    initialBirthday.month
-      ? Number(initialBirthday.month) - 1
-      : today.getMonth(),
-  );
-
-  const [currentYear, setCurrentYear] = useState(
-    initialBirthday.year ? Number(initialBirthday.year) : today.getFullYear(),
-  );
-
-  const birthDayRef = useRef(birthDay);
-
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const updateBirthday = useCallback(
-    (day, month, year) => {
-      if (!day || !month || !year || String(year).length !== 4) {
-        onChange("");
-        return;
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    if (value && typeof value === "string") {
+      const parts = value.split("-");
+      if (parts.length === 3) {
+        const m = Number(parts[1]) - 1;
+        if (!isNaN(m) && m >= 0 && m <= 11) return m;
       }
-
-      const numericDay = Number(day);
-      const numericMonth = Number(month);
-      const numericYear = Number(year);
-
-      const selectedDate = new Date(numericYear, numericMonth - 1, numericDay);
-
-      const validDate =
-        selectedDate.getFullYear() === numericYear &&
-        selectedDate.getMonth() === numericMonth - 1 &&
-        selectedDate.getDate() === numericDay;
-
-      if (!validDate) {
-        onChange("");
-        return;
-      }
-
-      const formattedBirthday =
-        `${numericYear}-` +
-        `${String(numericMonth).padStart(2, "0")}-` +
-        `${String(numericDay).padStart(2, "0")}`;
-
-      onChange(formattedBirthday);
-    },
-    [onChange],
-  );
-
-  useEffect(() => {
-    birthDayRef.current = birthDay;
-  }, [birthDay]);
-
-  useEffect(() => {
-    if (!birthMonth || !birthYear || !birthDayRef.current) return;
-
-    const month = Number(birthMonth);
-    const year = Number(birthYear);
-    const day = Number(birthDayRef.current);
-    const maxDays = new Date(year, month, 0).getDate();
-
-    if (day > maxDays) {
-      setBirthDay(String(maxDays));
-      updateBirthday(String(maxDays), birthMonth, birthYear);
     }
-  }, [birthMonth, birthYear, updateBirthday]);
+    return today.getMonth();
+  });
 
+  const [currentYear, setCurrentYear] = useState(() => {
+    if (value && typeof value === "string") {
+      const parts = value.split("-");
+      if (parts.length === 3) {
+        const y = Number(parts[0]);
+        if (!isNaN(y)) return y;
+      }
+    }
+    return today.getFullYear();
+  });
+
+  const [prevValue, setPrevValue] = useState(value);
+
+  // Điều chỉnh displayValue khi prop `value` thay đổi từ bên ngoài (tránh cascading render trong useEffect)
+  if (value !== prevValue) {
+    setPrevValue(value);
+    const formatted = isoToDisplay(value);
+    setDisplayValue(formatted);
+
+    if (value && typeof value === "string" && value.includes("-")) {
+      const parts = value.split("-");
+      if (parts.length === 3) {
+        const y = Number(parts[0]);
+        const m = Number(parts[1]) - 1;
+        if (!isNaN(y)) setCurrentYear(y);
+        if (!isNaN(m) && m >= 0 && m <= 11) setCurrentMonth(m);
+      }
+    }
+  }
+
+  // Đóng calendar khi click ra ngoài hoặc nhấn phím Escape
   useEffect(() => {
+    if (!openCalendar) return;
+
     const handleClickOutside = (e) => {
+      const target = e.target;
+      if (!target) return;
+
+      // 1. Nếu click vào bên trong container của BirthdayInput (input, nút mở lịch, popup lịch)
+      if (containerRef.current && containerRef.current.contains(target)) {
+        return;
+      }
+
+      // 2. Nếu click vào dropdown menu portal của Radix Select (chọn tháng hoặc chọn năm)
       if (
-        birthdayPickerRef.current &&
-        !birthdayPickerRef.current.contains(e.target)
+        target.closest?.("[data-radix-popper-content-wrapper]") ||
+        target.closest?.("[data-radix-select-viewport]") ||
+        target.closest?.('[role="listbox"]') ||
+        target.closest?.('[role="option"]') ||
+        target.closest?.("[data-radix-focus-guard]")
       ) {
-        setOpenBirthday(false);
+        return;
+      }
+
+      setOpenCalendar(false);
+    };
+
+    const handleEscKey = (e) => {
+      if (e.key === "Escape") {
+        // Nếu có dropdown Select đang mở, để Radix tự đóng dropdown trước
+        const isSelectOpen = Boolean(
+          document.querySelector(
+            "[data-radix-popper-content-wrapper], [data-radix-select-viewport]",
+          ),
+        );
+        if (isSelectOpen) {
+          return;
+        }
+        setOpenCalendar(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("keydown", handleEscKey);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleEscKey);
     };
-  }, []);
+  }, [openCalendar]);
 
-  const years = Array.from(
-    { length: 101 },
-    (_, index) => today.getFullYear() - index,
-  );
+  const years = useMemo(() => {
+    return Array.from(
+      { length: 101 },
+      (_, index) => today.getFullYear() - index,
+    );
+  }, [today]);
 
   const calendarDays = useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1);
@@ -165,199 +252,397 @@ const BirthdayInput = ({
     });
   }, [currentYear, currentMonth]);
 
+  const selectedDate = useMemo(() => {
+    const iso = displayToIso(displayValue);
+    if (!iso) return null;
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }, [displayValue]);
+
+  const isNextMonthDisabled = useMemo(() => {
+    return (
+      currentYear > today.getFullYear() ||
+      (currentYear === today.getFullYear() && currentMonth >= today.getMonth())
+    );
+  }, [currentYear, currentMonth, today]);
+
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-      return;
+      setCurrentYear((prev) => prev - 1);
+    } else {
+      setCurrentMonth((prev) => prev - 1);
     }
-
-    setCurrentMonth(currentMonth - 1);
   };
 
   const handleNextMonth = () => {
+    if (isNextMonthDisabled) return;
     if (currentMonth === 11) {
       setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
+      setCurrentYear((prev) => prev + 1);
+    } else {
+      setCurrentMonth((prev) => prev + 1);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const inputVal = e.target.value;
+    const masked = formatMask(inputVal);
+    setDisplayValue(masked);
+
+    if (!masked) {
+      onChange("");
       return;
     }
 
-    setCurrentMonth(currentMonth + 1);
+    const iso = displayToIso(masked);
+    if (iso) {
+      onChange(iso);
+      const [y, m] = iso.split("-");
+      setCurrentYear(Number(y));
+      setCurrentMonth(Number(m) - 1);
+    } else {
+      onChange("");
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Backspace") {
+      const input = e.target;
+      const { selectionStart, selectionEnd, value: currentVal } = input;
+      // Nếu con trỏ đứng ngay sau dấu "/" (vị trí 3 hoặc 6), xóa cả dấu "/" và ký tự số trước đó
+      if (
+        selectionStart === selectionEnd &&
+        (selectionStart === 3 || selectionStart === 6)
+      ) {
+        e.preventDefault();
+        const nextVal =
+          currentVal.slice(0, selectionStart - 2) +
+          currentVal.slice(selectionStart);
+        const masked = formatMask(nextVal);
+        setDisplayValue(masked);
+        const iso = displayToIso(masked);
+        onChange(iso);
+      }
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    if (!pasted) return;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(pasted.trim())) {
+      const formatted = isoToDisplay(pasted.trim());
+      setDisplayValue(formatted);
+      const iso = displayToIso(formatted);
+      onChange(iso);
+      return;
+    }
+
+    const masked = formatMask(pasted);
+    setDisplayValue(masked);
+    const iso = displayToIso(masked);
+    onChange(iso);
   };
 
   const handleSelectDate = (date) => {
-    const day = String(date.getDate());
-    const month = String(date.getMonth() + 1);
-    const year = String(date.getFullYear());
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = String(date.getFullYear());
 
-    setBirthDay(day);
-    setBirthMonth(month);
-    setBirthYear(year);
+    const formatted = `${d}/${m}/${y}`;
+    setDisplayValue(formatted);
 
-    updateBirthday(day, month, year);
-    setOpenBirthday(false);
+    const iso = `${y}-${m}-${d}`;
+    onChange(iso);
+    setOpenCalendar(false);
   };
 
+  const handleToggleCalendar = () => {
+    if (disabled || readOnly) return;
+
+    if (!openCalendar) {
+      if (selectedDate) {
+        setCurrentMonth(selectedDate.getMonth());
+        setCurrentYear(selectedDate.getFullYear());
+      } else if (value && value.includes("-")) {
+        const [y, m] = value.split("-").map(Number);
+        if (!isNaN(y)) setCurrentYear(y);
+        if (!isNaN(m) && m >= 1 && m <= 12) setCurrentMonth(m - 1);
+      }
+    }
+    setOpenCalendar((prev) => !prev);
+  };
+
+  const isAuth = variant === "auth";
+  const hasValue = Boolean(displayValue && displayValue.trim() !== "");
+
   return (
-    <div ref={birthdayPickerRef} className={`relative ${containerClassName}`}>
-      <div className="flex items-end gap-3">
+    <div
+      ref={containerRef}
+      className={cn("relative w-full", containerClassName)}
+    >
+      {/* Label cho variant mặc định (non-auth) */}
+      {label && !isAuth && (
+        <label
+          htmlFor={inputId}
+          className="mb-2 block text-sm font-semibold text-text-default"
+        >
+          {label}
+        </label>
+      )}
+
+      <div className="relative flex items-center">
         <input
+          {...restProps}
+          ref={inputRef}
+          id={inputId}
+          name={name}
           type="text"
           inputMode="numeric"
-          maxLength={2}
-          value={birthDay}
-          onChange={(e) => {
-            let value = e.target.value.replace(/\D/g, "");
-
-            if (value === "") {
-              setBirthDay("");
-              return;
-            }
-
-            let number = Number(value);
-
-            if (number > 31) number = 31;
-
-            setBirthDay(String(number));
-            updateBirthday(String(number), birthMonth, birthYear);
-          }}
-          placeholder="Day"
-          className={`h-13 w-full flex-1 rounded-xl border-2 border-white/25 bg-transparent px-4 text-center text-sm text-white transition-all duration-300 outline-none placeholder:text-white/45 focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)] ${inputClassName} `}
+          maxLength={10}
+          value={displayValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
+          disabled={disabled}
+          readOnly={readOnly}
+          placeholder={isAuth && label ? " " : placeholder}
+          aria-label={ariaLabel || label || "Ngày sinh (DD/MM/YYYY)"}
+          aria-invalid={Boolean(error)}
+          className={cn(
+            isAuth
+              ? "peer min-h-13 w-full rounded-xl border-2 border-white/25 bg-transparent px-4 pr-12 text-sm text-white transition-all duration-300 outline-none placeholder:text-white/45 focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)]"
+              : "h-11 w-full rounded-xl border border-input bg-surface px-4 pr-11 text-sm text-text-default transition outline-none placeholder:text-text-subtle focus:border-brand focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-surface-muted",
+            isAuth && label && "pt-5 pb-2 placeholder:text-transparent",
+            Boolean(error) &&
+              (isAuth
+                ? "border-red-400 focus:border-red-400"
+                : "border-danger focus:border-danger focus:ring-danger/10"),
+            inputClassName,
+          )}
         />
 
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={2}
-          value={birthMonth}
-          onChange={(e) => {
-            let value = e.target.value.replace(/\D/g, "");
+        {/* Floating Label cho variant auth */}
+        {isAuth && label && (
+          <label
+            htmlFor={inputId}
+            className={cn(
+              "pointer-events-none absolute left-4 -translate-y-1/2 text-sm text-white/55 transition-all duration-300 peer-focus:top-2 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-auth-accent",
+              hasValue
+                ? "top-2 translate-y-0 text-xs text-auth-accent"
+                : "top-1/2",
+            )}
+          >
+            {label}
+          </label>
+        )}
 
-            if (value === "") {
-              setBirthMonth("");
-              return;
-            }
-
-            let number = Number(value);
-
-            if (number > 12) number = 12;
-
-            setBirthMonth(String(number));
-            updateBirthday(birthDay, String(number), birthYear);
-          }}
-          placeholder="Month"
-          className={`h-13 w-full flex-1 rounded-xl border-2 border-white/25 bg-transparent px-4 text-center text-sm text-white transition-all duration-300 outline-none placeholder:text-white/45 focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)] ${inputClassName} `}
-        />
-
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={4}
-          value={birthYear}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, "");
-
-            setBirthYear(value);
-            updateBirthday(birthDay, birthMonth, value);
-          }}
-          placeholder="Year"
-          className={`h-13 w-full flex-2 rounded-xl border-2 border-white/25 bg-transparent px-4 text-center text-sm text-white transition-all duration-300 outline-none placeholder:text-white/45 focus:border-auth-accent focus:shadow-[0_0_18px_rgba(128,208,255,0.35)] ${inputClassName} `}
-        />
-
+        {/* Nút bấm mở popup lịch */}
         <button
           type="button"
-          onClick={() => {
-            if (!openBirthday) {
-              if (birthMonth) setCurrentMonth(Number(birthMonth) - 1);
-              if (birthYear) setCurrentYear(Number(birthYear));
-            }
-
-            setOpenBirthday(!openBirthday);
-          }}
-          className={`flex h-14.5 min-w-14.5 items-center justify-center rounded-xl border-2 border-white/25 bg-white/10 px-4 text-white transition-all duration-300 hover:border-white/35 hover:bg-white/20 ${calendarButtonClassName} `}
+          disabled={disabled || readOnly}
+          onClick={handleToggleCalendar}
+          aria-label="Mở lịch chọn ngày sinh"
+          className={cn(
+            "absolute flex items-center justify-center rounded-lg transition disabled:cursor-not-allowed disabled:opacity-50",
+            isAuth
+              ? "top-1/2 right-3 h-8 w-8 -translate-y-1/2 text-white/50 hover:bg-white/10 hover:text-white"
+              : "top-1/2 right-2.5 h-7 w-7 -translate-y-1/2 text-text-muted hover:bg-surface-muted hover:text-text-default",
+            calendarButtonClassName,
+          )}
         >
-          <CalendarDays className="h-5 w-5" />
+          <CalendarDays className={isAuth ? "h-5 w-5" : "h-4.5 w-4.5"} />
         </button>
       </div>
 
-      {openBirthday && (
+      {/* Thông báo lỗi nếu có */}
+      {typeof error === "string" && error && (
+        <p className="mt-1.5 text-xs text-danger">{error}</p>
+      )}
+
+      {/* Popup chọn ngày */}
+      {openCalendar && (
         <div
-          className={`absolute right-0 bottom-0 z-50 w-full overflow-hidden rounded-2xl border-2 border-[#e5d84c] bg-surface text-text-strong shadow-2xl ${popupClassName} `}
+          role="dialog"
+          aria-modal="false"
+          aria-label="Chọn ngày sinh"
+          className={cn(
+            "absolute top-[calc(100%+8px)] left-0 z-50 w-82.5 max-w-[calc(100vw-32px)] rounded-2xl border p-3.5 shadow-xl",
+            isAuth
+              ? "border-white/20 bg-slate-900/95 text-white shadow-2xl backdrop-blur-xl"
+              : "border-border bg-surface text-text-default shadow-xl",
+            popupClassName,
+          )}
         >
+          {/* Header tháng / năm */}
           <div
-            className={`flex items-center justify-between gap-3 bg-surface-muted px-4 py-4 ${popupHeaderClassName} `}
+            className={cn(
+              "flex w-full items-center justify-between gap-1.5 pb-3",
+              popupHeaderClassName,
+            )}
           >
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="text-3xl text-text-default"
+              aria-label="Tháng trước"
+              className={cn(
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition",
+                isAuth
+                  ? "text-white/70 hover:bg-white/10 hover:text-white"
+                  : "text-text-muted hover:bg-surface-muted hover:text-text-default",
+              )}
             >
-              ‹
+              <ChevronLeft className="h-4 w-4" />
             </button>
 
-            <div className="flex flex-1 gap-2">
-              <Select
-                value={String(currentMonth)}
-                onValueChange={(value) => setCurrentMonth(Number(value))}
-                ariaLabel="Chọn tháng"
-                options={months.map((month, index) => ({
-                  value: index,
-                  label: month,
-                }))}
-              />
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">
+              <div className="min-w-0 flex-1">
+                <Select
+                  size="xs"
+                  modal={false}
+                  value={String(currentMonth)}
+                  onValueChange={(val) => setCurrentMonth(Number(val))}
+                  ariaLabel="Chọn tháng"
+                  options={VIETNAMESE_MONTHS.map((m, idx) => ({
+                    value: String(idx),
+                    label: m,
+                  }))}
+                />
+              </div>
 
-              <Select
-                value={String(currentYear)}
-                onValueChange={(value) => setCurrentYear(Number(value))}
-                ariaLabel="Chọn năm"
-                options={years.map((year) => ({
-                  value: year,
-                  label: year,
-                }))}
-              />
+              <div className="w-20.5 shrink-0">
+                <Select
+                  size="xs"
+                  modal={false}
+                  value={String(currentYear)}
+                  onValueChange={(val) => setCurrentYear(Number(val))}
+                  ariaLabel="Chọn năm"
+                  options={years.map((y) => ({
+                    value: String(y),
+                    label: String(y),
+                  }))}
+                />
+              </div>
             </div>
 
             <button
               type="button"
               onClick={handleNextMonth}
-              className="text-3xl text-text-default"
+              disabled={isNextMonthDisabled}
+              aria-label="Tháng sau"
+              className={cn(
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition",
+                isAuth
+                  ? "text-white/70 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                  : "text-text-muted hover:bg-surface-muted hover:text-text-default disabled:cursor-not-allowed disabled:opacity-30",
+              )}
             >
-              ›
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="grid grid-cols-7 px-4 pt-4 text-center text-sm font-bold text-text-default">
-            {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((day) => (
-              <div key={day}>{day}</div>
+          {/* Thứ trong tuần */}
+          <div
+            className={cn(
+              "grid grid-cols-7 py-1 text-center text-xs font-semibold",
+              isAuth ? "text-white/60" : "text-text-muted",
+            )}
+          >
+            {WEEKDAYS.map((day) => (
+              <div key={day} className="py-1">
+                {day}
+              </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-y-2 px-4 py-4 text-center">
-            {calendarDays.map((date, index) => {
+          {/* Lưới các ngày trong tháng */}
+          <div className="grid grid-cols-7 gap-1 pt-1 text-center">
+            {calendarDays.map((date, idx) => {
               const isCurrentMonth = date.getMonth() === currentMonth;
-
+              const isFuture = date > today;
               const isSelected =
-                date.getDate() === Number(birthDay) &&
-                date.getMonth() + 1 === Number(birthMonth) &&
-                date.getFullYear() === Number(birthYear);
+                selectedDate &&
+                date.getDate() === selectedDate.getDate() &&
+                date.getMonth() === selectedDate.getMonth() &&
+                date.getFullYear() === selectedDate.getFullYear();
+
+              const isTodayDate =
+                date.getDate() === today.getDate() &&
+                date.getMonth() === today.getMonth() &&
+                date.getFullYear() === today.getFullYear();
 
               return (
                 <button
+                  key={idx}
                   type="button"
-                  key={index}
+                  disabled={isFuture}
                   onClick={() => handleSelectDate(date)}
-                  className={`mx-auto flex h-9 w-9 items-center justify-center rounded-lg text-sm transition ${
+                  className={cn(
+                    "relative mx-auto flex h-8 w-8 items-center justify-center rounded-lg text-xs transition",
                     isSelected
-                      ? selectedDateClassName
+                      ? cn(
+                          isAuth
+                            ? "bg-auth-accent font-bold text-slate-900 shadow-sm shadow-auth-accent/40"
+                            : "bg-brand font-semibold text-white shadow-sm shadow-brand/30 hover:bg-brand-hover",
+                          selectedDateClassName,
+                        )
                       : isCurrentMonth
-                        ? "text-text-default hover:bg-surface-muted"
-                        : "text-text-subtle"
-                  } `}
+                        ? isAuth
+                          ? "text-white hover:bg-white/15"
+                          : "text-text-default hover:bg-surface-muted"
+                        : isAuth
+                          ? "text-white/25 hover:bg-white/5"
+                          : "text-text-subtle hover:bg-surface-muted/50",
+                    isTodayDate &&
+                      !isSelected &&
+                      "font-bold ring-1 ring-brand/50",
+                    isFuture &&
+                      "cursor-not-allowed opacity-25 hover:bg-transparent",
+                  )}
                 >
                   {date.getDate()}
                 </button>
               );
             })}
+          </div>
+
+          {/* Footer popup */}
+          <div
+            className={cn(
+              "mt-3 flex items-center justify-between border-t pt-2.5 text-xs",
+              isAuth ? "border-white/10" : "border-border",
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setDisplayValue("");
+                onChange("");
+              }}
+              className={cn(
+                "font-medium transition",
+                isAuth
+                  ? "text-white/60 hover:text-white"
+                  : "text-text-muted hover:text-danger",
+              )}
+            >
+              Xóa ngày
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setOpenCalendar(false)}
+              className={cn(
+                "font-semibold transition",
+                isAuth
+                  ? "text-auth-accent hover:underline"
+                  : "text-brand hover:underline",
+              )}
+            >
+              Đóng
+            </button>
           </div>
         </div>
       )}

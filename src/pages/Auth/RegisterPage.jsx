@@ -179,7 +179,12 @@ const RegisterPage = () => {
           </div>
 
           {/* BIRTHDAY */}
-          <BirthdayInput onChange={setBirthday} containerClassName="mb-6" />
+          <BirthdayInput
+            variant="auth"
+            label="Ngày sinh"
+            onChange={setBirthday}
+            containerClassName="mb-6"
+          />
 
           {/* button submit */}
           <PrimaryButton type="submit" disabled={loading} icon={ArrowRight}>

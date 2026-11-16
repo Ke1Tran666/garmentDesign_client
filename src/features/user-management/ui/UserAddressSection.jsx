@@ -2,15 +2,24 @@ import { useState } from "react";
 import { MapPin, Plus } from "lucide-react";
 
 import { useNotification } from "@/app/providers/NotificationProvider";
+import { StatusBadge } from "@/shared/ui/badge/StatusBadge";
+import DataTable from "@/shared/ui/table/DataTable";
 
 import { EMPTY_VALUE } from "../lib/userDetail";
 import UserAddressCreateModal from "./UserAddressCreateModal";
+
+const ADDRESS_COLUMNS = [
+  { key: "status", title: "Trạng thái", className: "w-32 whitespace-nowrap" },
+  { key: "companyName", title: "Tên công ty / Người nhận", className: "w-1/4" },
+  { key: "address", title: "Địa chỉ chi tiết" },
+  { key: "note", title: "Ghi chú", className: "w-1/4" },
+];
 
 const UserAddressSection = ({ user, canEditUser, onUserChange }) => {
   const { showNotification } = useNotification();
   const [createOpen, setCreateOpen] = useState(false);
 
-  const addresses = Array.isArray(user.addresses) ? user.addresses : [];
+  const addresses = Array.isArray(user?.addresses) ? user.addresses : [];
 
   const handleCreated = (createdAddress) => {
     const nextAddresses = [
@@ -41,7 +50,7 @@ const UserAddressSection = ({ user, canEditUser, onUserChange }) => {
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold text-text-strong">Địa chỉ</h2>
 
-            {canEditUser && !user.deletedAt && (
+            {canEditUser && !user?.deletedAt && (
               <button
                 type="button"
                 onClick={() => setCreateOpen(true)}
@@ -59,46 +68,49 @@ const UserAddressSection = ({ user, canEditUser, onUserChange }) => {
           </span>
         </div>
 
-        {addresses.length > 0 ? (
-          <div className="space-y-3">
-            {addresses.map((address) => (
-              <div
+        <DataTable
+          columns={ADDRESS_COLUMNS}
+          data={addresses}
+          minWidth="min-w-160"
+          emptyText="Người dùng chưa có địa chỉ."
+          renderRow={(address) => {
+            const isDefault =
+              user?.defaultAddress?.addressId === address.addressId;
+
+            return (
+              <tr
                 key={address.addressId}
-                className="flex items-start gap-4 rounded-xl border border-border bg-surface-subtle p-4"
+                className="text-xs transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-muted">
-                  <MapPin size={17} />
-                </span>
+                <td className="px-4 py-3.5 whitespace-nowrap">
+                  <StatusBadge
+                    label={isDefault ? "Mặc định" : "Địa chỉ phụ"}
+                    tone={isDefault ? "success" : "neutral"}
+                  />
+                </td>
 
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-text-default">
-                    {address.companyName || "Địa chỉ người dùng"}
-                  </p>
+                <td className="px-4 py-3.5 font-semibold text-slate-900 dark:text-white">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-muted">
+                      <MapPin size={14} />
+                    </span>
+                    <span className="truncate">
+                      {address.companyName || "Địa chỉ người dùng"}
+                    </span>
+                  </div>
+                </td>
 
-                  <p className="mt-1 text-sm leading-6 text-text-muted">
-                    {address.address || EMPTY_VALUE}
-                  </p>
+                <td className="px-4 py-3.5 leading-5 text-slate-700 dark:text-slate-300">
+                  {address.address || EMPTY_VALUE}
+                </td>
 
-                  {address.note && (
-                    <p className="mt-1 text-xs text-text-subtle">
-                      {address.note}
-                    </p>
-                  )}
-                </div>
-
-                {user.defaultAddress?.addressId === address.addressId && (
-                  <span className="shrink-0 rounded-md bg-success-soft px-2 py-1 text-xs font-semibold text-success">
-                    Mặc định
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-text-muted">
-            Người dùng chưa có địa chỉ.
-          </div>
-        )}
+                <td className="px-4 py-3.5 leading-5 text-slate-500 dark:text-slate-400">
+                  {address.note || EMPTY_VALUE}
+                </td>
+              </tr>
+            );
+          }}
+        />
       </section>
 
       {createOpen && (

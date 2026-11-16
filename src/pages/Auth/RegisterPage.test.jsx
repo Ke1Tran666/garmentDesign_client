@@ -53,11 +53,10 @@ const fillRegisterForm = async (user) => {
     }),
   );
 
-  await user.type(screen.getByPlaceholderText("Day"), "15");
-
-  await user.type(screen.getByPlaceholderText("Month"), "8");
-
-  await user.type(screen.getByPlaceholderText("Year"), "2000");
+  await user.type(
+    screen.getByRole("textbox", { name: /Ngày sinh/i }),
+    "15082000",
+  );
 };
 
 describe("RegisterPage", () => {
@@ -84,11 +83,9 @@ describe("RegisterPage", () => {
 
     expect(screen.getByPlaceholderText("Họ và Tên")).toBeRequired();
 
-    expect(screen.getByPlaceholderText("Day")).toBeInTheDocument();
-
-    expect(screen.getByPlaceholderText("Month")).toBeInTheDocument();
-
-    expect(screen.getByPlaceholderText("Year")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: /Ngày sinh/i }),
+    ).toBeInTheDocument();
 
     expect(
       screen.getByRole("link", {
@@ -196,7 +193,7 @@ describe("RegisterPage", () => {
       expect(showNotificationMock).toHaveBeenCalledWith(
         "success",
         "Đăng ký thành công",
-        "Tài khoản của bạn đã được tạo",
+        "Đăng ký thành công",
       );
     });
   });
@@ -250,7 +247,7 @@ describe("RegisterPage", () => {
       expect(showNotificationMock).toHaveBeenCalledWith(
         "error",
         "Đăng ký thất bại",
-        "Vui lòng thử lại",
+        "Không thể kết nối đến máy chủ",
       );
     });
   });
